@@ -1,6 +1,6 @@
 
 ## 说明
-    I don't fuckin' care what others say.
+    I don't fucking care what others say.
 
 
 ## 本地开发
