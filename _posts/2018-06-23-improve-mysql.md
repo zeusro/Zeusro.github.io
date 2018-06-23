@@ -8,7 +8,7 @@ header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - leanote
+    - mysql
 ---
 
 ## 一些套路
