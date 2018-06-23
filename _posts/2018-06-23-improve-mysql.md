@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "这篇文章有毒吧为什么标题显示出来的"
+title:        "Mysql"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
