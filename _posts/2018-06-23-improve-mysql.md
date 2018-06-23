@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "优化"
+title:        "优化垃圾Mysql"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
