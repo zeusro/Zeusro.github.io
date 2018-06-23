@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "优化mysql"
+title:        "安装蚂蚁笔记2"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
@@ -8,7 +8,7 @@ header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - mysql
+    - leanote
 ---
 
 ## 一些套路
