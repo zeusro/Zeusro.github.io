@@ -12,7 +12,7 @@ tags:
 ---
 
 
-
+## 一些套路
 
 * 显示数据库引擎
 
@@ -91,5 +91,5 @@ Error Code: 2006. MySQL server has gone away
 7. [mysql的show processlist命令大作用](https://blog.csdn.net/juan083/article/details/54889893)
 8. 
 
-## 阿里云
+### 阿里云
 1. [10分钟搭建MySQL Binlog分析+可视化方案](https://yq.aliyun.com/articles/338423?spm=a1z5c.11394323.0.0.52d06cf5whHsHp)
