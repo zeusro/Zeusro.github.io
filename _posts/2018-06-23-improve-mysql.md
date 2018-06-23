@@ -15,24 +15,26 @@ tags:
 
 * 显示数据库引擎
 
-`SELECT * FROM INFORMATION_SCHEMA.ENGINES;`
+    SELECT * FROM INFORMATION_SCHEMA.ENGINES;
 
 * 查看有哪些线程正在执行
- 
-`show processlist;`
+
+    show processlist;
 
 我比较喜欢用
+
 ```bash
 SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where db = 'xxxx'  and state !='' order by time desc,command ;
 ```
 
 * 显示长事务
 
-`select * from information_schema.innodb_trx;`
+    select * from information_schema.innodb_trx;
 
 * 改表
 
 改表期间,运行
+
 ```sql
 select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_trx i,
   (select 
@@ -50,31 +52,29 @@ select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_
   where timestampdiff(second, i.trx_started, now()) > p.time
   and i.trx_mysql_thread_id  not in (connection_id(),p.id);
 ```
+
 执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
 
-
 * 允许 mysql 远程访问
-`vi /etc/mysql/my.cnf`
 
-```
-[mysqld]
-bind-address    = 0.0.0.0
-```
+    vi /etc/mysql/my.cnf
+    ```
+    [mysqld]
+    bind-address    = 0.0.0.0
+    ```
 
-
-## MySQL Workbech 
+## MySQL Workbech
 
 
 * 允许update不where更新
-``` 
-SET SQL_SAFE_UPDATES = 0; 
-```
+
+    SET SQL_SAFE_UPDATES = 0;
 
 * 客户端提示
-```
-Error Code: 2013. Lost connection to MySQL server during query
-Error Code: 2006. MySQL server has gone away
-```
+
+    Error Code: 2013. Lost connection to MySQL server during query
+    Error Code: 2006. MySQL server has gone away
+    
     Go to Edit -> Preferences -> SQL Editor and set to a higher value this parameter: DBMS connection read time out (in seconds). For instance: 86400.
 
 
@@ -88,7 +88,8 @@ Error Code: 2006. MySQL server has gone away
 5. [How to Allow Remote MySQL Database Connection](https://www.digitalocean.com/community/questions/how-to-allow-remote-mysql-database-connection)
 6. [解决Lost connection to MySQL server during query错误方法](https://blog.csdn.net/lovemysea/article/details/79121154)
 7. [mysql的show processlist命令大作用](https://blog.csdn.net/juan083/article/details/54889893)
-8. 
+8. []()
 
 ### 阿里云
+
 1. [10分钟搭建MySQL Binlog分析+可视化方案](https://yq.aliyun.com/articles/338423?spm=a1z5c.11394323.0.0.52d06cf5whHsHp)
