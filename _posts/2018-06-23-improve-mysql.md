@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "Mysql优化"
+title:        "我日"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
@@ -74,7 +74,7 @@ select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_
 
     Error Code: 2013. Lost connection to MySQL server during query
     Error Code: 2006. MySQL server has gone away
-    
+
     Go to Edit -> Preferences -> SQL Editor and set to a higher value this parameter: DBMS connection read time out (in seconds). For instance: 86400.
 
 
