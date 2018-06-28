@@ -1,4 +1,17 @@
-# 在阿里云的swarm上面安装consul(3agent 1server)
+---
+layout:       post
+title:        "在阿里云的swarm上面安装consul(3agent 1server)"
+subtitle:     ""
+date:         2018-06-28
+author:       "Zeusro"
+header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-mask:  0.3
+catalog:      true
+tags:
+    - swarm
+    - docker
+    - docker-compose
+---
 
 坑太多了不解释.直接贴docker-compose.yaml 吧
 
