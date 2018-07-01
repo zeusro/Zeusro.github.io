@@ -155,7 +155,7 @@ consul-client:
 
 ## 注意
 
-1. 服务编排里面启动参数那2个大括号跟jekyll语法冲突,具体编排见[github原文](https://github.com/zeusro/Zeusro.github.io/blob/master/_posts/2018-07-01-oneplus3-reinstall.md)
+1. 服务编排里面启动参数那2个大括号跟jekyll语法冲突,具体编排见[Github原文](https://github.com/zeusro/Zeusro.github.io/blob/master/_posts/2018-06-28-consul-on-aliyun-swarm.md)
 1. 因为2和3的agent配的`retry-join=consulserver1`,所以`consul-server1`一定要先启动.然后再启动2和3,最后启动 client.
 1. consul-client用了阿里云的简单路由,所以直接拿容器的`8500`端口来用就行.如果是其他方式的话,自己酌情配置
     ```yaml
