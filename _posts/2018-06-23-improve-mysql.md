@@ -13,6 +13,9 @@ tags:
 
 ## 一些套路
 
+* 不要使用"utf-8"
+    utf-8不是真正的UTF-8,应该使用utf8mb4作为替代
+
 * 显示数据库引擎
 
     SELECT * FROM INFORMATION_SCHEMA.ENGINES;
@@ -88,7 +91,9 @@ select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_
 5. [How to Allow Remote MySQL Database Connection](https://www.digitalocean.com/community/questions/how-to-allow-remote-mysql-database-connection)
 6. [解决Lost connection to MySQL server during query错误方法](https://blog.csdn.net/lovemysea/article/details/79121154)
 7. [mysql的show processlist命令大作用](https://blog.csdn.net/juan083/article/details/54889893)
-8. []()
+8. [Privileges Provided by MySQL](https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html)
+1. [记住，永远不要在MySQL中使用“utf8”](http://www.infoq.com/cn/articles/in-mysql-never-use-utf8-use-utf8)
+1. []()
 
 ### 阿里云
 
