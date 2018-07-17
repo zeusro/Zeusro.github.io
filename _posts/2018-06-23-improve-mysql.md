@@ -76,6 +76,15 @@ select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_
     bind-address    = 0.0.0.0
     ```
 
+* 查看数据库大小
+
+```sql
+SELECT table_schema "DB Name",
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB" 
+FROM information_schema.tables 
+GROUP BY table_schema; 
+```
+
 ## MySQL Workbech
 
 
@@ -132,6 +141,9 @@ COMMIT;
 1. [MySQL索引原理及慢查询优化](https://yq.aliyun.com/articles/66680)
 1. [Mysql 如何修改大数据表](https://www.v2ex.com/t/44841)
 1. [MySQL 二进制日志(Binary Log)](https://blog.csdn.net/leshami/article/details/39801867)
+1. [how-to-get-size-of-mysql-database](https://stackoverflow.com/questions/1733507/how-to-get-size-of-mysql-database)
+1. []()
+1. []()
 1. []()
 1. []()
 
