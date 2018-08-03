@@ -85,6 +85,12 @@ FROM information_schema.tables
 GROUP BY table_schema; 
 ```
 
+* utf-8的表里面搜索带中文的数据
+
+    select number from Chinese_Test where HEX(contents) REGEXP '^(..)*(E[4-9])';
+
+the Chinese Character is from E4 to E9
+
 ## MySQL Workbech
 
 
@@ -142,7 +148,7 @@ COMMIT;
 1. [Mysql 如何修改大数据表](https://www.v2ex.com/t/44841)
 1. [MySQL 二进制日志(Binary Log)](https://blog.csdn.net/leshami/article/details/39801867)
 1. [how-to-get-size-of-mysql-database](https://stackoverflow.com/questions/1733507/how-to-get-size-of-mysql-database)
-1. []()
+1. [How to detect rows with chinese characters in MySQL?](https://stackoverflow.com/questions/9795137/how-to-detect-rows-with-chinese-characters-in-mysql)
 1. []()
 1. []()
 1. []()
