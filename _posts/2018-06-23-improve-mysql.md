@@ -36,21 +36,27 @@ SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where db = 'xxxx'  and state !='' o
 改表期间,运行
 
 ```sql
-select concat('kill ',i.trx_mysql_thread_id,';') from information_schema.innodb_trx i,
-  (select 
-         id, time
-     from
-         information_schema.processlist
-     where
-         time = (select 
-                 max(time)
-             from
-                 information_schema.processlist
-             where
-                 state = 'Waiting for table metadata lock'
-                     and substring(info, 1, 5) in ('alter' , 'optim', 'repai', 'lock ', 'drop ', 'creat'))) p
-  where timestampdiff(second, i.trx_started, now()) > p.time
-  and i.trx_mysql_thread_id  not in (connection_id(),p.id);
+SELECT 
+    CONCAT('kill ', thread_id, ';')
+FROM
+    (SELECT DISTINCT
+        (i.trx_mysql_thread_id) thread_id
+    FROM
+        information_schema.innodb_trx i, (SELECT 
+        id, time
+    FROM
+        information_schema.processlist
+    WHERE
+        time = (SELECT 
+                MAX(time)
+            FROM
+                information_schema.processlist
+            WHERE
+                state = 'Waiting for table metadata lock'
+                    AND SUBSTRING(info, 1, 5) IN ('alter' , 'optim', 'repai', 'lock ', 'drop ', 'creat'))) p
+    WHERE
+        TIMESTAMPDIFF(SECOND, i.trx_started, NOW()) > p.time
+            AND i.trx_mysql_thread_id NOT IN (CONNECTION_ID() , p.id)) t;
 ```
 
 执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
