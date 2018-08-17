@@ -40,7 +40,7 @@ tags:
 
 自定义私有框架依赖,那么前置工作需要先更新Jenkins环境的依赖,打包到 maven local 里面.gradle 同理(gradle可以指定先读取本地 maven 依赖,所以都一样).
 
-- maven插件的选择(1):dockerfile-maven-extension
+### maven插件的选择(1):dockerfile-maven-extension
 
     我对这个插件比较熟,所以我一般用这个.不过这插件有个限制, **dockerfile 必须放在模块根目录里面.**
 
@@ -97,7 +97,7 @@ pom.xml
 	</build>
 ```
 
-- maven插件的选择(2):maven-dependency-plugin + docker-maven-plugin
+### maven插件的选择(2):maven-dependency-plugin + docker-maven-plugin
 
     这2个插件比较复杂,主要因为它把 dockerfile 放到了项目的 docker 目录,导致需要copy-resources这一步
 
@@ -203,7 +203,7 @@ pom.xml
 ```
 
 
-- gradle插件的选择:com.palantir.docker
+### gradle插件的选择:com.palantir.docker
 
     gradle <module>:build -x test --debug  <module>:docker
 
@@ -274,9 +274,9 @@ master 提取gradle 的 version 作为tag, 表示一种稳定的发布.master �
 
 ## Jenkins 的配置
 
-- 创建的时候选择 maven job
+### 创建的时候选择 maven job
 
-- 配置触发器
+###  配置触发器
 
 这里先介绍一下Generic Webhook Trigger 这个插件.
 
@@ -305,7 +305,7 @@ develop merge/push 事件的话,Expression填`^(refs/heads/develop)$`;
 参考:
 [使用Generic Webhook Trigger插件实现Jenkins+WebHooks（码云）持续集成--指定具体项目和分支进行集成](https://blog.csdn.net/xlgen157387/article/details/76216351)
 
-- MasK password 的设置(选配)
+###  MasK password 的设置(选配)
 
 全局设置
 
@@ -313,7 +313,7 @@ develop merge/push 事件的话,Expression填`^(refs/heads/develop)$`;
 
 ![image](/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817200417.png)
 
-- maven 构建
+### maven 构建
 
 ![image](/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817201545.png)
 
@@ -334,7 +334,7 @@ docker push $image:latest;
 这里按需配置即可.`DOCKER_PUSH`对应系统配置的mask password.
 
 
-- gradle构建
+###  gradle构建
 
 创建一个`free style`的Jenkins job.构建步骤先增加`Invoke Gradle script`
 
@@ -369,7 +369,7 @@ docker push $image:$version
 
 ## 其他注意事项：  
 
-- gradle相关问题
+### gradle相关问题
 
 gradle项目接入jenkins，因为develop分支对应的项目版本要为latest，这个镜像构建出来的才为latest，所以需要为build.gradle添加version设置，如：
 
@@ -387,14 +387,14 @@ if (project.hasProperty('projVersion')) {
 gradle -PprojVersion=latest build
 ```
 
-- maven相关问题
+### maven相关问题
 
 ```bash
 	# 这样构建出来的jar包是带latest结尾的
 	mvn versions:set -DnewVersion=latest
 ```
 
-- 其他依赖的问题
+### 其他依赖的问题
 
 需要导入本地jar时，有两种方法：  
 1. 传统方法，直接拉到jenkins所在服务器，进行手动导包。  
