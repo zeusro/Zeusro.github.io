@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "Gogs+Jenkins+java+docker构建(maven+gradle)"
+title:        "Gogs+Jenkins构建java项目,最后docker化(maven+gradle)"
 subtitle:     ""
 date:         2018-08-17
 author:       "Zeusro"
