@@ -74,6 +74,11 @@ FROM
 
 执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
 
+`PS`:虽然mysql 5.7支持onlineDDL,但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html)
+
+参考:
+[pt-online-schema-change的原理解析与应用说明](https://www.cnblogs.com/xinysu/p/6758170.html)
+
 * 允许 mysql 远程访问
 
     vi /etc/mysql/my.cnf
