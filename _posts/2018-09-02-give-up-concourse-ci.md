@@ -1,7 +1,7 @@
 ---
 layout:       post
 title:        "Concourse-CI从入门到摔桌"
-subtitle:     ""
+subtitle:     "Concourse-CI集成maven/gradle项目"
 date:         2018-09-02
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
@@ -9,6 +9,9 @@ header-mask:  0.3
 catalog:      true
 tags:
     - CI
+    - Java
+    - Gradle
+    - Maven
 ---
 
 
