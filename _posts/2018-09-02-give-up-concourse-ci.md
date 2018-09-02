@@ -221,7 +221,7 @@ fly  -t zeusro set-pipeline -p spring-boot-template -c concourse-ci-pipeline.yam
 -v 'image-password=<登录镜像的密码>'  ;
 ```
 
-<xx>内容自行按需替换即可
+尖括号中间的内容自行按需替换即可
 
 其实配置还可用文件方式指定
 
