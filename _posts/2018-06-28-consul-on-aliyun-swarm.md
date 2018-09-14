@@ -165,6 +165,11 @@ consul-client:
 1. 其他aliyun的标签就不说明了,跟主题无关.
 1. 最后我再补充一点,我这个配置是一个机器部署一个 agent, 最后挑第四台机作 client 的,没有那么多机器的,别问我怎么配.自己买机器去配就行了.
 
+## k8s
+
+亲测把consul:1.2.3安装在了1.11.2的集群,具体见[zeusro/deploy-consul-on-kubernetes](https://github.com/zeusro/deploy-consul-on-kubernetes)
+
+
 ## 参考链接
 
 1. https://www.jianshu.com/p/f8746b81d65d
