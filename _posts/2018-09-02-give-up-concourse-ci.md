@@ -1,7 +1,7 @@
 ---
 layout:       post
-title:        "Concourse-CI从入门到摔桌"
-subtitle:     "Concourse-CI集成maven/gradle项目"
+title:        "Concourse-CI集成maven/gradle项目"
+subtitle:     "Concourse-CI从入门到摔桌"
 date:         2018-09-02
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
