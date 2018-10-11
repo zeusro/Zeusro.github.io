@@ -161,8 +161,17 @@ COMMIT;
 1. [how-to-get-size-of-mysql-database](https://stackoverflow.com/questions/1733507/how-to-get-size-of-mysql-database)
 1. [How to detect rows with chinese characters in MySQL?](https://stackoverflow.com/questions/9795137/how-to-detect-rows-with-chinese-characters-in-mysql)
 1. [云数据库 RDS 版 > 技术运维问题 > MYSQL使用](https://help.aliyun.com/knowledge_list/41698.html)
+1. [mysql: show processlist 详解](https://zhuanlan.zhihu.com/p/30743094)
+1. [MySQL SHOW PROCESSLIST协助故障诊断](http://www.ywnds.com/?p=9337)
 1. []()
 1. []()
+1. []()
+1. []()
+1. []()
+1. []()
+1. []()
+1. []()
+
 
 
 ### 阿里云
