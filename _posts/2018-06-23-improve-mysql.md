@@ -144,6 +144,77 @@ COMMIT;
 ```
 
 
+## 忘记密码
+
+* mysql 5.7 Ubuntu 64
+
+```bash
+sudo service mysql status
+sudo service mysql stop
+mkdir -p /var/run/mysqld
+chown mysql:mysql /var/run/mysqld
+sudo mysqld_safe --skip-grant-tables --skip-networking &  
+```
+
+```bash
+mysql -u root --socket=/tmp/mysql.sock
+```
+
+```sql
+use mysql; 
+update user set authentication_string=PASSWORD("aaaaaaaaaaa") where User='root';
+flush privileges;
+```
+
+```
+sudo service mysql restart
+```
+
+## mysql查询技巧
+
+
+```
+explain  select sleep(1);
+
+```
+* explain 可以分析查询语句的性能
+* sleep秒
+
+```
+set @current =0;
+select @current :=@current +1;
+```
+* 在查询中可以通过使用:=对变量进行重新赋值
+
+
+## mysql workbench优化
+
+* 修改为F5执行选中当前选中语句
+
+方法:修改C:\Program Files\MySQL\MySQL Workbench 6.3 CE\data\main_menu.xml里面的内容
+```xml
+
+        <value type="object" struct-name="app.MenuItem" id="com.mysql.wb.menu.query.execute_current_statementwin"> 
+          <link type="object" key="owner" struct-name="app.MenuItem">com.mysql.wb.menu.query</link> 
+          <value type="string" key="caption">Execute Current Statement</value> 
+          <value type="string" key="name">query.execute_current_statement</value> 
+          <value type="string" key="command">builtin:query.execute_current_statement</value> 
+          <value type="string" key="itemType">action</value> 
+          <value type="string" key="shortcut">F5</value>
+          <value type="string" key="platform">windows</value>
+        </value> 
+```
+
+## 查看数据库大小
+
+```sql
+SELECT table_schema 'DB Name',
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1)   MB
+FROM information_schema.tables 
+GROUP BY table_schema order by MB;
+```
+
+
 ## 参考链接
 
 1. [ Table Locking Issues](https://dev.mysql.com/doc/refman/8.0/en/table-locking.html)
@@ -163,6 +234,12 @@ COMMIT;
 1. [云数据库 RDS 版 > 技术运维问题 > MYSQL使用](https://help.aliyun.com/knowledge_list/41698.html)
 1. [mysql: show processlist 详解](https://zhuanlan.zhihu.com/p/30743094)
 1. [MySQL SHOW PROCESSLIST协助故障诊断](http://www.ywnds.com/?p=9337)
+1. [解决mysqld_safe Directory '/var/run/mysqld' for UNIX socket file don't exists](http://blog.csdn.net/Z_YTTT/article/details/73650495)
+1. [MySQL5.7更改密码时出现ERROR 1054 (42S22): Unknown column 'password' in 'field list'](http://blog.csdn.net/u010603691/article/details/50379282)
+1. [create-user](https://www.yiibai.com/mysql/create-user.html)
+1. [GRANT](https://www.yiibai.com/mysql/grant.html)
+1. [privileges-provided](https://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html#priv_all)
+1. [MySQL用户管理：添加用户、授权、删除用户](https://www.cnblogs.com/chanshuyi/p/mysql_user_mng.html)
 1. []()
 1. []()
 1. []()
