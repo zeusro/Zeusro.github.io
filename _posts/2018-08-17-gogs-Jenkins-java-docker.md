@@ -399,3 +399,21 @@ gradle -PprojVersion=latest build
 需要导入本地jar时，有两种方法：  
 1. 传统方法，直接拉到jenkins所在服务器，进行手动导包。  
 2. 创建Jenkins项目，进行自动构建并执行导入仓库命令。
+
+## 介绍一些优化技巧
+
+
+* 设置Jenkins国内镜像
+【系统管理】【管理插件】【高级】升级站点项的的地址修改成
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.107/update-center.json
+
+* gitlab-hook安装失败的问题
+https://stackoverflow.com/questions/44403642/jenkins-plugin-installation-failing
+
+
+* [设置 Jenkins 为中文](http://www.cnblogs.com/EasonJim/p/6373769.html)
+1. 安装Locale plugin
+1. Jenkins->【系统管理】->【系统设置】->【Locale】，输入：zh_CN
+
+## 参考链接:
+1. [jenkins 更新插件源](https://www.phpsong.com/3394.html)
