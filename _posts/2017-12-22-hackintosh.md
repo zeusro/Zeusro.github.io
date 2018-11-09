@@ -1,8 +1,8 @@
 ---
 layout:       post
 title:        "熟悉macX 10.13.2"
-subtitle:     "2017-12-22"
-date:         
+subtitle:     ""
+date:         2017-12-22
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
