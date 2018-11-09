@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "熟悉macX 10.13.2"
+title:        "安装黑苹果"
 subtitle:     ""
 date:         2017-12-22
 author:       "Zeusro"
