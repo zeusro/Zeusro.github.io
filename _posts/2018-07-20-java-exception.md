@@ -9,7 +9,6 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Java
-    - exception
 ---
 
     这方面的资料不胜枚举,此文仅供本人备忘用.
