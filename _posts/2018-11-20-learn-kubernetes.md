@@ -222,12 +222,12 @@ I-->J(客户端)
 - 健康检查
     1. HTTP GET
     2. TCP socket
-    3. executes an arbitrary command 
+    3. executes an arbitrary command
   
 
 - liveness
 
-The kubelet uses liveness probes to know when to restart a Container. 
+The kubelet uses liveness probes to know when to restart a Container.
 
 - readiness
 
