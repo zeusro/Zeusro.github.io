@@ -10,7 +10,6 @@ catalog:      true
 tags:
     - swarm
     - docker
-    - docker-compose
 ---
 
 坑太多了不解释.直接贴docker-compose.yaml 吧
