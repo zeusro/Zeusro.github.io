@@ -209,9 +209,7 @@ I-->J(客户端)
 
  The status describes the actual state of the object, and is supplied and updated by the Kubernetes system.
 
-
-![image](/in-post/learn-kubernetes/resource.png)
-
+![image](/img/in-post/learn-kubernetes/resource.png)
 
 ### pod
 
