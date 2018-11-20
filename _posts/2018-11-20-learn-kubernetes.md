@@ -217,12 +217,6 @@ I-->J(客户端)
 
     Each pod is like a separate logical machine with its own IP, hostname, processes, etc., running a single application.
 
-- 健康检查
-    1. HTTP GET
-    2. TCP socket
-    3. executes an arbitrary command
-  
-
 - liveness
 
 The kubelet uses liveness probes to know when to restart a Container.
@@ -232,10 +226,10 @@ The kubelet uses liveness probes to know when to restart a Container.
 The kubelet uses readiness probes to know when a Container is ready to start accepting traffic. 
 
 - 问题：如果删除一个pod 是先从endpoint里移除pod ip,还是 pod 先删除
-```
-个人见解：
-删除一个pod的k8s内部流程
 
+个人见解：
+
+删除一个pod的k8s内部流程
 1. 用户删除pod
 2. apiserver标记pod为'dead'状态
 3. kubelet删除pod 默认等待30s还在运行时 会强制关闭pod
@@ -244,15 +238,9 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
    3.3 超过30s等待时间 发送 sigkill 信号强制pod关闭
 4. nodecontroller中的endpoint controller从endpoint中删除此pod
 
-
-3 4 步骤同时进行 一般情况下4肯定会先于3完成
-由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod 
-而endpoint controller仍然存在此pod
-会导致svc请求会转发到已经删除的pod上
-从而导致调用svc出错
+3 4 步骤同时进行 一般情况下4肯定会先于3完成,由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod,而endpoint controller仍然存在此pod,会导致svc请求会转发到已经删除的pod上,从而导致调用svc出错
 
 参考链接 https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
-```
 
 - 相关命令
 
@@ -282,6 +270,12 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
     A Deployment controller provides declarative updates for Pods and ReplicaSets.
 
 
+- Rolling Update
+
+```bash
+    #只适用于pod 里面只包含一个 container 的情况
+    kubectl rolling-update NAME [NEW_NAME] --image=IMAGE:TAG
+```
 
 
 [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) 用来作初始化环境的容器
@@ -309,14 +303,6 @@ kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
 
     -> label
 
-
-- Rolling Update
-
-
-    #只适用于pod 里面只包含一个 container 的情况
-    kubectl rolling-update NAME [NEW_NAME] --image=IMAGE:TAG    
-    
-    
 ### ReplicaSet(副本集)
 
     Replication Controller(副本控制器)的替代产物
