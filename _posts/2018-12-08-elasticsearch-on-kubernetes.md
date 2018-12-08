@@ -40,6 +40,7 @@ RUN elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-
 ### 编排文件
 
 - RBAC 相关内容
+
 ```
 apiVersion: v1
 kind: ServiceAccount
