@@ -41,7 +41,6 @@ RUN elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-
 
 - RBAC 相关内容
 ```
-# RBAC authn and authz
 apiVersion: v1
 kind: ServiceAccount
 metadata:
