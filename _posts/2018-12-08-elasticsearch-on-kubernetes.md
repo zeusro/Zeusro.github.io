@@ -263,7 +263,7 @@ spec:
 1. [订阅费用](https://www.elastic.co/subscriptions)
 2. [故障转移](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
 3. [节点配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
-4. [刨根问底 | Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
+4. [Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
 1. [elasticsearch-cloud-kubernetes](https://github.com/fabric8io/elasticsearch-cloud-kubernetes)
 
 [x] 配置账户
@@ -324,7 +324,7 @@ shard的个数（包括副本）要尽可能匹配节点数，等于节点数，
 
 ### 查询优化
 
-https://www.elastic.co/guide/en/elasticsearch/reference/5.5/indices-aliases.html
+[index别名](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/indices-aliases.html)
 
 
 新建索引时关闭索引映射的自动映射功能
