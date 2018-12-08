@@ -16,7 +16,7 @@ tags:
 
 ### 自制带插件的ES镜像
 
-```
+```dockerfile
 FROM elasticsearch:6.5.0
 #或者手动下载后然后安装也行
 # COPY elasticsearch-analysis-ik-6.5.0.zip /
