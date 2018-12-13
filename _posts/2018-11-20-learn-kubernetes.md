@@ -14,7 +14,7 @@ tags:
 
 
 
-## 安装类问题
+## 安装类工具
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
 2. 
@@ -25,6 +25,14 @@ tags:
 ## 一些实用工具
 
 1. [kompose](https://github.com/kubernetes/kompose)
+
+可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
+
+1. [kubectx](https://github.com/ahmetb/kubectx)
+
+kubectx:用来切换集群的访问
+
+kubens:用来切换默认的namespace
 
 ## k8s的 master-cluster 架构
 
@@ -92,28 +100,6 @@ tags:
 - Container Runtime (Docker, rkt, or others)
 
     The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
-
-
-## 一些概念
-
-```
-graph LR
-K(namespace)-->A
-A(pod)-->|副本管理|B(Replication Controller)
-A-->|每个节点都运行|D(DaemonSet)
-A-->|副本管理|C(ReplicaSet)
-A-->|封装|G
-C-->|封装|G(Deployment)
-A-->F(Service)
-A-->|固定的存储,网络服务名|E(StatefulSet)
-E-->H
-F-->H(Ingress)
-F-->|nodeport|I
-H-->|nodeport|I(负载均衡)
-I-->J(客户端)
-```
-
-
 
 
 ## 安装类问题
