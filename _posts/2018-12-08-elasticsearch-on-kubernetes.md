@@ -70,6 +70,15 @@ roleRef:
 
 - 主体程序
 
+
+存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
+
+```
+mkdir -p /root/kubernetes/17zwd/elasticsearch/data
+sudo chmod 775  /root/kubernetes/17zwd/elasticsearch/data -R
+chown 1000:0  /root/kubernetes/17zwd/elasticsearch/data -R
+```
+
 ```
 # kubectl get po -l app=myelasticsearch -o wide  -n default
 apiVersion: apps/v1
@@ -168,7 +177,7 @@ spec:
         #   timeoutSeconds: 1           
         volumeMounts:
         - name: host
-          mountPath: /data
+          mountPath: /usr/share/elasticsearch/data
         env:
         - name: "NAMESPACE"
           valueFrom:
@@ -235,6 +244,7 @@ spec:
 
 如果要吧节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
 
+
 ```
 kind: Service
 apiVersion: v1
@@ -282,11 +292,11 @@ GET /_cat/plugins?v&s=component&h=name,component,version,description
 ```
 esrally configure
 esrally list tracks
-esrally --pipeline=benchmark-only --target-hosts=47.106.99.115:9200 --track=geonames
+esrally --pipeline=benchmark-only --target-hosts=127.0.0.1:9200 --track=geonames
 ```
 
 datastore.type = elasticsearch
-datastore.host = 47.107.106.1
+datastore.host = 127.0.0.1
 datastore.port = 9200
 datastore.secure = False
 
