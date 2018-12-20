@@ -275,6 +275,7 @@ spec:
 3. [节点配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
 4. [Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
 1. [elasticsearch-cloud-kubernetes](https://github.com/fabric8io/elasticsearch-cloud-kubernetes)
+1. [干货 | 吃透Elasticsearch 堆内存](https://blog.csdn.net/laoyang360/article/details/79998974)
 
 [x] 配置账户
 
