@@ -316,6 +316,9 @@ kubectl patch statefulset elasticsearch -p '{"spec":{"updateStrategy":{"type":"R
 
 ## 性能优化
 
+使用routing明确数据对应的分片位置
+
+[Elasticsearch的路由（Routing）特性](https://blog.csdn.net/cnweike/article/details/38531997)
 
 ### 参数的设置
 
