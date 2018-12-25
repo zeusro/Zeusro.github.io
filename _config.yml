@@ -45,6 +45,12 @@ plugins: [jekyll-paginate]
 markdown: kramdown
 kramdown:
   input: GFM                            # use Github Flavored Markdown !important
+  syntax_highlighter_opts:
+    span:
+      line_numbers: false
+    block:
+      line_numbers: true
+      start_line: 1                        # use Github Flavored Markdown !important
 
 
 
@@ -84,7 +90,8 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 chrome-tab-theme-color: "#000000"
 service-worker: true
 
-
+# MathJax rendering for layout:page (e.g. post preview)
+page-mathjax: false
 
 # Friends
 friends: [
