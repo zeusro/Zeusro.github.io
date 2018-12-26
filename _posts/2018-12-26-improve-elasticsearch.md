@@ -39,7 +39,38 @@ shard的个数（包括副本）要尽可能匹配节点数，等于节点数，
 
 就像在关系型数据库里面,不要`select * `一样.
 
-    GET /product/goods/109524071?filter_path=_source.gid_unique
+```    
+GET /product/goods/109524071?filter_path=_source.zdid
+{
+  "_source" : {
+    "zdid" : 48
+  }
+}
+```
+
+类似的用法还有`_source`,但是与`filter_path`不同的在于,返回的结果会带上文档本身的默认字段
+
+```
+GET /product/goods/109524071?_source_include=zdid
+{
+  "_index" : "product",
+  "_type" : "goods",
+  "_id" : "109524071",
+  "_version" : 4,
+  "found" : true,
+  "_source" : {
+    "zdid" : 48
+  }
+}
+````
+
+```
+_source=false
+_source_include=zdid
+_source_exclude
+```
+
+**注意:_source和filter_path不能一起用**
 
 - 新建索引时关闭索引映射的自动映射功能
 
@@ -64,3 +95,14 @@ thread_pool:
 [更新集群配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-update-settings.html)
 
 [线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
+
+
+### 其他经验
+
+按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
+
+### 常用查询技巧
+
+error_trace=true
+pretty=true
+human=true
