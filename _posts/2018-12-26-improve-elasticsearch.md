@@ -103,6 +103,9 @@ thread_pool:
 
 ### 常用查询技巧
 
+```
 error_trace=true
 pretty=true
 human=true
+_stored_fields=tags,counter
+```
