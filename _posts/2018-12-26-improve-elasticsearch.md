@@ -87,6 +87,13 @@ thread_pool:
         queue_size: 2000
     search:
         queue_size: 2000
+indices:
+  query:
+    bool:
+      max_clause_count: 50000
+  recovery:
+    max_bytes_per_sec:
+
         
 ```        
 
