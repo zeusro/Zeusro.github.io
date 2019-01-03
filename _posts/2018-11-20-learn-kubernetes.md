@@ -34,6 +34,13 @@ kubectx:用来切换集群的访问
 
 kubens:用来切换默认的namespace
 
+## 集群管理经(教)验(训)
+
+- 建了一个服务,但是没有对应的po,会出现什么情况?
+
+请求时一直不会有响应,直到request timeout
+
+
 ## k8s的 master-cluster 架构
 
 ### master(CONTROL PLANE)
