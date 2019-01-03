@@ -116,3 +116,11 @@ pretty=true
 human=true
 _stored_fields=tags,counter
 ```
+
+## 故障维护
+
+- Unassigned Shards
+
+直接用`_reindex`
+
+[解决elasticsearch集群Unassigned Shards 无法reroute的问题](https://www.jianshu.com/p/542ed5a5bdfc)
