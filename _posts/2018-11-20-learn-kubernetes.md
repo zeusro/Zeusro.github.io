@@ -40,6 +40,9 @@ kubens:用来切换默认的namespace
 
 请求时一直不会有响应,直到request timeout
 
+参考
+
+1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
 ## k8s的 master-cluster 架构
 
