@@ -44,6 +44,17 @@ kubens:用来切换默认的namespace
 
 1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
+- taint别乱用
+
+```bash
+kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
+kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
+```
+
+master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
+
+
+
 ## k8s的 master-cluster 架构
 
 ### master(CONTROL PLANE)
