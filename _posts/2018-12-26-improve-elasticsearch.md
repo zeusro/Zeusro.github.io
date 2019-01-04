@@ -121,6 +121,31 @@ _stored_fields=tags,counter
 
 - Unassigned Shards
 
-直接用`_reindex`
+`解决方案/问题根源:`直接用`_reindex`
 
 [解决elasticsearch集群Unassigned Shards 无法reroute的问题](https://www.jianshu.com/p/542ed5a5bdfc)
+
+- gc overhead
+
+```
+[2019-01-04T08:41:09,538][INFO ][o.e.m.j.JvmGcMonitorService] [elasticsearch-onekey-3] [gc][159] overhead, spent [276ms] collecting in the last [1s]
+```
+
+`解决方案/问题根源:`集群负荷过重,宕机了
+
+- index长时间yellow
+
+`解决方案/问题根源:`先把`number_of_replicas`调成0,再调回去,手动触发同步.
+
+```
+put geonames/_settings
+{
+ 
+    "settings" : {
+      "index" : {
+        "number_of_replicas" : "0"
+    }
+  
+}
+}
+```
