@@ -149,3 +149,9 @@ put geonames/_settings
 }
 }
 ```
+## 参考工具
+
+[elasticHQ](http://www.elastichq.org/)
+
+参考链接:
+1. [如何使用Elasticsearch构建企业级搜索方案？](https://zhuanlan.zhihu.com/p/29449979)
