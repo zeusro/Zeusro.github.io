@@ -11,9 +11,6 @@ tags:
     - kubernetes
 ---
 
-
-
-
 ## 安装类工具
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
@@ -53,6 +50,9 @@ kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
 
 master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
 
+其他参考链接：
+
+[kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
 ## k8s的 master-cluster 架构
