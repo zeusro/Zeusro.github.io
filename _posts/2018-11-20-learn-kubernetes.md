@@ -52,7 +52,8 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
 其他参考链接：
 
-[kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
+1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
+1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
 ## k8s的 master-cluster 架构
