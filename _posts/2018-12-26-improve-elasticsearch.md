@@ -17,6 +17,9 @@ tags:
 
 [Elasticsearch的路由（Routing）特性](https://blog.csdn.net/cnweike/article/details/38531997)
 
+
+[使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
+
 ### 参数的设置
 
 对于 _all 这项参数，如果在业务使用上没有必要，我们通常的建议是禁止或者有选择性的添加。
@@ -76,10 +79,7 @@ _source_exclude
 
 [index别名](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/indices-aliases.html)
 
-
-
 ### 系统配置优化
-
 
 ```YML
 thread_pool:
@@ -121,9 +121,14 @@ _stored_fields=tags,counter
 
 - Unassigned Shards
 
-`解决方案/问题根源:`直接用`_reindex`
+`解决方案:`新建一个`number_of_replicas`为0的新index,然后用`_reindex`.迁移完成之后,把`number_of_replicas`改回去.`reindex`有个`size`的参数,按需配置或许更快些.
 
-[解决elasticsearch集群Unassigned Shards 无法reroute的问题](https://www.jianshu.com/p/542ed5a5bdfc)
+**注意**reindex极易超时,但是后台这个任务还是进行的,可以通过`GET _tasks?actions=indices:data/write/reindex`看到节点还在跑这个任务
+
+参考
+1. [Elasticsearch Reindex 性能提升10倍](https://my.oschina.net/TOW/blog/1928075)
+1. [解决elasticsearch集群Unassigned Shards 无法reroute的问题](https://www.jianshu.com/p/542ed5a5bdfc)
+1. [tasks API](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html)
 
 - gc overhead
 
@@ -149,6 +154,13 @@ put geonames/_settings
 }
 }
 ```
+
+- 滚动重启
+
+[_rolling_restarts](https://www.elastic.co/guide/en/elasticsearch/guide/current/_rolling_restarts.html)
+
+
+
 ## 参考工具
 
 [elasticHQ](http://www.elastichq.org/)
