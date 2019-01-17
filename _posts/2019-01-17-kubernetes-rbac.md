@@ -12,7 +12,7 @@ tags:
 ---
 
 
-`kubernetes`内部,master和node之间,别说内部通讯都需要通过`api-server`通讯,外部通过`kubelet`访问管理集群,本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢.
+`kubernetes`内部容器通讯都需要通过`api-server`进行通讯.外部通过`kubelet`访问管理集群,本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢.
 
 
 但是人在江湖漂,哪能不挨刀呢?要怎么防止集群内外瞎搞事的破坏分子呢?`RBAC`(Role-based access control )顺势而生.
