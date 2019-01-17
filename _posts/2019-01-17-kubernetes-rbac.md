@@ -59,6 +59,8 @@ service-account-token的API type是`kubernetes.io/service-account-token`
 1. namespace  
 1. token
 
+参考链接:
+
 1. [管理Service Accounts](https://kubernetes.io/zh/docs/admin/service-accounts-admin/)
 1. [Configure Service Accounts for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 
