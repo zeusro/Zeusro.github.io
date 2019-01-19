@@ -383,8 +383,7 @@ storage (we’ll talk about them in the last section of this chapter).
 用来申明它将从PV或者Storage Class资源里获取某个存储大小的空间。
 
 参考：  
-1. [](https://jimmysong.io/posts/kubernetes-volumes-introduction)
-
+1. [Kubernetes中的Volume介绍](https://jimmysong.io/posts/kubernetes-volumes-introduction)
 
 ### ConfigMap
 

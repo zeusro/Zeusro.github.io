@@ -167,3 +167,5 @@ put geonames/_settings
 
 参考链接:
 1. [如何使用Elasticsearch构建企业级搜索方案？](https://zhuanlan.zhihu.com/p/29449979)
+1. [滴滴Elasticsearch多集群架构实践](https://mp.weixin.qq.com/s/K44-L0rclaIM40hma55pPQ)
+1. [从平台到中台：Elaticsearch 在蚂蚁金服的实践经验](https://www.infoq.cn/article/IfwCVj-qJ4TU0dmBZ177)
