@@ -36,5 +36,5 @@ kubernetes有重启的机制,所以单节点一开始就不考虑.
 
 参考链接:
 
-[Redis 持久化](https://www.jianshu.com/p/bedec93e5a7b)
-
+1. [Redis 持久化](https://www.jianshu.com/p/bedec93e5a7b)
+1. [深入浅出Docker技术- Redis sentinel 集群的搭建](http://www.dczou.com/viemall/837.html)

@@ -14,14 +14,11 @@ tags:
 
 `kubernetes`内部容器通讯都需要通过`api-server`进行通讯.外部通过`kubectl`访问管理集群,本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢.
 
-
 但是人在江湖漂,哪能不挨刀呢?要怎么防止集群内外瞎搞事的破坏分子呢?`RBAC`(Role-based access control )顺势而生.
 
 一句话总结`ServiceAccount`,`Role`,`RoleBinding`,`ClusterRole`,`ClusterRoleBinding`的关系就是,
 
 **`ClusterRoleBinding`,`RoleBinding`是一种任命,认命被授权的对象(users, groups, or service accounts)能够有什么样的权限(Role,ClusterRole)**
-
- 
 
 ## ServiceAccount
 
