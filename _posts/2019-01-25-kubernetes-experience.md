@@ -105,6 +105,10 @@ resources:
        limits:
            ephemeral-storage: "3Gi"
 ```
+节点被驱逐后通过get po还是能看到,用describe命令,可以看到被驱逐的历史原因
+
+> Message:            The node was low on resource: ephemeral-storage. Container codis-proxy was using 10619440Ki, which exceeds its request of 0.
+
 
 参考:
 1. [Kubernetes pod ephemeral-storage配置](https://blog.csdn.net/hyneria_hope/article/details/79467922)
