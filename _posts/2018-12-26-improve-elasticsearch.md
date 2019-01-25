@@ -20,7 +20,7 @@ tags:
 
 [使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
 
-### 参数的设置
+## 参数的设置
 
 对于 _all 这项参数，如果在业务使用上没有必要，我们通常的建议是禁止或者有选择性的添加。
 
@@ -36,7 +36,7 @@ shard的个数（包括副本）要尽可能匹配节点数，等于节点数，
 
 
 
-### 查询优化
+## 查询优化
 
 - 只选取必须的字段
 
@@ -104,11 +104,11 @@ indices:
 [线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
 
 
-### 其他经验
+## 其他经验
 
 按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
 
-### 常用查询技巧
+## 常用查询技巧
 
 ```
 error_trace=true
@@ -159,7 +159,31 @@ put geonames/_settings
 
 [_rolling_restarts](https://www.elastic.co/guide/en/elasticsearch/guide/current/_rolling_restarts.html)
 
+- 慢日志分析
 
+慢日志分搜索和索引两种,并且可以从index,或者cluster级别进行设置
+
+```
+PUT _settings
+{
+        "index.indexing.slowlog.threshold.index.debug" : "10ms",
+        "index.indexing.slowlog.threshold.index.info" : "50ms",
+        "index.indexing.slowlog.threshold.index.warn" : "100ms",
+        "index.search.slowlog.threshold.fetch.debug" : "100ms",
+        "index.search.slowlog.threshold.fetch.info" : "200ms",
+        "index.search.slowlog.threshold.fetch.warn" : "500ms",
+        "index.search.slowlog.threshold.query.debug" : "100ms",
+        "index.search.slowlog.threshold.query.info" : "200ms",
+        "index.search.slowlog.threshold.query.warn" : "1s"
+}
+```
+
+参考链接:
+
+1. [ES 慢查询收集总结](http://www.fblinux.com/?p=1334)
+1. []()
+1. []()
+1. []()
 
 ## 参考工具
 
