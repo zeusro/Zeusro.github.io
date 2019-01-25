@@ -25,36 +25,6 @@ tags:
 
 可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
 
-1. [kubectx](https://github.com/ahmetb/kubectx)
-
-kubectx:用来切换集群的访问
-
-kubens:用来切换默认的namespace
-
-## 集群管理经(教)验(训)
-
-- 建了一个服务,但是没有对应的po,会出现什么情况?
-
-请求时一直不会有响应,直到request timeout
-
-参考
-
-1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
-
-- taint别乱用
-
-```bash
-kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
-kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
-```
-
-master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
-
-其他参考链接：
-
-1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
-1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
-
 
 ## k8s的 master-cluster 架构
 
@@ -451,53 +421,6 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
 
 ## 常用命令
-
-* 集群管理相关
-
-
-```bash
-kubectl get cs
-
-# 查看节点
-kubectl get nodes
-
-kubectl get ing pdd --n java
-# 不调度
-kubectl taint nodes node1 key=value:NoSchedule
-kubectl cluster-info dump
-
-```
-
-参考链接:
-1. [kubernetes 节点维护 cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)
-
-
-* 应用管理相关
-
-```bash
-kubectl top pod
-kubectl delete deployment,services -l app=nginx 
-kubectl scale deployment/nginx-deployment --replicas=2
-kubectl get svc --all-namespaces=true
-
-```
-
-* 强制删除
-
-有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
-
-
-* 一些技巧
-
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
-
-
-
-参考(应用调度相关):
-1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
-2. [kubernetes如何解决服务依赖呢？](https://ieevee.com/tech/2017/04/23/k8s-svc-dependency.html)
-5. [Kubernetes之路 1 - Java应用资源限制的迷思](https://yq.aliyun.com/articles/562440?spm=a2c4e.11153959.0.0.5e0ed55aq1betz)
-8. [Control CPU Management Policies on the Node](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies)
 
 
 参考命令:
