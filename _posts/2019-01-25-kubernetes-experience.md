@@ -39,6 +39,11 @@ kubectl get ing pdd --n java
 kubectl taint nodes node1 key=value:NoSchedule
 kubectl cluster-info dump
 
+
+kubectl get svc --sort-by=.metadata.creationTimestamp
+kubectl get no --sort-by=.metadata.creationTimestamp
+kubectl get po --field-selector spec.nodeName=xxxx
+kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
 ```
 
 参考链接:

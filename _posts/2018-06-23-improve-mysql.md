@@ -240,7 +240,7 @@ GROUP BY table_schema order by MB;
 1. [GRANT](https://www.yiibai.com/mysql/grant.html)
 1. [privileges-provided](https://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html#priv_all)
 1. [MySQL用户管理：添加用户、授权、删除用户](https://www.cnblogs.com/chanshuyi/p/mysql_user_mng.html)
-1. []()
+1. [详解慢查询](https://www.kancloud.cn/thinkphp/mysql-design-optimalize/39320)
 1. []()
 1. []()
 1. []()
