@@ -198,12 +198,28 @@ PUT /_ingest/pipeline/all
           - pipeline: "java"
 ```
 
+如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
+
+```
+curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: application/json' -d'
+{
+    "index_patterns" : ["filebeat*"],
+    "order" : 0,
+    "settings" : {
+        "number_of_replicas" : 0
+    }
+}
+'
+```
+
+
 
 参考链接:
 1. [running-on-kubernetes](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html)
 1. [ELK+Filebeat 集中式日志解决方案详解](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
 2. [filebeat.yml（中文配置详解）](http://www.cnblogs.com/zlslch/p/6622079.html)
 3. [Elasticsearch Pipeline 详解](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
+4. [es number_of_shards和number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
 
 
 
