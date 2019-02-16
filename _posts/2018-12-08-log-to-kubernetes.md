@@ -126,6 +126,7 @@ output {
 ### 定义pipeline
 
 - 定义java专用的管道
+
 ```
 
 PUT /_ingest/pipeline/java
