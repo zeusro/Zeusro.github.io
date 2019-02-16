@@ -94,8 +94,8 @@ indices:
   recovery:
     max_bytes_per_sec:
 
-        
-```        
+
+```
 
 [配置集群](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html)
 
