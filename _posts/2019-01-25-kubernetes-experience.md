@@ -64,6 +64,10 @@ kubectl get svc --all-namespaces=true
 
 有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
 
+* 删除所有失败的pod
+
+  kubectl get po --all-namespaces --field-selector 'status.phase==Failed'
+  kubectl delete po  --field-selector 'status.phase==Failed'
 
 * 一些技巧
 
