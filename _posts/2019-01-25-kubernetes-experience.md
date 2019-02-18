@@ -76,7 +76,7 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
 
 ## 集群管理经(教)验(训)
 
-- 建了一个服务,但是没有对应的po,会出现什么情况?
+### 建了一个服务,但是没有对应的po,会出现什么情况?
 
 请求时一直不会有响应,直到request timeout
 
@@ -84,7 +84,7 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
 
 1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
-- taint别乱用
+### taint别乱用
 
 ```bash
 kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
@@ -98,7 +98,7 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
 1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
-- pod被驱逐(Evicted)
+### pod被驱逐(Evicted)
 
 1. 节点加了污点导致pod被驱逐
 1. ephemeral-storage超过限制被驱逐
@@ -122,6 +122,46 @@ resources:
 参考:
 1. [Kubernetes pod ephemeral-storage配置](https://blog.csdn.net/hyneria_hope/article/details/79467922)
 1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
+
+### 节点出现磁盘压力(DiskPressure)
+
+```
+--eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%
+```
+
+kubelet在启动时指定了磁盘压力,以阿里云为例,`imagefs.available<15%`意思是说容器的读写层少于15%的时候,节点会被驱逐.节点被驱逐的后果就是产生DiskPressure这种状况,并且节点上再也不能运行任何镜像,直至磁盘问题得到解决.如果节点上容器使用了宿主目录,这个问题将会是致命的.因为你不能把目录删除掉,但是真是这些宿主机的目录堆积,导致了节点被驱逐.
+
+所以,平时要养好良好习惯,容器里面别瞎写东西(容器里面写文件会占用ephemeral-storage,ephemeral-storage过多pod会被驱逐),多使用无状态型容器,谨慎选择存储方式,尽量别用hostpath这种存储
+
+出现状况时,真的有种欲哭无泪的感觉.
+
+```
+Events:
+  Type     Reason                 Age                   From                                            Message
+  ----     ------                 ----                  ----                                            -------
+  Warning  FreeDiskSpaceFailed    23m                   kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 5182058496 bytes, but freed 0 bytes
+  Warning  FreeDiskSpaceFailed    18m                   kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 6089891840 bytes, but freed 0 bytes
+  Warning  ImageGCFailed          18m                   kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 6089891840 bytes, but freed 0 bytes
+  Warning  FreeDiskSpaceFailed    13m                   kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4953321472 bytes, but freed 0 bytes
+  Warning  ImageGCFailed          13m                   kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4953321472 bytes, but freed 0 bytes
+  Normal   NodeHasNoDiskPressure  10m (x5 over 47d)     kubelet, node.xxxx1     Node node.xxxx1 status is now: NodeHasNoDiskPressure
+  Normal   Starting               10m                   kube-proxy, node.xxxx1  Starting kube-proxy.
+  Normal   NodeHasDiskPressure    10m (x4 over 42m)     kubelet, node.xxxx1     Node node.xxxx1 status is now: NodeHasDiskPressure
+  Warning  EvictionThresholdMet   8m29s (x19 over 42m)  kubelet, node.xxxx1     Attempting to reclaim ephemeral-storage
+  Warning  ImageGCFailed          3m4s                  kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4920913920 bytes, but freed 0 bytes
+```
+
+参考链接:
+
+1. [Eviction Signals](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals)
+1. [10张图带你深入理解Docker容器和镜像](http://dockone.io/article/783)
+
+### ReplicationController不更新
+
+ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
+
+尽量使用deploy吧.
+
 
 ## 进阶调度
 
