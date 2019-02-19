@@ -428,7 +428,7 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 4. [Kubernetes与Docker基本概念与常用命令对照](https://yq.aliyun.com/articles/385699?spm=a2c4e.11153959.0.0.7355d55acvAlBq)
 6. [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 7. [K8S资源配置指南](https://kubernetes.io/docs/reference/)
-8. 
+8. [Introducing Container Runtime Interface (CRI) in Kubernetes](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)
 
 
 参考电子书:
