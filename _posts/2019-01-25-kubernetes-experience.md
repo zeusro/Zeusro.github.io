@@ -66,8 +66,10 @@ kubectl get svc --all-namespaces=true
 
 * 删除所有失败的pod
 
+```bash
   kubectl get po --all-namespaces --field-selector 'status.phase==Failed'
   kubectl delete po  --field-selector 'status.phase==Failed'
+```
 
 * 一些技巧
 
