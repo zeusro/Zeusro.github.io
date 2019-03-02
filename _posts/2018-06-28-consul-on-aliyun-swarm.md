@@ -168,7 +168,6 @@ consul-client:
 
 亲测把consul:1.2.3安装在了1.11.2的集群,具体见[zeusro/deploy-consul-on-kubernetes](https://github.com/zeusro/deploy-consul-on-kubernetes)
 
-
 ## 参考链接
 
 1. https://www.jianshu.com/p/f8746b81d65d
