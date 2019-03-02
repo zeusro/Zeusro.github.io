@@ -193,6 +193,16 @@ spec:
                 - /bin/sh
                 - -c
                 - consul leave
+          readinessProbe:
+            # NOTE(mitchellh): when our HTTP status endpoints support the
+            # proper status codes, we should switch to that. This is temporary.
+            exec:
+              command:
+                - "/bin/sh"
+                - "-ec"
+                - |
+                  curl http://127.0.0.1:8500/v1/status/leader 2>/dev/null | \
+                  grep -E '".+"'
           ports:
             - containerPort: 8301
               name: serflan
@@ -248,4 +258,6 @@ consul还支持彼此间加密通讯,但是我之前配置client的时候失败�
 
 consul的架构,server一定要跟client分离.如果直接往server注册服务,server担任了服务健康检查的角色,就会使整个consul变得非常的卡,我本想通过反注册服务给它降低负荷,但还是失败了,搞得最后我迁移了配置,重新搭了一套consul,相当蛋疼.
 
+## 参考链接
 
+https://github.com/hashicorp/consul-helm
