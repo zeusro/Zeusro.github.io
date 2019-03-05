@@ -223,10 +223,6 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
 - 相关命令
 
 ```bash
-    # 设置为不调度节点
-    kubectl cordon <node-name>
-    # 设置为调度节点
-    kubectl uncordon <node-name>
     # 将POD驱离
     kubectl drain <node-name>
     kubectl exec -it ng-57d74c8694-6cqnz sh  -n=java

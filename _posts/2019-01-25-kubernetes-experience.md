@@ -44,6 +44,7 @@ kubectl get svc --sort-by=.metadata.creationTimestamp
 kubectl get no --sort-by=.metadata.creationTimestamp
 kubectl get po --field-selector spec.nodeName=xxxx
 kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
+
 ```
 
 参考链接:
@@ -210,6 +211,41 @@ Events:
 ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
 
 尽量使用deploy吧.
+
+### 隔离节点的正确步骤
+
+```
+# 驱逐除了ds以外所有的pod
+kubectl drain <node name>   --ignore-daemonsets
+kubectl cordon <node name>
+```
+
+这个时候运行get node命令,状态会变
+
+```
+node.xx   Ready,SchedulingDisabled   <none>   189d   v1.11.5
+```
+
+最后
+
+```
+kubectl delete <node name>
+```
+
+### 维护节点的正确步骤
+
+```
+kubectl drain <node name>
+kubectl uncordon <node name>
+```
+
+### service connection refuse
+
+原因可能有
+
+1. pod没有设置readinessProbe,请求到未就绪的pod
+1. kube-proxy宕机了(kube-proxy负责转发请求)
+1. 网络过载
 
 
 ## 进阶调度
