@@ -235,7 +235,7 @@ kubectl delete <node name>
 ### 维护节点的正确步骤
 
 ```
-kubectl drain <node name>
+kubectl drain <node name> --ignore-daemonsets
 kubectl uncordon <node name>
 ```
 
