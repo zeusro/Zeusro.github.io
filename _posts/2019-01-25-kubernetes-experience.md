@@ -247,6 +247,27 @@ kubectl uncordon <node name>
 1. kube-proxy宕机了(kube-proxy负责转发请求)
 1. 网络过载
 
+### kubectl exec 进入容器失败
+
+这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
+
+```
+~ kex codis-server-3 sh
+rpc error: code = 2 desc = containerd: container not found
+command terminated with exit code 126
+```
+
+解决办法:删了这个pod,配置`livenessProbe`
+
+### 容器接连Crashbackoff
+
+`Crashbackoff`有多种原因.常见的沙箱创建失败,镜像拉取失败导致.
+
+也有一种可能是容器并发过高,流量雪崩导致.
+
+比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
+
+在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
 
 ## 进阶调度
 
