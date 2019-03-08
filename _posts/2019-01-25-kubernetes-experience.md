@@ -269,6 +269,25 @@ command terminated with exit code 126
 
 在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
 
+### StatefulSet更新失败
+
+StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
+
+### pod频繁重启
+
+原因有多种,不可一概而论
+
+#### 资源达到limit设置值
+
+调高limit或者检查应用
+
+#### Readiness/Liveness connection refused
+
+Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
+
+这个问题要上节点排查
+
+
 ## 进阶调度
 
 ### 使用亲和度确保节点在目标节点上运行
