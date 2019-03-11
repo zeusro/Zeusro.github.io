@@ -287,6 +287,20 @@ Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是�
 
 这个问题要上节点排查
 
+### 节点CPU彪高
+
+有可能是节点在进行GC(container GC/image GC),用`describe node`查查.我有次遇到这种状况,最后节点上的容器少了很多,也是有点郁闷
+
+```
+Events:
+  Type     Reason                 Age                 From                                         Message
+  ----     ------                 ----                ----
+  Warning  ImageGCFailed          45m                 kubelet, cn-shenzhen.xxxx  failed to get image stats: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+```
+
+参考:
+
+[kubelet 源码分析：Garbage Collect](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
 
 ## 进阶调度
 
