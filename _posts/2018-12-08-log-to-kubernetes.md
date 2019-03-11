@@ -186,17 +186,178 @@ PUT /_ingest/pipeline/all
 
 ### filebeat.yml
 
-```
-    # ......
-    # 省略了其他,只保留了关键的部分
-    
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filebeat-config
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
+data:
+  filebeat.yml: |-
+    filebeat.config:
+        inputs:
+          # Mounted `filebeat-inputs` configmap:
+          path: ${path.config}/inputs.d/*.yml
+          # Reload inputs configs as they change:
+          reload.enabled: false
+        modules:
+          path: ${path.config}/modules.d/*.yml
+          # Reload module configs as they change:
+          reload.enabled: false
+    setup.template.settings:
+        index.number_of_replicas: 0
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.5/filebeat-reference-yml.html
+    # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-autodiscover.html
+    filebeat.autodiscover:
+     providers:
+       - type: kubernetes
+         templates:
+             config:
+               - type: docker
+                 containers.ids:
+                  # - "${data.kubernetes.container.id}" 
+                  - "*"
+                 enable: true
+                 processors:
+                  - add_kubernetes_metadata:
+                      # include_annotations:
+                      #   - annotation_to_include        
+                      in_cluster: true
+                  - add_cloud_metadata:
+
+    cloud.id: ${ELASTIC_CLOUD_ID}
+    cloud.auth: ${ELASTIC_CLOUD_AUTH}
+
     output:
       elasticsearch:
         hosts: ['${ELASTICSEARCH_HOST:elasticsearch}:${ELASTICSEARCH_PORT:9200}']
         # username: ${ELASTICSEARCH_USERNAME}
         # password: ${ELASTICSEARCH_PASSWORD}
-        pipelines:
-          - pipeline: "java"
+        # pipelines:          
+        #   - pipeline: "nginx"
+        #     when.contains:
+        #       kubernetes.container.name: "nginx-"
+        #   - pipeline: "java"
+        #     when.contains:
+        #       kubernetes.container.name: "java-"              
+        #   - pipeline: "default"  
+        #     when.contains:
+        #       kubernetes.container.name: ""
+---
+apiVersion: extensions/v1beta1
+kind: DaemonSet
+metadata:
+  name: filebeat
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: filebeat
+    spec:
+      tolerations:
+        - key: "elasticsearch-exclusive"
+          operator: "Exists"
+          effect: "NoSchedule"         
+      serviceAccountName: filebeat
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: filebeat
+          imagePullPolicy: Always          
+          image: 'filebeat:6.6.0'
+          args: [
+            "-c", 
+            "/etc/filebeat.yml",
+            "-e",
+          ]         
+          env:
+          - name: ELASTICSEARCH_HOST
+            value: 0.0.0.0
+          - name: ELASTICSEARCH_PORT
+            value: "9200"
+          # - name: ELASTICSEARCH_USERNAME
+          #   value: elastic
+          # - name: ELASTICSEARCH_PASSWORD
+          #   value: changeme
+          # - name: ELASTIC_CLOUD_ID
+          #   value:
+          # - name: ELASTIC_CLOUD_AUTH
+          #   value:            
+          securityContext:
+            runAsUser: 0
+            # If using Red Hat OpenShift uncomment this:
+            #privileged: true
+          resources:
+            limits:
+              memory: 200Mi
+            requests:
+              cpu: 100m
+              memory: 100Mi
+          volumeMounts:
+          - name: config
+            mountPath: /etc/filebeat.yml
+            readOnly: true
+            subPath: filebeat.yml
+          - name: data
+            mountPath: /usr/share/filebeat/data
+          - name: varlibdockercontainers
+            mountPath: /var/lib/docker/containers
+            readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          defaultMode: 0600
+          name: filebeat-config
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+      # data folder stores a registry of read status for all files, so we don't send everything again on a Filebeat pod restart
+      - name: data
+        hostPath:
+          path: /var/lib/filebeat-data
+          type: DirectoryOrCreate
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: filebeat
+subjects:
+- kind: ServiceAccount
+  name: filebeat
+  namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: filebeat
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: filebeat
+  labels:
+    k8s-app: filebeat
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  resources:
+  - namespaces
+  - pods
+  verbs:
+  - get
+  - watch
+  - list
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: filebeat
+  namespace: kube-system
+  labels:
+    k8s-app: filebeat
 ```
 
 如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
