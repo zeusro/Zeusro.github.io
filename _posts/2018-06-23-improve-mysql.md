@@ -30,15 +30,6 @@ tags:
 
     SELECT * FROM INFORMATION_SCHEMA.ENGINES;
 
-* 查看有哪些线程正在执行
-
-    show processlist;
-
-我比较喜欢用
-
-```bash
-SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where db = 'xxxx'  and state !='' order by time desc,command ;
-```
 
 * 显示长事务
 
