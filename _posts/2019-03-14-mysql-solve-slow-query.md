@@ -194,4 +194,4 @@ SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 1. [MySQL慢查询日志总结](https://www.cnblogs.com/kerrycode/p/5593204.html)
 1. [MySQL CPU 使用率高的原因和解决方法](https://help.aliyun.com/knowledge_detail/51587.html)
 1. [mysql优化，导致查询不走索引的原因总结](https://blog.csdn.net/m0_37808356/article/details/72526687)
-1. [](https://blog.csdn.net/and1kaney/article/details/51213979)
+1. [information_schema中Innodb相关表用于分析sql查询锁的使用情况介绍](https://blog.csdn.net/and1kaney/article/details/51213979)
