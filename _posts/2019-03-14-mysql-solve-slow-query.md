@@ -182,8 +182,16 @@ EXPLAIN SQL
 DESC SQL
 ```
 
+```
+# INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
+SELECT * FROM information_schema.INNODB_TRX;
+SELECT * FROM information_schema.innodb_locks;
+SELECT * FROM information_schema.INNODB_LOCK_WAITS;
+```
+
 ## 参考链接
 
 1. [MySQL慢查询日志总结](https://www.cnblogs.com/kerrycode/p/5593204.html)
 1. [MySQL CPU 使用率高的原因和解决方法](https://help.aliyun.com/knowledge_detail/51587.html)
 1. [mysql优化，导致查询不走索引的原因总结](https://blog.csdn.net/m0_37808356/article/details/72526687)
+1. [](https://blog.csdn.net/and1kaney/article/details/51213979)
