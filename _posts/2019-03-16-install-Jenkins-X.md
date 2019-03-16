@@ -288,6 +288,8 @@ cronjob.batch/jenkins-x-gcpods         0/30 */3 * * *   False     0        10m  
 cronjob.batch/jenkins-x-gcpreviews     0 */3 * * *      False     1        15h             17h
 ```
 
+## 设置优化
+
 
 参考链接:
 
