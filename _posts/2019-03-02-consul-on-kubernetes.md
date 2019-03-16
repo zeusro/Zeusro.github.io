@@ -23,7 +23,7 @@ tags:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: 17zwd
+  namespace: $(namespace)
   name: consul-server
   labels:
     name: consul-server
@@ -72,7 +72,7 @@ spec:
             podAffinityTerm:
               topologyKey: "kubernetes.io/hostname"
               namespaces: 
-              - 17zwd
+              - $(namespace)
               labelSelector:
                 matchExpressions:
                 - key: 'consul-role'
@@ -214,7 +214,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: 17zwd
+  namespace: $(namespace)
   name: consul-client
   labels:
     name: consul-client
