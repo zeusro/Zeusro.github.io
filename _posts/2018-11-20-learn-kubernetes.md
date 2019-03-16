@@ -229,7 +229,7 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
     kubectl get pods --all-namespaces --field-selector spec.nodeName=<node> -o wide
     kubectl get pods -o wide --all-namespaces | grep <YOUR-NODE>
     kubectl get po -l app=nginx -w
-    kubectl delete po -l app=onekey-ali-web -n=17zwd
+    kubectl delete po -l app=onekey-ali-web -n=$(namespace)
     kubectl get po --all-namespaces
 ```
 

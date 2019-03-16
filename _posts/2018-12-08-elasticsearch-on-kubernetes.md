@@ -74,9 +74,9 @@ roleRef:
 存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
 
 ```
-mkdir -p /root/kubernetes/17zwd/elasticsearch/data
-sudo chmod 775  /root/kubernetes/17zwd/elasticsearch/data -R
-chown 1000:0  /root/kubernetes/17zwd/elasticsearch/data -R
+mkdir -p /root/kubernetes/$(namespace)/elasticsearch/data
+sudo chmod 775  /root/kubernetes/$(namespace)/elasticsearch/data -R
+chown 1000:0  /root/kubernetes/$(namespace)/elasticsearch/data -R
 ```
 
 ```
