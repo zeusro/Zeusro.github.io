@@ -14,10 +14,6 @@ tags:
     - kubernetes
 ---
 
-
-
-registry.cn-shenzhen.aliyuncs.com/amiba/tiller:v2.10.0
-
 ## 前言
 
 之前介绍了
@@ -30,6 +26,12 @@ registry.cn-shenzhen.aliyuncs.com/amiba/tiller:v2.10.0
 
 
 ## 前期准备
+
+### helm
+
+包括客户端和服务端.[语法](https://helm.sh/docs/chart_template_guide/#getting-started-with-a-chart-template)也要了解
+
+运行`helm version`确保客户端和服务端都没有问题
 
 ### 本地
 
@@ -56,11 +58,10 @@ git                git version 2.14.3 (Apple Git-98)
 Operating System   Mac OS X 10.13.6 build 17G65
 ```
 
-#### helm
+最佳实践是创建自己的`myvalue.yaml`,修改里面的镜像,一步到位,这样就不需要后期修改了
 
-包括客户端和服务端.[语法](https://helm.sh/docs/chart_template_guide/#getting-started-with-a-chart-template)也要了解
+https://jenkins-x.io/getting-started/config/
 
-运行`helm version`确保客户端和服务端都没有问题
 
 ### 服务器
 
@@ -209,7 +210,7 @@ docker pull k8s.gcr.io/addon-resizer:1.7
 
 `jenkins`,`monocular`和`nexus`可以直接访问,其他的暂时不用管
 
-```
+```bash
 # $(app).$(namespace).$(domain)
 ➜  ~ kg ing
 NAME                         HOSTS                                             ADDRESS        PORTS     AGE
@@ -220,7 +221,7 @@ monocular                    monocular.$(namespace).$(domain)         172.18.221
 nexus                        nexus.$(namespace).$(domain)             172.18.221.8   80        17h
 ```
 
-```
+```bash
 ➜  ~ kg all -l release=jenkins-x
 NAME                                                    READY   STATUS         RESTARTS   AGE
 pod/jenkins-6879786cbc-6p8f7                            1/1     Running        0          17h
@@ -289,6 +290,44 @@ cronjob.batch/jenkins-x-gcpreviews     0 */3 * * *      False     1        15h  
 ```
 
 ## 设置优化
+
+### 修改`jx get urls`的结果
+
+需要修改SVC里面的
+
+```yaml
+metadata:
+  annotations:
+    fabric8.io/exposeUrl:
+```
+
+1. jenkins-x-chartmuseum
+1. jenkins-x-docker-registry
+1. jenkins-x-monocular-api
+1. jenkins-x-monocular-ui
+1. jenkins
+1. nexus
+
+### 设置maven源
+
+
+## 其他有用命令
+
+### 更新整个Jenkins-X平台
+
+```bash
+jx upgrade platform
+```
+
+### 切换环境
+
+```bash
+jx context
+jx environment
+```
+
+### 更新密码
+
 
 
 参考链接:
