@@ -308,8 +308,11 @@ metadata:
 1. jenkins
 1. nexus
 
-### 设置maven源
+### 修改插件更新中心
 
+访问`/pluginManager/advanced`,Update Site填上
+
+  https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/current/update-center.json
 
 ## 其他有用命令
 
