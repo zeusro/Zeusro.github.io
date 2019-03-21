@@ -37,13 +37,13 @@ anchorjs: true                          # if you want to customize anchor. check
 plugins: 
 - jekyll-paginate
 # - hexo-generator-baidu-sitemap
-- hexo-generator-sitemap
+# - hexo-generator-sitemap
 
 # baidusitemap:
 #     path: baidusitemap.xml
-sitemap:
-    path: sitemap.xml
-    template: ./sitemap_template.xml
+# sitemap:
+#     path: sitemap.xml
+#     template: ./sitemap_template.xml
 
 # Markdown settings
 # replace redcarpet to kramdown,
