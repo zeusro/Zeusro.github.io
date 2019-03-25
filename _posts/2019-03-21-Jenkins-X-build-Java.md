@@ -10,6 +10,7 @@ catalog:      true
 tags:
     - Jenkins
     - Jenkins-X
+    - pipeline
     - CI
     - java
 ---
