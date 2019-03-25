@@ -28,7 +28,6 @@ metadata:
   labels:
     name: consul-server
 spec:
-  clusterIP: None
   ports:
     - name: http
       port: 8500
@@ -220,7 +219,6 @@ metadata:
     name: consul-client
     consul-role: consul-client
 spec:
-  clusterIP: None
   ports:
     - name: serflan-tcp
       protocol: "TCP"

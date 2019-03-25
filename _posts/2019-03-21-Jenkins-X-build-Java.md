@@ -21,11 +21,22 @@ tags:
 
 从git server(GitHub/gitea)拉取代码->构建docker镜像->推送到镜像仓库
 
-建议一开始用官方的例子+GitHub,熟悉以后再慢慢修改
+建议一开始用[jx create](https://jenkins-x.io/commands/jx_create_quickstart/)创建官方的例子,推送到  GitHub,熟悉以后再慢慢修改
 
 ```
 jx create spring -d web -d actuator
 jx create quickstart -l java
+jx create quickstart \
+ -l java \
+ --docker-registry-org zeusro \
+ --git-username zeusro \
+ --org  zeusro \
+ --git-provider-kind gitea \
+ --git-provider-url  https://gitea.com \
+ --git-host  https://gitea.com  \
+ --import-commit-message init \
+ --name java-abcde \
+ --project-name  java-abcde
 ```
 
 ## 前置准备
