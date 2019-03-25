@@ -302,6 +302,61 @@ Events:
 
 [kubelet 源码分析：Garbage Collect](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
 
+### service没有负载均衡
+
+检查一下是否用了`headless service`.`headless service`是不会自动负载均衡的...
+
+```yaml
+kind: Service
+spec:
+# clusterIP: None的即为`headless service`
+  type: ClusterIP
+  clusterIP: None
+```
+
+具体表现service没有自己的虚拟IP,nslookup会出现所有pod的ip.但是ping的时候只会出现第一个pod的ip
+
+```bash
+/ # nslookup consul
+nslookup: can't resolve '(null)': Name does not resolve
+
+Name:      consul
+Address 1: 172.31.10.94 172-31-10-94.consul.default.svc.cluster.local
+Address 2: 172.31.10.95 172-31-10-95.consul.default.svc.cluster.local
+Address 3: 172.31.11.176 172-31-11-176.consul.default.svc.cluster.local
+
+/ # ping consul
+PING consul (172.31.10.94): 56 data bytes
+64 bytes from 172.31.10.94: seq=0 ttl=62 time=0.973 ms
+64 bytes from 172.31.10.94: seq=1 ttl=62 time=0.170 ms
+^C
+--- consul ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.170/0.571/0.973 ms
+
+/ # ping consul
+PING consul (172.31.10.94): 56 data bytes
+64 bytes from 172.31.10.94: seq=0 ttl=62 time=0.206 ms
+64 bytes from 172.31.10.94: seq=1 ttl=62 time=0.178 ms
+^C
+--- consul ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+round-trip min/avg/max = 0.178/0.192/0.206 ms
+```
+
+
+普通的type: ClusterIP service,nslookup会出现该服务自己的IP
+
+```BASH
+/ # nslookup consul
+nslookup: can't resolve '(null)': Name does not resolve
+
+Name:      consul
+Address 1: 172.30.15.52 consul.default.svc.cluster.local
+```
+
+
+
 ## 进阶调度
 
 ### 使用亲和度确保节点在目标节点上运行
