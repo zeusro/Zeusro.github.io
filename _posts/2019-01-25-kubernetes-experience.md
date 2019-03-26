@@ -355,6 +355,18 @@ Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
 
+### 阿里云创建的LoadBalancer服务一直没有IP
+
+具体表现是EXTERNAL-IP一直显示pending.
+
+```bash
+~ kg svc consul-web
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
+consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m  
+```
+
+这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
+
 
 
 ## 进阶调度
