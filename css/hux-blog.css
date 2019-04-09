@@ -138,20 +138,20 @@
 .side-catalog .catalog-body .h3_nav {
   margin-left: 20px;
   font-size: 16px;
-  font-weight: 800;  
+  font-weight: 600;  
 }
 
 .side-catalog .catalog-body .h4_nav {
   margin-left: 40px;
   font-size: 13px;
-  font-weight: 700;  
+  font-weight: 300;  
 }
 
 .side-catalog .catalog-body .h5_nav,
 .side-catalog .catalog-body .h6_nav {
   margin-left: 60px;
   font-size: 12px;
-  font-weight: 600;  
+  /* font-weight: 600;   */
 }
 
 .side-catalog .catalog-body .h4_nav a,
