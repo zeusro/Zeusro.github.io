@@ -12,25 +12,25 @@ tags:
 ---
 
 
-### 环境:
+## 环境:
 
 1. kubernetes版本: 阿里云v1.11.5
 1. 节点系统 CentOS Linux 7 (Core)
 1. 节点容器版本 docker://17.6.2
 
-### 概念介绍
+## 概念介绍
 
-#### X-Forwarded-For
+### X-Forwarded-For
 
 ```
 X-Forwarded-For: <client>, <proxy1>, <proxy2>
 ```
 
-#### remote_addr
+### remote_addr
 
 remote_addr代表客户端的IP，但它的值不是由客户端提供的，而是服务端根据客户端的ip指定的，当你的浏览器访问某个网站时，假设中间没有任何代理，那么网站的web服务器（Nginx，Apache等）就会把remote_addr设为你的机器IP，如果你用了某个代理，那么你的浏览器会先访问这个代理，然后再由这个代理转发到网站，这样web服务器就会把remote_addr设为这台代理机器的IP。
 
-### 内部请求(Pod对Pod请求)
+## 内部请求(Pod对Pod请求)
 
 ```
 podA-->podB
@@ -41,15 +41,15 @@ podA-->podB
 The client_address is always the client pod’s IP address, whether the client pod and server pod are in the same node or in different nodes.
 
 
-### 外部请求
+## 外部请求
 
-#### Nodeport svc
+### Nodeport svc
 
 ```
 client-->svc-->pod
 ```
 
-##### externalTrafficPolicy: Cluster
+#### externalTrafficPolicy: Cluster
 
 svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动`kube-proxy`,外部流量可能转发多1次.
 
@@ -67,7 +67,7 @@ svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动
 
 这时流量通过node2的转发,app 获得的clientIP不定,有可能是`node 2` 的IP,也有可能是客户端的IP
 
-##### externalTrafficPolicy: Local
+#### externalTrafficPolicy: Local
 
 svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube-proxy`,外部流量直达节点.
 
@@ -88,7 +88,7 @@ svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube
 `clientIP`为`remote_addr`
 
 
-#### LoadBalancer svc
+### LoadBalancer svc
 
 svc.spec设置`externalTrafficPolicy: Local`.
 
@@ -110,7 +110,7 @@ SLB监听TCP,则取`remote_addr`
 
 `externalTrafficPolicy: Cluster`的情况就不用说了,没有意义.
 
-#### ingress
+### ingress
 
 ```
 client-->slb-->ingress svc-->app svc-->pod
@@ -123,7 +123,7 @@ app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
 这个时候,`X-Forwarded-For`的值即为`clientIP`
 
 
-### 参考链接:
+## 参考链接:
 
 1. [source-ip](https://kubernetes.io/docs/tutorials/services/source-ip/)
 1. [HTTP 请求头中的 X-Forwarded-For](https://imququ.com/post/x-forwarded-for-header-in-http.html)
