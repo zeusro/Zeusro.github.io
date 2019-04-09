@@ -113,7 +113,7 @@ SLB监听TCP,则取`remote_addr`
 ### ingress
 
 ```
-client-->slb-->ingress svc-->app svc-->pod
+client-->slb-->ingress svc-->ingress pod-->app svc-->pod
 ```
 
 首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`,并且`externalTrafficPolicy: Local`
@@ -122,6 +122,7 @@ app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
 
 这个时候,`X-Forwarded-For`的值即为`clientIP`
 
+`remote_addr`为`ingress pod` Virtual IP
 
 ## 参考链接:
 
