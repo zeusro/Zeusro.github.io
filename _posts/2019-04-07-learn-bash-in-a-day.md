@@ -371,7 +371,7 @@ fi
 
 ### 循环
 
-##### while
+#### while
 
 ```bash
 # while 循环
