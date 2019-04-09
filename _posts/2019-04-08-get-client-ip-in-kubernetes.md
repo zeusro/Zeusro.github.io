@@ -43,7 +43,11 @@ The client_address is always the client pod’s IP address, whether the client p
 
 ## 外部请求
 
-### Nodeport svc
+```
+client-->svc-->pod
+```
+
+### Nodeport/LoadBalancer svc
 
 #### externalTrafficPolicy: Cluster
 
@@ -105,3 +109,4 @@ health check --->   node 1   node 2 <--- health check
 
 1. [source-ip](https://kubernetes.io/docs/tutorials/services/source-ip/)
 1. [HTTP 请求头中的 X-Forwarded-For](https://imququ.com/post/x-forwarded-for-header-in-http.html)
+1. [如何获取客户端真实IP](https://help.aliyun.com/document_detail/54007.html?spm=5176.11065259.1996646101.searchclickresult.610a1293EtcJUu)
