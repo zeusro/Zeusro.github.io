@@ -61,8 +61,6 @@ The client_address is always the client pod’s IP address, whether the client p
 
 这时流量通过node2的转发,app 获得的clientIP不定,有可能是`node 2` 的IP,也有可能是客户端的IP
 
-
-
 #### externalTrafficPolicy: Local
 
 取`remote_addr`
@@ -85,9 +83,11 @@ svc.spec设置`externalTrafficPolicy: Local`.
 
 ### ingress
 
-X-Forwarded-For:运行app pod的节点IP
+首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`,并且`externalTrafficPolicy: Local`
 
-### LoadBalancer svc
+app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
+
+这个时候,`X-Forwarded-For`的值即为`clientIP`
 
 ```
                       client
@@ -100,10 +100,6 @@ health check --->   node 1   node 2 <--- health check
                     | V
                  endpoint
 ```
-
-SLB监听HTTP:取`X-Forwarded-For`即可.
-
-SLB监听TCP,则取`remote_addr`
 
 ## 参考链接:
 
