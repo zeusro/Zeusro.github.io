@@ -136,20 +136,20 @@
 
 /* 从H2开始缩进 */
 .side-catalog .catalog-body .h3_nav {
-  margin-left: 15px;
+  margin-left: 20px;
   font-size: 16px;
   font-weight: 800;  
 }
 
 .side-catalog .catalog-body .h4_nav {
-  margin-left: 30px;
+  margin-left: 40px;
   font-size: 13px;
   font-weight: 700;  
 }
 
 .side-catalog .catalog-body .h5_nav,
 .side-catalog .catalog-body .h6_nav {
-  margin-left: 45px;
+  margin-left: 60px;
   font-size: 12px;
   font-weight: 600;  
 }
@@ -163,6 +163,7 @@
 .side-catalog .catalog-body .active {
   border-radius: 4px;
   background-color: #F5F5F5;
+  font-weight: bold;
 }
 
 .side-catalog .catalog-body .active a {
