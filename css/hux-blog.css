@@ -128,7 +128,8 @@
   text-overflow: ellipsis;
 }
 
-.side-catalog .catalog-body .h1_nav .side-catalog .catalog-body .h2_nav {
+.side-catalog .catalog-body .h1_nav,
+.side-catalog .catalog-body .h2_nav {
   margin-left: 0;
   font-size: 18px;
   font-weight: 900;
