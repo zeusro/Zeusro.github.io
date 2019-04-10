@@ -20,6 +20,17 @@ tags:
 
 [使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
 
+
+## 性能减低的原因
+
+1. Your clients are simply sending too many queries too quickly in a fast burst, overwhelming the queue. You can monitor this with Node Stats over time to see if it's bursty or smooth
+1. You've got some very slow queries which get "stuck" for a long time, eating up threads and causing the queue to back up. You can enable the slow log to see if there are queries that are taking an exceptionally long time, then try to tune those
+1. There may potentially be "unending" scripts written in Groovy or something. E.g. a loop that never exits, causing the thread to spin forever.
+1. Your hardware may be under-provisioned for your workload, and bottlenecking on some resource (disk, cpu, etc)
+1. A temporary hiccup from your iSCSI target, which causes all the in-flight operations to block waiting for the disks to come back. It wouldn't take a big latency hiccup to seriously backup a busy cluster... ES generally expects disks to always be available.
+1. Heavy garbage collections could cause problems too. Check Node Stats to see if there are many/long old gen GCs running
+
+
 ## 参数的设置
 
 对于 _all 这项参数，如果在业务使用上没有必要，我们通常的建议是禁止或者有选择性的添加。
