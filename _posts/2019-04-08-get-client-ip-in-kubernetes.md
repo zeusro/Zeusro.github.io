@@ -104,6 +104,8 @@ health check --->   node 1   node 2 <--- health check
                  endpoint
 ```
 
+![image](/img/in-post/get-client-ip-in-kubernetes/15450327712333_zh-CN.png)
+
 SLB监听HTTP:取`X-Forwarded-For`即可(从SLB获得客户端IP).
 
 SLB监听TCP,则取`remote_addr`
