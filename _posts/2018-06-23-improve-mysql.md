@@ -11,6 +11,8 @@ tags:
     - mysql
 ---
 
+![image](/img/in-post/improve-mysql/640.webp)
+
 ## 慢查询优化基本步骤
 
 0. 先运行看看是否真的很慢，注意设置SQL_NO_CACHE
