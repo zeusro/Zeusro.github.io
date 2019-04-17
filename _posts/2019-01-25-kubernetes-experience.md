@@ -79,15 +79,10 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
 
 ## 集群管理经(教)验(训)
 
-### 建了一个服务,但是没有对应的po,会出现什么情况?
+### 节点问题
 
-请求时一直不会有响应,直到request timeout
 
-参考
-
-1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
-
-### taint别乱用
+#### taint别乱用
 
 ```bash
 kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
@@ -98,7 +93,7 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
 `taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
 
-#### NoExecute
+##### NoExecute
 
 
 ```
@@ -115,7 +110,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 特别注意用`Exists`这个操作符是无效的,必须用`Equal`
 
-#### NoSchedule
+##### NoSchedule
 
 ```
       tolerations:
@@ -141,39 +136,40 @@ Taints:             elasticsearch-exclusive=true:NoExecute
                     elasticsearch-exclusive=true:NoSchedule
 ```
 
-
-
 其他参考链接：
 
 1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
 1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
-### pod被驱逐(Evicted)
 
-1. 节点加了污点导致pod被驱逐
-1. ephemeral-storage超过限制被驱逐
-    1. EmptyDir 的使用量超过了他的 SizeLimit，那么这个 pod 将会被驱逐
-    1. Container 的使用量（log，如果没有 overlay 分区，则包括 imagefs）超过了他的 limit，则这个 pod 会被驱逐
-    1. Pod 对本地临时存储总的使用量（所有 emptydir 和 container）超过了 pod 中所有container 的 limit 之和，则 pod 被驱逐
+#### 隔离节点的正确步骤
 
-ephemeral-storage是一个pod用的临时存储.
 ```
-resources:
-       requests: 
-           ephemeral-storage: "2Gi"
-       limits:
-           ephemeral-storage: "3Gi"
+# 驱逐除了ds以外所有的pod
+kubectl drain <node name>   --ignore-daemonsets
+kubectl cordon <node name>
 ```
-节点被驱逐后通过get po还是能看到,用describe命令,可以看到被驱逐的历史原因
 
-> Message:            The node was low on resource: ephemeral-storage. Container codis-proxy was using 10619440Ki, which exceeds its request of 0.
+这个时候运行get node命令,状态会变
 
+```
+node.xx   Ready,SchedulingDisabled   <none>   189d   v1.11.5
+```
 
-参考:
-1. [Kubernetes pod ephemeral-storage配置](https://blog.csdn.net/hyneria_hope/article/details/79467922)
-1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
+最后
 
-### 节点出现磁盘压力(DiskPressure)
+```
+kubectl delete <node name>
+```
+
+#### 维护节点的正确步骤
+
+```
+kubectl drain <node name> --ignore-daemonsets
+kubectl uncordon <node name>
+```
+
+#### 节点出现磁盘压力(DiskPressure)
 
 ```
 --eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%
@@ -206,88 +202,8 @@ Events:
 1. [Eviction Signals](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals)
 1. [10张图带你深入理解Docker容器和镜像](http://dockone.io/article/783)
 
-### ReplicationController不更新
 
-ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
-
-尽量使用deploy吧.
-
-### 隔离节点的正确步骤
-
-```
-# 驱逐除了ds以外所有的pod
-kubectl drain <node name>   --ignore-daemonsets
-kubectl cordon <node name>
-```
-
-这个时候运行get node命令,状态会变
-
-```
-node.xx   Ready,SchedulingDisabled   <none>   189d   v1.11.5
-```
-
-最后
-
-```
-kubectl delete <node name>
-```
-
-### 维护节点的正确步骤
-
-```
-kubectl drain <node name> --ignore-daemonsets
-kubectl uncordon <node name>
-```
-
-### service connection refuse
-
-原因可能有
-
-1. pod没有设置readinessProbe,请求到未就绪的pod
-1. kube-proxy宕机了(kube-proxy负责转发请求)
-1. 网络过载
-
-### kubectl exec 进入容器失败
-
-这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
-
-```
-~ kex codis-server-3 sh
-rpc error: code = 2 desc = containerd: container not found
-command terminated with exit code 126
-```
-
-解决办法:删了这个pod,配置`livenessProbe`
-
-### 容器接连Crashbackoff
-
-`Crashbackoff`有多种原因.常见的沙箱创建失败,镜像拉取失败导致.
-
-也有一种可能是容器并发过高,流量雪崩导致.
-
-比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
-
-在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
-
-### StatefulSet更新失败
-
-StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
-
-### pod频繁重启
-
-原因有多种,不可一概而论
-
-#### 资源达到limit设置值
-
-调高limit或者检查应用
-
-#### Readiness/Liveness connection refused
-
-Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
-
-这个问题要上节点排查
-
-### 节点CPU彪高
+#### 节点CPU彪高
 
 有可能是节点在进行GC(container GC/image GC),用`describe node`查查.我有次遇到这种状况,最后节点上的容器少了很多,也是有点郁闷
 
@@ -302,7 +218,104 @@ Events:
 
 [kubelet 源码分析：Garbage Collect](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
 
-### service没有负载均衡
+### 对象问题
+
+#### pod
+
+
+##### pod频繁重启
+
+原因有多种,不可一概而论
+
+###### 资源达到limit设置值
+
+调高limit或者检查应用
+
+###### Readiness/Liveness connection refused
+
+Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
+
+这个问题要上节点排查
+
+
+##### pod被驱逐(Evicted)
+
+1. 节点加了污点导致pod被驱逐
+1. ephemeral-storage超过限制被驱逐
+    1. EmptyDir 的使用量超过了他的 SizeLimit，那么这个 pod 将会被驱逐
+    1. Container 的使用量（log，如果没有 overlay 分区，则包括 imagefs）超过了他的 limit，则这个 pod 会被驱逐
+    1. Pod 对本地临时存储总的使用量（所有 emptydir 和 container）超过了 pod 中所有container 的 limit 之和，则 pod 被驱逐
+
+ephemeral-storage是一个pod用的临时存储.
+```
+resources:
+       requests: 
+           ephemeral-storage: "2Gi"
+       limits:
+           ephemeral-storage: "3Gi"
+```
+节点被驱逐后通过get po还是能看到,用describe命令,可以看到被驱逐的历史原因
+
+> Message:            The node was low on resource: ephemeral-storage. Container codis-proxy was using 10619440Ki, which exceeds its request of 0.
+
+
+参考:
+1. [Kubernetes pod ephemeral-storage配置](https://blog.csdn.net/hyneria_hope/article/details/79467922)
+1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
+
+
+##### kubectl exec 进入容器失败
+
+这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
+
+```
+~ kex codis-server-3 sh
+rpc error: code = 2 desc = containerd: container not found
+command terminated with exit code 126
+```
+
+解决办法:删了这个pod,配置`livenessProbe`
+
+
+##### pod的virtual host name
+
+`Deployment`衍生的pod,`virtual host name`就是`pod name`.
+
+`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.
+
+
+##### pod接连Crashbackoff
+
+`Crashbackoff`有多种原因.常见的沙箱创建失败,镜像拉取失败导致.
+
+也有一种可能是容器并发过高,流量雪崩导致.
+
+比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
+
+在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
+
+
+#### service
+
+##### 建了一个服务,但是没有对应的po,会出现什么情况?
+
+请求时一直不会有响应,直到request timeout
+
+参考
+
+1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
+
+
+##### service connection refuse
+
+原因可能有
+
+1. pod没有设置readinessProbe,请求到未就绪的pod
+1. kube-proxy宕机了(kube-proxy负责转发请求)
+1. 网络过载
+
+
+##### service没有负载均衡
 
 检查一下是否用了`headless service`.`headless service`是不会自动负载均衡的...
 
@@ -355,23 +368,15 @@ Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
 
-### 阿里云创建的LoadBalancer服务一直没有IP
+### ReplicationController不更新
 
-具体表现是EXTERNAL-IP一直显示pending.
+ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
 
-```bash
-~ kg svc consul-web
-NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
-consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m  
-```
+尽量使用deploy吧.
 
-这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
+### StatefulSet更新失败
 
-### pod的virtual host name
-
-`Deployment`衍生的pod,`virtual host name`就是`pod name`.
-
-`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.
+StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
 
 
 ## 进阶调度
@@ -423,6 +428,27 @@ master节点之所以不允许普通镜像,是因为master节点带了污点,如
           operator: Exists
 ```
 
+## 阿里云Kubernetes问题
+
+### LoadBalancer服务一直没有IP
+
+具体表现是EXTERNAL-IP一直显示pending.
+
+```bash
+~ kg svc consul-web
+NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
+consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m  
+```
+
+这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
+
+### 清理Statefulset动态PVC
+
+目前阿里云`Statefulset`动态PVC用的是nas。
+
+1. 对于这种存储，需要先把容器副本将为0，或者整个`Statefulset`删除。
+1. 删除PVC
+1. 把nas挂载到任意一台服务器上面，然后删除pvc对应nas的目录。
 
 
 参考(应用调度相关):
