@@ -287,7 +287,7 @@ spec:
           # - name: ELASTIC_CLOUD_ID
           #   value:
           # - name: ELASTIC_CLOUD_AUTH
-          #   value:            
+          #   value:
           securityContext:
             runAsUser: 0
             # If using Red Hat OpenShift uncomment this:

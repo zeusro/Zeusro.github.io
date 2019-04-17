@@ -212,4 +212,5 @@ jx create docker auth \
 ## 参考链接:
 
 1. [Jenkins X构建例子](https://github.com/jenkins-x-buildpacks/jenkins-x-kubernetes/tree/master/packs)
-
+1. [pod-templates](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/pod-templates.md)
+1. [基于 Kubernetes 实践弹性的 CI/CD 系统](https://yq.aliyun.com/articles/690403)
