@@ -367,6 +367,11 @@ consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m
 
 这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
 
+### pod的virtual host name
+
+`Deployment`衍生的pod,`virtual host name`就是`pod name`.
+
+`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.
 
 
 ## 进阶调度
