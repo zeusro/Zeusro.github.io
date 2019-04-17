@@ -25,19 +25,19 @@ tags:
 
 ## 一些套路
 
-* 不要使用"utf-8"
+### 不要使用"utf-8"
     utf-8不是真正的UTF-8,应该使用utf8mb4作为替代
 
-* 显示数据库引擎
+### 显示数据库引擎
 
     SELECT * FROM INFORMATION_SCHEMA.ENGINES;
 
 
-* 显示长事务
+### 显示长事务
 
     select * from information_schema.innodb_trx;
 
-* 改表
+### 改表
 
 改表期间,运行
 
@@ -67,7 +67,7 @@ FROM
 
 执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
 
-`PS`:虽然mysql 5.7支持onlineDDL,但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html)
+`PS`:虽然mysql 5.7支持onlineDDL,但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html),例子见[pt-online-schema-change使用说明、限制与比较](http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/)
 
 参考:
 [pt-online-schema-change的原理解析与应用说明](https://www.cnblogs.com/xinysu/p/6758170.html)
