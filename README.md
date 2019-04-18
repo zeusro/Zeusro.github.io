@@ -4,13 +4,15 @@
     I don't fucking care what others say.
 
 
-## 本地开发
+## 本地预览
 
 ```bash
-
-gem uninstall --all
-gem install github-pages
-jekyll serve --watch
+npm install grunt -g
+# 编译less
+grunt less  
+# 安装Ruby
+sudo gem install bundler jekyll
+npm run watch
 ```
 
 ## 鸣谢

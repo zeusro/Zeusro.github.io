@@ -1,34 +1,39 @@
 // Directory Section
 
-.catalog-container{
+.catalog-container {
     padding: 0px;
 }
 
 .side-catalog {
-    &.fixed{
+    &.fixed {
         position: fixed;
         top: -21px;
     }
-    &.fold{
-        .catalog-toggle::before{
+
+    &.fold {
+        .catalog-toggle::before {
             content: "+";
         }
-        .catalog-body{
+
+        .catalog-body {
             display: none;
         }
     }
-    .catalog-toggle::before{
+
+    .catalog-toggle::before {
         content: "−";
         position: relative;
         margin-right: 5px;
         bottom: 1px;
     }
+
     display: block;
     overflow: auto;
     height: 100%;
     padding-bottom: 40px;
     width: 395px;
-    .catalog-body{
+
+    .catalog-body {
         position: relative;
         list-style: none;
         height: auto;
@@ -36,12 +41,14 @@
         padding-left: 0px;
         padding-right: 5px;
         text-indent: 0;
-        li{
+
+        li {
             position: relative;
             list-style: none;
-            a{
+
+            a {
                 padding-left: 10px;
-                max-width: 180px;
+                max-width: 300px;
                 display: inline-block;
                 vertical-align: middle;
                 height: 30px;
@@ -52,30 +59,50 @@
                 text-overflow: ellipsis;
             }
         }
-        .h1_nav,.h2_nav,.h3_nav{
+
+        .h1_nav,
+        .h2_nav {
             margin-left: 0;
+            font-size: 16px;
+            font-weight: 900;
+        }
+
+        .h3_nav {
+            margin-left: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .h4_nav {
+            margin-left: 40px;
             font-size: 13px;
-            font-weight: bold;
+            font-weight: 300;
         }
-        .h4_nav,.h5_nav,.h6_nav{
-            margin-left: 10px;
+
+        .h5_nav {
+            margin-left: 60px;
             font-size: 12px;
-            a{
-                max-width: 170px;
-            }
         }
-        .active{
-            a{
-                color: #0085a1!important;
+
+        .h6_nav {
+            margin-left: 80px;
+            font-size: 11px;
+        }
+
+        .active {
+            a {
+                color: #0085a1 !important;
             }
+
             border-radius: 4px;
             background-color: #F5F5F5;
+            font-weight: bold;
         }
     }
 }
 
-@media (max-width: 1200px){
-    .side-catalog{
+@media (max-width: 1200px) {
+    .side-catalog {
         display: none;
     }
 }
