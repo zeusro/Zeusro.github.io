@@ -20,6 +20,7 @@ tags:
 ### agent1
 
 ```yaml
+# {% raw %}
 consul-server1:
   image: 'consul:1.2.0'
   command:
@@ -50,11 +51,13 @@ consul-server1:
     aliyun.auto_scaling.min_memory: '0'
     aliyun.auto_scaling.max_memory: '95'
     aliyun.scale: '1'
+# {% endraw %}
 ```
 
 ### agent2
 
 ```yaml
+# {% raw %}
 consul-server2:
   image: 'consul:1.2.0'
   ports:
@@ -90,11 +93,14 @@ consul-server2:
   memswap_reservation: 0
   kernel_memory: 0
   name: consul-server2
+# {% endraw %}
+
 ```
 
 ### agent3
 
 ```yaml
+# {% raw %}
 consul-server3:
   image: 'consul:1.2.0'
   ports:
@@ -125,11 +131,14 @@ consul-server3:
     aliyun.scale: '1'
     aliyun.auto_scaling.max_memory: '95'
     aliyun.auto_scaling.min_memory: '0'
+# {% endraw %}
+
 ```
 
 ## 一个 client
 
 ```yaml
+# {% raw %}
 consul-client:
   image: 'consul:1.2.0'
   expose:
@@ -150,6 +159,8 @@ consul-client:
     aliyun.routing.port_8500: "https://abcd.com"
   environment:
     - 'constraint:aliyun.node_index==4'
+# {% endraw %}
+
 ```
 
 ## 注意

@@ -12,7 +12,7 @@ tags:
     - Jenkins-X
     - pipeline
     - CI
-    - java
+    - Java
 ---
 
 
