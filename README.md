@@ -1,8 +1,14 @@
 
 ## 说明
 
+<details>
+<summary>展开查看</summary>
+<pre>
+<code>
     I don't fucking care what others say.
-
+</code>
+</pre>
+</details>
 
 ## 本地预览
 
