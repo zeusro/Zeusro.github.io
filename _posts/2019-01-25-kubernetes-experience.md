@@ -450,9 +450,22 @@ consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m
 1. 删除PVC
 1. 把nas挂载到任意一台服务器上面，然后删除pvc对应nas的目录。
 
+### 升级到v1.12.6-aliyun.1之后节点可分配内存变少
+
+该版本每个节点保留了1Gi,相当于整个集群少了N GB(N为节点数)供Pod分配.
+
+如果节点是4G的,Pod请求3G,极其容易被驱逐.
+
+建议提高节点规格.
+
+```
+Server Version: version.Info{Major:"1", Minor:"12+", GitVersion:"v1.12.6-aliyun.1", GitCommit:"8cb561c", GitTreeState:"", BuildDate:"2019-04-22T11:34:20Z", GoVersion:"go1.10.8", Compiler:"gc", Platform:"linux/amd64"}
+```
 
 参考(应用调度相关):
 1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
 2. [kubernetes如何解决服务依赖呢？](https://ieevee.com/tech/2017/04/23/k8s-svc-dependency.html)
 5. [Kubernetes之路 1 - Java应用资源限制的迷思](https://yq.aliyun.com/articles/562440?spm=a2c4e.11153959.0.0.5e0ed55aq1betz)
 8. [Control CPU Management Policies on the Node](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies)
+1. [Reserve Compute Resources for System Daemons](https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/)
+1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/)
