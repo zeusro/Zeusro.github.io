@@ -224,7 +224,7 @@ func ToTime(str string) (time.Time, error) {
 }
 ```
 
-- 值类型不会溢出
+### 值类型不会溢出
 
 ```go
 	var s int32 = 5120
@@ -242,6 +242,7 @@ func ToTime(str string) (time.Time, error) {
 9223372036854775807
 */
 ```
+
 以前用C#的时候,如果定义一个值类型变量,赋予它一个超出范围的值的话是会出异常的,然而到了golang,直接变成这个类型无符号最大值
 
 
@@ -306,4 +307,3 @@ func a() (str string) {
 ```
 
 注释掉里面的`defer`，观察一下不同组合下的函数的结果，看懂了，就算理解defer了
-
