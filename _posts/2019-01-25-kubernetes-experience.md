@@ -300,7 +300,7 @@ command terminated with exit code 126
 
 ### deploy
 
-#### deploy的rs没有创建起来
+#### MinimumReplicationUnavailable
 
 如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
 
