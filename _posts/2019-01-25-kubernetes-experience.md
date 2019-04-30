@@ -286,7 +286,11 @@ command terminated with exit code 126
 
 ##### pod接连Crashbackoff
 
-`Crashbackoff`有多种原因.常见的沙箱创建失败,镜像拉取失败导致.
+`Crashbackoff`有多种原因.
+
+沙箱创建(FailedCreateSandBox)失败,多半是cni网络插件的问题
+
+镜像拉取,有中国特色社会主义的问题,可能太大了,拉取较慢
 
 也有一种可能是容器并发过高,流量雪崩导致.
 
@@ -294,6 +298,13 @@ command terminated with exit code 126
 
 在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
 
+### deploy
+
+#### deploy的rs没有创建起来
+
+如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
+
+具体见[Using Admission Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
 #### service
 
