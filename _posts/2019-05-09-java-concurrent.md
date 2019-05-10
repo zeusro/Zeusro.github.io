@@ -21,9 +21,9 @@ tags:
 
 ## 导航
 
-1. [可能是最全的java线程指南(1-1)[任务调度类_Callable系]](2019-05-09-java-concurrent(1-1).md)
-1. [可能是最全的java线程指南(1-2)[任务调度类_Executor系]](2019-05-09-java-concurrent(1-2).md)
-1. []()
+1. [可能是最全的java线程指南(1-1)[任务调度类_Callable系]](/2019/05/09/java-concurrent(1-1)/)
+1. [可能是最全的java线程指南(1-2)[任务调度类_Executor系]](/2019/05/09/java-concurrent(1-2)/)
+1. [可能是最全的java线程指南(1-3)[任务调度类_CompletionService系]](/2019/05/10/java-concurrent(1-3)/)
 1. []()
 1. []()
 
