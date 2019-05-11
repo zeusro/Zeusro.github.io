@@ -48,6 +48,32 @@ iptables升级到1.6.2以上
 
 ### 伪解决方案(不能解决根本问题)
 
+默认的pod的`/etc/resolv.conf`一般长这样
+
+```
+sh-4.2# cat /etc/resolv.conf
+nameserver <kube-dns-vip>
+search <namespace>.svc.cluster.local svc.cluster.local cluster.local localdomain
+options ndots:5
+```
+
+这个配置的意思是，默认nameserver指向kube-dns/core-dns,所有查询中，如果.的个数少于5个，则会根据search中配置的列表依次搜索,如果没有返回，则最后再直接查询域名本
+身。ndots就是n个.(dots)的意思
+
+举个例子
+
+```
+sh-4.2# host -v baidu.com
+Trying "baidu.com.<namespace>.svc.cluster.local"
+Trying "baidu.com.svc.cluster.local"
+Trying "baidu.com.cluster.local"
+Trying "baidu.com.localdomain"
+Trying "baidu.com"
+......
+```
+
+#### 重开socket
+
 ```
         lifecycle:
           postStart:
@@ -58,21 +84,73 @@ iptables升级到1.6.2以上
               - "/bin/echo 'options single-request-reopen' >> /etc/resolv.conf"
 ```
 
+#### 关闭
+
 ```
 # https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html
 echo "$(sed 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf)" > /etc/resolv.conf
 ```
 
-无论是
-1. 设置重开socket
-1. 注释`/etc/resolv.conf`里面的`options ndots:5`
-都只是规避了容器并发AA,AAAA查询的问题.如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,从而导致SNAT的问题
+设置重开socket是规避容器并发A,AAAA查询
+
+注释`/etc/resolv.conf`里面的`options ndots:5`只是降低了频繁DNS查询的可能性。
+
+如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
 
 ## 衍生的问题
 
-容器访问clusterIP(因为是虚拟IP所以需要DNAT)也会出现这类超时的问题
+### DNAT
 
-参考链接:
+容器访问clusterIP(因为是虚拟IP所以需要DNAT)也有可能出现这类超时的问题
+
+### 注意Virtual domain的问题
+
+non-headservice的域名格式是`<svc>.<namespace>.svc.cluster.local`
+
+如果我们容器直接访问`<svc>.<namespace>.svc.cluster.local`,因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问`<svc>`
+
+例子：假设test下面有个s的svc
+
+```
+host -v s 
+# 解析1次
+host -v s.test.svc.cluster.local
+# 解析4次
+```
+
+
+## 其他知识
+
+### dns记录类型
+
+1. A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。
+1. CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。
+1. TXT：在这里可以填写任何东西，长度限制255。绝大多数的TXT记录是用来做SPF记录（反垃圾邮件）。
+1. NS：域名服务器记录，如果需要把子域名交给其他DNS服务商解析，就需要添加NS记录。
+1. AAAA：用来指定主机名（或域名）对应的IPv6地址（例如：ff06:0:0:0:0:0:0:c3）记录。
+1. MX：如果需要设置邮箱，让邮箱能收到邮件，就需要添加MX记录。
+1. 显性URL：从一个地址301重定向到另一个地址的时候，就需要添加显性URL记录（注：DNSPod目前只支持301重定向）。
+1. 隐性URL：类似于显性URL，区别在于隐性URL不会改变地址栏中的域名。
+1. SRV：记录了哪台计算机提供了哪个服务。格式为：服务的名字、点、协议的类型，例如：_xmpp-server._tcp。
+
+### 用到的命令
+
+安装方法：
+
+  yum install -y bind-utils
+  sudo apt-get install -y dnsutils
+  apk add bind-utils
+
+#### [dig](https://www.ibm.com/support/knowledgecenter/zh/ssw_aix_72/com.ibm.aix.cmds2/dig.htm)
+
+  dig +trace +ndots=5 +search $host
+
+
+#### [host](https://www.ibm.com/support/knowledgecenter/zh/ssw_aix_72/com.ibm.aix.cmds2/host.htm)
+
+  host -v $host
+
+## 参考链接:
 
 1. [iptables中DNAT、SNAT和MASQUERADE的理解](https://blog.csdn.net/wgwgnihao/article/details/68490985#)
 1. [linux根文件系统 /etc/resolv.conf 文件详解](https://blog.csdn.net/mybelief321/article/details/10049429#)
@@ -80,3 +158,5 @@ echo "$(sed 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf)" > /etc/res
 1. [DNS intermittent delays of 5s #56903](https://github.com/kubernetes/kubernetes/issues/56903)
 1. [Racy conntrack and DNS lookup timeouts](https://www.weave.works/blog/racy-conntrack-and-dns-lookup-timeouts)
 1. [/etc/resolv.conf](http://www.man7.org/linux/man-pages/man5/resolver.5.html)
+1. [/etc/resolv.conf search和ndots配置](https://www.ichenfu.com/2018/10/09/resolv-conf-desc/)
+1. [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)
