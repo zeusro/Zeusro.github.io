@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "解决kubernetes应用访问外网时出现的timeout问题"
+title:        "kubernetes的timeout问题"
 subtitle:     ""
 date:         2019-05-11
 author:       "Zeusro"
