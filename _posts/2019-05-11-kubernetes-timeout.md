@@ -42,6 +42,10 @@ iptables升级到1.6.2以上
 
 用基于IPVS模式,并且支持随机端口SNAT的网络插件启动kubernetes(很遗憾,flannel目前没有实现这个选项,但是[有人做了出来](https://gist.github.com/maxlaverse/1fb3bfdd2509e317194280f530158c98))
 
+### 次优解
+
+用ds部署name sever,所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.
+
 ### 伪解决方案(不能解决根本问题)
 
 ```
