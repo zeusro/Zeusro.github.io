@@ -84,7 +84,7 @@ Trying "baidu.com"
               - "/bin/echo 'options single-request-reopen' >> /etc/resolv.conf"
 ```
 
-#### 关闭
+#### 关掉search
 
 ```
 # https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html
