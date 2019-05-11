@@ -93,7 +93,7 @@ echo "$(sed 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf)" > /etc/res
 
 设置重开socket是规避容器并发A,AAAA查询
 
-注释`/etc/resolv.conf`里面的`options ndots:5`只是降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”（search列表只用来解析虚拟IP）
+注释`/etc/resolv.conf`里面的`options ndots:5`只是降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”（search列表只用来解析虚拟IP，没用到svc的话用search没啥意义）
 
 如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
 
