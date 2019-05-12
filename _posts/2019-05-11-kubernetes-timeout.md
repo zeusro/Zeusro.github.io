@@ -89,11 +89,15 @@ Trying "baidu.com"
 
 #### 2级域名直接走上层解析
 
+参考[kubernetes 使用基于 alpine 镜像无法正常解析外网DNS](https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html) 做的
+
+直接运行 sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf 会报错
+
+echo注入文件换行符会消失，试过直接`content=$(head -n 2 /etc/resolv.conf);echo $content > /etc/resolv.conf;`但发现alpine的echo竟然会把换行符吞了！
+
+最后只能使用临时文件的办法去掉options，比较丑陋，能用就算了
+
 ```
-# https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html
-# 直接运行 sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf 会报错
-# echo注入文件换行符会消失，试过直接`content=$(head -n 2 /etc/resolv.conf);echo $content > /etc/resolv.conf;`但发现alpine的echo竟然会把换行符吞了！
-# 最后只能使用临时文件的办法去掉options，比较丑陋，能用就算了
           lifecycle:
             postStart:
               exec:
