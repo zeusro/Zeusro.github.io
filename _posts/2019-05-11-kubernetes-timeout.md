@@ -107,6 +107,18 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
                 - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
 ```
 
+或者
+
+```
+      initContainers:
+      - name: alpine
+        image: alpine
+        command:
+         - /bin/sh
+         - -c 
+         - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
+```         
+
 去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
 
 而解析`Google.com`，实际上是解析`Google.com.`,.的数量超过1个，这时不走search列表，直接用上层DNS
