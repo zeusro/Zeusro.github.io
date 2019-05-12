@@ -84,18 +84,32 @@ Trying "baidu.com"
               - "/bin/echo 'options single-request-reopen' >> /etc/resolv.conf"
 ```
 
-#### 关掉search
+设置重开socket是规避容器并发A,AAAA查询
+
+
+#### 2级域名直接走上层解析
 
 ```
 # https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html
-echo "$(sed 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf)" > /etc/resolv.conf
+# 直接运行 sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf 会报错
+# echo注入文件换行符会消失，试过直接`content=$(head -n 2 /etc/resolv.conf);echo $content > /etc/resolv.conf;`但发现alpine的echo竟然会把换行符吞了！
+# 最后只能使用临时文件的办法去掉options，比较丑陋，能用就算了
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c 
+                - "content=$(head -n 2 /etc/resolv.conf);cat $content > /etc/resolv.conf;"
 ```
 
-设置重开socket是规避容器并发A,AAAA查询
+去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
 
-注释`/etc/resolv.conf`里面的`options ndots:5`只是降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”（search列表只用来解析虚拟IP，没用到svc的话用search没啥意义）
+而解析`Google.com`，实际上是解析`Google.com.`,.的数量超过1个，这时不走search列表，直接用上层DNS
 
-如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
+综上所述，去掉ndots/ndots设为1 降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”。
+
+但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
 
 ## 衍生的问题
 
@@ -118,6 +132,7 @@ host -v s.test.svc.cluster.local
 # 解析4次
 ```
 
+所以，访问同namespace其他svc，直接用svc名去访问即可，没必要装逼使用`<svc>.<namespace>.svc.cluster.local`这种格式。
 
 ## 其他知识
 
@@ -137,9 +152,11 @@ host -v s.test.svc.cluster.local
 
 安装方法：
 
+```bash
   yum install -y bind-utils
   sudo apt-get install -y dnsutils
-  apk add bind-utils
+  apk add bind-tools
+```
 
 #### [dig](https://www.ibm.com/support/knowledgecenter/zh/ssw_aix_72/com.ibm.aix.cmds2/dig.htm)
 
