@@ -104,7 +104,7 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
                 command:
                 - /bin/sh
                 - -c 
-                - "content=$(head -n 2 /etc/resolv.conf);cat $content > /etc/resolv.conf;"
+                - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
 ```
 
 去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
