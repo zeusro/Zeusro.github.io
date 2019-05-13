@@ -281,7 +281,7 @@ command terminated with exit code 126
 
 `Deployment`衍生的pod,`virtual host name`就是`pod name`.
 
-`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.
+`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.而且支持其他pod访问
 
 
 ##### pod接连Crashbackoff
