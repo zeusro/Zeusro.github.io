@@ -473,6 +473,19 @@ consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m
 Server Version: version.Info{Major:"1", Minor:"12+", GitVersion:"v1.12.6-aliyun.1", GitCommit:"8cb561c", GitTreeState:"", BuildDate:"2019-04-22T11:34:20Z", GoVersion:"go1.10.8", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
+### 新加节点出现NetworkUnavailable
+
+RouteController failed to create a route
+
+看一下kubernetes events,是否出现了
+
+```
+timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9cpnsbt11hlelpoq2zh error, Aliyun API Error: RequestId: 7006BF4E-000B-4E12-89F2-F0149D6688E4 Status Code: 400 Code: QuotaExceeded Message: Route entry quota exceeded in this route table  
+```
+
+出现这个问题是因为达到了[VPC的自定义路由条目限制](https://help.aliyun.com/document_detail/27750.html),默认是48,需要提高`vpc_quota_route_entrys_num`的配额
+
+
 参考(应用调度相关):
 1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
 2. [kubernetes如何解决服务依赖呢？](https://ieevee.com/tech/2017/04/23/k8s-svc-dependency.html)
