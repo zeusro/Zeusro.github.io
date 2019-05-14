@@ -42,9 +42,11 @@ iptables升级到1.6.2以上
 
 用基于IPVS模式,并且支持随机端口SNAT的网络插件启动kubernetes(很遗憾,flannel目前没有实现这个选项,但是[有人做了出来](https://gist.github.com/maxlaverse/1fb3bfdd2509e317194280f530158c98))
 
+或者用绕过SNAT的网络插件插件方案,比如阿里云的[terway](https://github.com/AliyunContainerService/terway).但这个插件跟阿里云绑定得比较深入,需要每台机器额外购买一个弹性网卡.
+
 ### 次优解
 
-用ds部署name sever,所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.
+[用ds部署name sever](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md),所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.
 
 ### 伪解决方案(不能解决根本问题)
 
@@ -117,7 +119,7 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
          - /bin/sh
          - -c 
          - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
-```         
+```
 
 去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
 
@@ -126,6 +128,17 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
 综上所述，去掉ndots/ndots设为1 降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”。
 
 但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
+
+
+(2019-05-14更新):用`initContainers`和`postStart`都不是特别优雅,其实pod是支持直接设置DNS的
+
+```
+  dnsConfig:
+    options:
+      - name: ndots
+        value: "2"
+      - name: single-request-reopen
+```
 
 ## 衍生的问题
 
