@@ -97,28 +97,12 @@ Trying "baidu.com"
 
 alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报错
 
-最后只能使用临时文件的办法去掉options，比较丑陋，能用就算了
-
 ```
-          lifecycle:
-            postStart:
-              exec:
-                command:
-                - /bin/sh
-                - -c 
-                - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
-```
-
-或者
-
-```
-      initContainers:
-      - name: alpine
-        image: alpine
-        command:
-         - /bin/sh
-         - -c 
-         - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
+  dnsConfig:
+    options:
+      - name: ndots
+        value: "2"
+      - name: single-request-reopen
 ```
 
 去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
@@ -130,14 +114,28 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
 但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
 
 
-(2019-05-14更新):用`initContainers`和`postStart`都不是特别优雅,其实pod是支持直接设置DNS的
+歪门邪道1
 
 ```
-  dnsConfig:
-    options:
-      - name: ndots
-        value: "2"
-      - name: single-request-reopen
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c 
+                - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
+```
+
+歪门邪道2
+
+```
+      initContainers:
+      - name: alpine
+        image: alpine
+        command:
+         - /bin/sh
+         - -c 
+         - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
 ```
 
 ## 衍生的问题
