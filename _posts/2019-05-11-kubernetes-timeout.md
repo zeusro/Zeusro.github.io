@@ -40,7 +40,7 @@ SNAT就像是一个搬运工,把砖(流量)从容器搬到主机
 
 iptables升级到1.6.2以上
 
-用基于IPVS模式,并且支持随机端口SNAT的网络插件启动kubernetes(很遗憾,flannel目前没有实现这个选项,但是[有人做了出来](https://gist.github.com/maxlaverse/1fb3bfdd2509e317194280f530158c98))
+用基于IPVS模式,尽量少做SNAT/DNAT,支持随机端口SNAT的网络插件启动kubernetes
 
 或者用绕过SNAT的网络插件插件方案,比如阿里云的[terway](https://github.com/AliyunContainerService/terway).但这个插件跟阿里云绑定得比较深入,需要每台机器额外购买一个弹性网卡.
 
