@@ -35,8 +35,7 @@ tags:
 
 ## 常用方法
 
-```
-
+```bash
 iptables -t filter -nL
 iptables -t nat -nL
 iptables -t raw -nL 
