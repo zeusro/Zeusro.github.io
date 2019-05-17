@@ -33,10 +33,6 @@ tags:
     * 并集list1 ∪ list2
     * 差集list1 - list2
 1. [数据结构转换](#数据结构转换)
-1. []()
-1. []()
-1. []()
-1. []()
 
 为方便初学 Java8/C# 集合操作的人,特意写下这篇文章.
 
@@ -47,11 +43,6 @@ tags:
 
 
 [java版](https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98)
-
-
-
-
-
 
 ## 单集合
 
