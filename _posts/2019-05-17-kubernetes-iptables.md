@@ -30,7 +30,7 @@ tags:
 1. PREROUTING链：用于目标地址转换（DNAT）。
 1. INPUT链：处理输入数据包。
 1. PORWARD链：处理转发数据包。
-2. 1. OUTPUT链：处理输出数据包。
+2. OUTPUT链：处理输出数据包。
 1. POSTOUTING链：用于源地址转换（SNAT）。
 
 ## 常用方法
@@ -38,7 +38,7 @@ tags:
 ```bash
 iptables -t filter -nL
 iptables -t nat -nL
-iptables -t raw -nL 
+iptables -t raw -nL
 iptables -t mangle -nL
 ```
 
@@ -182,4 +182,3 @@ g-->|loadbalancer的IP在节点上截获后转给service|h(KUBE-SVC-M42ZCW2EYUCR
 2. [关于iptables & ipvs的简单介绍](http://www.voidcn.com/article/p-uttldwvk-pz.html)
 3. [iptables相关](https://www.zsythink.net/archives/category/%E8%BF%90%E7%BB%B4%E7%9B%B8%E5%85%B3/iptables/)
 4. [理解kubernetes环境的iptables](https://www.cnblogs.com/charlieroro/p/9588019.html)
-
