@@ -8,7 +8,7 @@ header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - kubernetes
+    - Kubernetes
 ---
 
 kubernetes+alpine+php特别容易出现访问外网/解析外网地址的时候出现超时的问题.

@@ -8,7 +8,7 @@ header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - kubernetes
+    - Kubernetes
 ---
 
 注意,`/consul/data`这个存储被我注释掉了,请按需自行配置相应的volume

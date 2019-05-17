@@ -11,7 +11,7 @@ tags:
     - Jenkins
     - Jenkins-X
     - CI
-    - kubernetes
+    - Kubernetes
 ---
 
 ## 前言
