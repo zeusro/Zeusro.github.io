@@ -486,7 +486,8 @@ codis是redis集群没出来之前,豌豆荚团队做的一个方案,通过proxy
 ```
 ERR handle response, backend conn reset
 ```
-此外,日常观察发现pod退出/重启困难.如果某个group节点全部挂掉的话,整个集群将不可读写.
+此外,日常观察发现pod退出/重启困难.如果某个group节点全部挂掉的话,整个集群将不可读写.蛋疼的是，statefulset是顺序更新的（podManagementPolicy: "OrderedReady“），pod异常会影响后面的pod更新。设置为并行并行（podManagementPolicy: "Parallel"）似乎也不大合适。
+
 
 综上,codis已经影响到了严重影响到了我们程序的正确性,决定弃用codis.改为普通的1主N从的模式.
 
