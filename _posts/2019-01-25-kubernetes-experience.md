@@ -441,6 +441,21 @@ master节点之所以不允许普通镜像,是因为master节点带了污点,如
 
 ## 阿里云Kubernetes问题
 
+### 修改默认ingress
+
+新建一个指向ingress的负载均衡型svc,然后修改一下`kube-system`下`nginx-ingress-controller`启动参数.
+
+```
+        - args:
+            - /nginx-ingress-controller
+            - '--configmap=$(POD_NAMESPACE)/nginx-configuration'
+            - '--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services'
+            - '--udp-services-configmap=$(POD_NAMESPACE)/udp-services'
+            - '--annotations-prefix=nginx.ingress.kubernetes.io'
+            - '--publish-service=$(POD_NAMESPACE)/<自定义svc>'
+            - '--v=2'
+```
+
 ### LoadBalancer服务一直没有IP
 
 具体表现是EXTERNAL-IP一直显示pending.
