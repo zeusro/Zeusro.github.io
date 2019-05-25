@@ -446,7 +446,7 @@ redis-cli --cluster del-node 127.0.0.1:7000 `<node-id>`
 
 ### 集群指令
 
-```
+```bash
 CLUSTER REPLICATE <master-node-id>
 cluster nodes
 ```
@@ -457,11 +457,13 @@ cluster nodes
 
 而且pod这种易失架构注定了在Kubernetes上面用redis要么用数据卷挂载,要么用主从自动切换模式(纯内存的话至少要1主2从,并且用反亲和度错开彼此的运行节点).
 
-主从和单机版倒好解决,单机的话挂载好数据卷,主从的话,主和从分开2个deploy/statefulset部署即可.
+主从和单机版倒好解决,单机的话挂载好数据卷,主从的话,主Redis用StatefulSet搭一个实例，从Redis用deploy。只要配置好内置的健康检查，连选主和哨兵都省下了。
 
 但是集群版就比较麻烦.官方的设计还是偏向于传统二进制人工运维,没有做到云原生
 
 看了一下官方的helm chart,也是用的主从模式.
+
+但不管用什么模式，都记住CAP原理这个紧箍咒。当你用了主从想实现高可用，最终只能放弃一致性而选择最终一致性；如果强行为了一致性，那必定只能选择单机版，牺牲掉容错性甚至可用性。
 
 ## codis
 
@@ -472,6 +474,7 @@ codis是redis集群没出来之前,豌豆荚团队做的一个方案,通过proxy
 1. 支持Kubernetes
 2. 有web图形界面,方便运维
 3. Redis获得动态扩容/缩容的能力，增减redis实例对client完全透明、不需要重启服务
+4. 伸缩方便，扩张服务器增加副本数，重新平衡slot即可；缩小的话，先把slot移动到旧的分组，再调小副本数即可。
 
 ### 缺点
 
@@ -488,6 +491,7 @@ ERR handle response, backend conn reset
 ```
 此外,日常观察发现pod退出/重启困难.如果某个group节点全部挂掉的话,整个集群将不可读写.蛋疼的是，statefulset是顺序更新的（podManagementPolicy: "OrderedReady“），pod异常会影响后面的pod更新。设置为并行并行（podManagementPolicy: "Parallel"）似乎也不大合适。
 
+偶尔还会出现节点重启了，但一直没有加入任何一个group中。
 
 综上,codis已经影响到了严重影响到了我们程序的正确性,决定弃用codis.改为普通的1主N从的模式.
 
