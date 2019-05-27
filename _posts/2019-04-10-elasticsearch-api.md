@@ -12,19 +12,39 @@ tags:
 ---
 
 
-默认并发限制1000
 
-## 常用API
+## 基本查询
+
+ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,就会出现异常.
+
+### 创建
+
+
+```
+POST /a/_doc/2
+{"content":"公安部：各地校车将享最高路权"}
+POST /a/_doc/1
+{"content":"男人老狗穿什么连衣裙"}
+
+```
+
+
+### 查询
 
 - 返回文档的一部分
 
-
 ?_source=title,text
 
-- 健康检查
+### get
 
-GET /_cluster/health
+```
+get /a/text/1
+get /a/text/2
+```
 
+
+
+### 更新
 
 - 部分更新
 
@@ -37,17 +57,78 @@ GET /_cluster/health
 
 - 分析
 
-GET /_analyze
+GET _analyze
+{
+  "analyzer" : "standard",
+  "text" : "this is a test"
+}
+
+## 分片
+
+
+```
+PUT test
+{
+    "settings" : {
+        "number_of_shards" : 1
+    },
+    "mappings" : {
+        "properties" : {
+            "field1" : { "type" : "text" }
+        }
+    }
+}
+GET /kimchy,elasticsearch/_search?q=tag:wow
+GET /_all/_search?q=tag:wow
+
+```
 
 
 GET _cat/indices
 
 
+## 系统查询
+
+- 健康检查
+
+GET /_cluster/health
+
+
+## 基于插件的查询
+
+### [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik)
+
+使用该插件,要注意**mappings要在创建index时创建**,不能后期修改/添加
+
+```
+PUT /a
+{
+	"mappings": {
+		"_doc": {
+			"properties": {
+				"content": {
+					"type": "text",
+					"analyzer": "ik_max_word",
+					"search_analyzer": "ik_smart"
+				}
+			}
+		}
+	}
+}
+```
+
+使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词,这种需求是无法实现的.
+
+热更新的词语存在内存中,不会更新dic文件
+
+
+
 ## 付费功能(_xpack)
+
+es默认没有密码,需要用户授权功能的话买商业版的许可.
 
 - [security-api-users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html)
 
-免费版不支持
 
 GET /_xpack/security/user
 
@@ -56,3 +137,4 @@ GET /_xpack/security/user
 
 1. [基础入门](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
 1. [文档元数据](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
+2. [es 的常用查询语法](https://blog.csdn.net/qingmoruoxi/article/details/77221602)
