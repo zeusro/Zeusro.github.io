@@ -69,7 +69,6 @@ SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_
 
 ## 延后分析
 
-```
 
 ```SQL
 # 建数据库
@@ -93,8 +92,6 @@ CREATE TABLE `slow_log_2019-05-30` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 -- insert into slow_log.slow_log_2019-05-30 select * from mysql.slow_log;
 -- truncate table mysql.slow_log ;
-
-```
 select * FROM slow_log.`slow_log_2019-05-30`
 where sql_text not like 'xxx`%'
 order by  query_time desc,query_time desc;
@@ -107,6 +104,25 @@ order by  query_time desc,query_time desc;
 对于每一个查询,先用`explain SQL`分析一遍,是比较明智的做法.
 
 一般而言,rows越少越好,提防Extra:`Using where`这种情况,这种情况一般是扫全表,在数据量大(>10万)的时候考虑增加索引.
+
+### 慎用子查询
+
+尽力避免嵌套子查询，使用索引来优化它们
+
+```SQL
+EXPLAIN SELECT *
+FROM (
+	SELECT *
+	FROM `s`.`t`
+	WHERE status IN (-15, -11)
+	LIMIT 0, 10
+) a
+ORDER BY a.modified DESC
+```
+
+比如说这种的,根本毫无必要.表面上看,比去掉子查询更快一点,实际上是因为mysql 5.7对子查询进行了优化,生成了[Derived table](http://mysql.taobao.org/monthly/2017/03/05/),把结果集做了一层缓存.
+
+按照实际的场景分析发现,`status`这个字段没有做索引,导致查询变成了全表扫描(using where),加了索引后,问题解决.
 
 ### json类型
 
@@ -182,15 +198,14 @@ WHERE b='' and c =''
 
 这时组合索引是无效的.
 
-
 ## 其他
 
-```
+```SQL
 EXPLAIN SQL
 DESC SQL
 ```
 
-```
+```SQL
 # INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
 SELECT * FROM information_schema.INNODB_TRX;
 SELECT * FROM information_schema.innodb_locks;
