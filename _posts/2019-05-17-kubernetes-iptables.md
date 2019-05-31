@@ -12,6 +12,8 @@ tags:
     - Linux
 ---
 
+![img](/img/in-post/kubernetes-iptables/Kube-proxy NAT分析.png)
+
 ## 基本
 
 3 个协议：TCP,UDP,ICMP
