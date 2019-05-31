@@ -13,17 +13,7 @@ tags:
 
 ## 主要思路
 
-通过导入`mysql.slow_log`的表数据延后分析,结合实时分析,进行SQL优化
-
-
-## 设置慢查询参数
-
-```
-slow_query_log 1
-log_queries_not_using_indexes OFF
-long_query_time 5
-slow_query_log 1  
-```
+实时分析(`show full processlist;`)结合延后分析(`mysql.slow_log`),对SQL语句进行优化
 
 ## 实时分析
 
@@ -69,6 +59,14 @@ SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_
 
 ## 延后分析
 
+### 设置慢查询参数
+
+```
+slow_query_log 1
+log_queries_not_using_indexes OFF
+long_query_time 5
+slow_query_log 1  
+```
 
 ```SQL
 # 建数据库
