@@ -28,10 +28,11 @@ kubens:用来切换默认的namespace
 
 zsh
 
-```
+```bash
 source <(kubectl completion zsh)  # setup autocomplete in zsh into the current shell
 echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc # add autocomplete permanently to your zsh shell
 ```
+
 其他的方式见[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 ## 集群管理相关命令
@@ -109,7 +110,7 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 ##### NoExecute
 
 
-```
+```yml
       tolerations:
         - key: "elasticsearch-exclusive"
           operator: "Equal"
@@ -125,7 +126,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 ##### NoSchedule
 
-```
+```yml
       tolerations:
         - key: "elasticsearch-exclusive"
           operator: "Exists"
@@ -144,7 +145,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 值得一提的是,同一个key可以同时存在多个effect
 
-```
+```yml
 Taints:             elasticsearch-exclusive=true:NoExecute
                     elasticsearch-exclusive=true:NoSchedule
 ```
@@ -157,7 +158,7 @@ Taints:             elasticsearch-exclusive=true:NoExecute
 
 #### 删除节点的正确步骤
 
-```
+```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
 kubectl cordon <node name>
 # 驱逐除了ds以外所有的pod
@@ -167,7 +168,7 @@ kubectl delete <node name>
 
 #### 维护节点的正确步骤
 
-```
+```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
 kubectl cordon <node name>
 # 驱逐除了ds以外所有的pod
@@ -399,6 +400,8 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
 
 ## 进阶调度
 
+每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+
 ### 使用亲和度确保节点在目标节点上运行
 
 ```yml
@@ -428,8 +431,25 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
                 values:
                 - nginx-test2
             topologyKey: "kubernetes.io/hostname"
-            namespaces: 
+            namespaces:
             - test
+```
+
+```yml
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              namespaces:
+              - test
+              labelSelector:
+                matchExpressions:
+                - key: 'app'
+                  operator: In
+                  values:
+                   - "nginx-test2"
 ```
 
 ### 容忍运行
