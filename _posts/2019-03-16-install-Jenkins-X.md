@@ -146,7 +146,7 @@ docker.io/bitnami/mongodb:3.6.6-debian-9
         - name: data
           persistentVolumeClaim:
             claimName: jenkins-x-mongodb
-```            
+```
 
 #### jenkins-x-chartmuseum
 
@@ -314,6 +314,16 @@ metadata:
 
   https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/current/update-center.json
 
+
+### [自定义git server](https://jenkins-x.io/developing/git/)
+
+todo:
+
+```bash
+jx edit addon gitea -e true
+jx get addons
+```
+
 ## 其他有用命令
 
 ### 更新整个Jenkins-X平台
@@ -331,7 +341,7 @@ jx environment
 
 ### 更新密码
 
-
+TODO:
 
 参考链接:
 
