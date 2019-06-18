@@ -119,29 +119,49 @@ indices:
 
 按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
 
-## 常用查询技巧
-
-```
-error_trace=true
-pretty=true
-human=true
-_stored_fields=tags,counter
-```
 
 ## 故障维护
 
-- Unassigned Shards
+### Unassigned Shards
 
 `解决方案:`新建一个`number_of_replicas`为0的新index,然后用`_reindex`.迁移完成之后,把`number_of_replicas`改回去.`reindex`有个`size`的参数,按需配置或许更快些.
 
-**注意**reindex极易超时,但是后台这个任务还是进行的,可以通过`GET _tasks?actions=indices:data/write/reindex`看到节点还在跑这个任务
+**注意**可以通过`GET _tasks?actions=indices:data/write/reindex?detailed`查看相关任务
 
 参考
 1. [Elasticsearch Reindex 性能提升10倍](https://my.oschina.net/TOW/blog/1928075)
 1. [解决elasticsearch集群Unassigned Shards 无法reroute的问题](https://www.jianshu.com/p/542ed5a5bdfc)
 1. [tasks API](https://www.elastic.co/guide/en/elasticsearch/reference/current/tasks.html)
 
-- gc overhead
+### reindex
+
+reindex也是有技巧的。
+
+```bash
+# 禁用副本
+put geonames/_settings
+{
+ 
+    "settings" : {
+      "index" : {
+        "number_of_replicas" : "0"
+    }
+  
+}
+}
+# 禁用刷新期间，_count结果不更新
+json='{"index":{"refresh_interval":"-1"}}'
+curl -XPUT 0.0.0.0:9200/geonames/_settings -H 'Content-Type: application/json' -d $json
+
+# 中途想取消也行
+curl -XPOST 0.0.0.0:9200/_tasks/mHCg6HqYTqqd12nIDFDk1w:2977/_cancel
+
+# 恢复刷新机制
+json='{"index":{"refresh_interval":null}}'
+curl -XPUT 0.0.0.0:9200/geonames/_settings -H 'Content-Type: application/json' -d $json
+```
+
+### gc overhead
 
 ```
 [2019-01-04T08:41:09,538][INFO ][o.e.m.j.JvmGcMonitorService] [elasticsearch-onekey-3] [gc][159] overhead, spent [276ms] collecting in the last [1s]
@@ -192,9 +212,6 @@ PUT _settings
 参考链接:
 
 1. [ES 慢查询收集总结](http://www.fblinux.com/?p=1334)
-1. []()
-1. []()
-1. []()
 
 ## 参考工具
 
