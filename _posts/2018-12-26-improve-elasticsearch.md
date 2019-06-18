@@ -17,8 +17,50 @@ tags:
 
 [Elasticsearch的路由（Routing）特性](https://blog.csdn.net/cnweike/article/details/38531997)
 
+## 节点
 
-[使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
+自己玩就别整那么多节点了,`Elasticsearch`是内存杀手.
+
+
+### coordinating
+
+协调节点是请求的入口
+
+```
+node.master:false
+node.data:false
+node.ingest:false
+```
+
+### master
+
+选主,决定分片位置
+
+```
+node.master:true
+node.data:false
+node.ingest:false
+```
+
+### data
+
+存放分片的节点
+
+```
+node.master:false
+node.data:true
+node.ingest:false
+```
+
+### ingest
+
+ingest节点负责处理pipeline
+
+```
+node.master:false
+node.data:false
+node.ingest:true
+```
 
 
 ## 性能减低的原因
@@ -212,6 +254,10 @@ PUT _settings
 参考链接:
 
 1. [ES 慢查询收集总结](http://www.fblinux.com/?p=1334)
+<<<<<<< HEAD
+=======
+1. [使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
+>>>>>>> a4396b10f747fc7b927115709744994369cf9358
 
 ## 参考工具
 

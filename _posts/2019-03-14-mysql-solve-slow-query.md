@@ -13,10 +13,53 @@ tags:
 
 ## 主要思路
 
-通过导入`mysql.slow_log`的表数据,结合实时分析,进行SQL优化
+实时分析(`show full processlist;`)结合延后分析(`mysql.slow_log`),对SQL语句进行优化
+
+## 实时分析
+
+### 查看有哪些线程正在执行
+
+    show processlist;
+    show full processlist;
+
+相比`show processlist;`我比较喜欢用.因为这个查询可以用where条件
+
+```SQL
+SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where state !='' order by state,time desc,command ;
+-- 按照客户端IP对当前连接用户进行分组
+SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by h  order by c desc,user;
+-- 按用户名对当前连接用户进行分组
+SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by user  order by c desc,user;
+```
+
+### 各种耗时SQL对应的特征
+
+- 改表
+
+1. Copying to tmp table
+
+- 内存不够用,转成磁盘
+
+1. Copying to tmp table on disk
+
+- 传输数据量大
+
+1. Reading from net
+1. Sending data
+
+- 没有索引
+
+1. Copying to tmp table
+1. Sorting result
+1. Creating sort index
+1. Sorting result
+
+重点关注这些状态,参考[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)进行优化
 
 
-## 设置慢查询参数
+## 延后分析
+
+### 设置慢查询参数
 
 ```
 slow_query_log 1
@@ -25,11 +68,9 @@ long_query_time 5
 slow_query_log 1  
 ```
 
-## 建表
-
 ```SQL
 # 建数据库
-CREATE TABLE `slow_log_2019-03-14` (
+CREATE TABLE `slow_log_2019-05-30` (
   `start_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   `user_host` mediumtext NOT NULL,
   `query_time` time(6) NOT NULL,
@@ -47,61 +88,43 @@ CREATE TABLE `slow_log_2019-03-14` (
   KEY `idx_lock_time` (`lock_time`),
   KEY `idx_rows_examined` (`rows_examined`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
- insert into slow_log.`slow_log_2019-03-14` select * from mysql.slow_log;
+-- insert into slow_log.slow_log_2019-05-30 select * from mysql.slow_log;
 -- truncate table mysql.slow_log ;
-
-```
-
-## 实时分析
-
-* 查看有哪些线程正在执行
-
-    show processlist;
-
-相比`show processlist;`我比较喜欢用
-
-```SQL
-SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where state !='' order by state,time desc,command ;
-```
-
-重点关注
-
-- 改表
-
-1. Copying to tmp table	
-
-- 内存不够用,转成磁盘
-
-1. Copying to tmp table on disk	
-
-- 传输数据量大
-
-1. Reading from net
-1. Sending data
-
-- 没有索引
-
-1. Copying to tmp table
-1. Sorting result
-1. Creating sort index
-1. Sorting result
-
-的状态,参考[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)进行优化
-
-
-## 延后分析
-
-```
-select * FROM slow_log.`slow_log_2019-03-14` 
+select * FROM slow_log.`slow_log_2019-05-30`
 where sql_text not like 'xxx`%'
 order by  query_time desc,query_time desc;
 ```
 
 按优先级排列,需要关注的列是`lock_time`,`query_time`,`rows_examined`.分析的时候应用二八法则,先找出最坑爹的那部分SQL,率先优化掉,然后不断not like或者删除掉排除掉已经优化好的低效SQL.
 
-## 优化
+## 低效SQL的优化思路
+
+对于每一个查询,先用`explain SQL`分析一遍,是比较明智的做法.
+
+一般而言,rows越少越好,提防Extra:`Using where`这种情况,这种情况一般是扫全表,在数据量大(>10万)的时候考虑增加索引.
+
+### 慎用子查询
+
+尽力避免嵌套子查询，使用索引来优化它们
+
+```SQL
+EXPLAIN SELECT *
+FROM (
+	SELECT *
+	FROM `s`.`t`
+	WHERE status IN (-15, -11)
+	LIMIT 0, 10
+) a
+ORDER BY a.modified DESC
+```
+
+比如说这种的,根本毫无必要.表面上看,比去掉子查询更快一点,实际上是因为mysql 5.7对子查询进行了优化,生成了[Derived table](http://mysql.taobao.org/monthly/2017/03/05/),把结果集做了一层缓存.
+
+按照实际的场景分析发现,`status`这个字段没有做索引,导致查询变成了全表扫描(using where),加了索引后,问题解决.
 
 ### json类型
+
+json数据类型,如果存入的JSON很长,读取出来自然越慢.在实际场景中,首先要确定是否有使用这一类型的必要,其次,尽量只取所需字段.
 
 见过这样写的
 
@@ -173,16 +196,14 @@ WHERE b='' and c =''
 
 这时组合索引是无效的.
 
-
-
 ## 其他
 
-```
+```SQL
 EXPLAIN SQL
 DESC SQL
 ```
 
-```
+```SQL
 # INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
 SELECT * FROM information_schema.INNODB_TRX;
 SELECT * FROM information_schema.innodb_locks;

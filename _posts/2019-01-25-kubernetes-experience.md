@@ -24,6 +24,16 @@ kubens:用来切换默认的namespace
 
 `kubectl`命令别名
 
+### 自动完成
+
+zsh
+
+```bash
+source <(kubectl completion zsh)  # setup autocomplete in zsh into the current shell
+echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc # add autocomplete permanently to your zsh shell
+```
+
+其他的方式见[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
 ## 集群管理相关命令
 
@@ -44,6 +54,10 @@ kubectl get svc --sort-by=.metadata.creationTimestamp
 kubectl get no --sort-by=.metadata.creationTimestamp
 kubectl get po --field-selector spec.nodeName=xxxx
 kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
+kubectl get event --all-namespaces  --field-selector involvedObject.name=$po
+# 查看异常pod
+kubectl get po --all-namespaces --field-selector 'status.phase!=Running'
+
 
 ```
 
@@ -96,7 +110,7 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 ##### NoExecute
 
 
-```
+```yml
       tolerations:
         - key: "elasticsearch-exclusive"
           operator: "Equal"
@@ -112,7 +126,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 ##### NoSchedule
 
-```
+```yml
       tolerations:
         - key: "elasticsearch-exclusive"
           operator: "Exists"
@@ -131,7 +145,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 值得一提的是,同一个key可以同时存在多个effect
 
-```
+```yml
 Taints:             elasticsearch-exclusive=true:NoExecute
                     elasticsearch-exclusive=true:NoSchedule
 ```
@@ -142,30 +156,24 @@ Taints:             elasticsearch-exclusive=true:NoExecute
 1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
-#### 隔离节点的正确步骤
+#### 删除节点的正确步骤
 
-```
+```bash
+# SchedulingDisabled,确保新的容器不会调度到该节点
+kubectl cordon <node name>
 # 驱逐除了ds以外所有的pod
 kubectl drain <node name>   --ignore-daemonsets
-kubectl cordon <node name>
-```
-
-这个时候运行get node命令,状态会变
-
-```
-node.xx   Ready,SchedulingDisabled   <none>   189d   v1.11.5
-```
-
-最后
-
-```
 kubectl delete <node name>
 ```
 
 #### 维护节点的正确步骤
 
-```
+```bash
+# SchedulingDisabled,确保新的容器不会调度到该节点
+kubectl cordon <node name>
+# 驱逐除了ds以外所有的pod
 kubectl drain <node name> --ignore-daemonsets
+# 维护完成,恢复其正常状态
 kubectl uncordon <node name>
 ```
 
@@ -298,9 +306,9 @@ command terminated with exit code 126
 
 在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
 
-### deploy
+#### deploy
 
-#### MinimumReplicationUnavailable
+##### MinimumReplicationUnavailable
 
 如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
 
@@ -392,6 +400,8 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
 
 ## 进阶调度
 
+每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+
 ### 使用亲和度确保节点在目标节点上运行
 
 ```yml
@@ -421,8 +431,25 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
                 values:
                 - nginx-test2
             topologyKey: "kubernetes.io/hostname"
-            namespaces: 
+            namespaces:
             - test
+```
+
+```yml
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              namespaces:
+              - test
+              labelSelector:
+                matchExpressions:
+                - key: 'app'
+                  operator: In
+                  values:
+                   - "nginx-test2"
 ```
 
 ### 容忍运行
