@@ -160,21 +160,21 @@ Taints:             elasticsearch-exclusive=true:NoExecute
 
 ```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
-kubectl cordon <node name>
+kubectl cordon $node
 # 驱逐除了ds以外所有的pod
-kubectl drain <node name>   --ignore-daemonsets
-kubectl delete <node name>
+kubectl drain $node   --ignore-daemonsets
+kubectl delete $node
 ```
 
 #### 维护节点的正确步骤
 
 ```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
-kubectl cordon <node name>
+kubectl cordon $node
 # 驱逐除了ds以外所有的pod
-kubectl drain <node name> --ignore-daemonsets
+kubectl drain $node --ignore-daemonsets
 # 维护完成,恢复其正常状态
-kubectl uncordon <node name>
+kubectl uncordon $node
 ```
 
 #### 节点出现磁盘压力(DiskPressure)
