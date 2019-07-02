@@ -11,6 +11,13 @@ tags:
     - Kubernetes
 ---
 
+
+## 一些实用工具
+
+1. [kompose](https://github.com/kubernetes/kompose)
+
+可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
+
 ## 安装类工具
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
@@ -18,12 +25,6 @@ tags:
 
 参考:
 1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
-
-## 一些实用工具
-
-1. [kompose](https://github.com/kubernetes/kompose)
-
-可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
 
 
 ## k8s的 master-cluster 架构
@@ -67,15 +68,6 @@ tags:
     - Volume Controller
         
          For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
-
-```bash
-
-    kubectl api-resources --namespaced=false
-    kubectl api-resources --namespaced=true
-    # -R表示递归目录下所有配置
-    kubectl apply -R -f configs/
-
-```
 
 参考链接:
 1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
@@ -93,20 +85,6 @@ tags:
 
     The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
 
-
-## 安装类问题
-
-1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
-2. 
-
-参考:
-1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
-
-## 一些实用工具
-
-1. [kompose](https://github.com/kubernetes/kompose)
-
-
 ## k8s的 master-cluster 架构
 
 ### master(CONTROL PLANE)
@@ -148,15 +126,6 @@ tags:
     - Volume Controller
         
          For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
-
-```bash
-
-    kubectl api-resources --namespaced=false
-    kubectl api-resources --namespaced=true
-    # -R表示递归目录下所有配置
-    kubectl apply -R -f configs/
-
-```
 
 参考链接:
 1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
@@ -220,18 +189,6 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
 
 参考链接 https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
 
-- 相关命令
-
-```bash
-    # 将POD驱离
-    kubectl drain <node-name>
-    kubectl exec -it ng-57d74c8694-6cqnz sh  -n=java
-    kubectl get pods --all-namespaces --field-selector spec.nodeName=<node> -o wide
-    kubectl get pods -o wide --all-namespaces | grep <YOUR-NODE>
-    kubectl get po -l app=nginx -w
-    kubectl delete po -l app=onekey-ali-web -n=$(namespace)
-    kubectl get po --all-namespaces
-```
 
 参考链接:
 1. [容器中使用pod的数据](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
@@ -254,12 +211,6 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
 
 [Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) 用来作初始化环境的容器
 
-
-```bash
-kubectl rollout undo deployment/nginx-deployment --to-revision=2
-kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
-
-```
 
 参考:
 1. [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
@@ -287,11 +238,6 @@ Replication Controller|label
 ReplicaSet|label ,pods that include a certain label key
 
 
-```bash
-#来watch ReplicaSet的变化。
-kubectl get rs -w
-```
-
 参考链接:
 1. [聊聊你可能误解的Kubernetes Deployment滚动更新机制](https://blog.csdn.net/WaltonWang/article/details/77461697)
 
@@ -309,16 +255,7 @@ kubectl get rs -w
 
 参考:
 1. [StatefulSet](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)
-2. 
 
-```bash
-
-
-kubectl set image deployment/nginx-deployment nginx=nginx:1.9.1
-# deployment "nginx-deployment" image updated
-kubectl set image deploy monitorapi-deployment  monitorapi=registry-vpc.cn-shenzhen.aliyuncs.com/amiba/monitorapi:1.2.4 -n=java
-
-```
 
 ### volumes
 
@@ -402,7 +339,6 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
 - environment variables
 - downwardAPI volume
-- 
 
 
 ### Resource Quotas
@@ -414,9 +350,6 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
 [Kubernetes网络模型原理](https://mp.weixin.qq.com/s?__biz=MjM5OTcxMzE0MQ==&mid=2653371440&idx=1&sn=49f4e773bb8a58728752275faf891273&chksm=bce4dc2a8b93553c6b33d53c688ba30d61f88f0e065f50d82b1fb7e64daa4cc68394ffd8810b&mpshare=1&scene=23&srcid=1031BL2jtxx8DABRb46lNGPl%23rd)
 
-
-
-## 常用命令
 
 
 参考命令:
