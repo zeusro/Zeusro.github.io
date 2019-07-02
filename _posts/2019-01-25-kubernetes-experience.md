@@ -476,6 +476,23 @@ timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9
 官方说法：
 > 复用同一个SLB的多个Service不能有相同的前端监听端口，否则会造成端口冲突。
 
+## 容器编排的技巧
+
+### wait-for-it
+
+k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
+
+### 在cmd中使用双引号的办法
+
+```
+
+               - "/bin/sh"
+               - "-ec"
+               - |
+                  curl -X POST --connect-timeout 5 -H 'Content-Type: application/json' \
+                  elasticsearch-logs:9200/logs,tracing,tracing-test/_delete_by_query?conflicts=proceed  \
+                  -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
+```
 
 参考(应用调度相关):
 1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
