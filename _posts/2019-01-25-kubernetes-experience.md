@@ -11,86 +11,6 @@ tags:
     - Kubernetes
 ---
 
-## 推荐工具
-
-
-### [kubectx](https://github.com/ahmetb/kubectx)
-
-kubectx:用来切换集群的访问
-
-kubens:用来切换默认的namespace
-
-### [kubectl-aliases](https://github.com/ahmetb/kubectl-aliases)
-
-`kubectl`命令别名
-
-### 自动完成
-
-zsh
-
-```bash
-source <(kubectl completion zsh)  # setup autocomplete in zsh into the current shell
-echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc # add autocomplete permanently to your zsh shell
-```
-
-其他的方式见[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-
-## 集群管理相关命令
-
-
-```bash
-kubectl get cs
-
-# 查看节点
-kubectl get nodes
-
-kubectl get ing pdd --n java
-# 不调度
-kubectl taint nodes node1 key=value:NoSchedule
-kubectl cluster-info dump
-
-
-kubectl get svc --sort-by=.metadata.creationTimestamp
-kubectl get no --sort-by=.metadata.creationTimestamp
-kubectl get po --field-selector spec.nodeName=xxxx
-kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
-kubectl get event --all-namespaces  --field-selector involvedObject.name=$po
-# 查看异常pod
-kubectl get po --all-namespaces --field-selector 'status.phase!=Running'
-
-
-```
-
-参考链接:
-1. [kubernetes 节点维护 cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)
-
-
-* 应用管理相关
-
-```bash
-kubectl top pod
-kubectl delete deployment,services -l app=nginx 
-kubectl scale deployment/nginx-deployment --replicas=2
-kubectl get svc --all-namespaces=true
-
-```
-
-* 强制删除
-
-有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
-
-* 删除所有失败的pod
-
-```bash
-  kubectl get po --all-namespaces --field-selector 'status.phase==Failed'
-  kubectl delete po  --field-selector 'status.phase==Failed'
-```
-
-* 一些技巧
-
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
-
-
 ## 集群管理经(教)验(训)
 
 ### 节点问题
@@ -546,6 +466,15 @@ timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9
 ```
 
 出现这个问题是因为达到了[VPC的自定义路由条目限制](https://help.aliyun.com/document_detail/27750.html),默认是48,需要提高`vpc_quota_route_entrys_num`的配额
+
+### 访问LoadBalancer svc随机出现流量转发异常
+
+见
+[[bug]阿里云kubernetes版不检查loadbalancer service port,导致流量被异常转发](https://github.com/kubernetes/cloud-provider-alibaba-cloud/issues/57)
+简单的说，同SLB不能有相同的svc端口，不然会瞎转发。
+
+官方说法：
+> 复用同一个SLB的多个Service不能有相同的前端监听端口，否则会造成端口冲突。
 
 
 参考(应用调度相关):
