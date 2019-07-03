@@ -102,10 +102,10 @@ function throttle(func, wait, mustRun) {
     }
 };
 
+// 需引入 velocity.min.js 和 velocity.ui.min.js
 $(window).scroll(throttle(function (event) {
     var currentTop = $(this).scrollTop()
-    if (!isMobile()) {
-        // percentage inspired by hexo-theme-next
+    if (!isMobile()) {        
         scrollPercent(currentTop)
     }
 }, 50, 100))
