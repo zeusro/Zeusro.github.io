@@ -166,6 +166,7 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 [Node flapping between Ready/NotReady with PLEG issues](https://github.com/kubernetes/kubernetes/issues/45419)
 [深度解析Kubernetes Pod Disruption Budgets(PDB)](https://my.oschina.net/jxcdwangtao/blog/1594348)
 
+
 ### 对象问题
 
 #### pod
@@ -475,6 +476,13 @@ timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9
 
 官方说法：
 > 复用同一个SLB的多个Service不能有相同的前端监听端口，否则会造成端口冲突。
+
+
+### 控制台显示的节点内存使用率总是偏大
+
+[Docker容器内存监控](https://xuxinkun.github.io/2016/05/16/memory-monitor-with-cgroup/)
+
+原因在于他们控制台用的是usage_in_bytes(cache+buffer),所以会比云监控看到的数字大
 
 ## 容器编排的技巧
 
