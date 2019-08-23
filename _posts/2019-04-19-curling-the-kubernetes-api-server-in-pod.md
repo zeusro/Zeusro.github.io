@@ -253,6 +253,131 @@ curl \
 完整API见[kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)
 
 
+## 后记(使用JavaScript客户端访问 api service)
+
+最近(2019-08-23)在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
+
+```ts
+
+public loadFromDefault() {
+        if (process.env.KUBECONFIG && process.env.KUBECONFIG.length > 0) {
+            const files = process.env.KUBECONFIG.split(path.delimiter);
+            this.loadFromFile(files[0]);
+            for (let i = 1; i < files.length; i++) {
+                const kc = new KubeConfig();
+                kc.loadFromFile(files[i]);
+                this.mergeConfig(kc);
+            }
+            return;
+        }
+        const home = findHomeDir();
+        if (home) {
+            const config = path.join(home, '.kube', 'config');
+            if (fileExists(config)) {
+                this.loadFromFile(config);
+                return;
+            }
+        }
+        if (process.platform === 'win32' && shelljs.which('wsl.exe')) {
+            // TODO: Handle if someome set $KUBECONFIG in wsl here...
+            try {
+                const result = execa.sync('wsl.exe', ['cat', shelljs.homedir() + '/.kube/config']);
+                if (result.code === 0) {
+                    this.loadFromString(result.stdout);
+                    return;
+                }
+            } catch (err) {
+                // Falling back to alternative auth
+            }
+        }
+
+        if (fileExists(Config.SERVICEACCOUNT_TOKEN_PATH)) {
+            this.loadFromCluster();
+            return;
+        }
+
+        this.loadFromClusterAndUser(
+            { name: 'cluster', server: 'http://localhost:8080' } as Cluster,
+            { name: 'user' } as User,
+        );
+    }
+......
+
+
+    public loadFromCluster(pathPrefix: string = '') {
+        const host = process.env.KUBERNETES_SERVICE_HOST;
+        const port = process.env.KUBERNETES_SERVICE_PORT;
+        const clusterName = 'inCluster';
+        const userName = 'inClusterUser';
+        const contextName = 'inClusterContext';
+
+        let scheme = 'https';
+        if (port === '80' || port === '8080' || port === '8001') {
+            scheme = 'http';
+        }
+
+        this.clusters = [
+            {
+                name: clusterName,
+                caFile: `${pathPrefix}${Config.SERVICEACCOUNT_CA_PATH}`,
+                server: `${scheme}://${host}:${port}`,
+                skipTLSVerify: false,
+            },
+        ];
+        this.users = [
+            {
+                name: userName,
+                authProvider: {
+                    name: 'tokenFile',
+                    config: {
+                        tokenFile: `${pathPrefix}${Config.SERVICEACCOUNT_TOKEN_PATH}`,
+                    },
+                },
+            },
+        ];
+        this.contexts = [
+            {
+                cluster: clusterName,
+                name: contextName,
+                user: userName,
+            },
+        ];
+        this.currentContext = contextName;
+    }
+```
+
+可以看到,加载配置是有先后顺序的. sa 排在比较靠后的优先级.
+
+host 和 port 通过读取相应 env 得出(实际上,就算在yaml没有配置ENV, kubernetes 本身也会注入大量ENV,这些ENV大多是svc的ip地址和端口等)
+
+而且默认的客户端 `skipTLSVerify: false,`
+
+那么使用默认的客户端,要取消SSL验证咋办呢?这里提供一个比较蠢但是万无一失的办法:
+
+```ts
+import * as k8s from '@kubernetes/client-node';
+import { Cluster } from '@kubernetes/client-node/dist/config_types';
+
+    this.kubeConfig.loadFromDefault();
+    const context =
+      this.kubeConfig.getContextObject(this.kubeConfig.getCurrentContext());
+    if (context && context.namespace) {
+      this.namespace = context.namespace;
+    }
+    let oldCluster = this.kubeConfig.getCurrentCluster()
+    let cluster: Cluster = {
+      name: oldCluster.name,
+      caFile: oldCluster.caFile,
+      server: oldCluster.server,
+      skipTLSVerify: true,
+    }
+    kubeConfig.clusters = [cluster]
+    this.coreAPI = this.kubeConfig.makeApiClient(k8s.Core_v1Api);
+    this.customObjectsAPI =
+      this.kubeConfig.makeApiClient(k8s.Custom_objectsApi);
+```
+
+
 ## 参考链接
 1. [Access Clusters Using the Kubernetes API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
 2. [cURLing the Kubernetes API server](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)
