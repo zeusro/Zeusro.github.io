@@ -92,10 +92,14 @@ kubectl delete $node
 # SchedulingDisabled,确保新的容器不会调度到该节点
 kubectl cordon $node
 # 驱逐除了ds以外所有的pod
-kubectl drain $node --ignore-daemonsets
+kubectl drain $node --ignore-daemonsets --delete-local-data
 # 维护完成,恢复其正常状态
 kubectl uncordon $node
 ```
+
+--delete-local-data 是忽略 `emptyDir`这类的临时存储的意思
+
+
 
 #### 节点出现磁盘压力(DiskPressure)
 
