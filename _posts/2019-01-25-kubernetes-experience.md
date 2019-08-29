@@ -166,6 +166,28 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 [Node flapping between Ready/NotReady with PLEG issues](https://github.com/kubernetes/kubernetes/issues/45419)
 [深度解析Kubernetes Pod Disruption Budgets(PDB)](https://my.oschina.net/jxcdwangtao/blog/1594348)
 
+#### SystemOOM
+
+`SystemOOM` 并不一定是机器内存用完了.有一种情况是docker 在控制容器的内存导致的.
+
+默认情况下Docker的存放位置为：/var/lib/docker/containers/$id
+
+这个目录下面有个重要的文件: `hostconfig.json`,截取部分大概长这样:
+
+```json
+	"MemorySwappiness": -1,
+	"OomKillDisable": false,
+	"PidsLimit": 0,
+	"Ulimits": null,
+	"CpuCount": 0,
+	"CpuPercent": 0,
+	"IOMaximumIOps": 0,
+	"IOMaximumBandwidth": 0
+}
+```
+
+`"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
+
 
 ### 对象问题
 
