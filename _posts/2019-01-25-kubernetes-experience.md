@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "Kubernetes管理经验"
+title:        "集群管理经验"
 subtitle:     "Kubernetes Management Experience"
 date:         2019-01-25
 author:       "Zeusro"
@@ -11,12 +11,12 @@ tags:
     - Kubernetes
 ---
 
-## 集群管理经(教)验(训)
+Kubernetes 集群管理经(教)验(训)
 
-### 节点问题
+## 节点问题
 
 
-#### taint别乱用
+### taint别乱用
 
 ```bash
 kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
@@ -27,7 +27,7 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
 `taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
 
-##### NoExecute
+### NoExecute
 
 
 ```yml
@@ -44,7 +44,7 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
 特别注意用`Exists`这个操作符是无效的,必须用`Equal`
 
-##### NoSchedule
+### NoSchedule
 
 ```yml
       tolerations:
@@ -76,7 +76,7 @@ Taints:             elasticsearch-exclusive=true:NoExecute
 1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
-#### 删除节点的正确步骤
+### 删除节点的正确步骤
 
 ```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
@@ -86,7 +86,7 @@ kubectl drain $node   --ignore-daemonsets
 kubectl delete $node
 ```
 
-#### 维护节点的正确步骤
+### 维护节点的正确步骤
 
 ```bash
 # SchedulingDisabled,确保新的容器不会调度到该节点
@@ -101,7 +101,7 @@ kubectl uncordon $node
 
 
 
-#### 节点出现磁盘压力(DiskPressure)
+### 节点出现磁盘压力(DiskPressure)
 
 ```
 --eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%
@@ -129,13 +129,20 @@ Events:
   Warning  ImageGCFailed          3m4s                  kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4920913920 bytes, but freed 0 bytes
 ```
 
+ImageGCFailed 是很坑爹的状态,出现这个状态时,表示 kubelet 尝试回收磁盘失败,这时得考虑是否要手动上机修复了.
+
+建议:
+
+1. 镜像数量在200以上时,采购100G SSD存镜像
+1. 少用临时存储(empty-dir,hostpath之类的)
+
 参考链接:
 
 1. [Eviction Signals](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals)
 1. [10张图带你深入理解Docker容器和镜像](http://dockone.io/article/783)
 
 
-#### 节点CPU彪高
+### 节点CPU彪高
 
 有可能是节点在进行GC(container GC/image GC),用`describe node`查查.我有次遇到这种状况,最后节点上的容器少了很多,也是有点郁闷
 
@@ -150,7 +157,7 @@ Events:
 
 [kubelet 源码分析：Garbage Collect](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
 
-#### 节点失联(unknown)
+### 节点失联(unknown)
 
 ```
   Ready                False   Fri, 28 Jun 2019 10:19:21 +0800   Thu, 27 Jun 2019 07:07:38 +0800   KubeletNotReady              PLEG is not healthy: pleg was last seen active 27h14m51.413818128s ago; threshold is 3m0s
@@ -170,7 +177,7 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 [Node flapping between Ready/NotReady with PLEG issues](https://github.com/kubernetes/kubernetes/issues/45419)
 [深度解析Kubernetes Pod Disruption Budgets(PDB)](https://my.oschina.net/jxcdwangtao/blog/1594348)
 
-#### SystemOOM
+### SystemOOM
 
 `SystemOOM` 并不一定是机器内存用完了.有一种情况是docker 在控制容器的内存导致的.
 
@@ -192,7 +199,7 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 
 `"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
 
-#### docker daemon 卡住
+### docker daemon 卡住
 
 这种状况我出现过一次,原因是某个容器有毛病,坑了整个节点.
 
@@ -208,27 +215,27 @@ systemctl restart kubelet
 
 建议: `对于容器的liveness/readiness 使用tcp/httpget的方式，避免 高频率使用exec`
 
-### 对象问题
+## 对象问题
 
-#### pod
+### pod
 
 
-##### pod频繁重启
+#### pod频繁重启
 
 原因有多种,不可一概而论
 
-###### 资源达到limit设置值
+#### 资源达到limit设置值
 
 调高limit或者检查应用
 
-###### Readiness/Liveness connection refused
+#### Readiness/Liveness connection refused
 
 Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
 
 这个问题要上节点排查
 
 
-##### pod被驱逐(Evicted)
+#### pod被驱逐(Evicted)
 
 1. 节点加了污点导致pod被驱逐
 1. ephemeral-storage超过限制被驱逐
@@ -254,7 +261,7 @@ resources:
 1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 
 
-##### kubectl exec 进入容器失败
+#### kubectl exec 进入容器失败
 
 这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
 
@@ -267,14 +274,14 @@ command terminated with exit code 126
 解决办法:删了这个pod,配置`livenessProbe`
 
 
-##### pod的virtual host name
+#### pod的virtual host name
 
 `Deployment`衍生的pod,`virtual host name`就是`pod name`.
 
 `StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.而且支持其他pod访问
 
 
-##### pod接连Crashbackoff
+#### pod接连Crashbackoff
 
 `Crashbackoff`有多种原因.
 
@@ -294,17 +301,17 @@ command terminated with exit code 126
 
 严禁生产环境使用alpine作为基础镜像(会导致dns解析请求异常)
 
-#### deploy
+### deploy
 
-##### MinimumReplicationUnavailable
+#### MinimumReplicationUnavailable
 
 如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
 
 具体见[Using Admission Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
-#### service
+### service
 
-##### 建了一个服务,但是没有对应的po,会出现什么情况?
+#### 建了一个服务,但是没有对应的po,会出现什么情况?
 
 请求时一直不会有响应,直到request timeout
 
@@ -313,7 +320,7 @@ command terminated with exit code 126
 1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
 
-##### service connection refuse
+#### service connection refuse
 
 原因可能有
 
@@ -322,7 +329,7 @@ command terminated with exit code 126
 1. 网络过载
 
 
-##### service没有负载均衡
+#### service没有负载均衡
 
 检查一下是否用了`headless service`.`headless service`是不会自动负载均衡的...
 
@@ -375,16 +382,25 @@ Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
 
-### ReplicationController不更新
+## ReplicationController不更新
 
 ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
 
 尽量使用deploy吧.
 
-### StatefulSet更新失败
+## StatefulSet
+
+### pod 更新失败
 
 StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
 
+### unknown pod
+
+如果 StatefulSet 绑定 pod 状态变成 unknown ,这个时候是非常坑爹的,StatefulSet不会帮你重建pod.
+
+这时会导致外部请求一直失败.
+
+综合建议,不用 `StatefulSet` ,改用 operator 模式替换它.
 
 ## 进阶调度
 
