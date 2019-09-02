@@ -122,6 +122,32 @@ PUT /a
 热更新的词语存在内存中,不会更新dic文件
 
 
+## 分片管理
+
+默认模板设置
+
+```
+POST _template/default
+{
+  "template": ["*"]
+  "order": -1
+  "settings": {
+    "number_of_replicas": "0"
+  }
+}
+```
+
+- 自定义模板-设置副本数默认为0
+
+```
+curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/json' -d '
+{
+"template" : "*",
+"settings" : {
+"number_of_replicas" : 0
+}
+}'
+```
 
 ## 付费功能(_xpack)
 
@@ -131,6 +157,31 @@ es默认没有密码,需要用户授权功能的话买商业版的许可.
 
 
 GET /_xpack/security/user
+
+
+
+## 7.0废弃的查询
+
+As of version 7.0 Elasticsearch will require that a [field] parameter is provided when a [seed] is set
+
+改为
+
+```
+ "random_score": {
+                "seed": 10,
+                "field": "_seq_no"
+            }
+```
+Deprecation: Deprecated field [inline] used, expected [source] instead
+
+```
+		"_script": {
+			"script": {
+				"inline": "doc['xxx'].value>0?1:0"
+			},
+```
+inline
+
 
 
 ## 参考链接:
