@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "kubernetes管理经验"
+title:        "Kubernetes管理经验"
 subtitle:     "Kubernetes Management Experience"
 date:         2019-01-25
 author:       "Zeusro"
@@ -192,7 +192,6 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 
 `"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
 
-
 ### 对象问题
 
 #### pod
@@ -272,6 +271,12 @@ command terminated with exit code 126
 比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
 
 在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
+
+#### DNS 效率低下
+
+容器内打开nscd(域名缓存服务)，可大幅提升解析性能
+
+严禁生产环境使用alpine作为基础镜像(会导致dns解析请求异常)
 
 #### deploy
 
@@ -510,6 +515,53 @@ timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9
 
 原因在于他们控制台用的是usage_in_bytes(cache+buffer),所以会比云监控看到的数字大
 
+
+### Ingress Controller 玄学优化
+
+修改 kube-system 下面名为 nginx-configuration 的configmap
+
+```
+proxy-connect-timeout: "75" 
+proxy-read-timeout: "75" 
+proxy-send-timeout: "75" 
+upstream-keepalive-connections: "300" 
+upstream-keepalive-timeout: "300" 
+upstream-keepalive-requests: "1000" 
+keep-alive-requests: "1000" 
+keep-alive: "300"
+disable-access-log: "true" 
+client-header-timeout: "75" 
+worker-processes: "16"
+```
+
+注意,是一个项对应一个配置,而不是一个文件. 格式大概这样
+
+```
+➜  ~ kg cm nginx-configuration -o yaml
+apiVersion: v1
+data:
+  disable-access-log: "true"
+  keep-alive: "300"
+  keep-alive-requests: "1000"
+  proxy-body-size: 20m
+  worker-processes: "16"
+  ......
+```
+
+
+### pid 问题
+
+```
+Message: **Liveness probe failed: rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:262: starting container process caused "process_linux.go:86: adding pid 30968 to cgroups caused \"failed to write 30968 to cgroup.procs: write /sys/fs/cgroup/cpu,cpuacct/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podfe4cc065_cc58_11e9_bf64_00163e08cd06.slice/docker-0447a362d2cf4719ae2a4f5ad0f96f702aacf8ee38d1c73b445ce41bdaa8d24a.scope/cgroup.procs: invalid argument\""
+```
+
+阿里云初始化节点用的 centos 版本老旧,内核是3.1, Centos7.4的内核3.10还没有支持cgroup对于pid/fd限制,所以会出现这类问题.
+
+建议:
+
+1. 手动维护节点,升级到5.x的内核(目前已有一些节点升级到5.x,但是docker版本还是 17.6.2 ,持续观察中~)
+1. 安装 [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer) ,利用事件机制提醒管理员手动维护
+
 ## 容器编排的技巧
 
 ### wait-for-it
@@ -527,6 +579,8 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
                   elasticsearch-logs:9200/logs,tracing,tracing-test/_delete_by_query?conflicts=proceed  \
                   -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
 ```
+
+
 
 参考(应用调度相关):
 1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
