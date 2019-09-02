@@ -192,6 +192,22 @@ ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.
 
 `"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
 
+#### docker daemon 卡住
+
+这种状况我出现过一次,原因是某个容器有毛病,坑了整个节点.
+
+出现这个问题要尽快解决,因为节点上面所有的 pod 都会变成 unknown .
+
+```bash
+systemctl daemon-reexec
+systemctl restart docker(可选视情况定)
+systemctl restart kubelet
+```
+
+严重时只能重启节点,停止涉事容器.
+
+建议: `对于容器的liveness/readiness 使用tcp/httpget的方式，避免 高频率使用exec`
+
 ### 对象问题
 
 #### pod
