@@ -580,7 +580,6 @@ data:
   ......
 ```
 
-
 ### pid 问题
 
 ```
@@ -593,6 +592,18 @@ Message: **Liveness probe failed: rpc error: code = 2 desc = oci runtime error: 
 
 1. 手动维护节点,升级到5.x的内核(目前已有一些节点升级到5.x,但是docker版本还是 17.6.2 ,持续观察中~)
 1. 安装 [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer) ,利用事件机制提醒管理员手动维护
+
+### OSS PVC FailedMount
+
+可以通过PV制定access key,access secret +PVC的方式使用OSS.某天某个deploy遇到 FailedMount 的问题,联系到阿里云的开发工程师,说是 flexvolume 在初次运行的节点上面运行会有问题,要让他"重新注册"
+
+影响到的版本: registry-vpc.cn-shenzhen.aliyuncs.com/acs/flexvolume:v1.12.6.16-1f4c6cb-aliyun
+
+解决方案:
+
+```bash
+touch /usr/libexec/kubernetes/kubelet-plugins/volume/exec/alicloud~oss/debug
+```
 
 ## 容器编排的技巧
 
