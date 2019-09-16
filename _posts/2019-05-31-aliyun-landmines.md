@@ -42,3 +42,9 @@ ECS的共享计算型还好,突发性能型,谁买谁知道.
 ## CDN
 
 CDN开启HTTPS之后,静态HTTPS按次数计费
+
+## SLB
+
+后端服务器无法访问SLB，对于四层负载均衡服务，目前不支持负载均衡后端ECS实例直接为客户端提供服务的同时，又作为负载均衡的后端服务器。
+
+[为什么无法访问负载均衡](https://help.aliyun.com/knowledge_detail/55206.html)
