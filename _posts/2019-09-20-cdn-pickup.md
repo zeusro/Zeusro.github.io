@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "混合云CDN最佳实践"
+title:        "多共有云CDN最佳实践"
 subtitle:     ""
 date:         2019-09-20
 author:       "Zeusro"
