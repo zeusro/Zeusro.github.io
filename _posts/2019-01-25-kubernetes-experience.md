@@ -228,28 +228,25 @@ systemctl restart kubelet
 严重时只能重启节点,停止涉事容器.
 
 建议: `对于容器的liveness/readiness 使用tcp/httpget的方式，避免 高频率使用exec`
-
-## 对象问题
-
-### pod
+## pod
 
 
-#### pod频繁重启
+### pod频繁重启
 
 原因有多种,不可一概而论
 
-#### 资源达到limit设置值
+### 资源达到limit设置值
 
 调高limit或者检查应用
 
-#### Readiness/Liveness connection refused
+### Readiness/Liveness connection refused
 
 Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
 
 这个问题要上节点排查
 
 
-#### pod被驱逐(Evicted)
+### pod被驱逐(Evicted)
 
 1. 节点加了污点导致pod被驱逐
 1. ephemeral-storage超过限制被驱逐
@@ -275,7 +272,7 @@ resources:
 1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 
 
-#### kubectl exec 进入容器失败
+### kubectl exec 进入容器失败
 
 这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
 
@@ -288,14 +285,14 @@ command terminated with exit code 126
 解决办法:删了这个pod,配置`livenessProbe`
 
 
-#### pod的virtual host name
+### pod的virtual host name
 
 `Deployment`衍生的pod,`virtual host name`就是`pod name`.
 
 `StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.而且支持其他pod访问
 
 
-#### pod接连Crashbackoff
+### pod接连Crashbackoff
 
 `Crashbackoff`有多种原因.
 
@@ -309,23 +306,23 @@ command terminated with exit code 126
 
 在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
 
-#### DNS 效率低下
+### DNS 效率低下
 
 容器内打开nscd(域名缓存服务)，可大幅提升解析性能
 
 严禁生产环境使用alpine作为基础镜像(会导致dns解析请求异常)
 
-### deploy
+## deploy
 
-#### MinimumReplicationUnavailable
+### MinimumReplicationUnavailable
 
 如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
 
 具体见[Using Admission Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
-### service
+## service
 
-#### 建了一个服务,但是没有对应的po,会出现什么情况?
+### 建了一个服务,但是没有对应的po,会出现什么情况?
 
 请求时一直不会有响应,直到request timeout
 
@@ -334,7 +331,7 @@ command terminated with exit code 126
 1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
 
-#### service connection refuse
+### service connection refuse
 
 原因可能有
 
@@ -343,7 +340,7 @@ command terminated with exit code 126
 1. 网络过载
 
 
-#### service没有负载均衡
+### service没有负载均衡
 
 检查一下是否用了`headless service`.`headless service`是不会自动负载均衡的...
 
@@ -415,74 +412,6 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
 这时会导致外部请求一直失败.
 
 综合建议,不用 `StatefulSet` ,改用 operator 模式替换它.
-
-## 进阶调度
-
-每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
-
-### 使用亲和度确保节点在目标节点上运行
-
-```yml
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-            - matchExpressions:
-              - key: elasticsearch-test-ready
-                operator: Exists
-```
-
-
-参考链接:
-1. [advanced-scheduling-in-kubernetes](https://kubernetes.io/blog/2017/03/advanced-scheduling-in-kubernetes/)
-1. [kubernetes-scheulder-affinity](https://cizixs.com/2017/05/17/kubernetes-scheulder-affinity/)
-
-### 使用反亲和度确保每个节点只跑同一个应用
-
-```yml
-      affinity:
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: 'app'
-                operator: In
-                values:
-                - nginx-test2
-            topologyKey: "kubernetes.io/hostname"
-            namespaces:
-            - test
-```
-
-```yml
-      affinity:
-        podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 100
-            podAffinityTerm:
-              topologyKey: "kubernetes.io/hostname"
-              namespaces:
-              - test
-              labelSelector:
-                matchExpressions:
-                - key: 'app'
-                  operator: In
-                  values:
-                   - "nginx-test2"
-```
-
-### 容忍运行
-
-master节点之所以不允许普通镜像,是因为master节点带了污点,如果需要强制在master上面运行镜像,则需要容忍相应的污点.
-
-```yml
-      tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
-        - effect: NoSchedule
-          key: node.cloudprovider.kubernetes.io/uninitialized
-          operator: Exists
-```
 
 ## 阿里云Kubernetes问题
 
@@ -618,26 +547,6 @@ Message: **Liveness probe failed: rpc error: code = 2 desc = oci runtime error: 
 ```bash
 touch /usr/libexec/kubernetes/kubelet-plugins/volume/exec/alicloud~oss/debug
 ```
-
-## 容器编排的技巧
-
-### wait-for-it
-
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
-
-### 在cmd中使用双引号的办法
-
-```
-
-               - "/bin/sh"
-               - "-ec"
-               - |
-                  curl -X POST --connect-timeout 5 -H 'Content-Type: application/json' \
-                  elasticsearch-logs:9200/logs,tracing,tracing-test/_delete_by_query?conflicts=proceed  \
-                  -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
-```
-
-
 
 参考(应用调度相关):
 1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
