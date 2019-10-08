@@ -81,19 +81,72 @@ tags:
                    - "nginx-test2"
 ```
 
-### 容忍运行
 
-master节点之所以不允许普通镜像,是因为master节点带了污点,如果需要强制在master上面运行镜像,则需要容忍相应的污点.
+### tolerations 和 taint
+
+ tolerations 和 taint 总是结对存在, taint 就像是"虽然我刁莽,抽烟,月光,但我还是一个好女人",这种污点(taint)一般会让一般男性(pod)敬而远之,但总有几个老实人能够容忍(tolerations).
+
+#### taint
+
+```bash
+kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
+kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
+```
+
+master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
+
+`taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
+
+#### tolerations
+
+##### NoExecute
+
 
 ```yml
       tolerations:
-        - effect: NoSchedule
-          key: node-role.kubernetes.io/master
-          operator: Exists
-        - effect: NoSchedule
-          key: node.cloudprovider.kubernetes.io/uninitialized
-          operator: Exists
+        - key: "elasticsearch-exclusive"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"
 ```
+
+  kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoExecute
+
+NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务必先行确认系统组件有对应配置tolerations.
+
+特别注意用`Exists`这个操作符是无效的,必须用`Equal`
+
+##### NoSchedule
+
+```yml
+      tolerations:
+        - key: "elasticsearch-exclusive"
+          operator: "Exists"
+          effect: "NoSchedule"
+        - key: "elasticsearch-exclusive"
+          operator: "Equal"
+          value: "true"
+          effect: "NoExecute"
+```
+
+  kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoSchedule
+
+是尽量不往这上面调度,但实际上还是会有pod在那上面跑
+
+`Exists`和`Exists`随意使用,不是很影响
+
+值得一提的是,同一个key可以同时存在多个effect
+
+```yml
+Taints:             elasticsearch-exclusive=true:NoExecute
+                    elasticsearch-exclusive=true:NoSchedule
+```
+
+其他参考链接：
+
+1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
+1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
+
 
 ## 容器编排的技巧
 
