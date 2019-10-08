@@ -27,6 +27,92 @@ tags:
 1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
 
 
+## 进阶调度
+
+每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+
+### 使用亲和度确保节点在目标节点上运行
+
+```yml
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: elasticsearch-test-ready
+                operator: Exists
+```
+
+
+参考链接:
+1. [advanced-scheduling-in-kubernetes](https://kubernetes.io/blog/2017/03/advanced-scheduling-in-kubernetes/)
+1. [kubernetes-scheulder-affinity](https://cizixs.com/2017/05/17/kubernetes-scheulder-affinity/)
+
+### 使用反亲和度确保每个节点只跑同一个应用
+
+```yml
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: 'app'
+                operator: In
+                values:
+                - nginx-test2
+            topologyKey: "kubernetes.io/hostname"
+            namespaces:
+            - test
+```
+
+```yml
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              topologyKey: "kubernetes.io/hostname"
+              namespaces:
+              - test
+              labelSelector:
+                matchExpressions:
+                - key: 'app'
+                  operator: In
+                  values:
+                   - "nginx-test2"
+```
+
+### 容忍运行
+
+master节点之所以不允许普通镜像,是因为master节点带了污点,如果需要强制在master上面运行镜像,则需要容忍相应的污点.
+
+```yml
+      tolerations:
+        - effect: NoSchedule
+          key: node-role.kubernetes.io/master
+          operator: Exists
+        - effect: NoSchedule
+          key: node.cloudprovider.kubernetes.io/uninitialized
+          operator: Exists
+```
+
+## 容器编排的技巧
+
+### wait-for-it
+
+k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
+
+### 在cmd中使用双引号的办法
+
+```yaml
+
+               - "/bin/sh"
+               - "-ec"
+               - |
+                  curl -X POST --connect-timeout 5 -H 'Content-Type: application/json' \
+                  elasticsearch-logs:9200/logs,tracing,tracing-test/_delete_by_query?conflicts=proceed  \
+                  -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
+```
+
 ## k8s的 master-cluster 架构
 
 ### master(CONTROL PLANE)
