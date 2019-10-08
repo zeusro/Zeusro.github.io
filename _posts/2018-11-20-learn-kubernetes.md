@@ -171,64 +171,6 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
 
     The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
 
-## k8s的 master-cluster 架构
-
-### master(CONTROL PLANE)
-
-- etcd distributed persistent storage
-
-    Consistent and highly-available key value store used as Kubernetes’ backing store for all cluster data.
-
-- kube-apiserver
-
-    front-end for the Kubernetes control plane.
-- kube-scheduler
-
-    Component on the master that watches newly created pods that have no node assigned, and selects a node for them to run on.
-
-- Controller Manager 
-    - Node Controller
-    
-        Responsible for noticing and responding when nodes go down.
-    - Replication Controller
-        
-        Responsible for maintaining the correct number of pods for every replication controller object in the system.
-    - Endpoints Controller
-
-        Populates the Endpoints object (that is, joins Services & Pods).
-    - Service Account & Token Controllers
-        
-        Create default accounts and API access tokens for new namespaces.
-- cloud-controller-manager(**alpha feature**)
-    - Node Controller
-
-        For checking the cloud provider to determine if a node has been deleted in the cloud after it stops responding        
-    - Route Controller
-
-        For setting up routes in the underlying cloud infrastructure
-    - Service Controller
-
-        For creating, updating and deleting cloud provider load balancers
-    - Volume Controller
-        
-         For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
-
-参考链接:
-1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
-
-### worker nodes
-
-- Kubelet
-
-    The kubelet is the primary “node agent” that runs on each node.
-- Kubernetes Proxy
-
-    kube-proxy enables the Kubernetes service abstraction by maintaining network rules on the host and performing connection forwarding.
-
-- Container Runtime (Docker, rkt, or others)
-
-    The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
-
 
 ## kubernetes的资源
 
