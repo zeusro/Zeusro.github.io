@@ -99,7 +99,7 @@ kubectl uncordon $node
 
 --delete-local-data 是忽略 `emptyDir`这类的临时存储的意思
 
-## ImageGCFailed
+### ImageGCFailed
 
 > 
 >   kubelet 可以清除未使用的容器和镜像。kubelet 在每分钟和每五分钟分别回收容器和镜像。
