@@ -57,11 +57,13 @@ get /a/text/2
 
 - 分析
 
+```
 GET _analyze
 {
   "analyzer" : "standard",
   "text" : "this is a test"
 }
+```
 
 ## 分片
 

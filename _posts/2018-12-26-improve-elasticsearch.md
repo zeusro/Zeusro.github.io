@@ -162,6 +162,30 @@ indices:
 按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
 
 
+## 日志的最佳实践
+
+如果日志丢了也无所谓,建议用1节点0副本分片储存日志.
+
+日志 index 用 `xx-<date>` ,这样删除的时候直接删 index 就行
+
+delete by query 的我表示每次都想死...
+
+```
+POST /tracing/_delete_by_query?conflicts=proceed
+{
+	"query": {
+		"range": {
+			"@timestamp": {
+				"lt": "now-90d",
+				"format": "epoch_millis"
+			}
+		}
+	}
+}
+
+GET /_tasks?&actions=*delete*
+```
+
 ## 故障维护
 
 ### Unassigned Shards
