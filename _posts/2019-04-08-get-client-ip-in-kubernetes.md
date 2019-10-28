@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "kubernetes内部容器获取客户端IP"
+title:        "Kubernetes获取客户端IP"
 subtitle:     ""
 date:         2019-04-08
 author:       "Zeusro"
