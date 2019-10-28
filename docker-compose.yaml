@@ -2,7 +2,8 @@ version: '2.2'
 services:
     blog: 
         build: .
+        restart: always
         ports: 
-        - "4000:4000"        
+        - "80:4000"        
         # volumes:
         # - 
