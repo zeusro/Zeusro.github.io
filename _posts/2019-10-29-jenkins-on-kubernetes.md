@@ -118,12 +118,144 @@ scp -c blowfish -r root@172.18.220.238:/root/.m2/repository /root/.m2/repository
 
 ## 准备yaml
 
+```yaml
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: jenkins-classic
+  name: jenkins-classic
+  namespace: default
+spec:
+  progressDeadlineSeconds: 60
+  replicas: 1
+  revisionHistoryLimit: 2
+  selector:
+    matchLabels:
+      app: jenkins-classic
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: jenkins-classic
+    spec:
+      containers:
+      - env:
+        - name: LANG
+          value: C.UTF-8
+        - name: JAVA_HOME
+          value: /usr/local/openjdk-8
+        - name: JAVA_BASE_URL
+          value: https://github.com/AdoptOpenJDK/openjdk8-upstream-binaries/releases/download/jdk8u232-b09/OpenJDK8U-jdk_
+        - name: JENKINS_HOME
+          value: /var/jenkins_home
+        - name: JENKINS_SLAVE_AGENT_PORT
+          value: '50000'
+        - name: REF
+          value: /usr/share/jenkins/ref
+        - name: JENKINS_UC
+          value: https://updates.jenkins.io
+        - name: JENKINS_UC_EXPERIMENTAL
+          value: https://updates.jenkins.io/experimental
+        - name: JENKINS_INCREMENTALS_REPO_MIRROR
+          value: https://repo.jenkins-ci.org/incrementals
+        image: registry-vpc.cn-shenzhen.aliyuncs.com/amiba/jenkins-docker:latest
+        imagePullPolicy: Always
+        name: jenkins-classic
+        ports:
+        - containerPort: 50000
+          protocol: TCP
+        - containerPort: 8080
+          protocol: TCP
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/jenkins_home
+          name: jenkinshome
+        - mountPath: /usr/bin/docker
+          name: volume-1572343266578
+        - mountPath: /usr/local/maven
+          name: maven
+        - mountPath: /opt/gradle
+          name: gradle
+        - mountPath: /etc/localtime
+          name: volume-localtime
+        - mountPath: /etc/timezone
+          name: timezone
+      dnsPolicy: ClusterFirst
+      securityContext:
+        privileged: true
+        fsGroup: 1000
+        runAsUser: 1000      
+      imagePullSecrets:
+      - name: vpc-shenzhen
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoExecute
+        key: jenkins-ready
+        operator: Exists
+      volumes:
+      - hostPath:
+          path: /var/lib/docker/jenkins
+          type: Directory
+        name: jenkinshome
+      - hostPath:
+          path: /usr/local/maven
+          type: Directory
+        name: maven
+      - hostPath:
+          path: /opt/gradle
+          type: Directory
+        name: gradle        
+      - hostPath:
+          path: /var/run/docker.sock
+          type: 'File'
+        name: volume-1572343266578
+      - hostPath:
+          path: /etc/localtime
+          type: 'File'
+        name: volume-localtime
+      - hostPath:
+          path: /etc/timezone
+          type: 'File'
+        name: timezone
+```
 
 ## 结果
 
-果然翻车,看了一下容器日志,出现
+翻车了,看了一下日志,说是权限问题
 
 ```
 touch: cannot touch '/var/jenkins_home/copy_reference_file.log': Permission denied
 Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?
+
+id jenkins
+uid=1000(jenkins) gid=1000(jenkins) groups=1000(jenkins),999(docker)
+
+$ cat /etc/os-release
+PRETTY_NAME="Debian GNU/Linux 9 (stretch)"
+NAME="Debian GNU/Linux"
+VERSION_ID="9"
+VERSION="9 (stretch)"
+VERSION_CODENAME=stretch
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"
+```
+
+尝试用 securityContext 设置成 1000 运行,结果还是没有权限
+
+于是只能登录服务器,改文件权限了.
+
+```bash
+volume=/var/lib/docker/jenkins
+chown 1000:0 $volume -R
 ```
