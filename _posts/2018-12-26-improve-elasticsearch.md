@@ -146,15 +146,15 @@ indices:
       max_clause_count: 50000
   recovery:
     max_bytes_per_sec:
-
-
 ```
 
-[配置集群](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html)
+queue_size 是并发查询的限制,默认是1000,不同的版本名称可能略有区别,线程池的参数可以直接附在启动参数里面(毕竟挂载配置文件对我来说也是一种麻烦)
 
-[更新集群配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-update-settings.html)
+参考:
 
-[线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
+1. [配置集群](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html)
+1. [更新集群配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-update-settings.html)
+1. [线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
 
 
 ## 其他经验
@@ -278,10 +278,7 @@ PUT _settings
 参考链接:
 
 1. [ES 慢查询收集总结](http://www.fblinux.com/?p=1334)
-<<<<<<< HEAD
-=======
 1. [使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
->>>>>>> a4396b10f747fc7b927115709744994369cf9358
 
 ## 参考工具
 
