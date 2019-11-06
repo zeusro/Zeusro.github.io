@@ -9,6 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Kubernetes
+    - Elasticsearch
 ---
 
 
@@ -296,10 +297,13 @@ esrally list tracks
 esrally --pipeline=benchmark-only --target-hosts=127.0.0.1:9200 --track=geonames
 ```
 
+```
 datastore.type = elasticsearch
 datastore.host = 127.0.0.1
 datastore.port = 9200
 datastore.secure = False
+```
+
 
 通过 Elasticsearch 官方提供的 benchmark 脚本 rally
 
