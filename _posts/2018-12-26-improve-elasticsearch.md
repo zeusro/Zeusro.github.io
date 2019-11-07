@@ -280,6 +280,10 @@ PUT _settings
 1. [ES 慢查询收集总结](http://www.fblinux.com/?p=1334)
 1. [使用reroute手动转移分片](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-reroute.html)
 
+### No alive nodes found in your cluster
+
+这个要具体分析，看看ES的日志。有可能是并发连接数1000限制导致的问题。
+
 ## 参考工具
 
 [elasticHQ](http://www.elastichq.org/)
