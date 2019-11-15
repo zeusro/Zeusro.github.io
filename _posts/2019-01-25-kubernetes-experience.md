@@ -120,10 +120,11 @@ Events:
   ----     ------             ----                ----                                         -------
   Warning  ContainerGCFailed  5s (x543 over 27h)  kubelet, cn-shenzhen.xxxx                    rpc error: code = DeadlineExceeded desc = context deadline exceeded
 ```
-
 ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.于是我顺便升级了内核到5.1,然后重启.
 
 后来发现是有个人上了一个问题镜像，无论在哪节点运行，都会把节点搞瘫，也是醉了。
+
+unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kubernetes master 自身不知道节点上面的容器是死是活,假如有一个非常重要的容器在 unknown 节点上面运行,而且他刚好又挂了,kubernetes是不会自动帮你另启一个容器的,这点要注意.
 
 参考链接:
 
