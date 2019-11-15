@@ -174,6 +174,21 @@ systemctl restart kubelet
 
 原因有多种,不可一概而论
 
+有一种情况是,deploy配置了健康检查,节点运行正常,但是因为节点负载过高导致了健康检查失败(load15长期大于2以上),频繁Backoff.我调高了不健康阈值之后,降低节点负载之后,问题解决
+
+```yaml
+
+          livenessProbe:
+            # 不健康阈值
+            failureThreshold: 3
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            tcpSocket:
+              port: 8080
+            timeoutSeconds: 1
+```
+
 ### 资源达到limit设置值
 
 调高limit或者检查应用
