@@ -15,7 +15,10 @@ tags:
 
 1. twrp-3.2.1-0-universal-codeworkx-cheeseburger.img
 1. Aurora_O_A5000_1111_Stable_9.0.6_V41.0.zip
-1. 
+
+## 安装 window驱动
+
+这一步可能需要禁用驱动程序签名认证
 
 ## 解锁
 
