@@ -39,6 +39,8 @@ fastboot boot D:\twrp-3.2.1-0-universal-codeworkx-cheeseburger.img
 
 ```bash
 adb push G:\oneplus3\Aurora_OnePlus_A3000_O_0629_OPEN37_V59.0.zip /sdcard/
+# 这一步很慢，
+# 6982 KB/s (2361816600 bytes in 330.299s)
 ```
 
 最后在twrp 那里选择安装，点击sdcard内的zip包即可
