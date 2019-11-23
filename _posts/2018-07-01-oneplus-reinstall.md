@@ -72,6 +72,9 @@ adb push  d:\Aurora_O_A5000_1111_Stable_9.0.6_V41.0.zip /sdcard/
 
 最后用adb 推送安装包,在twrp里面安装系统,重启.
 
+## 官方系统刷入Google全家桶的办法
+
+偶然在[https://melty.land/blog/lineageos-16](https://melty.land/blog/lineageos-16) 这篇文章看到的,有个[神奇的网站](https://opengapps.org/),在那里按照架构选择,下载对应的zip文件,在刷入系统后,**LineageOS 第一次启动前 进入twrp 安装**
 
 ## 参考链接:
 1. [OnePlus 3T: How to Unlock Bootloader ](https://forums.oneplus.com/threads/guide-oneplus-3t-how-to-unlock-bootloader-flash-twrp-root-nandroid-efs-backup-and-more.475142/)
