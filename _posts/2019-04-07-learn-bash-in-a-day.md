@@ -497,7 +497,7 @@ num=$((num + 1))          # 变量递增，双括号内的 $ 可以省略
 num=$((1 + (2 + 3) * 2))  # 复杂计算
 ```
 
-彩蛋
+## 彩蛋
 
 ```bash
 function g()
@@ -512,6 +512,8 @@ do
 done
 echo $phone
 }
+
+while true; do dig "elastic.spain.adevinta.com" | grep time; sleep 2; done
 ```
 
 ## 参考链接
