@@ -151,6 +151,62 @@ curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/js
 }'
 ```
 
+## ingest/pipeline 用法
+
+ingest 是 elasticsearch 的节点角色。在ingest里面定义pipeline。
+
+pipeline是预处理器。什么是预处理器呢，可以勉强理解为数据清洗，在入库前对数据进行处理。
+
+比如下面这个pipeline的定义
+
+```
+PUT _ingest/pipeline/monthlyindex
+{
+    "description" : "servicelog-test monthlyindex",
+    "processors" : [
+      {
+        "date_index_name" : {
+          "field" : "timestamp",
+          "date_formats" : [
+            "UNIX"
+          ],
+          "timezone" : "Asia/Shanghai",
+          "index_name_prefix" : "servicelog-test_",
+          "date_rounding" : "M"
+        }
+      },
+      {
+        "date" : {
+          "field" : "timestamp",
+          "formats" : [
+            "UNIX"
+          ],
+          "timezone" : "Asia/Shanghai"
+        }
+      },
+      {
+        "remove" : {
+          "field" : "timestamp"
+        }
+      },
+      {
+        "remove" : {
+          "field" : "type"
+        }
+      }
+    ]
+}
+```
+
+意思是把写入"servicelog-test" index 的数据按月分片处理。
+
+原始写入"servicelog-test"的请求，最终最写入到 `servicelog-test_2020-02-01`(当前月份的自动分片)
+
+这个 `pipeline` 解决了我们写入单一elasticsearch index 的问题。以后再也不需要 delete by query 了，直接删过往的index，这也是elasticsearch推荐的方式。
+
+参考链接：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
+
+
 ## 付费功能(_xpack)
 
 es默认没有密码,需要用户授权功能的话买商业版的许可.
