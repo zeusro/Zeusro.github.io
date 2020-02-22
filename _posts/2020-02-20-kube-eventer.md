@@ -138,6 +138,52 @@ type ObjectReference struct {
 }
 ```
 
+
+
+```json
+// kubectl get event -o json
+{
+    "apiVersion": "v1",
+    "items": [{
+        "apiVersion": "v1",
+        "count": 2416,
+        "eventTime": null,
+        "firstTimestamp": "2020-02-14T12:22:43Z",
+        "involvedObject": {
+            "apiVersion": "v1",
+            "kind": "Service",
+            "name": "my-sb-svc",
+            "namespace": "default",
+            "resourceVersion": "264028180",
+            "uid": "96117aad-4f24-11ea-a87c-00163e04f1e0"
+        },
+        "kind": "Event",
+        "lastTimestamp": "2020-02-19T13:08:25Z",
+        "message": "Port 666 was assigned to multiple services; please recreate service",
+        "metadata": {
+            "creationTimestamp": "2020-02-14T12:22:43Z",
+            "name": "my-sb-svc.15f344468d77364d",
+            "namespace": "default",
+            "resourceVersion": "267629591",
+            "selfLink": "/api/v1/namespaces/test/events/my-sb-svc.15f344468d77364d",
+            "uid": "b3a56707-4f24-11ea-81ec-00163e0a865a"
+        },
+        "reason": "PortAlreadyAllocated",
+        "reportingComponent": "",
+        "reportingInstance": "",
+        "source": {
+            "component": "portallocator-repair-controller"
+        },
+        "type": "Warning"
+    }],
+    "kind": "List",
+    "metadata": {
+        "resourceVersion": "",
+        "selfLink": ""
+    }
+}
+```
+
 ## 设计细节
 
 程序的入口是
