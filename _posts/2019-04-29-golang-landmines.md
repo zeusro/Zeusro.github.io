@@ -267,6 +267,7 @@ export GOPROXY=https://goproxy.io
 其他语言的可看
 [Google Style Guides](https://google.github.io/styleguide/)
 
+论喷子，还是没[王垠](http://www.yinwang.org/blog-cn/2014/04/18/golang)强
 
 ## 课后作业
 
