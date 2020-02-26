@@ -11,7 +11,7 @@ tags:
     - Kubernetes
 ---
 
-kubernetes+alpine+php特别容易出现访问外网/解析外网地址的时候出现超时的问题.
+kubernetes + alpine+ php 特别容易出现访问外网/解析外网地址的时候出现超时的问题.
 
 ## 原因
 
@@ -73,6 +73,14 @@ Trying "baidu.com.localdomain"
 Trying "baidu.com"
 ......
 ```
+
+#### 不使用 alpine 镜像
+
+#### 使用 [FQDN](https://baike.baidu.com/item/FQDN)
+
+由于域名是从右到左逐级解析的，比如 `google.com` ,实际上是 `google.com.`，com后面的.称之为根域名。解析的时候，先解析.，然后解析.com,.com称之为顶级域名，最后解析google。
+
+使用 FQDN：(Fully Qualified Domain Name)全限定域名，是为了尽可能减少内部DNS(比如coreDNS，节点DNS)的解析压力
 
 #### 重开socket
 
