@@ -31,7 +31,6 @@ SNAT就像是一个搬运工,把砖(流量)从容器搬到主机
 
 [记一次Docker/Kubernetes上无法解释的连接超时原因探寻之旅](https://mp.weixin.qq.com/s?__biz=MzIzNzU5NTYzMA==&mid=2247484016&idx=1&sn=72bc7f3443cbc259762fb6bd7adb33ae&chksm=e8c77cf1dfb0f5e7598497767db6365bd8db9f4b6a945cb8c72adb1e052e8b0cd46b727c929b&scene=21#wechat_redirect)
 
-
 ## 解决方案
 
 ### 最优解
@@ -84,7 +83,7 @@ Trying "baidu.com"
 
 #### 重开socket
 
-```
+```yaml
         lifecycle:
           postStart:
             exec:
@@ -101,11 +100,11 @@ Trying "baidu.com"
 
 参考[kubernetes 使用基于 alpine 镜像无法正常解析外网DNS](https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html) 做的
 
-直接运行 sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf 会报错
+直接运行 `sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf` 会报错
 
 alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报错
 
-```
+```yaml
   dnsConfig:
     options:
       - name: ndots
@@ -152,15 +151,15 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
 
 容器访问clusterIP(因为是虚拟IP所以需要DNAT)也有可能出现这类超时的问题
 
-### 注意Virtual domain的问题
+### 访问同 namespace svc 不要强行加戏
 
-non-headservice的域名格式是`<svc>.<namespace>.svc.cluster.local`
+non-head service的 virtual domain 格式是`<svc>.<namespace>.svc.cluster.local`
 
 如果我们容器直接访问`<svc>.<namespace>.svc.cluster.local`,因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问`<svc>`
 
 例子：假设test下面有个s的svc
 
-```
+```bash
 host -v s 
 # 解析1次
 host -v s.test.svc.cluster.local
