@@ -208,8 +208,10 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
         
          For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
 
+
 参考链接:
 1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
+1. [Kubernetes组件](https://kubernetes.io/docs/concepts/overview/components/)
 
 ### worker nodes
 

@@ -13,6 +13,8 @@ tags:
 
 Kubernetes 集群管理经(教)验(训)
 
+**2020-02-26 更新：本文再更新，请移步 [Kubernetes集群管理经验](https://github.com/zeusro/awesome-kubernetes-notes/blob/master/source/chapter_6.md)**
+
 ## 节点问题
 
 ### 删除节点的正确步骤
@@ -347,6 +349,7 @@ nslookup: can't resolve '(null)': Name does not resolve
 Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
+
 
 ## ReplicationController不更新
 
