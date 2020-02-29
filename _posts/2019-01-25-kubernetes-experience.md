@@ -350,7 +350,6 @@ Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
 
-
 ## ReplicationController不更新
 
 ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
@@ -370,6 +369,19 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
 这时会导致外部请求一直失败.
 
 综合建议,不用 `StatefulSet` ,改用 operator 模式替换它.
+
+## [kube-apiserver](https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-apiserver/)
+
+`kube-apiserver` 是一组运行在 `master` 上面的特殊容器。以 阿里云 kubernetes 为例 （`kubeadm`创建的 kubernetes 同理）
+
+在 `/etc/kubernetes/manifests/` 下面定义了三个文件
+1. kube-apiserver.yaml
+1. kube-controller-manager.yaml
+1. kube-scheduler.yaml
+
+master 节点会自动监视这个目录里面文件的变化，视情况自动重启。
+
+所以修改 `api server` 的设置只需要修改`kube-apiserver.yaml`,保存退出，相应的容器就会重启。同理，如果你改错了配置，`api server` 就会启动失败，修改之前务必仔细看清楚[文档](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/)
 
 ## 阿里云Kubernetes问题
 
