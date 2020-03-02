@@ -148,7 +148,7 @@ Host github.com raw.githubusercontent.com
     ProxyCommand  ssh root@xx.xx.xx.xx nc %h %p
 ```
 
-克隆仓库时用ssh协议才会生效哦 
+之后把自己客户端的公钥加到远程GitHub，克隆仓库时用ssh协议才会生效
 
     git clone git@github.com:owner/git.git
 
