@@ -170,6 +170,44 @@ func a() (str string, err error) {
 }
 ```
 
+### goroutine 机制
+
+```go
+package main
+
+import (
+	"fmt"
+	"runtime"
+)
+
+func main() {
+	var i byte
+	go func() {
+		for i = 0; i < 255; i++ {
+			fmt.Println(i)
+		}
+	}()
+	fmt.Println("start")
+	runtime.Gosched()
+	runtime.GC()
+	fmt.Println("end")
+}
+```
+
+1. 问题1: 运行的结果
+1. 问题2: 去掉`runtime.GC()`之后的结果
+1. 问题3: 如果你是goruntime,去掉`fmt.Println(i)`之后要怎么优化编译
+
+答案:
+
+Gosched() 让出了CPU时间片,让 goroutine 有机会运行
+
+GC()需要stop the world,所以会等待协程运行完
+
+如果没有 GC()这个方法,则运行结果完全不可控
+
+for 里面一堆废话,最合理的优化,应该是连协程都不创建,哈哈哈哈哈
+
 ## 坑爹API
 
 
