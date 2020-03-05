@@ -9,7 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Java
-    - CI
+    - CI这
     - Jenkins
     - docker
 ---
@@ -17,8 +17,6 @@ tags:
 ## 前言
 
 接收到 Gogs 的web hook 之后,Jenkins对Java 项目进行自动构建/测试, 最后将应用容器化,推送到私有 docker 源(阿里云)
-
-    
 
 ## 前期准备
 
