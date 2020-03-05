@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "kt-connect，一条解决Kubernetes集群内外互访问的网络中转隧道"
+title:        "kt-connect，一条解决Kubernetes集群内外互访问的网络中转隧道(WIP)"
 subtitle:     "妈妈再也不担心我访问不了 virtual service"
 date:         2020-02-28
 author:       "Zeusro"
