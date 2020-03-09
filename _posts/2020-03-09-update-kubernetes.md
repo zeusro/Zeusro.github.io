@@ -25,6 +25,7 @@ tags:
 
 ## 拥抱变化
 
+
 ### 检查受影响资源
 
 ```bash
@@ -51,6 +52,8 @@ kubectl get --raw="/metrics" | grep apiserver_request_count | grep 'group="apps"
 ## 后记
 
 apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容器调度方面的霸权——毕竟，如果你跟女朋友分手了，也不会想给她买新衣服，对吧？
+
+![](/img/sticker/云原生开发.gif)
 
 ## 参考链接:
 
