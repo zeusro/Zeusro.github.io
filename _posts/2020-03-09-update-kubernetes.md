@@ -21,7 +21,7 @@ tags:
 
 `PodSecurityPolicy` 使用 `networking.k8s.io/v1`
 
-所以,在 `1.16` 中使用
+所以,在 `1.16` 中使用 `apps/v1beta2`, `extensions/v1beta1` 等废弃API都会出错
 
 ## 拥抱变化
 
