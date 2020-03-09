@@ -59,6 +59,6 @@ apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容
 
 1. [error: At least one of apiVersion, kind and name was changed](https://stackoverflow.com/questions/56386647/error-at-least-one-of-apiversion-kind-and-name-was-changed)
 1. [Kubernetes Version 1.16 Removes Deprecated APIs](https://www.ibm.com/cloud/blog/announcements/kubernetes-version-1-16-removes-deprecated-apis)
-1. [Kubernetes v1.17 版本解读 | 云原生生态周报 Vol. 31](https://yq.aliyun.com/articles/739120)
+1. [Kubernetes v1.17 版本解读](https://yq.aliyun.com/articles/739120)
 1. [API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md)
 1. [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)
