@@ -1,7 +1,7 @@
 ---
 layout:       post
-title:        "iptables"
-subtitle:     "理解kubernetes的service流量转发链路"
+title:        "理解kubernetes的service流量转发链路"
+subtitle:     "iptables"
 date:         2019-05-17
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
