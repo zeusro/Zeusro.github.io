@@ -279,7 +279,7 @@ header img{
 	border-radius: 50%;
 }
 .cbp_tmlabel ul li.skill>span:nth-child(1){
-	margin-left: -7px;
+	/* margin-left: -7px; */
 }
 .cbp_tmlabel ul li.skill span:before{
     line-height: 40px;
