@@ -1,7 +1,4 @@
-> Do before speaking.
 
 Hello,I am Zeusro.
 
-
-##### Talks
-
+Fight to the death.
