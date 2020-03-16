@@ -17,10 +17,25 @@ tags:
 
 [Elasticsearch的路由（Routing）特性](https://blog.csdn.net/cnweike/article/details/38531997)
 
-## 节点
+
+
+
+## 性能减低的原因
+
+1. Your clients are simply sending too many queries too quickly in a fast burst, overwhelming the queue. You can monitor this with Node Stats over time to see if it's bursty or smooth
+1. You've got some very slow queries which get "stuck" for a long time, eating up threads and causing the queue to back up. You can enable the slow log to see if there are queries that are taking an exceptionally long time, then try to tune those
+1. There may potentially be "unending" scripts written in Groovy or something. E.g. a loop that never exits, causing the thread to spin forever.
+1. Your hardware may be under-provisioned for your workload, and bottlenecking on some resource (disk, cpu, etc)
+1. A temporary hiccup from your iSCSI target, which causes all the in-flight operations to block waiting for the disks to come back. It wouldn't take a big latency hiccup to seriously backup a busy cluster... ES generally expects disks to always be available.
+1. Heavy garbage collections could cause problems too. Check Node Stats to see if there are many/long old gen GCs running
+
+这段E文，无非就是说，你的机器太low，你查的过多, `Mysql` 的经验同样适用于ES。
+
+## 节点的选择
 
 自己玩就别整那么多节点了,`Elasticsearch`是内存杀手.
 
+资源紧张的话，`coordinating` , `data` 和 `ingest` 可以合起来。
 
 ### coordinating
 
@@ -62,22 +77,34 @@ node.data:false
 node.ingest:true
 ```
 
+## 系统配置优化
 
-## 性能减低的原因
+```YML
+thread_pool:
+    bulk:
+        queue_size: 2000
+    search:
+        queue_size: 2000
+indices:
+  query:
+    bool:
+      max_clause_count: 50000
+  recovery:
+    max_bytes_per_sec:
+```
 
-1. Your clients are simply sending too many queries too quickly in a fast burst, overwhelming the queue. You can monitor this with Node Stats over time to see if it's bursty or smooth
-1. You've got some very slow queries which get "stuck" for a long time, eating up threads and causing the queue to back up. You can enable the slow log to see if there are queries that are taking an exceptionally long time, then try to tune those
-1. There may potentially be "unending" scripts written in Groovy or something. E.g. a loop that never exits, causing the thread to spin forever.
-1. Your hardware may be under-provisioned for your workload, and bottlenecking on some resource (disk, cpu, etc)
-1. A temporary hiccup from your iSCSI target, which causes all the in-flight operations to block waiting for the disks to come back. It wouldn't take a big latency hiccup to seriously backup a busy cluster... ES generally expects disks to always be available.
-1. Heavy garbage collections could cause problems too. Check Node Stats to see if there are many/long old gen GCs running
+queue_size 是并发查询的限制,默认是1000,不同的版本名称可能略有区别,线程池的参数可以直接附在启动参数里面(毕竟挂载配置文件对我来说也是一种麻烦)
+
+参考:
+
+1. [配置集群](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html)
+1. [更新集群配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-update-settings.html)
+1. [线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
 
 
-## 参数的设置
+## Index配置优化
 
-对于 _all 这项参数，如果在业务使用上没有必要，我们通常的建议是禁止或者有选择性的添加。
-
-- shard
+### shard
 
 建议在小规格节点下单shard大小不要超过30GB。更高规格的节点单shard大小不要超过50GB。
 
@@ -88,14 +115,15 @@ shard的个数（包括副本）要尽可能匹配节点数，等于节点数，
 通常我们建议单节点上同一索引的shard个数不要超5个。
 
 
-
 ## 查询优化
 
-- 只选取必须的字段
+对于 _all 这项参数，如果在业务使用上没有必要，我们通常的建议是禁止或者有选择性的添加。
+
+### 只选取必须的字段
 
 就像在关系型数据库里面,不要`select * `一样.
 
-```    
+```
 GET /product/goods/109524071?filter_path=_source.zdid
 {
   "_source" : {
@@ -128,41 +156,15 @@ _source_exclude
 
 **注意:_source和filter_path不能一起用**
 
-- 新建索引时关闭索引映射的自动映射功能
+### 新建索引时关闭索引映射的自动映射功能
 
 [index别名](https://www.elastic.co/guide/en/elasticsearch/reference/5.5/indices-aliases.html)
-
-### 系统配置优化
-
-```YML
-thread_pool:
-    bulk:
-        queue_size: 2000
-    search:
-        queue_size: 2000
-indices:
-  query:
-    bool:
-      max_clause_count: 50000
-  recovery:
-    max_bytes_per_sec:
-```
-
-queue_size 是并发查询的限制,默认是1000,不同的版本名称可能略有区别,线程池的参数可以直接附在启动参数里面(毕竟挂载配置文件对我来说也是一种麻烦)
-
-参考:
-
-1. [配置集群](https://www.elastic.co/guide/en/elasticsearch/reference/current/settings.html)
-1. [更新集群配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-update-settings.html)
-1. [线程池配置](https://www.elastic.co/guide/en/elasticsearch/reference/6.5/modules-threadpool.html)
-
 
 ## 其他经验
 
 按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
 
-
-## 日志的最佳实践
+### 日志的最佳实践
 
 如果日志丢了也无所谓,建议用1节点0副本分片储存日志.
 
@@ -260,7 +262,7 @@ put geonames/_settings
 
 慢日志分搜索和索引两种,并且可以从index,或者cluster级别进行设置
 
-```
+```bash
 PUT _settings
 {
         "index.indexing.slowlog.threshold.index.debug" : "10ms",
@@ -288,7 +290,10 @@ PUT _settings
 
 [elasticHQ](http://www.elastichq.org/)
 
-参考链接:
+## 参考链接:
 1. [如何使用Elasticsearch构建企业级搜索方案？](https://zhuanlan.zhihu.com/p/29449979)
 1. [滴滴Elasticsearch多集群架构实践](https://mp.weixin.qq.com/s/K44-L0rclaIM40hma55pPQ)
 1. [从平台到中台：Elaticsearch 在蚂蚁金服的实践经验](https://www.infoq.cn/article/IfwCVj-qJ4TU0dmBZ177)
+1. [为什么Elasticsearch查询变得这么慢了？](https://blog.csdn.net/laoyang360/article/details/83048087)
+1. [通过某瓣真实案例看Elasticsearch优化](https://www.dongwm.com/post/elasticsearch-performance-tuning-practice-at-douban/#%E5%89%8D%E8%A8%80)
+1. []()
