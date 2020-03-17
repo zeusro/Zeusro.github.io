@@ -1,4 +1,4 @@
-![](/img/p.jpg)
+![](/img/sticker/p.jpg)
 
 今天是2020-03-17，让我向大家隆重介绍一种划时代的元编程开发技巧：**面向调皮开发**
 
@@ -39,7 +39,7 @@
 
 ## 服务器运维的正确姿势
 
-![](/img/sticker/rm.jpg)
+![](/img/p-programming/rm.jpg)
 
 1. `sudo rm -rf /`
 1. 拔插头
