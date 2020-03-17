@@ -7,6 +7,7 @@ author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
+multilingual: true
 tags:
     - 面向调皮编程
 ---
