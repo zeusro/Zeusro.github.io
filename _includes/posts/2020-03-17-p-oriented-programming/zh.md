@@ -27,7 +27,20 @@
 
 ![](/img/p-programming/code.jpg)
 
+风清扬曾经说过：
+> “单以武学而论，这些魔教长老们也不能说真正已窥上乘武学之门。他们不懂得，招数是死的，发招之人却是活的。死招数破得再妙，遇上了活招数，免不了缚手缚脚，只有任人屠戮。这个‘活’字，你要牢牢记住了。学招时要活学，使招时要活使。倘若拘泥不化，便练熟了几千万手绝招，遇上了真正高手，终究还是给人家破得干干净净。
+
+![](/img/p-programming/another.jpg)
+
+风清扬又道：
+
+> “大丈夫行事，爱怎样便怎，行云流水，任意所至，甚么武林规矩，门派教条，全都是放他妈的狗臭屁!”
+
+`#define TRUE FALSE`
+
 记住，对过早优化说不，需要优化就马上跑路。
+
+![](/img/p-programming/thread.png)
 
 ## 搞前端的正确姿势
 
@@ -63,13 +76,12 @@
 1. 充分利用`UTF-8`的字符集，使用非英语字母，ASCII 字符
 1. 尽可能模块化，util , interface ，service implement ，web front-end, web back-end 都各自做成 `git` 的 `submodule`，并且各个`submodule`之间还有菱形依赖。反正顶层的web项目天知道哪天能运行起来。项目一多，KPI 就有了。
 1. 坚持使用`Java`编程，并违背[阿里巴巴Java开发手册](https://github.com/alibaba/p3c)上面的任何一条规则
-1. `#define TRUE FALSE`
 1. 产品文档上面不要写跟产品有关的任何细节（这是为了保护你的产品不被破坏！）
 1. 为了阻挠任何雇佣外部维护承包商的倾向，可以在代码中散布针对其他同行软件公司的攻击和抹黑，特别是可能接替你工作的其中任何一家
 
 自带混淆的代码是给上帝看的，保护好我们的代码，就算它们落入了竞争对手手上，也丝毫不慌。只要你写的bug足够奇怪，单位就不敢轻易辞退你！竞争对手也会对你肃然起敬！
 
-**面向调皮开发**，注重的是思路，而不是结果。要学会一本正经的胡说八道，写出满是bug的代码.
+**面向调皮开发**，注重的是思路，而不是结果。要学会一本正经的胡说八道，写出满是bug的代码。
 
 如果有人质疑你，你就发这张图：
 
@@ -117,3 +129,8 @@ kubectl delete namespace default --grace-period=0 --force
 相信我，当你体会了**面向调皮开发**的真谛以后，相信用不了多久，降职减薪，当上CAO(首席背锅官)，出入拘留所，勾搭检察官，堕入人生低谷。收入减半，仇人加倍，铁窗生活不是梦！
 
 ![](/img/p-programming/CAO.png)
+
+## 参考链接
+1. [风清扬：另有高处比天高](https://baike.baidu.com/tashuo/browse/content?id=465f421a9dfaa9bbf1492227&lemmaId=7056998&fromLemmaModule=pcBottom)
+1. [Ask HN: What's the largest amount of bad code you have ever seen work?](https://news.ycombinator.com/item?id=18442637)
+1. [is there an award for ugliest code?](https://www.reddit.com/r/ProgrammerHumor/comments/9xuhyj/is_there_an_award_for_ugliest_code/)
