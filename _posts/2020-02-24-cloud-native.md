@@ -17,6 +17,10 @@ Cloud-native development is not concerned where a new app or service is hosted, 
 
 ## docker 相关
 
+![](https://docs.docker.com/engine/images/architecture.svg)
+
+### Docker daemon (dockerd)
+
 containerd
 
 Container Runtime Interface (CRI)
@@ -58,5 +62,9 @@ The idea of virtualization within enterprise IT is an old one, often used to des
 
 
 参考链接
-1. [](https://www.cloudfoundry.cn/cloud-native-glossary/)
+1. [cloud-native-glossary](https://www.cloudfoundry.cn/cloud-native-glossary/)
+1. [container-runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
+1. []()
+1. []()
+1. []()
 1. []()
