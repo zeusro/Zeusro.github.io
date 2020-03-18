@@ -109,7 +109,7 @@
 ![](/img/p-programming/rm.gif)
 
 ```bash
-kubectl delete namespace default
+kubectl delete namespace default --grace-period=0 --force
 ```
 
 ## 结语
