@@ -59,7 +59,7 @@
 
 参考
 
-1.[hexo Chart](https://github.com/cloudnativeapp/charts/pull/33)
+1. [hexo Chart](https://github.com/cloudnativeapp/charts/pull/33)
 1. [如何编写无法维护的代码](https://coderlmn.github.io/frontEndCourse/unmaintainable.html)
 
 ## 写bug的正确姿势
