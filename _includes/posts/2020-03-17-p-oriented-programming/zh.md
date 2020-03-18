@@ -33,9 +33,19 @@
 
 ![](/img/p-programming/jq.jpg)
 
-## 参与开源的正确姿势
+## 写bug的正确姿势
 
-### 参与开源社区的正确姿势
+![](/img/p-programming/hand-over.jpg)
+
+写出bug不要紧，只要不是你的就行。
+
+如果是你写的代码出问题，那就`hack`同事的电脑，用`git rebase`重写仓库的提交历史，有锅全让别人来背。
+
+## 搞测试的正确姿势
+
+![](/img/p-programming/test.gif)
+
+## 开源社区的正确姿势
 
 自己的开源项目，要突出一个“**皮**”字，这个项目必须要有趣，比如
 1. [用动态规划做一个渣男挖别人墙角](https://www.zeusro.com/2020/03/14/dynamic-optimization/)
@@ -71,7 +81,7 @@
 
 如果他学会了，就让他自己解决问题。
 
-### code review 的正确姿势
+### `code review` 的正确姿势
 
 不管他写了什么代码，先让他测试覆盖率达到99.99%再说，如果他做到了，我们直接关掉他`pull request`,并告诉他，这个项目我已经不打算维护了。
 
@@ -81,17 +91,6 @@
 1. [如何编写无法维护的代码](https://coderlmn.github.io/frontEndCourse/unmaintainable.html)
 1. [Update README-zh_Hans.md](https://github.com/zxystd/IntelBluetoothFirmware/pull/61)
 
-## 写bug的正确姿势
-
-![](/img/p-programming/hand-over.jpg)
-
-写出bug不要紧，只要不是你的就行。
-
-如果是你写的代码出问题，那就`hack`同事的电脑，用`git rebase`重写仓库的提交历史，有锅全让别人来背。
-
-## 测试的正确姿势
-
-![](/img/p-programming/test.gif)
 
 ## 服务器运维的正确姿势
 
@@ -104,6 +103,14 @@
 ## 数据库管理的正确姿势
 
 ![](/img/p-programming/delete-db.gif)
+
+## Kubernetes 管理员的正确姿势
+
+![](/img/p-programming/rm.gif)
+
+```bash
+kubectl delete namespace default
+```
 
 ## 结语
 
