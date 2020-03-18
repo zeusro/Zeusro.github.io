@@ -151,7 +151,7 @@ tags:
 当然好，但是这样做的话，你得获取所有EIP的流量监控数据。而获取当前带宽只需要使用一个接口，之后绑定EIP到共享带宽即可，步骤少一点点。
 
 最终成果发布在
-[GitHub](https://github.com/zeusro/common-bandwidth-auto-switch)
+[GitHub](https://github.com/p-program/common-bandwidth-auto-switch)
 
 ### 后记
 
