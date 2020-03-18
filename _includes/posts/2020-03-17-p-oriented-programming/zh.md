@@ -29,6 +29,10 @@
 
 记住，对过早优化说不，需要优化就马上跑路。
 
+## 搞前端的正确姿势
+
+![](/img/p-programming/jq.jpg)
+
 ## 参与开源的正确姿势
 
 ### 参与开源社区的正确姿势
@@ -57,10 +61,25 @@
 
 **面向调皮开发**，注重的是思路，而不是结果。要学会一本正经的胡说八道，写出满是bug的代码.
 
+如果有人质疑你，你就发这张图：
+
+![](/img/p-programming/chicken.png)
+
+### 处理 `issue` 的正确姿势
+
+不管别人问你什么问题，先让他[提问的智慧](https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md)
+
+如果他学会了，就让他自己解决问题。
+
+### code review 的正确姿势
+
+不管他写了什么代码，先让他测试覆盖率达到99.99%再说，如果他做到了，我们直接关掉他`pull request`,并告诉他，这个项目我已经不打算维护了。
+
 参考
 
 1. [hexo Chart](https://github.com/cloudnativeapp/charts/pull/33)
 1. [如何编写无法维护的代码](https://coderlmn.github.io/frontEndCourse/unmaintainable.html)
+1. [Update README-zh_Hans.md](https://github.com/zxystd/IntelBluetoothFirmware/pull/61)
 
 ## 写bug的正确姿势
 
