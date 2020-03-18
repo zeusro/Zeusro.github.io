@@ -39,7 +39,7 @@
 
 自己的开源项目，要突出一个“**皮**”字，这个项目必须要有趣，比如
 1. [用动态规划做一个渣男挖别人墙角](https://www.zeusro.com/2020/03/14/dynamic-optimization/)
-1. [人为制造带宽均衡态](https://github.com/zeusro/common-bandwidth-auto-switch)让阿里云的共享带宽挣不到钱。
+1. [人为制造带宽均衡态](https://github.com/p-program/common-bandwidth-auto-switch)让阿里云的共享带宽挣不到钱。
 1. 嫌弃`dnspod`网站做的太破，[开发一个油猴插件魔改dnspod](https://www.zeusro.com/2019/07/05/mydnspod/),最后再发邮件给腾讯的HR，吐槽下他们的产品设计
 
 ### pull request的正确姿势
