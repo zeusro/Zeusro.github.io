@@ -19,20 +19,52 @@ Cloud-native development is not concerned where a new app or service is hosted, 
 
 ![](https://docs.docker.com/engine/images/architecture.svg)
 
-### Docker daemon (dockerd)
 
-containerd
+
+## 行业标准
+
+### [containerd](https://containerd.io/docs/)
+
+```
+An industry-standard container runtime with an emphasis on simplicity, robustness and portability
+行业标准的容器运行时，着重于简单性，健壮性和可移植性
+```
+
+他们的主要项目有：
+
+[https://containerd.io/docs/](containerd)
+
+参考链接：
+[Containerd 简介](https://www.cnblogs.com/sparkdev/p/9063042.html)
 
 Container Runtime Interface (CRI)
 
 OCI（Open Container Initiative）
 
+## 行业组织
+
+### Cloud Native Computing Foundation（CNCF）
+
+[CNCF全家福](https://landscape.cncf.io/)
+
+- Technical Oversight Committee （TOC）
+
+CNCF 的技术监督委员会由 9 位具有丰富技术知识和行业背景的代表组成，为云原生社区提供技术领导。
+
+ ### [OCI](https://www.opencontainers.org/)(Open Container Initiative)
+
+ The Open Container Initiative (OCI) is a lightweight, open governance structure (project), formed under the auspices of the Linux Foundation, for the express purpose of creating open industry standards around container formats and runtime. The OCI was launched on June 22nd 2015 by Docker, CoreOS and other leaders in the container industry
+
+#### [runc](https://github.com/opencontainers/runc)
+
+> RunC 是一个轻量级的工具，它是用来运行容器的，只用来做这一件事，并且这一件事要做好。我们可以认为它就是个命令行小工具，可以不用通过 docker 引擎，直接运行容器。事实上，runC 是标准化的产物，它根据 OCI 标准来创建和运行容器。而 OCI(Open Container Initiative)组织，旨在围绕容器格式和运行时制定一个开放的工业化标准。
+
+参考链接:
+[RunC 简介](https://www.cnblogs.com/sparkdev/p/9032209.html) 
 
 ## kubernetes 相关
 
-
 ## service mesh 相关
-
 
 ## 其他概念
 
@@ -64,7 +96,7 @@ The idea of virtualization within enterprise IT is an old one, often used to des
 参考链接
 1. [cloud-native-glossary](https://www.cloudfoundry.cn/cloud-native-glossary/)
 1. [container-runtimes](https://kubernetes.io/docs/setup/production-environment/container-runtimes/)
-1. []()
+1. [Docker 生态概览](https://www.cnblogs.com/sparkdev/p/8998546.html)
 1. []()
 1. []()
 1. []()
