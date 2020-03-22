@@ -235,6 +235,8 @@ OPTIMIZE TABLE  db.tables
 
 释放那些无效的空间
 
+
+
 ## 参考链接
 
 1. [ Table Locking Issues](https://dev.mysql.com/doc/refman/8.0/en/table-locking.html)
@@ -266,4 +268,6 @@ OPTIMIZE TABLE  db.tables
 
 ### 阿里云
 
+1. [参数调优建议](https://help.aliyun.com/document_detail/63255.html)
 1. [10分钟搭建MySQL Binlog分析+可视化方案](https://yq.aliyun.com/articles/338423)
+1. [如何排查MySQL实例空间满后自动锁定的原因](https://help.aliyun.com/knowledge_detail/51682.html)
