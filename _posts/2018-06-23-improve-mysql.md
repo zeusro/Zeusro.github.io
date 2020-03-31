@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "Mysql优化"
+title:        "Mysql的奇技巧淫"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
@@ -23,21 +23,60 @@ tags:
 5. 加索引时参照建索引的几大原则
 6. 观察结果，不符合预期继续从0分析
 
+
+## mysql查询技巧
+
+### 分析查询
+
+```sql
+explain  select sleep(1);
+```
+
+* explain 可以分析查询语句的性能
+* sleep秒
+
+### 变量赋值
+
+```
+set @current =0;
+select @current :=@current +1;
+```
+* 在查询中可以通过使用:=对变量进行重新赋值
+
+
+### 查看数据库大小
+
+```sql
+SELECT table_schema 'DB Name',
+        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1)   MB
+FROM information_schema.tables
+GROUP BY table_schema order by MB desc;
+```
+
+
+### utf-8的表里面搜索带中文的数据
+
+    select number from Chinese_Test where HEX(contents) REGEXP '^(..)*(E[4-9])';
+
+the Chinese Character is from E4 to E9
+
+
+
 ## 一些套路
 
 ### 不要使用"utf-8"
-    utf-8不是真正的UTF-8,应该使用utf8mb4作为替代
+
+utf-8不是真正的UTF-8,应该使用`utf8mb4`作为替代。系统中有一个参数`character_set_server`,改为`utf8mb4`
 
 ### 显示数据库引擎
 
     SELECT * FROM INFORMATION_SCHEMA.ENGINES;
 
-
 ### 显示长事务
 
     select * from information_schema.innodb_trx;
 
-### 改表
+### 暴力改表
 
 改表期间,运行
 
@@ -72,7 +111,7 @@ FROM
 参考:
 [pt-online-schema-change的原理解析与应用说明](https://www.cnblogs.com/xinysu/p/6758170.html)
 
-* 允许 mysql 远程访问
+### 允许 mysql 远程访问
 
     vi /etc/mysql/my.cnf
     ```
@@ -80,36 +119,7 @@ FROM
     bind-address    = 0.0.0.0
     ```
 
-* 查看数据库大小
-
-```sql
-SELECT table_schema "DB Name",
-        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1) "DB Size in MB" 
-FROM information_schema.tables 
-GROUP BY table_schema; 
-```
-
-* utf-8的表里面搜索带中文的数据
-
-    select number from Chinese_Test where HEX(contents) REGEXP '^(..)*(E[4-9])';
-
-the Chinese Character is from E4 to E9
-
-## MySQL Workbech
-
-
-* 允许update不where更新
-
-    SET SQL_SAFE_UPDATES = 0;
-
-* 客户端提示
-
-    Error Code: 2013. Lost connection to MySQL server during query
-    Error Code: 2006. MySQL server has gone away
-
-    Go to Edit -> Preferences -> SQL Editor and set to a higher value this parameter: DBMS connection read time out (in seconds). For instance: 86400.
-
-## 修改大数据表
+### 修改大数据表
 
 1. 被修改的表 Table A 需要有一个记录时间戳的字段， 这个时间戳就是每次数据更新，都会更新的字段， 这个字段需要有索引，在django里可以使用 auto_now=True
 2. 创建一个新的临时表 Table B， 不是tmp_table, 是一个新的表，但是是临时使用的。 这个表和要修改的表拥有一模一样的数据结构， 加上你要修改的部分， 比如增加的字段；
@@ -119,25 +129,56 @@ the Chinese Character is from E4 to E9
 5 为B建立索引， 待索引全部好了之后， 再继续6
 6. 那么这个时候Table A 的数据是不是都进入了Table B 呢， 应当说差不多大部分都进入了， 但5中说， 这大概需要16分钟， 这么长的时间里， 可能有新的数据进入了， 也有可能已有的数据发生了更新， 所以我们要把Table A 中在t1 之后发生变化的数据查找出来， 然后更新到Table B 中， 我们的做法是：
     ```
-记录这个操作对应的时间点 t2
-BEGIN;
-DELETE FROM B WHERE updated_time > t1;
-INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time >t1;
-COMMIT;
+    记录这个操作对应的时间点 t2
+    BEGIN;
+    DELETE FROM B WHERE updated_time > t1;
+    INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time >t1;
+    COMMIT;
     ```
 7. 现在A 和 B 差不多該同步了吧？ 差不多了， 但是6 执行完之后， A仍然在写， 子子孙孙无穷尽也 ... , 但这个时候 A 和 B 的差异已经非常非常小了， 所以在下一步，我们在一个transaction 里执行下面的操作：
+    ```
+    BEGIN;
+    DELETE FROM B WHERE updated_time > t2;
+    INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time >t2;
+
+    ALTER TABLE A RENAME TO C;
+    ALTER TABLE B RENAME TO A;
+    COMMIT;
+    ```
+
+## MySQL Workbech
+
+### 允许update不where更新
+
+    SET SQL_SAFE_UPDATES = 0;
+
+### 客户端提示
+
+    Error Code: 2013. Lost connection to MySQL server during query
+    Error Code: 2006. MySQL server has gone away
+
+    Go to Edit -> Preferences -> SQL Editor and set to a higher value this parameter: DBMS connection read time out (in seconds). For instance: 86400.
+
+### 修改为F5执行选中当前选中语句
+
+方法:修改C:\Program Files\MySQL\MySQL Workbench 6.3 CE\data\main_menu.xml里面的内容
+
+```xml
+
+        <value type="object" struct-name="app.MenuItem" id="com.mysql.wb.menu.query.execute_current_statementwin"> 
+          <link type="object" key="owner" struct-name="app.MenuItem">com.mysql.wb.menu.query</link> 
+          <value type="string" key="caption">Execute Current Statement</value> 
+          <value type="string" key="name">query.execute_current_statement</value> 
+          <value type="string" key="command">builtin:query.execute_current_statement</value> 
+          <value type="string" key="itemType">action</value> 
+          <value type="string" key="shortcut">F5</value>
+          <value type="string" key="platform">windows</value>
+        </value> 
 ```
-BEGIN;
-DELETE FROM B WHERE updated_time > t2;
-INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time >t2;
 
-ALTER TABLE A RENAME TO C;
-ALTER TABLE B RENAME TO A;
-COMMIT;
-```
+## 故障处理
 
-
-## 忘记密码
+### 忘记密码
 
 * mysql 5.7 Ubuntu 64
 
@@ -163,49 +204,37 @@ flush privileges;
 sudo service mysql restart
 ```
 
-## mysql查询技巧
+### 磁盘已满
 
+阿里云的RDS,磁盘满了，会出现 `--rds-read-drop-only` 状态。此时只能读取数据或者删库（毕竟升级磁盘要重启）。
 
-```
-explain  select sleep(1);
+此时最快的解决办法是删库。
 
-```
-* explain 可以分析查询语句的性能
-* sleep秒
+退而求其次，转移数据库，然后删库。
 
-```
-set @current =0;
-select @current :=@current +1;
-```
-* 在查询中可以通过使用:=对变量进行重新赋值
-
-
-## mysql workbench优化
-
-* 修改为F5执行选中当前选中语句
-
-方法:修改C:\Program Files\MySQL\MySQL Workbench 6.3 CE\data\main_menu.xml里面的内容
-```xml
-
-        <value type="object" struct-name="app.MenuItem" id="com.mysql.wb.menu.query.execute_current_statementwin"> 
-          <link type="object" key="owner" struct-name="app.MenuItem">com.mysql.wb.menu.query</link> 
-          <value type="string" key="caption">Execute Current Statement</value> 
-          <value type="string" key="name">query.execute_current_statement</value> 
-          <value type="string" key="command">builtin:query.execute_current_statement</value> 
-          <value type="string" key="itemType">action</value> 
-          <value type="string" key="shortcut">F5</value>
-          <value type="string" key="platform">windows</value>
-        </value> 
-```
-
-## 查看数据库大小
+或者在业务低峰期优化数据表结构
 
 ```sql
-SELECT table_schema 'DB Name',
-        ROUND(SUM(data_length + index_length) / 1024 / 1024, 1)   MB
-FROM information_schema.tables 
-GROUP BY table_schema order by MB;
+SELECT 
+    ROW_FORMAT,
+    TABLE_ROWS,
+    DATA_LENGTH,
+    INDEX_LENGTH,
+    MAX_DATA_LENGTH,
+    DATA_FREE,
+    TABLE_SCHEMA,
+    TABLE_NAME,
+    ENGINE
+FROM
+    information_schema.TABLES
+    order by data_free desc, TABLE_NAME
+
+OPTIMIZE TABLE  db.tables
+
 ```
+
+释放那些无效的空间
+
 
 
 ## 参考链接
@@ -239,4 +268,6 @@ GROUP BY table_schema order by MB;
 
 ### 阿里云
 
+1. [参数调优建议](https://help.aliyun.com/document_detail/63255.html)
 1. [10分钟搭建MySQL Binlog分析+可视化方案](https://yq.aliyun.com/articles/338423)
+1. [如何排查MySQL实例空间满后自动锁定的原因](https://help.aliyun.com/knowledge_detail/51682.html)
