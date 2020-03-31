@@ -74,10 +74,11 @@ roleRef:
 
 存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
 
-```
-mkdir -p /root/kubernetes/$(namespace)/elasticsearch/data
-sudo chmod 775  /root/kubernetes/$(namespace)/elasticsearch/data -R
-chown 1000:0  /root/kubernetes/$(namespace)/elasticsearch/data -R
+```bash
+cd /root/kubernetes/$(namespace)/elasticsearch/data
+mkdir -p $(pwd)
+sudo chmod 775  $(pwd) -R
+chown 1000:0  $(pwd) -R
 ```
 
 ```
@@ -211,7 +212,7 @@ spec:
               fieldPath: metadata.name 
               # fieldPath: spec.nodeName 
         securityContext: 
-          privileged: true        
+          privileged: true
       volumes:
       - name: host
         hostPath:
@@ -230,11 +231,11 @@ spec:
   ports:
     - name: discovery
       port: 9300
-      targetPort: discovery   
+      targetPort: discovery
     - name: restful
       port: 9200
       protocol: TCP
-      targetPort: restful      
+      targetPort: restful
   selector:
     app: myelasticsearch
     elasticsearch-role: all
@@ -243,10 +244,10 @@ spec:
 
 这个编排精髓的一点在于用了节点`affinity`使每一个节点最多会运行一个容器,确保了高可用.
 
-如果要吧节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
+如果要把节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
 
 
-```
+```yaml
 kind: Service
 apiVersion: v1
 metadata:
@@ -269,22 +270,17 @@ spec:
 1. [学习Elasticsearch之4：配置一个3节点Elasticsearch集群(不区分主节点和数据节点)](http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/)
 1. [谈一谈Elasticsearch的集群部署](https://blog.csdn.net/zwgdft/article/details/54585644)
 1. [官方docker镜像构建项目](https://github.com/elastic/elasticsearch-docker/tree/master/templates)
-1. [Elasticsearch模块功能之-自动发现（Discovery）
-](https://blog.csdn.net/changong28/article/details/38377863)
+1. [Elasticsearch模块功能之-自动发现（Discovery）](https://blog.csdn.net/changong28/article/details/38377863)
 1. [订阅费用](https://www.elastic.co/subscriptions)
 2. [故障转移](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
 3. [节点配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
 4. [Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
 1. [elasticsearch-cloud-kubernetes](https://github.com/fabric8io/elasticsearch-cloud-kubernetes)
-1. [干货 | 吃透Elasticsearch 堆内存](https://blog.csdn.net/laoyang360/article/details/79998974)
-
-[x] 配置账户
-
-- 插件安装
-
-[elasticsearch-docker-plugin-management](https://www.elastic.co/blog/elasticsearch-docker-plugin-management)
+1. [吃透Elasticsearch 堆内存](https://blog.csdn.net/laoyang360/article/details/79998974)
 
 ### 安装插件
+
+[elasticsearch-docker-plugin-management](https://www.elastic.co/blog/elasticsearch-docker-plugin-management)
 
 GET /_cat/plugins?v&s=component&h=name,component,version,description
 
@@ -312,8 +308,17 @@ datastore.secure = False
 
 
 更新的时候务必使用灰度更新,从序号最大的镜像开始更新,不然分片丢失了,相信我,你会死的很惨
-```
-kubectl patch statefulset elasticsearch -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":0}}}}' -n test
-kubectl patch statefulset elasticsearch -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":1}}}}' -n test
-kubectl patch statefulset elasticsearch -p '{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":2}}}}' -n test
+
+```bash
+kubectl patch statefulset elasticsearch -p \
+'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":0}}}}' \
+-n test
+
+kubectl patch statefulset elasticsearch -p \
+'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":1}}}}' \
+-n test
+
+kubectl patch statefulset elasticsearch -p \
+'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":2}}}}' \
+-n test
 ```
