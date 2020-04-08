@@ -21,6 +21,25 @@ sudo gem install bundler jekyll
 npm run watch
 ```
 
+## 新建博文
+
+now=$(date "+%Y-%m-%d")
+cat >> _posts/$now-.md<<EOF
+---
+layout:       post
+title:        ""
+subtitle:     ""
+date:         $now
+author:       "Zeusro"
+header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-mask:  0.3
+catalog:      true
+multilingual: true
+tags:
+    - 
+---
+EOF
+
 ## 备注
 
 - [raw](https://shopify.github.io/liquid/tags/raw/)
