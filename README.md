@@ -34,7 +34,7 @@ npm run watch
 layout:       post
 title:        ""
 subtitle:     ""
-date:          
+date:         
 author:       "Zeusro"
 header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
 header-mask:  0.3
