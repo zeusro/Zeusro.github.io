@@ -1,5 +1,5 @@
 now    := $(shell date)
-today  =  $(shell date "+%Y-%m-%d")
+today  ?=  $(shell date "+%Y-%m-%d")
 post   ?= ""
 
 define NEW_POST=
