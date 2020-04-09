@@ -238,6 +238,8 @@ ENTRYPOINT ["/kube-eventer"]
 
 [gocd](https://github.com/gocd/gocd)
 
+[理想的DevOp流程怎么做？看看Slack的代码部署实践](https://mp.weixin.qq.com/s?__biz=MzAwMDU1MTE1OQ==&mid=2653552052&idx=1&sn=bbc6dd52c9451dc807530ff5af2f50fd&chksm=813a6c2cb64de53a1d6818d72974150805dffcfda32f896c67e158a047b706036ab433b11e1d&mpshare=1&scene=23&srcid=&sharer_sharetime=1586425526712&sharer_shareid=75da3ea8231bb63b18e055a6e877643e#rd)
+
 ## 总结
 
 `DevOps` 核心思路只有一个：**不断提高应用开发，部署，监控，升级/迭代效率**。
