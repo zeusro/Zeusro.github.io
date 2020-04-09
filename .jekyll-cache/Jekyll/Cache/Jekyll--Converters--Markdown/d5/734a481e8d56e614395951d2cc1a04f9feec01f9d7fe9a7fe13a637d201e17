@@ -1,0 +1,431 @@
+I"\e<h2 id="缘起">缘起</h2>
+
+<p>起源来自阿里云的<a href="https://help.aliyun.com/document_detail/125679.html">文档</a></p>
+
+<p>发现能对 kubernetes Event 进行消息推送之后，非常喜欢。但是其本身的钉钉推送方式不好用，所以决定亲自修改。</p>
+
+<h2 id="决定开发">决定开发</h2>
+
+<p>项目源代码位于 <a href="https://github.com/AliyunContainerService/kube-eventer">kube-eventer</a>
+，顺便了解了一下kubernetes 的 Event 机制</p>
+
+<ol>
+  <li>Controller Manager 会记录节点注册和销毁的事件、Deployment 扩容和升级的事件</li>
+  <li>kubelet 会记录镜像回收事件、volume 无法挂载事件。基本上所有的事件都在<code class="highlighter-rouge">kubernetes/pkg/kubelet/events/event.go</code>l里面定义</li>
+</ol>
+
+<h2 id="event-结构体">Event 结构体</h2>
+
+<p>Event 结构体定义在 <code class="highlighter-rouge">"k8s.io/api/core/v1"</code>里面</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+</pre></td><td class="rouge-code"><pre><span class="c">// Event is a report of an event somewhere in the cluster.</span>
+<span class="k">type</span> <span class="n">Event</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="n">metav1</span><span class="o">.</span><span class="n">TypeMeta</span> <span class="s">`json:",inline"`</span>
+	<span class="c">// Standard object's metadata.</span>
+	<span class="c">// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#metadata</span>
+	<span class="n">metav1</span><span class="o">.</span><span class="n">ObjectMeta</span> <span class="s">`json:"metadata" protobuf:"bytes,1,opt,name=metadata"`</span>
+
+	<span class="c">// The object that this event is about.</span>
+	<span class="n">InvolvedObject</span> <span class="n">ObjectReference</span> <span class="s">`json:"involvedObject" protobuf:"bytes,2,opt,name=involvedObject"`</span>
+
+	<span class="c">// This should be a short, machine understandable string that gives the reason</span>
+	<span class="c">// for the transition into the object's current status.</span>
+	<span class="c">// TODO: provide exact specification for format.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Reason</span> <span class="kt">string</span> <span class="s">`json:"reason,omitempty" protobuf:"bytes,3,opt,name=reason"`</span>
+
+	<span class="c">// A human-readable description of the status of this operation.</span>
+	<span class="c">// TODO: decide on maximum length.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Message</span> <span class="kt">string</span> <span class="s">`json:"message,omitempty" protobuf:"bytes,4,opt,name=message"`</span>
+
+	<span class="c">// The component reporting this event. Should be a short machine understandable string.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Source</span> <span class="n">EventSource</span> <span class="s">`json:"source,omitempty" protobuf:"bytes,5,opt,name=source"`</span>
+
+	<span class="c">// The time at which the event was first recorded. (Time of server receipt is in TypeMeta.)</span>
+	<span class="c">// +optional</span>
+	<span class="n">FirstTimestamp</span> <span class="n">metav1</span><span class="o">.</span><span class="n">Time</span> <span class="s">`json:"firstTimestamp,omitempty" protobuf:"bytes,6,opt,name=firstTimestamp"`</span>
+
+	<span class="c">// The time at which the most recent occurrence of this event was recorded.</span>
+	<span class="c">// +optional</span>
+	<span class="n">LastTimestamp</span> <span class="n">metav1</span><span class="o">.</span><span class="n">Time</span> <span class="s">`json:"lastTimestamp,omitempty" protobuf:"bytes,7,opt,name=lastTimestamp"`</span>
+
+	<span class="c">// The number of times this event has occurred.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Count</span> <span class="kt">int32</span> <span class="s">`json:"count,omitempty" protobuf:"varint,8,opt,name=count"`</span>
+
+	<span class="c">// Type of this event (Normal, Warning), new types could be added in the future</span>
+	<span class="c">// +optional</span>
+	<span class="n">Type</span> <span class="kt">string</span> <span class="s">`json:"type,omitempty" protobuf:"bytes,9,opt,name=type"`</span>
+
+	<span class="c">// Time when this Event was first observed.</span>
+	<span class="c">// +optional</span>
+	<span class="n">EventTime</span> <span class="n">metav1</span><span class="o">.</span><span class="n">MicroTime</span> <span class="s">`json:"eventTime,omitempty" protobuf:"bytes,10,opt,name=eventTime"`</span>
+
+	<span class="c">// Data about the Event series this event represents or nil if it's a singleton Event.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Series</span> <span class="o">*</span><span class="n">EventSeries</span> <span class="s">`json:"series,omitempty" protobuf:"bytes,11,opt,name=series"`</span>
+
+	<span class="c">// What action was taken/failed regarding to the Regarding object.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Action</span> <span class="kt">string</span> <span class="s">`json:"action,omitempty" protobuf:"bytes,12,opt,name=action"`</span>
+
+	<span class="c">// Optional secondary object for more complex actions.</span>
+	<span class="c">// +optional</span>
+	<span class="n">Related</span> <span class="o">*</span><span class="n">ObjectReference</span> <span class="s">`json:"related,omitempty" protobuf:"bytes,13,opt,name=related"`</span>
+
+	<span class="c">// Name of the controller that emitted this Event, e.g. `kubernetes.io/kubelet`.</span>
+	<span class="c">// +optional</span>
+	<span class="n">ReportingController</span> <span class="kt">string</span> <span class="s">`json:"reportingComponent" protobuf:"bytes,14,opt,name=reportingComponent"`</span>
+
+	<span class="c">// ID of the controller instance, e.g. `kubelet-xyzf`.</span>
+	<span class="c">// +optional</span>
+	<span class="n">ReportingInstance</span> <span class="kt">string</span> <span class="s">`json:"reportingInstance" protobuf:"bytes,15,opt,name=reportingInstance"`</span>
+<span class="p">}</span>
+
+
+<span class="c">// ObjectReference contains enough information to let you inspect or modify the referred object.</span>
+<span class="c">// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object</span>
+<span class="k">type</span> <span class="n">ObjectReference</span> <span class="k">struct</span> <span class="p">{</span>
+	<span class="c">// Kind of the referent.</span>
+	<span class="c">// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds</span>
+	<span class="c">// +optional</span>
+	<span class="n">Kind</span> <span class="kt">string</span> <span class="s">`json:"kind,omitempty" protobuf:"bytes,1,opt,name=kind"`</span>
+	<span class="c">// Namespace of the referent.</span>
+	<span class="c">// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/</span>
+	<span class="c">// +optional</span>
+	<span class="n">Namespace</span> <span class="kt">string</span> <span class="s">`json:"namespace,omitempty" protobuf:"bytes,2,opt,name=namespace"`</span>
+	<span class="c">// Name of the referent.</span>
+	<span class="c">// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names</span>
+	<span class="c">// +optional</span>
+	<span class="n">Name</span> <span class="kt">string</span> <span class="s">`json:"name,omitempty" protobuf:"bytes,3,opt,name=name"`</span>
+	<span class="c">// UID of the referent.</span>
+	<span class="c">// More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids</span>
+	<span class="c">// +optional</span>
+	<span class="n">UID</span> <span class="n">types</span><span class="o">.</span><span class="n">UID</span> <span class="s">`json:"uid,omitempty" protobuf:"bytes,4,opt,name=uid,casttype=k8s.io/apimachinery/pkg/types.UID"`</span>
+	<span class="c">// API version of the referent.</span>
+	<span class="c">// +optional</span>
+	<span class="n">APIVersion</span> <span class="kt">string</span> <span class="s">`json:"apiVersion,omitempty" protobuf:"bytes,5,opt,name=apiVersion"`</span>
+	<span class="c">// Specific resourceVersion to which this reference is made, if any.</span>
+	<span class="c">// More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#concurrency-control-and-consistency</span>
+	<span class="c">// +optional</span>
+	<span class="n">ResourceVersion</span> <span class="kt">string</span> <span class="s">`json:"resourceVersion,omitempty" protobuf:"bytes,6,opt,name=resourceVersion"`</span>
+
+	<span class="c">// If referring to a piece of an object instead of an entire object, this string</span>
+	<span class="c">// should contain a valid JSON/Go field access statement, such as desiredState.manifest.containers[2].</span>
+	<span class="c">// For example, if the object reference is to a container within a pod, this would take on a value like:</span>
+	<span class="c">// "spec.containers{name}" (where "name" refers to the name of the container that triggered</span>
+	<span class="c">// the event) or if no container name is specified "spec.containers[2]" (container with</span>
+	<span class="c">// index 2 in this pod). This syntax is chosen only to have some well-defined way of</span>
+	<span class="c">// referencing a part of an object.</span>
+	<span class="c">// TODO: this design is not final and this field is subject to change in the future.</span>
+	<span class="c">// +optional</span>
+	<span class="n">FieldPath</span> <span class="kt">string</span> <span class="s">`json:"fieldPath,omitempty" protobuf:"bytes,7,opt,name=fieldPath"`</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-json highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+</pre></td><td class="rouge-code"><pre><span class="err">//</span><span class="w"> </span><span class="err">kubectl</span><span class="w"> </span><span class="err">get</span><span class="w"> </span><span class="err">event</span><span class="w"> </span><span class="err">-o</span><span class="w"> </span><span class="err">json</span><span class="w">
+</span><span class="p">{</span><span class="w">
+    </span><span class="nl">"apiVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"v1"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"items"</span><span class="p">:</span><span class="w"> </span><span class="p">[{</span><span class="w">
+        </span><span class="nl">"apiVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"v1"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"count"</span><span class="p">:</span><span class="w"> </span><span class="mi">2416</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"eventTime"</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"firstTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-02-14T12:22:43Z"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"involvedObject"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"apiVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"v1"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Service"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-sb-svc"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"namespace"</span><span class="p">:</span><span class="w"> </span><span class="s2">"default"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"resourceVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"264028180"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"96117aad-4f24-11ea-a87c-00163e04f1e0"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Event"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"lastTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-02-19T13:08:25Z"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"message"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Port 666 was assigned to multiple services; please recreate service"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"creationTimestamp"</span><span class="p">:</span><span class="w"> </span><span class="s2">"2020-02-14T12:22:43Z"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"name"</span><span class="p">:</span><span class="w"> </span><span class="s2">"my-sb-svc.15f344468d77364d"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"namespace"</span><span class="p">:</span><span class="w"> </span><span class="s2">"default"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"resourceVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">"267629591"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"selfLink"</span><span class="p">:</span><span class="w"> </span><span class="s2">"/api/v1/namespaces/test/events/my-sb-svc.15f344468d77364d"</span><span class="p">,</span><span class="w">
+            </span><span class="nl">"uid"</span><span class="p">:</span><span class="w"> </span><span class="s2">"b3a56707-4f24-11ea-81ec-00163e0a865a"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"reason"</span><span class="p">:</span><span class="w"> </span><span class="s2">"PortAlreadyAllocated"</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"reportingComponent"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"reportingInstance"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"source"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+            </span><span class="nl">"component"</span><span class="p">:</span><span class="w"> </span><span class="s2">"portallocator-repair-controller"</span><span class="w">
+        </span><span class="p">},</span><span class="w">
+        </span><span class="nl">"type"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Warning"</span><span class="w">
+    </span><span class="p">}],</span><span class="w">
+    </span><span class="nl">"kind"</span><span class="p">:</span><span class="w"> </span><span class="s2">"List"</span><span class="p">,</span><span class="w">
+    </span><span class="nl">"metadata"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w">
+        </span><span class="nl">"resourceVersion"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="p">,</span><span class="w">
+        </span><span class="nl">"selfLink"</span><span class="p">:</span><span class="w"> </span><span class="s2">""</span><span class="w">
+    </span><span class="p">}</span><span class="w">
+</span><span class="p">}</span><span class="w">
+</span></pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="设计细节">设计细节</h2>
+
+<p>程序的入口是
+<a href="https://note.youdao.com/">eventer.go</a></p>
+
+<p><code class="highlighter-rouge">sink</code> 是程序的输出端，比如可以输出到钉钉，elasticsearch等等。
+这一块插件会在一开始通过</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">sinkManager</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">sinks</span><span class="o">.</span><span class="n">NewEventSinkManager</span><span class="p">(</span><span class="n">sinkList</span><span class="p">,</span> <span class="n">sinks</span><span class="o">.</span><span class="n">DefaultSinkExportEventsTimeout</span><span class="p">,</span> <span class="n">sinks</span><span class="o">.</span><span class="n">DefaultSinkStopTimeout</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个方法，以<code class="highlighter-rouge">go func()</code> 形式并行启动所有 <code class="highlighter-rouge">sink</code> 。</p>
+
+<p>真正的主角是 manager</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="n">manager</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">manager</span><span class="o">.</span><span class="n">NewManager</span><span class="p">(</span><span class="n">sources</span><span class="p">[</span><span class="m">0</span><span class="p">],</span> <span class="n">sinkManager</span><span class="p">,</span> <span class="o">*</span><span class="n">argFrequency</span><span class="p">)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>它接受 <code class="highlighter-rouge">sinkManager</code> 和其他一系列参数，启动主函数。重复展开定义之后，会找到<code class="highlighter-rouge">Housekeep</code> 这个方法</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="rouge-code"><pre><span class="k">func</span> <span class="p">(</span><span class="n">rm</span> <span class="o">*</span><span class="n">realManager</span><span class="p">)</span> <span class="n">Housekeep</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">for</span> <span class="p">{</span>
+		<span class="c">// Try to infovke housekeep at fixed time.</span>
+		<span class="n">now</span> <span class="o">:=</span> <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">()</span>
+		<span class="n">start</span> <span class="o">:=</span> <span class="n">now</span><span class="o">.</span><span class="n">Truncate</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+		<span class="n">end</span> <span class="o">:=</span> <span class="n">start</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="n">rm</span><span class="o">.</span><span class="n">frequency</span><span class="p">)</span>
+		<span class="n">timeToNextSync</span> <span class="o">:=</span> <span class="n">end</span><span class="o">.</span><span class="n">Sub</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
+
+		<span class="k">select</span> <span class="p">{</span>
+		<span class="k">case</span> <span class="o">&lt;-</span><span class="n">time</span><span class="o">.</span><span class="n">After</span><span class="p">(</span><span class="n">timeToNextSync</span><span class="p">)</span><span class="o">:</span>
+			<span class="n">rm</span><span class="o">.</span><span class="n">housekeep</span><span class="p">()</span>
+		<span class="k">case</span> <span class="o">&lt;-</span><span class="n">rm</span><span class="o">.</span><span class="n">stopChan</span><span class="o">:</span>
+			<span class="n">rm</span><span class="o">.</span><span class="n">sink</span><span class="o">.</span><span class="n">Stop</span><span class="p">()</span>
+			<span class="k">return</span>
+		<span class="p">}</span>
+	<span class="p">}</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个方法写得非常简单明了，无限递归调用，除非接收到 <code class="highlighter-rouge">stopChan</code> 这个停止信号。</p>
+
+<p>除此以外，还默认监听了 <code class="highlighter-rouge">0.0.0.0:8084</code> 作为健康检查的端口。</p>
+
+<p>Event 的获取也相当高效</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre><span class="c">// NewKubernetesSource 事件来源</span>
+<span class="k">func</span> <span class="n">NewKubernetesSource</span><span class="p">(</span><span class="n">uri</span> <span class="o">*</span><span class="n">url</span><span class="o">.</span><span class="n">URL</span><span class="p">)</span> <span class="p">(</span><span class="o">*</span><span class="n">KubernetesEventSource</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="n">kubeConfig</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">kubeconfig</span><span class="o">.</span><span class="n">GetKubeClientConfig</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+	<span class="p">}</span>
+	<span class="n">kubeClient</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">kubeclient</span><span class="o">.</span><span class="n">NewForConfig</span><span class="p">(</span><span class="n">kubeConfig</span><span class="p">)</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="no">nil</span><span class="p">,</span> <span class="n">err</span>
+	<span class="p">}</span>
+	<span class="n">eventClient</span> <span class="o">:=</span> <span class="n">kubeClient</span><span class="o">.</span><span class="n">CoreV1</span><span class="p">()</span><span class="o">.</span><span class="n">Events</span><span class="p">(</span><span class="n">kubeapi</span><span class="o">.</span><span class="n">NamespaceAll</span><span class="p">)</span>
+	<span class="n">result</span> <span class="o">:=</span> <span class="n">KubernetesEventSource</span><span class="p">{</span>
+		<span class="n">localEventsBuffer</span><span class="o">:</span> <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="o">*</span><span class="n">kubeapi</span><span class="o">.</span><span class="n">Event</span><span class="p">,</span> <span class="n">LocalEventsBufferSize</span><span class="p">),</span>
+		<span class="n">stopChannel</span><span class="o">:</span>       <span class="nb">make</span><span class="p">(</span><span class="k">chan</span> <span class="k">struct</span><span class="p">{}),</span>
+		<span class="n">eventClient</span><span class="o">:</span>       <span class="n">eventClient</span><span class="p">,</span>
+	<span class="p">}</span>
+	<span class="k">go</span> <span class="n">result</span><span class="o">.</span><span class="n">watch</span><span class="p">()</span>
+	<span class="k">return</span> <span class="o">&amp;</span><span class="n">result</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="结语">结语</h2>
+
+<p>这个项目的开发者语言表达非常精炼，这个项目很适用于学习 golang 并发。</p>
+
+<ol>
+  <li><a href="https://www.kubernetes.org.cn/1031.html">Kubernetes Events介绍（上）</a></li>
+  <li><a href="https://www.kubernetes.org.cn/1090.html">Kubernetes Events介绍（中）</a></li>
+  <li><a href="https://www.kubernetes.org.cn/1195.html">Kubernetes Events介绍（下）</a></li>
+  <li><a href="https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/">kubelet 源码分析： 事件处理</a></li>
+</ol>
+:ET

@@ -1,0 +1,44 @@
+I"�<p>fork+pull request 这种基础操作就不用提了吧。</p>
+
+<h2 id="节操">节操</h2>
+
+<p>但一般大型项目都会引入一个节操的机制，就Kubernetes类项目来说，在遵守代码提交规范的基础上，需要先同意CLA之后，pr才有被合并的机会。</p>
+
+<p>如果贸贸然直接pr，就会被<code class="highlighter-rouge">k8s-ci-robot</code>这个机器人账户直接打上<code class="highlighter-rouge">cncf-cla: no</code>.</p>
+
+<p>那么要怎么同意CLA呢？</p>
+
+<h2 id="注册">注册</h2>
+
+<p>根据这个指示，按个人或者组织申请账户，关联起来就行。我当时直接选择用GitHub账户关联 Linux 基金会。</p>
+
+<p>https://github.com/kubernetes/community/blob/master/CLA.md#the-contributor-license-agreement</p>
+
+<ol>
+  <li>验证邮箱（该邮箱要跟GitHub账户邮箱一致）</li>
+  <li>重设密码</li>
+  <li>电子签署SLA文件</li>
+</ol>
+
+<h2 id="修正提交信息">修正提交信息</h2>
+
+<p>之前用电脑提交代码的时候，都是不填email的，结果导致提交上去的个人信息是一个空的头像，于是我只得设置一下email，跟GitHub账户保持一致。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>git config <span class="nt">--global</span> user.email <span class="s2">"email@example.com"</span>
+git commit <span class="nt">--amend</span> <span class="nt">--reset-author</span>
+git push <span class="nt">--force</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这通操作之后，提交信息跟 GitHub/Linux 基金会注册信息保持一致啦。但是<code class="highlighter-rouge">cncf-cla: no</code>这个标签还在。</p>
+
+<p>于是我向天空大喊一声“I signed it”</p>
+
+<p><code class="highlighter-rouge">k8s-ci-robot</code>出来给我重新验证了cla，并打上<code class="highlighter-rouge">cncf-cla: yes</code>标签，合并的流程进入到review阶段</p>
+
+<h2 id="友好交流撕逼">友好交流（撕逼）</h2>
+
+<p>https://github.com/kubernetes-sigs/kustomize/pull/1204</p>
+:ET

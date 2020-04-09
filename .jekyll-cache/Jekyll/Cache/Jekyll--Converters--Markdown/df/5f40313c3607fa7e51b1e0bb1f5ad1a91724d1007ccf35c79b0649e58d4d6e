@@ -1,0 +1,216 @@
+I"6"<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre>graph TB
+g(Comparable&lt;Delayed&gt;)--&gt;A
+A(Delayed)--&gt;C(ScheduledFuture&lt;V&gt;)
+D(Runnable)--&gt;e(RunnableFuture&lt;V&gt;)
+F(Future&lt;V&gt;)--&gt;e(RunnableFuture&lt;V&gt;)
+F--&gt;C
+e--&gt;B(RunnableScheduledFuture&lt;V&gt;)
+C--&gt;B
+cs(CompletionStage&lt;T&gt;)--&gt;cf(CompletableFuture&lt;T&gt;)
+F--&gt;cf
+F--&gt;cc(CountedCompleter&lt;T&gt;)
+e--&gt;ft(FutureTask)
+F--&gt;fjt(ForkJoinTask&lt;V&gt;)
+fjt--&gt;cct(CountedCompleter&lt;T&gt;)
+fjt--&gt;rsa(RecursiveAction)
+fjt--&gt;rtt(RecursiveTask&lt;V&gt;)
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/img/in-post/future/future.png" alt="img" /></p>
+
+<h3 id="future">Future<V></V></h3>
+
+<p>上图可以看出<code class="highlighter-rouge">Future&lt;V&gt;</code>地位超凡,基本上很多成员都是他”儿子”</p>
+
+<p>Future<V>表示异步运算的结果</V></p>
+
+<h3 id="scheduledfuture">ScheduledFuture<V></V></h3>
+
+<p>代表了一种预期的任务,比如可以用<code class="highlighter-rouge">ScheduledFuture</code>配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate),延迟作业(scheduleWithFixedDelay)</p>
+
+<h3 id="runnablescheduledfuture">RunnableScheduledFuture<V></V></h3>
+
+<p>这是个接口,得自己实现.</p>
+
+<p>可用于一次性任务或者周期性任务.</p>
+
+<p>这里可以参考他的子接口.ScheduledFuture的用法</p>
+
+<h3 id="runnablefuture">RunnableFuture</h3>
+
+<p>这是个接口,得自己实现.</p>
+
+<h3 id="futuretask">FutureTask</h3>
+
+<p>可用<code class="highlighter-rouge">Callable&lt;V&gt;</code>和<code class="highlighter-rouge">Runnable</code>初始化.<code class="highlighter-rouge">Callable&lt;V&gt;</code>带返回值.</p>
+
+<p>可配合ExecutorService实现多线程任务分发</p>
+
+<h3 id="completablefuture">CompletableFuture<T></T></h3>
+
+<p>可以用来创建链式服务(1启动多任务)</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+</pre></td><td class="rouge-code"><pre><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span><span class="o">;</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">InterruptedException</span><span class="o">,</span> <span class="nc">ExecutionException</span> <span class="o">{</span>
+
+        <span class="nc">CompletableFuture</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">future</span> <span class="o">=</span> <span class="nc">CompletableFuture</span><span class="o">.</span><span class="na">supplyAsync</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1</span><span class="o">);</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+                <span class="k">throw</span> <span class="k">new</span> <span class="nf">IllegalStateException</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+            <span class="o">}</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="k">return</span> <span class="s">"end 1"</span><span class="o">;</span>
+        <span class="o">});</span>
+
+        <span class="n">future</span><span class="o">.</span><span class="na">thenApply</span><span class="o">((</span><span class="n">s</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="c1">//把上个任务的结果传递到子任务中</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">s</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"end 2"</span><span class="o">);</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="k">return</span> <span class="s">"hhh"</span><span class="o">;</span>
+        <span class="o">});</span>
+        <span class="n">future</span><span class="o">.</span><span class="na">thenRun</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">{</span>
+            <span class="k">try</span> <span class="o">{</span>
+                <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">1000</span><span class="o">);</span>
+                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">&lt;&lt;</span> <span class="mi">1</span><span class="o">;</span>
+            <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">InterruptedException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+
+            <span class="o">}</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"CompletableFutureExample end"</span><span class="o">);</span>
+        <span class="o">});</span>
+        <span class="c1">//通过这个信号,持续等待子线程运行完毕</span>
+        <span class="k">while</span> <span class="o">(</span><span class="n">i</span> <span class="o">!=</span> <span class="mi">8</span><span class="o">)</span> <span class="o">{</span>
+            <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="mi">500</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"继续等待"</span><span class="o">);</span>
+        <span class="o">}</span>
+<span class="c1">//        future.join();</span>
+<span class="c1">//        CompletableFuture.allOf(future).join();</span>
+    <span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="countedcompleter">CountedCompleter<T></T></h3>
+
+<p>CountedCompleter:任务可能产生结果，也可能不产生结果。</p>
+
+<p>CountedCompleter 在任务完成执行后会触发执行一个自定义的钩子函数。</p>
+
+<h3 id="recursiveaction">RecursiveAction</h3>
+
+<p>跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`,但是`RecursiveAction`不产生结果.</V></T></p>
+
+<h3 id="recursivetask">RecursiveTask<V></V></h3>
+
+<p>RecursiveTask类的实例表示产生结果的任务。</p>
+
+<p>特点在于可递归执行.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre></td><td class="rouge-code"><pre>public class RecursiveTaskExample extends RecursiveTask&lt;Integer&gt; {
+    final int n;
+
+    RecursiveTaskExample(int n) {
+        this.n = n;
+    }
+
+    /**
+     * The main computation performed by this task.
+     *
+     * @return the result of the computation
+     */
+    @Override
+    protected Integer compute() {
+        if (n &lt;= 1) {
+            return n;
+        }
+        RecursiveTaskExample f1 = new RecursiveTaskExample(n - 1);
+        f1.fork();
+        RecursiveTaskExample f2 = new RecursiveTaskExample(n - 2);
+        return f2.compute() + f1.join();
+    }
+}
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>参考链接:</p>
+
+<ol>
+  <li><a href="https://www.jianshu.com/p/6a14d0b54b8d">JUC源码分析-线程池篇（五）：ForkJoinPool - 2</a></li>
+</ol>
+:ET

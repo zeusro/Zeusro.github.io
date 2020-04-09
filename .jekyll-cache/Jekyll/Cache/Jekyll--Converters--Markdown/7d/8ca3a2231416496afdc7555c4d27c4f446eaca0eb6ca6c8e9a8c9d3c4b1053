@@ -1,0 +1,468 @@
+I"�Q<h2 id="前言">前言</h2>
+
+<p>之前介绍了
+<a href="https://www.zeusro.tech/2018/09/02/give-up-concourse-ci/">Concourse-CI从入门到放弃</a>
+今天来讲讲<code class="highlighter-rouge">Jenkins</code>的划时代版本–<strong>JenkinsX</strong>!</p>
+
+<p><code class="highlighter-rouge">JenkinsX</code>是一个Jenkins的子项目,专门运行在K8S上面.</p>
+
+<p>文章分2部分,第一部分介绍安装,第二部分讲解应用实践.</p>
+
+<h2 id="前期准备">前期准备</h2>
+
+<h3 id="helm">helm</h3>
+
+<p>包括客户端和服务端.<a href="https://helm.sh/docs/chart_template_guide/#getting-started-with-a-chart-template">语法</a>也要了解</p>
+
+<p>运行<code class="highlighter-rouge">helm version</code>确保客户端和服务端都没有问题</p>
+
+<h3 id="本地">本地</h3>
+
+<h4 id="jx">jx</h4>
+
+<p>跟<code class="highlighter-rouge">Concourse-CI</code>差不多,一开始也要安装本地CLI</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>brew tap jenkins-x/jx
+brew <span class="nb">install </span>jx 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre>➜  ~ jx version
+NAME               VERSION
+jx                 1.3.974
+jenkins x platform 0.0.3535
+Kubernetes cluster v1.11.5
+kubectl            v1.13.4
+helm client        v2.10.0+g9ad53aa
+helm server        v2.10.0+g9ad53aa
+git                git version 2.14.3 (Apple Git-98)
+Operating System   Mac OS X 10.13.6 build 17G65
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最佳实践是创建自己的<code class="highlighter-rouge">myvalue.yaml</code>,修改里面的镜像,一步到位,这样就不需要后期修改了</p>
+
+<p>https://jenkins-x.io/getting-started/config/</p>
+
+<h3 id="服务器">服务器</h3>
+
+<p>使用国内阿里云ECS作为服务器.</p>
+
+<p>已经创建了ingress的服务和pod</p>
+
+<h3 id="验证安装">验证安装</h3>
+
+<p><code class="highlighter-rouge">jx compliance run</code>会启动一个新的ns和一系列资源去检查整个集群.但由于镜像都是
+gcr.io的,所以我启动失败了.有信心的直接跳过这一步吧.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>jx compliance run
+jx compliance status
+jx compliance results
+jx compliance delete
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="安装步骤">安装步骤</h2>
+
+<h3 id="jx-install">jx install</h3>
+
+<p><code class="highlighter-rouge">jx install</code> 是对helm的再度封装.参数分为几部分</p>
+
+<p><code class="highlighter-rouge">default-admin-password</code> 是<code class="highlighter-rouge">Jenkins</code>,<code class="highlighter-rouge">grafana</code>,<code class="highlighter-rouge">nexus</code>,<code class="highlighter-rouge">chartmuseum</code>的默认密码,建议设复杂点,不然后期又要修改</p>
+
+<p><code class="highlighter-rouge">--namespace</code>是安装的目标ns.默认是<code class="highlighter-rouge">kube-system</code>;</p>
+
+<p><code class="highlighter-rouge">--ingress</code>指定当前的ingress实例,不指定的话会报错,提示找不到jx-ingress</p>
+
+<p><code class="highlighter-rouge">--domain</code>是最终Jenkins-X的对外域名</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre>jx \
+install \
+--cloud-environment-repo https://github.com/haoshuwei/cloud-environments.git \
+--default-admin-password abcde \
+--provider=kubernetes \
+--namespace $(namespace) \
+--ingress-service=nginx-ingress-lb \
+--ingress-deployment=nginx-ingress-controller \
+--ingress-namespace=kube-system 
+--domain=$(domain)
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>里面有几个重要的选项,我先后选了</p>
+
+<blockquote>
+  <p>Static Master Jenkins</p>
+</blockquote>
+
+<blockquote>
+  <p>Kubernetes Workloads: Automated CI+CD with GitOps Promotion</p>
+</blockquote>
+
+<p>之后会命令行会进入这个等待的状态</p>
+
+<p>waiting for install to be ready, if this is the first time then it will take a while to download images</p>
+
+<p>部署docker镜像,相比一定会碰到不可描述类问题.这时</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>kgpo <span class="nt">-l</span> <span class="nv">release</span><span class="o">=</span>jenkins-x
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>果然发现部分pod启动失败,这时需要把镜像搬回国内,并修改对应的<code class="highlighter-rouge">deploy</code>/<code class="highlighter-rouge">ds</code></p>
+
+<h3 id="配置volume">配置volume</h3>
+
+<h4 id="mongodb">mongodb</h4>
+
+<p>先把<code class="highlighter-rouge">jenkins-x-mongodb</code>关联的镜像转移到国内,再配置PVC</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>jenkins-x-mongodb
+docker.io/bitnami/mongodb:3.6.6-debian-9
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>修改这部分</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>      <span class="na">volumes</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">data</span>
+          <span class="na">persistentVolumeClaim</span><span class="pi">:</span>
+            <span class="na">claimName</span><span class="pi">:</span> <span class="s">jenkins-x-mongodb</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="jenkins-x-chartmuseum">jenkins-x-chartmuseum</h4>
+
+<p>同样是修改volumes这部分</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>      <span class="na">volumes</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">storage-volume</span>
+          <span class="na">persistentVolumeClaim</span><span class="pi">:</span>
+            <span class="na">claimName</span><span class="pi">:</span> <span class="s">jenkins-x-chartmuseum</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="jenkins">jenkins</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+</pre></td><td class="rouge-code"><pre>      volumes:
+        - configMap:
+            defaultMode: 420
+            name: jenkins
+          name: jenkins-config
+        - emptyDir: {}
+          name: plugin-dir
+        - emptyDir: {}
+          name: secrets-dir
+        - name: jenkins-home
+          persistentVolumeClaim:
+            claimName: jenkins
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>推荐使用阿里云NAS</p>
+
+<h3 id="转移k8sgcrio镜像到国内">转移k8s.gcr.io镜像到国内</h3>
+
+<p>Jenkins-X配置了deploy,CronJob,镜像很多都是<code class="highlighter-rouge">gcr.io</code>的,两部分都需要修改</p>
+
+<h4 id="deploy">deploy</h4>
+
+<ul>
+  <li><code class="highlighter-rouge">jenkins-x-controllerteam</code>,<code class="highlighter-rouge">jenkins-x-controllerbuild</code></li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>gcr.io/jenkinsxio/builder-go:0.1.281
+这镜像3.72G左右
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li><code class="highlighter-rouge">jenkins-x-heapster</code></li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>docker pull k8s.gcr.io/heapster:v1.5.2
+docker pull k8s.gcr.io/addon-resizer:1.7
+# docker tag k8s.gcr.io/addon-resizer:1.7 $newregistry'addon-resizer:1.7'
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="cronjob">CronJob</h4>
+
+<ul>
+  <li>jenkins-x-gcpreviews</li>
+</ul>
+
+<p>转移完成后,pod基本上就全起来了</p>
+
+<h2 id="最后成果">最后成果</h2>
+
+<p><code class="highlighter-rouge">jenkins</code>,<code class="highlighter-rouge">monocular</code>和<code class="highlighter-rouge">nexus</code>可以直接访问,其他的暂时不用管</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="c"># $(app).$(namespace).$(domain)</span>
+➜  ~ kg ing
+NAME                         HOSTS                                             ADDRESS        PORTS     AGE
+chartmuseum                  chartmuseum.<span class="si">$(</span>namespace<span class="si">)</span>.<span class="si">$(</span>domain<span class="si">)</span>       172.18.221.8   80        17h
+docker-registry              docker-registry.<span class="si">$(</span>namespace<span class="si">)</span>.<span class="si">$(</span>domain<span class="si">)</span>   172.18.221.8   80        17h
+jenkins                      jenkins.<span class="si">$(</span>namespace<span class="si">)</span>.<span class="si">$(</span>domain<span class="si">)</span>           172.18.221.8   80        17h
+monocular                    monocular.<span class="si">$(</span>namespace<span class="si">)</span>.<span class="si">$(</span>domain<span class="si">)</span>         172.18.221.8   80        17h
+nexus                        nexus.<span class="si">$(</span>namespace<span class="si">)</span>.<span class="si">$(</span>domain<span class="si">)</span>             172.18.221.8   80        17h
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+</pre></td><td class="rouge-code"><pre>➜  ~ kg all <span class="nt">-l</span> <span class="nv">release</span><span class="o">=</span>jenkins-x
+NAME                                                    READY   STATUS         RESTARTS   AGE
+pod/jenkins-6879786cbc-6p8f7                            1/1     Running        0          17h
+pod/jenkins-x-chartmuseum-7557886767-rbvlf              1/1     Running        0          6m
+pod/jenkins-x-controllerbuild-74f7bd9f66-5b5v6          1/1     Running        0          16m
+pod/jenkins-x-controllercommitstatus-5947679dc4-ltft7   1/1     Running        0          17h
+pod/jenkins-x-controllerrole-5d58fcdd9f-lggwj           1/1     Running        0          17h
+pod/jenkins-x-controllerteam-75c7565bdb-dmcgw           1/1     Running        0          44m
+pod/jenkins-x-controllerworkflow-578bd4f984-qntf4       1/1     Running        0          17h
+pod/jenkins-x-docker-registry-7b56b4f555-4p6hx          1/1     Running        0          17h
+pod/jenkins-x-gcactivities-1552708800-7qcdc             0/1     Completed      0          10m
+pod/jenkins-x-gcpods-1552708800-wfssj                   0/1     Completed      0          10m
+pod/jenkins-x-gcpreviews-1552654800-pptmn               0/1     ErrImagePull   0          24s
+pod/jenkins-x-mongodb-6bd8cc478f-55wwm                  1/1     Running        1          18m
+pod/jenkins-x-nexus-695cc97bd6-qljhk                    1/1     Running        0          17h
+
+NAME                                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT<span class="o">(</span>S<span class="o">)</span>     AGE
+service/heapster                    ClusterIP   172.30.2.12     &lt;none&gt;        8082/TCP    17h
+service/jenkins                     ClusterIP   172.30.5.27     &lt;none&gt;        8080/TCP    17h
+service/jenkins-x-chartmuseum       ClusterIP   172.30.14.160   &lt;none&gt;        8080/TCP    17h
+service/jenkins-x-docker-registry   ClusterIP   172.30.13.194   &lt;none&gt;        5000/TCP    17h
+service/jenkins-x-mongodb           ClusterIP   172.30.13.146   &lt;none&gt;        27017/TCP   17h
+service/nexus                       ClusterIP   172.30.4.7      &lt;none&gt;        80/TCP      17h
+
+NAME                                               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/jenkins                            1         1         1            1           17h
+deployment.apps/jenkins-x-chartmuseum              1         1         1            1           17h
+deployment.apps/jenkins-x-controllerbuild          1         1         1            1           17h
+deployment.apps/jenkins-x-controllercommitstatus   1         1         1            1           17h
+deployment.apps/jenkins-x-controllerrole           1         1         1            1           17h
+deployment.apps/jenkins-x-controllerteam           1         1         1            1           17h
+deployment.apps/jenkins-x-controllerworkflow       1         1         1            1           17h
+deployment.apps/jenkins-x-docker-registry          1         1         1            1           17h
+deployment.apps/jenkins-x-mongodb                  1         1         1            1           17h
+deployment.apps/jenkins-x-nexus                    1         1         1            1           17h
+
+NAME                                                          DESIRED   CURRENT   READY   AGE
+replicaset.apps/jenkins-6879786cbc                            1         1         1       17h
+replicaset.apps/jenkins-x-chartmuseum-7557886767              1         1         1       6m
+replicaset.apps/jenkins-x-chartmuseum-cc467cfc                0         0         0       17h
+replicaset.apps/jenkins-x-controllerbuild-57dcb9fd5f          0         0         0       17h
+replicaset.apps/jenkins-x-controllerbuild-74f7bd9f66          1         1         1       16m
+replicaset.apps/jenkins-x-controllercommitstatus-5947679dc4   1         1         1       17h
+replicaset.apps/jenkins-x-controllerrole-5d58fcdd9f           1         1         1       17h
+replicaset.apps/jenkins-x-controllerteam-5f57968bc9           0         0         0       17h
+replicaset.apps/jenkins-x-controllerteam-75c7565bdb           1         1         1       44m
+replicaset.apps/jenkins-x-controllerworkflow-578bd4f984       1         1         1       17h
+replicaset.apps/jenkins-x-docker-registry-7b56b4f555          1         1         1       17h
+replicaset.apps/jenkins-x-mongodb-6bd8cc478f                  1         1         1       23m
+replicaset.apps/jenkins-x-mongodb-6bfd5d9c79                  0         0         0       17h
+replicaset.apps/jenkins-x-nexus-695cc97bd6                    1         1         1       17h
+
+NAME                                          DESIRED   SUCCESSFUL   AGE
+job.batch/jenkins-x-gcactivities-1552698000   1         1            3h
+job.batch/jenkins-x-gcactivities-1552699800   1         1            2h
+job.batch/jenkins-x-gcactivities-1552708800   1         1            10m
+job.batch/jenkins-x-gcpods-1552698000         1         1            3h
+job.batch/jenkins-x-gcpods-1552699800         1         1            2h
+job.batch/jenkins-x-gcpods-1552708800         1         1            10m
+job.batch/jenkins-x-gcpreviews-1552654800     1         0            15h
+
+NAME                                   SCHEDULE         SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+cronjob.batch/jenkins-x-gcactivities   0/30 <span class="k">*</span>/3 <span class="k">*</span> <span class="k">*</span> <span class="k">*</span>   False     0        10m             17h
+cronjob.batch/jenkins-x-gcpods         0/30 <span class="k">*</span>/3 <span class="k">*</span> <span class="k">*</span> <span class="k">*</span>   False     0        10m             17h
+cronjob.batch/jenkins-x-gcpreviews     0 <span class="k">*</span>/3 <span class="k">*</span> <span class="k">*</span> <span class="k">*</span>      False     1        15h             17h
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="设置优化">设置优化</h2>
+
+<h3 id="修改jx-get-urls的结果">修改<code class="highlighter-rouge">jx get urls</code>的结果</h3>
+
+<p>需要修改SVC里面的</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">annotations</span><span class="pi">:</span>
+    <span class="s">fabric8.io/exposeUrl</span><span class="pi">:</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ol>
+  <li>jenkins-x-chartmuseum</li>
+  <li>jenkins-x-docker-registry</li>
+  <li>jenkins-x-monocular-api</li>
+  <li>jenkins-x-monocular-ui</li>
+  <li>jenkins</li>
+  <li>nexus</li>
+</ol>
+
+<h3 id="修改插件更新中心">修改插件更新中心</h3>
+
+<p>访问<code class="highlighter-rouge">/pluginManager/advanced</code>,Update Site填上</p>
+
+<p>https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/current/update-center.json</p>
+
+<h3 id="自定义git-server"><a href="https://jenkins-x.io/developing/git/">自定义git server</a></h3>
+
+<p>todo:</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>jx edit addon gitea <span class="nt">-e</span> <span class="nb">true
+</span>jx get addons
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="其他有用命令">其他有用命令</h2>
+
+<h3 id="更新整个jenkins-x平台">更新整个Jenkins-X平台</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>jx upgrade platform
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="切换环境">切换环境</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>jx context
+jx environment
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="更新密码">更新密码</h3>
+
+<p>TODO:</p>
+
+<p>参考链接:</p>
+
+<ol>
+  <li><a href="http://www.caict.ac.cn/pphd/zb/2018kxy/15pm/5/201808/t20180813_181702.htm">京东工程效率专家 石雪峰 JenkinsX：基于Kubernetes的新一代CI/CD平台</a></li>
+  <li><a href="https://www.youtube.com/watch?v=LPEIfvkJpw0">JenkinsX Essentials</a></li>
+  <li><a href="https://kubernetes.feisky.xyz/fu-wu-zhi-li/devops/jenkinsx">安装Jenkins X</a></li>
+  <li><a href="https://www.ctolib.com/jenkins-x-jx.html">安装和使用Jenkins X：Kubernetes的自动化CI / CD的命令行工具</a></li>
+  <li><a href="https://yq.aliyun.com/articles/683440">5分钟在阿里云Kubernetes服务上搭建jenkins环境并完成应用构建到部署的流水线作业</a></li>
+  <li><a href="https://jenkins-x.io/getting-started/install-on-cluster/">Install on Kubernetes</a></li>
+  <li><a href="https://jenkins-x.io/commands/jx/">jx</a></li>
+  <li><a href="https://yq.aliyun.com/articles/657149">阿里云容器服务Kubernetes之JenkinsX（1）-安装部署实践篇</a></li>
+  <li><a href="https://cs.console.aliyun.com/#/k8s/catalog/detail/incubator_jenkins-x-platform">阿里云示例</a></li>
+</ol>
+:ET

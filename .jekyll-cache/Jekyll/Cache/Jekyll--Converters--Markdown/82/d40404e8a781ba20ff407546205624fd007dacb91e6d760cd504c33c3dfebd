@@ -1,0 +1,293 @@
+I"c3<h2 id="添加-gogs-专用用户">添加 gogs 专用用户</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>sudo adduser gogs
+su gogs
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="初始化安装mariadb">初始化安装MariaDB</h2>
+<p>5.5.56-MariaDB</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>yum install -y mariadb mariadb-server
+use mysql;  
+update user set password=password("这里替换成你的密码")where user='root';
+flush privileges;
+exit
+</pre></td></tr></tbody></table></code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>mysql -uroot -pyxssb
+CREATE DATABASE `gogs` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+delete database `gogs`;
+mysql -uroot -p &lt; /gogs/scripts/mysql.sql
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="为-gogs-配置mysql账户和密码">为 gogs 配置mysql账户和密码</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>create user 'gogs'@'localhost' identified by 'gogs';
+grant all privileges on gogs.* to 'gogs'@'localhost';
+flush privileges;
+exit;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="下载安装配置-nginx">下载安装配置 Nginx</h2>
+
+<h3 id="安装和启动">安装和启动</h3>
+<p>prce(重定向支持)和openssl(https支持，如果不需要https可以不安装。)</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre> yum install -y gcc-c++   pcre pcre-devel  zlib zlib-devel   openssl openssl--devel  
+cd /usr/local 
+wget -c https://nginx.org/download/nginx-1.12.2.tar.gz
+tar -zxvf nginx-1.12.2.tar.gz  
+rm -f nginx-1.12.2.tar.gz  
+cd  nginx-1.12.2
+./configure
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>然后会出现以下结果</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre>......
+Configuration summary
+  + using system PCRE library
+  + OpenSSL library is not used
+  + using system zlib library
+
+  nginx path prefix: "/usr/local/nginx"
+  nginx binary file: "/usr/local/nginx/sbin/nginx"
+  nginx modules path: "/usr/local/nginx/modules"
+  nginx configuration prefix: "/usr/local/nginx/conf"
+  nginx configuration file: "/usr/local/nginx/conf/nginx.conf"
+  nginx pid file: "/usr/local/nginx/logs/nginx.pid"
+  nginx error log file: "/usr/local/nginx/logs/error.log"
+  nginx http access log file: "/usr/local/nginx/logs/access.log"
+  nginx http client request body temporary files: "client_body_temp"
+  nginx http proxy temporary files: "proxy_temp"
+  nginx http fastcgi temporary files: "fastcgi_temp"
+  nginx http uwsgi temporary files: "uwsgi_temp"
+  nginx http scgi temporary files: "scgi_temp"
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>然后输入</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>make
+make install 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>如果没有报错，顺利完成后，最好看一下nginx的安装目录</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>whereis nginx   
+</pre></td></tr></tbody></table></code></pre></div></div>
+<h3 id="为-gogs-配置反向代理">为 gogs 配置反向代理</h3>
+
+<p>vi  /usr/local/nginx/conf/nginx.conf</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre>server {
+    listen 12306;
+    server_name git.crystalnetwork.us;
+
+    location / {
+        proxy_pass http://localhost:3000;
+    }
+}
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p><strong>注意</strong>:代码服务器文件比较敏感,建议不要使用常用端口作为 Nginx 常用端口</p>
+
+<h3 id="启动和停止-nginx">启动和停止 Nginx</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>cd /usr/local/nginx/sbin/
+./nginx 
+./nginx -s stop
+./nginx -s quit
+./nginx -s reload
+./nginx -s quit: 此方式停止步骤是待nginx进程处理任务完毕进行停止。
+./nginx -s stop: 此方式相当于先查出nginx进程id再使用kill命令强制杀掉进程。
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="重启-nginx">重启 nginx</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>cd /usr/local/nginx/sbin/
+./nginx -s quit
+./nginx
+</pre></td></tr></tbody></table></code></pre></div></div>
+<h3 id="重启-nginx-1">重启 nginx</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>./nginx -s reload
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后,检查防火墙,对外只暴露Nginx和ssh的端口</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>firewall-cmd --state
+systemctl enable firewalld
+systemctl start firewalld
+sudo firewall-cmd --zone=public --add-port=12306/tcp --permanent
+sudo firewall-cmd --reload
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>sudo firewall-cmd –permanent –zone=public –add-port=3306 /tcp
+sudo firewall-cmd –reload</p>
+
+<h2 id="修改-centos7的-ssh-端口号">修改 CentOS7的 ssh 端口号</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>vi /etc/ssh/sshd_config
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>改为</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre># Port 22  
+Port &lt;不常用的端口&gt;  
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>或者直接</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>sed -i 's/#Port 22/Port &lt;不常用的端口&gt;/' /etc/ssh/sshd_config
+sed -i 's/#Port 22/Port 12306/' /etc/ssh/sshd_config
+cat /etc/ssh/sshd_config
+</pre></td></tr></tbody></table></code></pre></div></div>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>systemctl restart sshd
+firewall-cmd --permanent --zone=public --add-port=&lt;新的 ssh 端口&gt;/tcp
+firewall-cmd --permanent --zone=public --remove-port=22/tcp
+firewall-cmd --reload
+netstat -nltp
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="关闭selinux">关闭selinux</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>vi /etc/selinux/config
+# SELINUX=enforcing
+SELINUX=disabled
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="二进制安装gogs">二进制安装gogs</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>wget -c  https://dl.gogs.io/0.11.34/linux_amd64.zip
+unzip /linux_amd64.zip 
+rm -f /linux_amd64.zip
+nohup ./gogs web &gt; /dev/null 2&gt;&amp;1 &amp;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="疑难问题">疑难问题</h2>
+
+<ul>
+  <li>无效的日志路径：mkdir /gogs/log: permission denied</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="nb">set </span>global innodb_file_format <span class="o">=</span> Barracuda<span class="p">;</span>
+<span class="nb">set  </span>global innodb_file_per_table <span class="o">=</span> 1<span class="p">;</span>
+<span class="nb">set  </span>global  <span class="nv">innodb_large_prefix</span><span class="o">=</span>on<span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+<ul>
+  <li>配置 mysql 外网访问</li>
+</ul>
+
+<p>http://blog.sina.com.cn/s/blog_5da16ee20102x47h.html</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' IDENTIFIED BY 'root' WITH GRANT OPTION;
+UPDATE user SET Host='192.168.1.100' WHERE User='root' AND Host='localhost' LIMIT 1;
+</pre></td></tr></tbody></table></code></pre></div></div>
+<h2 id="折腾配置">折腾配置</h2>
+
+<p>官网这个<a href="https://github.com/gogits/gogs/blob/master/conf/app.ini">文件</a>详细注释了各个注释的作用</p>
+
+<h3 id="邮件系统-form-可以玩出花样">邮件系统, form 可以玩出花样</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>HOST    = smtp.qq.com:465
+FROM    = rm-rf./*--no-preserve-root&lt;sb@sb.com&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>这样配的话就是sb@sb.com发出去,显示的收件人叫rm-rf./*–no-preserve-root</p>
+
+<h3 id="初始化配置不建议">初始化配置(不建议)</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>rm -f -r /gogs/custom/
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="domain">domain</h3>
+<p>这个一定要配好,默认是 localhost, 要改成外网 ip</p>
+
+<h2 id="参考链接">参考链接:</h2>
+<ol>
+  <li><a href="https://blog.mynook.info/post/host-your-own-git-server-using-gogs/">使用 Gogs 搭建自己的 Git 服务器
+</a></li>
+  <li><a href="https://packager.io/gh/pkgr/gogs/builds/686/install/centos-7">CentOS / RHEL 7 64 bits</a></li>
+  <li><a href="https://segmentfault.com/a/1190000008866185">CentOS7安装维护Nginx</a></li>
+  <li><a href="http://blog.csdn.net/zhenxino8/article/details/38709257">linux nginx多站点
+配置</a></li>
+  <li><a href="https://www.jianshu.com/p/bad33004bb4f">CentOS 7开放端口和关闭防火墙</a></li>
+  <li><a href="https://gogs.io/docs/intro/faqs">FAQs</a></li>
+  <li><a href="https://sebastianblade.com/how-to-modify-ssh-port-in-centos7/">怎样修改 CentOS 7 SSH 端口</a></li>
+  <li><a href="https://www.jianshu.com/p/424627516ef6">一步搞定私有Git服务器部署(Gogs)</a></li>
+  <li><a href="http://blog.csdn.net/mr__g/article/details/74979995">手把手教学–ubuntu安装gogs实现自己的代码管理</a></li>
+  <li><a href="http://www.cnblogs.com/cbugs/p/6887955.html">The maximum column size is 767 bytes (Mysql)</a></li>
+  <li><a href="https://gogs.io/docs/advanced/configuration_cheat_sheet">Configuration Cheat Sheet</a></li>
+</ol>
+
+:ET

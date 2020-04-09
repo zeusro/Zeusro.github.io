@@ -1,0 +1,31 @@
+I"�<p>kubernetes有重启的机制,所以单节点一开始就不考虑.</p>
+
+<p>这篇文章介绍得很好,详细对比了客户端分片,代理分片,路由分片的差别.
+<a href="https://juejin.im/post/5a54a6fbf265da3e3f4c9048">Redis Cluster深入与实践</a></p>
+
+<h2 id="codis">codis</h2>
+
+<p>官方的golang版本比较旧.而且最终打包出来的镜像比较大</p>
+
+<p>可以参考</p>
+<ol>
+  <li><a href="https://github.com/CodisLabs/codis">codis</a></li>
+  <li><a href="http://www.cnblogs.com/zhoujinyi/p/9249873.html">Redis Codis 部署安装</a></li>
+</ol>
+
+<p>最终我用的codis,用了每组节点一主两从的方案</p>
+
+<h2 id="twemproxy--redis-资源池">twemproxy + redis 资源池</h2>
+
+<p>看起来不是很满意</p>
+
+<p><a href="https://segmentfault.com/a/1190000014453291#articleHeader1">redis on kubernetes</a></p>
+
+<p>参考链接:</p>
+
+<ol>
+  <li><a href="https://www.jianshu.com/p/bedec93e5a7b">Redis 持久化</a></li>
+  <li><a href="http://www.dczou.com/viemall/837.html">深入浅出Docker技术- Redis sentinel 集群的搭建</a></li>
+  <li><a href="https://www.cnblogs.com/MrHSR/p/10119843.html">redis 系列23 哨兵Sentinel (上)</a></li>
+</ol>
+:ET

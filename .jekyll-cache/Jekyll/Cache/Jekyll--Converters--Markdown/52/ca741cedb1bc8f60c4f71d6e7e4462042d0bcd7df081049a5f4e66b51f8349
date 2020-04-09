@@ -1,0 +1,238 @@
+I" 2<p>kubernetes + alpine+ php 特别容易出现访问外网/解析外网地址的时候出现超时的问题.</p>
+
+<h2 id="原因">原因</h2>
+
+<p>docker容器访问外网的时候,整个完整路径是这样的.</p>
+
+<p>容器–&gt;主机–&gt;外网–&gt;主机–&gt;容器</p>
+
+<p>容器到主机之间的流量要经过源地址转换(SNAT)才能顺利流通.</p>
+
+<p>SNAT就像是一个搬运工,把砖(流量)从容器搬到主机</p>
+
+<p>如果一个主机上面运行多个容器,并发访问外网(特别是PHP这种没有连接池的)时向系统申请可用端口(nf_nat_l4proto_unique_tuple),不可用时+1,然后再申请,再校验.这个过程一多,最终就会导致寻址超时.</p>
+
+<p>说白了是个系统内核问题.</p>
+
+<p>详细的解释见</p>
+
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzIzNzU5NTYzMA==&amp;mid=2247484016&amp;idx=1&amp;sn=72bc7f3443cbc259762fb6bd7adb33ae&amp;chksm=e8c77cf1dfb0f5e7598497767db6365bd8db9f4b6a945cb8c72adb1e052e8b0cd46b727c929b&amp;scene=21#wechat_redirect">记一次Docker/Kubernetes上无法解释的连接超时原因探寻之旅</a></p>
+
+<h2 id="解决方案">解决方案</h2>
+
+<h3 id="最优解">最优解</h3>
+
+<p>节点升级到 5.1的Linux内核.</p>
+
+<p>iptables升级到1.6.2以上</p>
+
+<p>用基于IPVS模式,尽量少做SNAT/DNAT,支持随机端口SNAT的网络插件启动kubernetes</p>
+
+<p>或者用绕过SNAT的网络插件插件方案,比如阿里云的<a href="https://github.com/AliyunContainerService/terway">terway</a>.但这个插件跟阿里云绑定得比较深入,需要每台机器额外购买一个弹性网卡.</p>
+
+<h3 id="次优解">次优解</h3>
+
+<p><a href="https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md">用ds部署name sever</a>,所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.</p>
+
+<h3 id="伪解决方案不能解决根本问题">伪解决方案(不能解决根本问题)</h3>
+
+<p>默认的pod的<code class="highlighter-rouge">/etc/resolv.conf</code>一般长这样</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>sh-4.2# cat /etc/resolv.conf
+nameserver &lt;kube-dns-vip&gt;
+search &lt;namespace&gt;.svc.cluster.local svc.cluster.local cluster.local localdomain
+options ndots:5
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个配置的意思是，默认nameserver指向kube-dns/core-dns,所有查询中，如果.的个数少于5个，则会根据search中配置的列表依次搜索,如果没有返回，则最后再直接查询域名本
+身。ndots就是n个.(dots)的意思</p>
+
+<p>举个例子</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>sh-4.2# host -v baidu.com
+Trying "baidu.com.&lt;namespace&gt;.svc.cluster.local"
+Trying "baidu.com.svc.cluster.local"
+Trying "baidu.com.cluster.local"
+Trying "baidu.com.localdomain"
+Trying "baidu.com"
+......
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="不使用-alpine-镜像">不使用 alpine 镜像</h4>
+
+<h4 id="使用-fqdn">使用 <a href="https://baike.baidu.com/item/FQDN">FQDN</a></h4>
+
+<p>由于域名是从右到左逐级解析的，比如 <code class="highlighter-rouge">google.com</code> ,实际上是 <code class="highlighter-rouge">google.com.</code>，com后面的.称之为根域名。解析的时候，先解析.，然后解析.com,.com称之为顶级域名，最后解析google。</p>
+
+<p>使用 FQDN：(Fully Qualified Domain Name)全限定域名，是为了尽可能减少内部DNS(比如coreDNS，节点DNS)的解析压力</p>
+
+<h4 id="重开socket">重开socket</h4>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>        <span class="na">lifecycle</span><span class="pi">:</span>
+          <span class="na">postStart</span><span class="pi">:</span>
+            <span class="na">exec</span><span class="pi">:</span>
+              <span class="na">command</span><span class="pi">:</span>
+              <span class="pi">-</span> <span class="s">/bin/sh</span>
+              <span class="pi">-</span> <span class="s">-c</span> 
+              <span class="pi">-</span> <span class="s2">"</span><span class="s">/bin/echo</span><span class="nv"> </span><span class="s">'options</span><span class="nv"> </span><span class="s">single-request-reopen'</span><span class="nv"> </span><span class="s">&gt;&gt;</span><span class="nv"> </span><span class="s">/etc/resolv.conf"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>设置重开socket是规避容器并发A,AAAA查询</p>
+
+<h4 id="2级域名直接走上层解析">2级域名直接走上层解析</h4>
+
+<p>参考<a href="https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html">kubernetes 使用基于 alpine 镜像无法正常解析外网DNS</a> 做的</p>
+
+<p>直接运行 <code class="highlighter-rouge">sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf</code> 会报错</p>
+
+<p>alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报错</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>  <span class="na">dnsConfig</span><span class="pi">:</span>
+    <span class="na">options</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">ndots</span>
+        <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">2"</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">single-request-reopen</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>去掉了<code class="highlighter-rouge">options ndots:5</code>，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。</namespace></svc></svc></p>
+
+<p>而解析<code class="highlighter-rouge">Google.com</code>，实际上是解析<code class="highlighter-rouge">Google.com.</code>,.的数量超过1个，这时不走search列表，直接用上层DNS</p>
+
+<p>综上所述，去掉ndots/ndots设为1 降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”。</p>
+
+<p>但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改<code class="highlighter-rouge">/etc/resolv.conf</code>文件并不能解决根本问题</p>
+
+<p>歪门邪道1</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>          lifecycle:
+            postStart:
+              exec:
+                command:
+                - /bin/sh
+                - -c 
+                - "head -n 2 /etc/resolv.conf &gt; /etc/temp.conf;cat /etc/temp.conf &gt; /etc/resolv.conf;rm -rf /etc/temp.conf"
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>歪门邪道2</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>      initContainers:
+      - name: alpine
+        image: alpine
+        command:
+         - /bin/sh
+         - -c 
+         - "head -n 2 /etc/resolv.conf &gt; /etc/temp.conf;cat /etc/temp.conf &gt; /etc/resolv.conf;rm -rf /etc/temp.conf"
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="衍生的问题">衍生的问题</h2>
+
+<h3 id="dnat">DNAT</h3>
+
+<p>容器访问clusterIP(因为是虚拟IP所以需要DNAT)也有可能出现这类超时的问题</p>
+
+<h3 id="访问同-namespace-svc-不要强行加戏">访问同 namespace svc 不要强行加戏</h3>
+
+<p>non-head service的 virtual domain 格式是<code class="highlighter-rouge">&lt;svc&gt;.&lt;namespace&gt;.svc.cluster.local</code></p>
+
+<p>如果我们容器直接访问<code class="highlighter-rouge">&lt;svc&gt;.&lt;namespace&gt;.svc.cluster.local</code>,因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问<code class="highlighter-rouge">&lt;svc&gt;</code></p>
+
+<p>例子：假设test下面有个s的svc</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>host <span class="nt">-v</span> s 
+<span class="c"># 解析1次</span>
+host <span class="nt">-v</span> s.test.svc.cluster.local
+<span class="c"># 解析4次</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>所以，访问同namespace其他svc，直接用svc名去访问即可，没必要装逼使用<code class="highlighter-rouge">&lt;svc&gt;.&lt;namespace&gt;.svc.cluster.local</code>这种格式。</p>
+
+<h2 id="其他知识">其他知识</h2>
+
+<h3 id="dns记录类型">dns记录类型</h3>
+
+<ol>
+  <li>A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。</li>
+  <li>CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。</li>
+  <li>TXT：在这里可以填写任何东西，长度限制255。绝大多数的TXT记录是用来做SPF记录（反垃圾邮件）。</li>
+  <li>NS：域名服务器记录，如果需要把子域名交给其他DNS服务商解析，就需要添加NS记录。</li>
+  <li>AAAA：用来指定主机名（或域名）对应的IPv6地址（例如：ff06:0:0:0:0:0:0:c3）记录。</li>
+  <li>MX：如果需要设置邮箱，让邮箱能收到邮件，就需要添加MX记录。</li>
+  <li>显性URL：从一个地址301重定向到另一个地址的时候，就需要添加显性URL记录（注：DNSPod目前只支持301重定向）。</li>
+  <li>隐性URL：类似于显性URL，区别在于隐性URL不会改变地址栏中的域名。</li>
+  <li>SRV：记录了哪台计算机提供了哪个服务。格式为：服务的名字、点、协议的类型，例如：_xmpp-server._tcp。</li>
+</ol>
+
+<h3 id="用到的命令">用到的命令</h3>
+
+<p>安装方法：</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>  yum <span class="nb">install</span> <span class="nt">-y</span> bind-utils
+  <span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="nt">-y</span> dnsutils
+  apk add bind-tools
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="dig"><a href="https://www.ibm.com/support/knowledgecenter/zh/ssw_aix_72/com.ibm.aix.cmds2/dig.htm">dig</a></h4>
+
+<p>dig +trace +ndots=5 +search $host</p>
+
+<h4 id="host"><a href="https://www.ibm.com/support/knowledgecenter/zh/ssw_aix_72/com.ibm.aix.cmds2/host.htm">host</a></h4>
+
+<p>host -v $host</p>
+
+<h2 id="参考链接">参考链接:</h2>
+
+<ol>
+  <li><a href="https://blog.csdn.net/wgwgnihao/article/details/68490985#">iptables中DNAT、SNAT和MASQUERADE的理解</a></li>
+  <li><a href="https://blog.csdn.net/mybelief321/article/details/10049429#">linux根文件系统 /etc/resolv.conf 文件详解</a></li>
+  <li><a href="https://github.com/kubernetes/kubernetes/issues/45363">kube-dns per node #45363</a></li>
+  <li><a href="https://github.com/kubernetes/kubernetes/issues/56903">DNS intermittent delays of 5s #56903</a></li>
+  <li><a href="https://www.weave.works/blog/racy-conntrack-and-dns-lookup-timeouts">Racy conntrack and DNS lookup timeouts</a></li>
+  <li><a href="http://www.man7.org/linux/man-pages/man5/resolver.5.html">/etc/resolv.conf</a></li>
+  <li><a href="https://www.ichenfu.com/2018/10/09/resolv-conf-desc/">/etc/resolv.conf search和ndots配置</a></li>
+  <li><a href="https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/">DNS for Services and Pods</a></li>
+</ol>
+:ET

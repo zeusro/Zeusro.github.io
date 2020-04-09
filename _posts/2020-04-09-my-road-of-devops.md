@@ -4,20 +4,16 @@ title:        "我的DevOps之路"
 subtitle:     "My Road Of DevOps"
 date:         2020-04-09
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/road-of-devops/devops-elephant.png" 
 header-mask:  0.3
 catalog:      true
-multilingual: true
+multilingual: false
 published:    true
 tags:
     -  DevOps
 ---  
 
-![image](/img/road-of-devops/devops-elephant.png)
-
-**持续优化**是我工作和生活的唯一算法。
-
-其一体现就是 `DevOps` 。
+**持续优化**是我工作和生活的唯一算法，其一体现就是 `DevOps` 。
 
 今天讲下我跟 `DevOps` 相爱相杀的历史。
 
@@ -101,18 +97,15 @@ BTW , Concourse 本身是一套分布式系统，未来计划在 `Kubernetes` �
 1. [Concourse-CI集成maven/gradle项目](http://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
 
 
-TODO：补点图片
-
-
 ## 2020：tektoncd
 
 ![image](/img/road-of-devops/devops.png)
 
-其实，我还折腾过 `JenkinsX` ,但那时候，`JenkinsX` 的文档太少，导致工作一直不顺利。`JenkinsX` 有点像 `Jenkins Blue Ocean`，还加入点 `serverless` 但他并没有放弃 `static Jenkins` 那套玩意。最后变得有点不伦不类。
+其实，我还折腾过 `JenkinsX` ,但那时候，`JenkinsX` 的文档太少，导致工作一直不顺利。`JenkinsX` 有点像 `Jenkins Blue Ocean`，还加入点 `serverless` 。 但他并没有放弃 `static Jenkins` 那套玩意。最后变得有点不伦不类。
 
 2020/03/11，`JenkinsX` 宣布自(我)(倒)闭。
 
-函数型 serverless 框架[knative](https://github.com/knative)也宣布放弃自家CI的开发，指向 `tektoncd`。
+函数型 serverless 框架 [knative](https://github.com/knative) 也宣布放弃自家CI的开发，指向 `tektoncd`。
 
 在2019年3月的时候，我就已经作为云玩家参与体验了 `tektoncd` 。那时候，模型的定义还是非常简单。
 
@@ -180,6 +173,9 @@ TODO：补点图片
 不过值得借鉴的地方也有不少。
 
 比如这个 `golang` 的 `Dockerfile`，还有云效那套 `DevOps` 文化。
+
+### golang Dockerfile
+
 ```Dockerfile
 FROM golang:1.14 AS build-env
 ADD . /src/github.com/AliyunContainerService/kube-eventer
@@ -202,9 +198,9 @@ COPY deploy/entrypoint.sh /
 ENTRYPOINT ["/kube-eventer"]
 ```
 
-### 云效 `DevOps` 文化 
+### 云效 `DevOps` 文化
 
-![image](46CA1A225996450685AC54A17DDF9AE9)
+![image](/img/road-of-devops/yunxiao1.png)
 
 #### 研发模式全自动化
 
@@ -218,17 +214,17 @@ ENTRYPOINT ["/kube-eventer"]
 
 > 第三个是全链路压测技术（对应阿里云上的产品叫PTS）。双11大家之所以能放心剁手，一年比一年顺滑，核心就是这项技术在每次大促前帮助开发者发现风险。发现以后就需要快速的响应，通过DevOps工具去解决线上问题。每次压测都是一次练兵，有点类似于军事演习，快速发现问题，快速解决，不断锤炼团队DevOps能力，也可以这样说阿里巴巴的DevOps能力正是一次一次“双11”给练出来的。
 
-
 #### 大胆尝试，把握底线
 
-![image](D554CB70BE6B475ABA1B0FF94812223A)
+![image](/img/road-of-devops/yunxiao2.png)
 
 ### 结论
 
 合适自己的才是最好。
 
 ### 参考链接
-1. [分享实录 | 阿里巴巴DevOps文化浅谈](https://yq.aliyun.com/articles/752195)
+
+1. [阿里巴巴DevOps文化浅谈](https://yq.aliyun.com/articles/752195)
 2. [DevOps研发模式下CI/CD实践详解指南](https://yq.aliyun.com/articles/738405)
 
 ## 其他可选方案
@@ -240,4 +236,3 @@ ENTRYPOINT ["/kube-eventer"]
 ## 总结
 
 `DevOps` 核心思路只有一个：**不断提高应用开发，部署，监控，升级/迭代效率**。
-

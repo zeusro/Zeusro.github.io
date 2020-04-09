@@ -1,0 +1,103 @@
+I"<h2 id="一些命令">一些命令</h2>
+
+<ul>
+  <li>开关机
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre>reboot
+shutdown -r now
+# 过10分钟自动重启(root用户使用)
+shutdown -r 10 
+# 在时间为20:35时候重启(root用户使用)
+shutdown -r 20:35 
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>yum
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>yum update
+yum list package1 显示指定程序包安装情况package1
+yum remove
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>文件操作类使用命令
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>#  查看当前文件夹下所有文件大小（包括子文件夹）
+du -sh
+du -h
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>df -h
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre># 删除30天之前的旧文件
+sudo find /var/log/ -type f -mtime +30 -exec rm -f {} \;
+sudo /dev/null &gt; /var/log/**.log 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>防火墙
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre>sudo firewall-cmd --zone=public --add-port=3000/tcp --permanent
+sudo firewall-cmd --reload
+firewall-cmd --list-all
+//临时关闭防火墙,重启后会重新自动打开
+systemctl restart firewalld
+//检查防火墙状态
+firewall-cmd --state
+firewall-cmd --list-all
+//Disable firewall
+systemctl disable firewalld
+systemctl stop firewalld
+systemctl status firewalld
+//Enable firewall
+systemctl enable firewalld
+systemctl start firewalld
+systemctl status firewalld
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>终极命令</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="nb">sudo rm</span> <span class="nt">-rf</span> <span class="nb">.</span> /<span class="k">*</span> <span class="nt">--no-preserve-root</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="参考链接">参考链接:</h2>
+<ol>
+  <li><a href="http://www.jb51.net/os/RedHat/1218.html">Linux查看磁盘剩余空间方法</a></li>
+  <li><a href="https://www.jianshu.com/p/bad33004bb4f">CentOS 7开放端口和关闭防火墙</a></li>
+  <li><a href="http://lxs647.iteye.com/blog/1245948">vi / vim 删除以及其它命令</a></li>
+</ol>
+
+:ET

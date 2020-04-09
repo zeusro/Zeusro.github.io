@@ -1,0 +1,561 @@
+I"xh<p><img src="/img/in-post/git/git.png" alt="Image" /></p>
+
+<h2 id="设置git">设置git</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>git config <span class="nt">--global</span> user.name <span class="s2">"Rose"</span> 
+git config <span class="nt">--global</span> user.email <span class="s2">"1425294730@qq.com"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="增加远程origin">增加远程origin</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git remote add  origin &lt;<span class="o">&gt;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="提交">提交</h2>
+
+<h3 id="第一次提交">第一次提交</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nb">cd</span> &lt;project&gt;
+git remote add origin “”
+git add <span class="nb">.</span>
+git commit <span class="nt">-am</span>  <span class="s2">"处女提交"</span>
+git push <span class="nt">-u</span> origin  master
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="日常提交">日常提交</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>git add <span class="nb">.</span>
+d:
+<span class="nb">cd</span> &lt;project&gt;
+git commit <span class="nt">-am</span> <span class="s2">"test"</span>
+git push 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="提交到别人的分支">提交到别人的分支</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre>git remote add up &lt;开源项目地址&gt;
+git status 
+git add <span class="nb">.</span> 
+git commit <span class="nt">-m</span> git push origin branch
+<span class="c"># 获取上游的变化</span>
+git pull up
+git push origin master
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>或者</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre>git remote add up &lt;开源项目地址&gt;
+git status 
+git add <span class="nb">.</span> 
+git commit <span class="nt">-m</span> git push origin branch
+<span class="c"># 获取上游的变化</span>
+git fetch up 
+git rebase up/master
+git push origin master
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="分支管理">分支管理</h2>
+
+<ol>
+  <li>
+    <h3 id="推送特定分支">推送特定分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git push origin  NewUI
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="查看当前分支">查看当前分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git branch
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="列出远程分支">列出远程分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git branch -r
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="列出所有分支">列出所有分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git branch -a
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="创建分支">创建分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git branch branchName
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="切换分支">切换分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre> git checkout  AndroidStudio
+ git checkout  master
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="创建并切换到分支">创建并切换到分支</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git checkout -b branchName
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="submodule">submodule</h2>
+
+<h3 id="将已有目录修改为子仓库">将已有目录修改为子仓库</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nv">projectfolder</span><span class="o">=</span>build/html
+<span class="nb">rm</span> <span class="nt">-rf</span> <span class="nv">$projectfolder</span>
+git commit <span class="nt">-am</span> <span class="s2">"clean"</span>
+git <span class="nb">rm</span> <span class="nt">--cached</span> <span class="nv">$projectfolder</span>
+git submodule add git@github.com:zeusro/awesome-kubernetes-notes-release.git <span class="nv">$projectfolder</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="清理删除子仓库">清理删除子仓库</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">rm</span> <span class="nt">-rf</span> <span class="nv">$projectfolder</span>
+<span class="nb">rm</span> <span class="nt">-rf</span> gitmodules
+git <span class="nb">rm</span> <span class="nt">--cached</span> <span class="nv">$projectfolder</span>
+git commit <span class="nt">-am</span> <span class="s2">"clean"</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="灾难处理">灾难处理</h2>
+
+<h3 id="修复未提交文件中的错误重置">修复未提交文件中的错误(重置)</h3>
+<p>如果你现在的工作目录(work tree)里搞的一团乱麻, 但是你现在还没有把它们提交; 你可以通过下面的命令, 让工作目录回到上次提交时的状态(last committed state):
+    <code class="highlighter-rouge">
+    git reset --hard HEAD
+   </code></p>
+
+<h3 id="回退所有内容到上一个版本">回退所有内容到上一个版本</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>``` 
+git reset HEAD^ 
+```
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="回溯到特定的commitid">回溯到特定的commitid</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>在.git/logs/head 里面找到我那个提交了用
+```
+git reset  &lt;commit id&gt; --hard
+```
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="紧急热修复">紧急热修复</h3>
+
+<p>思路是找到上次的稳定版本,修改后推送到目标分支.这种修复方式是最快的</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>```
+# git checkout HEAD^1
+回滚到上一次release的commitID
+git checkout &lt;commit ID&gt;
+git commit -am "fix"
+git push origin HEAD:master
+```
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="撤销上一次提交">撤销上一次提交</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>(该操作非常凶险,所有这次提交的内容都会不见)
+```
+git revert HEAD
+```
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="git-log">git log</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>git log --stat -n 5 // 简单的列出了修改过的文件
+git log -p -n 5 // 详细的列出修改过的文件，及提交文件的对比
+git log --graph // ASCII 字符串表示的简单图形，形象地展示了每个提交所在的分支及其分化衍合情况
+git log --all --decorate --graph
+git log --pretty=oneline
+// 只显示哈希值和提交说明
+git log --pretty=oneline/short/full/fuller/format:""(格式等)
+git log --name-only // 仅在提交信息后显示已修改的文件清单
+git log --no-merges // 不显示merge的log
+:格式化日志
+git log  --pretty=format:" %cd %h - %s" --since=3.days
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>参考链接:
+<a href="https://git-scm.com/book/zh/v1/Git-%E5%9F%BA%E7%A1%80-%E6%9F%A5%E7%9C%8B%E6%8F%90%E4%BA%A4%E5%8E%86%E5%8F%B2">Git 基础 - 查看提交历史</a></p>
+
+<h2 id="其他命令">其他命令</h2>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>git checkout //后面不跟任何参数，则就是对工作区进行检查
+git checkout --filename //从暂存区中恢复文件(确保filename与branch名称不同)
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="vs插件异常处理">VS插件异常处理</h2>
+<ol>
+  <li>
+    <h3 id="无法将分支-master-发布到远程-origin因为远程存储库中已存在具有同一名称的分支发布此分支将导致远程存储库中的分支发生非快进更新">无法将分支 master 发布到远程 origin，因为远程存储库中已存在具有同一名称的分支。发布此分支将导致远程存储库中的分支发生非快进更新。</h3>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git push --set-upstream origin master
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <h3 id="无法将本地分支master发布到远程存储库origin">无法将本地分支master发布到远程存储库origin</h3>
+    <p><img src="/img/in-post/git/vspluginError.png" alt="Image" /></p>
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre> git config branch.master.remote origin
+ git config branch.master.merge refs/heads/master
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="git的错误处理">git的错误处理</h2>
+
+<h3 id="2边的文件都有修改">2边的文件都有修改</h3>
+
+<p>You have unmerged paths.
+(fix conflicts and run “git commit”)
+Move/rename/delete/copy/edit/whatever those files to get your code to the desired state, then git add the changes and git commit the conflict resolution.</p>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git reset 9b25cd5635b4986aa1f1d614381226f79d123f87  --hard
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="中途初始化git项目之后从远程仓库中拉取发生错误-the-following-untracked-working-tree-files-would-be-overwritten-by-merge">中途初始化git项目之后从远程仓库中拉取发生错误 The following untracked working tree files would be overwritten by merge</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>git fetch origin
+git reset --hard origin/master
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="git-pull需要密码">git pull需要密码</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>把C:\Users\&lt;用户&gt;\.ssh里的id_rsa和id_rsa.pub文件复制到git安装目录下的.ssh目录里面即可
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="fatal-the-current-branch-master-has-no-upstream-branch">fatal: The current branch master has no upstream branch</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>[branch "master"]
+remote = origin
+merge = refs/heads/master
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="mac-ssh-出现-permission-deny-的解决方案">mac ssh 出现 permission deny 的解决方案</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>chmod 600 ~/.ssh/id_rsa
+ssh-add  ~/.ssh/id_rsa
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="your-branch-and-originmaster-have-diverged">Your branch and ‘origin/master’ have diverged</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>注意,此操作会废了本地的提交
+
+git fetch origin
+git reset --hard origin/master
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="特别的技巧">特别的技巧</h2>
+
+<h3 id="修改gitignore文件后清理项目文件夹">修改.gitignore文件后,清理项目文件夹</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>git rm -r --cached .
+git add .
+git commit -am "clean"
+git push
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="清除垃圾前提示">清除垃圾前提示</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git clean -i -d
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="强制清除垃圾">强制清除垃圾</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git clean -f  -d
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="多个pushurl一个pull地址">多个pushurl，一个pull地址</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre>git remote set-url --push --add origin &lt;url&gt;
+git remote set-url --push --add origin &lt;url&gt;
+
+效果如下:
+
+[remote "origin"]
+url = &lt;url1&gt;
+pushurl = &lt;url2&gt;
+pushurl = &lt;url1&gt;
+fetch = +refs/heads/*:refs/remotes/origin/*
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="修改远程url">修改远程url</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git remote set-url  origin &lt;URL&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="从历史中永远删除某个文件">从历史中永远删除某个文件</h3>
+
+<p>从 https://rtyley.github.io/bfg-repo-cleaner/ 中下载 <a href="https://repo1.maven.org/maven2/com/madgag/bfg/1.13.0/bfg-1.13.0.jar">bfg-1.13.0.jar</a></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>java -jar bfg.jar --strip-blobs-bigger-than 100M &lt;git项目完整路径&gt;
+git reflog expire --expire=now --all &amp;&amp; git gc --prune=now --aggressive
+git push
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="push所有本地的分支到远程仓库中对应匹配的分支">push所有本地的分支到远程仓库中对应匹配的分支。</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git config --global push.default matching
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="只有当前分支会被push到你使用git-pull获取的代码">只有当前分支会被push到你使用git pull获取的代码。</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git config --global push.default simple
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="更改origin-url">更改origin url</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git remote  set-url origin &lt;URL&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="代理">代理</h3>
+
+<h4 id="http-代理">http 代理</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>    git config <span class="nt">--global</span> http.proxy <span class="s1">'socks5://127.0.0.1:1080'</span>
+    git config <span class="nt">--global</span> https.proxy <span class="s1">'socks5://127.0.0.1:1080'</span>
+
+    git config <span class="nt">--local</span> http.proxy <span class="s1">'http://127.0.0.1:1080'</span>
+    git config <span class="nt">--local</span> https.proxy <span class="s1">'http://127.0.0.1:1080'</span>
+    <span class="c"># 取消代理</span>
+    git config <span class="nt">--global</span> <span class="nt">--unset</span> http.proxy
+    git config <span class="nt">--global</span> <span class="nt">--unset</span> https.proxy
+    
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h4 id="ssh代理">ssh代理</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>ssh-copy-id root@proxy
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>cat &lt;&lt; EOF &gt;&gt;  ~/.ssh/config
+Host github.com
+    ProxyCommand  ssh root@proxy nc %h %p
+EOF
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="抹除所有提交历史重新提交">抹除所有提交历史,重新提交</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>git checkout --orphan latest_branch
+git add -A
+git commit -am "重新提交"
+git branch -D master
+git branch -m master
+git push -f origin master
+
+
+**gitlab的注意事项**
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ol>
+  <li>
+    <p>gitlab的话,要先取消protected_branches中 master 的保护,然后再将本地的这个 master 提交到另外一个远程分支</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git push origin master:temp;
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>然后设置这个temp 分支为默认分支,然后再提交到master远程分支</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre> git push origin master:master;
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>
+    <p>删除 temp 远程分支,设置 master 为默认分支</p>
+
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre> : 删除远程master分支
+ git push origin :temp
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ol>
+
+<h3 id="设置发布用公钥">设置发布用公钥</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>把本地用户的 ~/.ssh/id_rsa.pub 的内容追加到 Git 服务器仓库所属用户的 ~/.ssh/authorized_keys 文件的末尾即可。文件不存在的话用`ssh-keygen`生成
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="管理大文件">管理大文件</h3>
+
+<p><a href="https://git-lfs.github.com/">Git Large File Storage</a>，原理是历史里面存放文件的指针，文件放在远程仓库，提高整个拉取，推送效率。</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>git lfs install
+brew install git-lfs
+git lfs track "*.psd"
+git add .gitattributes
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>如果大文件以及存在于历史中,则需要输入另外的命令</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git lfs migrate import --include="*.psd"
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>从别的地方重新拉取仓库之后,被track的文件已指针的形式存在,如果需要还原文件,得输入2个命令</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>git lfs install
+git lfs pull
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>获得命令帮助</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>git lfs help
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>服务器可能需要安装 nc (<code class="highlighter-rouge">yum install -y nc</code>)命令</p>
+
+<p>参考链接:</p>
+<ol>
+  <li><a href="http://www.mr-wu.cn/ssh-permission-denied-publickey/">ssh 连接提示 Permission denied (publickey) 怎么破</a></li>
+  <li><a href="http://blog.csdn.net/u013197629/article/details/73608613">Linux权限详解（chmod、600、644、666、700、711、755、777、4755、6755、7755）</a></li>
+  <li><a href="http://wlog.cn/linux/ssh-permission-denied-publickey.html">SSH Permission denied (publickey)解决办法</a></li>
+  <li><a href="http://blog.smallmuou.xyz/git/2016/03/11/%E5%85%B3%E4%BA%8EGitlab%E8%8B%A5%E5%B9%B2%E6%9D%83%E9%99%90%E9%97%AE%E9%A2%98.html">关于Gitlab若干权限问题</a></li>
+  <li><a href="http://blog.csdn.net/mg0324/article/details/44916747">git删除master分支后重建</a></li>
+  <li><a href="http://stackoverflow.com/questions/19864934/git-your-branch-and-origin-master-have-diverged-how-to-throw-away-local-com">git: Your branch and ‘origin/master’ have diverged - how to throw away local commits?</a></li>
+</ol>
+:ET

@@ -1,0 +1,30 @@
+I"a<ul>
+  <li><a href="#准备工作">准备工作</a></li>
+  <li><a href="#全局设置">全局设置</a>
+    <ul>
+      <li><a href="#配置git插件">配置git插件</a></li>
+      <li><a href="#配置MSBuild插件">配置MSBuild插件</a></li>
+      <li><a href="#配置gitlab插件">配置gitlab插件</a></li>
+    </ul>
+  </li>
+  <li><a href="#Job的配置">Job的配置</a>
+    <ul>
+      <li><a href="#SSH的问题">SSH的问题</a></li>
+      <li><a href="#源码管理">源码管理</a></li>
+      <li><a href="#触发器">触发器</a></li>
+      <li><a href="#构建">构建</a></li>
+    </ul>
+  </li>
+  <li><a href="#血泪教训">血泪教训</a></li>
+  <li><a href="#更改Jenkins目录">更改Jenkins目录</a></li>
+  <li><a href="#一些配置">一些配置</a></li>
+  <li><a href="#插件选用">插件选用</a></li>
+  <li><a href="#异常处理">异常处理</a>
+    <ul>
+      <li><a href="#误设置了安全选项导致无法登录进去">误设置了安全选项导致无法登录进去</a></li>
+    </ul>
+  </li>
+  <li><a href="#参考链接">参考链接</a></li>
+  <li><a href="#"></a></li>
+</ul>
+:ET

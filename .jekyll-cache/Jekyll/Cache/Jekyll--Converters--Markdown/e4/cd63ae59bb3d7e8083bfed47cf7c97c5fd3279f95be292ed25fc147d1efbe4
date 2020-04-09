@@ -1,0 +1,102 @@
+I"<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>graph TB
+e(Executor&lt;V&gt;)--&gt;es(ExecutorService)
+es--&gt;se(ScheduledExecutorService)
+es--&gt;aes(AbstractExecutorService)
+aes--&gt;tpe(ThreadPoolExecutor)
+tpe--&gt;ste(ScheduledThreadPoolExecutor)
+se--&gt;ste
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/img/in-post/java-concurrent/Executor.png" alt="image" /></p>
+
+<h3 id="executorservice">ExecutorService</h3>
+
+<p>一个运行新任务的简单接口。</p>
+
+<p>ExecutorService，扩展了Executor接口。添加了一些用来管理执行器生命周期和任务生命周期的方法。</p>
+
+<p>可以通过<code class="highlighter-rouge">java.util.concurrent.Executors</code>类,提供了多个实例化线程的简易静态工厂方法,来创造ExecutorService的子类(一般是创建ThreadPoolExecutor/ScheduledExecutorService/ScheduledThreadPoolExecutor)</p>
+
+<h3 id="scheduledexecutorservice">ScheduledExecutorService</h3>
+
+<p>继承了ExecutorService和Executor。支持Future和定期执行任务。</p>
+
+<h3 id="abstractexecutorservice">AbstractExecutorService</h3>
+
+<h3 id="threadpoolexecutor">ThreadPoolExecutor</h3>
+
+<p>实现了ExecutorService,所以才能够这么玩</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>        <span class="c1">//guava</span>
+        <span class="nc">ThreadFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ThreadFactoryBuilder</span><span class="o">().</span><span class="na">setNameFormat</span><span class="o">(</span><span class="s">"ExecutorServiceExample-%d"</span><span class="o">).</span><span class="na">build</span><span class="o">();</span>
+        <span class="nc">ExecutorService</span> <span class="n">executor</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ThreadPoolExecutor</span><span class="o">(</span><span class="mi">1</span><span class="o">,</span>
+                <span class="mi">200</span><span class="o">,</span>
+                <span class="mi">0L</span><span class="o">,</span>
+                <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">DAYS</span><span class="o">,</span>
+                <span class="k">new</span> <span class="nc">LinkedBlockingDeque</span><span class="o">&lt;</span><span class="nc">Runnable</span><span class="o">&gt;(</span><span class="mi">1024</span><span class="o">),</span><span class="n">factory</span><span class="o">);</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="scheduledthreadpoolexecutor">ScheduledThreadPoolExecutor</h3>
+
+<p>从上图的继承树就可以看出,ScheduledThreadPoolExecutor通过继承<code class="highlighter-rouge">ScheduledExecutorService</code>接口实现了其特性,多出了一个<code class="highlighter-rouge">awaitTermination</code>方法</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+</pre></td><td class="rouge-code"><pre>        <span class="nc">Runnable</span> <span class="n">runnabledelayedTask</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Runnable</span><span class="o">()</span> <span class="o">{</span>
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="kt">void</span> <span class="nf">run</span><span class="o">()</span> <span class="o">{</span>
+                <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="nc">Thread</span><span class="o">.</span><span class="na">currentThread</span><span class="o">().</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">" is Running Delayed Task"</span><span class="o">);</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+
+
+        <span class="nc">Callable</span> <span class="n">callabledelayedTask</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Callable</span><span class="o">()</span> <span class="o">{</span>
+
+            <span class="nd">@Override</span>
+            <span class="kd">public</span> <span class="nc">String</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+                <span class="k">return</span> <span class="s">"GoodBye! See you at another invocation..."</span><span class="o">;</span>
+            <span class="o">}</span>
+        <span class="o">};</span>
+        <span class="nc">ScheduledExecutorService</span> <span class="n">scheduledPool</span> <span class="o">=</span> <span class="nc">Executors</span><span class="o">.</span><span class="na">newScheduledThreadPool</span><span class="o">(</span><span class="mi">4</span><span class="o">);</span>
+        <span class="n">scheduledPool</span><span class="o">.</span><span class="na">scheduleWithFixedDelay</span><span class="o">(</span><span class="n">runnabledelayedTask</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
+        <span class="nc">ScheduledFuture</span> <span class="n">sf</span> <span class="o">=</span> <span class="n">scheduledPool</span><span class="o">.</span><span class="na">schedule</span><span class="o">(</span><span class="n">callabledelayedTask</span><span class="o">,</span> <span class="mi">4</span><span class="o">,</span> <span class="nc">TimeUnit</span><span class="o">.</span><span class="na">SECONDS</span><span class="o">);</span>
+        <span class="nc">String</span> <span class="n">value</span> <span class="o">=</span> <span class="o">(</span><span class="nc">String</span><span class="o">)</span> <span class="n">sf</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Callable returned"</span> <span class="o">+</span> <span class="n">value</span><span class="o">);</span>
+        <span class="n">scheduledPool</span><span class="o">.</span><span class="na">shutdown</span><span class="o">();</span>
+        <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Is ScheduledThreadPool shutting down? "</span> <span class="o">+</span> <span class="n">scheduledPool</span><span class="o">.</span><span class="na">isShutdown</span><span class="o">());</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+:ET

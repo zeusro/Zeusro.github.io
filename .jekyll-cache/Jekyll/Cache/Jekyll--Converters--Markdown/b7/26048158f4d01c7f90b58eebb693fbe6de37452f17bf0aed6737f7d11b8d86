@@ -1,0 +1,536 @@
+I"7:<h2 id="安装和配置">安装和配置</h2>
+
+<h3 id="自制带插件的es镜像">自制带插件的ES镜像</h3>
+
+<div class="language-dockerfile highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+</pre></td><td class="rouge-code"><pre><span class="k">FROM</span><span class="s"> elasticsearch:6.5.0</span>
+<span class="c">#或者手动下载后然后安装也行</span>
+<span class="c"># COPY elasticsearch-analysis-ik-6.5.0.zip /</span>
+<span class="c"># elasticsearch-plugin install --batch file:///elasticsearch-analysis-ik-6.5.0.zip</span>
+    <span class="c">#IK Analyzer是一个开源的，基于java语言开发的中文分词工具包。是开源社区中处理中分分词非常热门的插件。 </span>
+<span class="k">RUN </span>elasticsearch-plugin <span class="nb">install</span> <span class="nt">--batch</span> https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.0/elasticsearch-analysis-ik-6.5.0.zip <span class="o">&amp;&amp;</span> <span class="se">\
+</span>    <span class="c"># 拼音分词器</span>
+    elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v6.5.0/elasticsearch-analysis-pinyin-6.5.0.zip &amp;&amp; \    
+    # Smart Chinese Analysis Plugin
+    elasticsearch-plugin install analysis-icu &amp;&amp; \
+    # 日文分词器
+    elasticsearch-plugin install analysis-kuromoji &amp;&amp; \
+    # 语音分析
+    elasticsearch-plugin install analysis-phonetic &amp;&amp; \
+    # 计算字符哈希
+    elasticsearch-plugin install  mapper-murmur3 &amp;&amp; \
+    # 在_source中提供size字段
+    elasticsearch-plugin install mapper-size
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="编排文件">编排文件</h3>
+
+<ul>
+  <li>RBAC 相关内容</li>
+</ul>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="rouge-code"><pre>apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elasticsearch-admin
+  namespace: default
+  labels:
+    app: elasticsearch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: default
+  name: elasticsearch
+  labels:
+    app: elasticsearch
+subjects:
+- kind: ServiceAccount
+  name: elasticsearch-admin
+  namespace: default
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: elasticsearch
+  apiGroup: ""
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>主体程序</li>
+</ul>
+
+<p>存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">cd</span> /root/kubernetes/<span class="si">$(</span>namespace<span class="si">)</span>/elasticsearch/data
+<span class="nb">mkdir</span> <span class="nt">-p</span> <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span>
+<span class="nb">sudo chmod </span>775  <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span> <span class="nt">-R</span>
+<span class="nb">chown </span>1000:0  <span class="si">$(</span><span class="nb">pwd</span><span class="si">)</span> <span class="nt">-R</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+</pre></td><td class="rouge-code"><pre># kubectl get po -l app=myelasticsearch -o wide  -n default
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myelasticsearch
+  namespace: default
+  labels:
+    app: myelasticsearch    
+    elasticsearch-role: all
+spec:
+  updateStrategy:
+    rollingUpdate:
+      partition: 0
+    type: RollingUpdate
+  serviceName: elasticsearch-master
+  replicas: 2
+  selector:
+    matchLabels:
+      app: myelasticsearch
+      elasticsearch-role: all
+  template:
+    metadata:
+      labels:
+        app: myelasticsearch                     
+        elasticsearch-role: all 
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: elasticsearch-test-ready
+                operator: Exists
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:              
+              - key: 'app'
+                operator: In
+                values:
+                - myelasticsearch
+              - key: 'elasticsearch-role'
+                operator: In
+                values:
+                - all                 
+            topologyKey: "kubernetes.io/hostname"
+            namespaces: 
+            - default    
+      serviceAccountName: elasticsearch-admin    
+      terminationGracePeriodSeconds: 180
+      # Elasticsearch requires vm.max_map_count to be at least 262144.
+      # If your OS already sets up this number to a higher value, feel free
+      # to remove this init container.
+      initContainers:
+      - image: alpine:3.6
+        command: ["/sbin/sysctl", "-w", "vm.max_map_count=262144"]
+        name: elasticsearch-init
+        securityContext:
+          privileged: true      
+      imagePullSecrets:
+        - name: vpc-shenzhen      
+      containers:
+      - image: elasticsearch:6.5.0-plugin-in-remote-ik
+        name: elasticsearch
+        resources:
+          # need more cpu upon initialization, therefore burstable class
+          limits:
+            # cpu: 2
+            memory: 4Gi
+          requests:
+            # cpu: 1
+            memory: 1Gi
+        ports:
+        - name: restful
+          containerPort: 9200          
+          protocol: TCP
+        - name: discovery
+          containerPort: 9300          
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          initialDelaySeconds: 2
+          periodSeconds: 10
+          successThreshold: 1
+          tcpSocket:
+            port: 9200
+          timeoutSeconds: 1     
+        # livenessProbe:
+        #   failureThreshold: 3
+        #   initialDelaySeconds: 7
+        #   periodSeconds: 10
+        #   successThreshold: 1
+        #   tcpSocket:
+        #     port: 9200
+        #   timeoutSeconds: 1           
+        volumeMounts:
+        - name: host
+          mountPath: /usr/share/elasticsearch/data
+        env:
+        - name: "NAMESPACE"
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        # - name: "ES_JAVA_OPTS"
+        #   value: "-Xms256m -Xmx256m"              
+        - name: "cluster.name"
+          value: "myelasticsearch"
+        - name: "bootstrap.memory_lock"
+          value: "true"
+        - name: "discovery.zen.ping.unicast.hosts"
+          value: "myelasticsearch"
+        - name: "discovery.zen.minimum_master_nodes"
+          value: "2"
+        - name: "discovery.zen.ping_timeout"
+          value: "5s"
+          #因为是测试,所以master,data,ingest都混用          
+        - name: "node.master"
+          value: "true"
+        - name: "node.data"
+          value: "true"
+        - name: "node.ingest"
+          value: "true"
+        - name: xpack.monitoring.collection.enabled
+          value: "true" 
+        - name: node.name
+          valueFrom: 
+            fieldRef:
+              fieldPath: metadata.name 
+              # fieldPath: spec.nodeName 
+        securityContext: 
+          privileged: true
+      volumes:
+      - name: host
+        hostPath:
+          path: /root/kubernetes/default/myelasticsearch/data
+          type: DirectoryOrCreate
+---
+kind: Service
+apiVersion: v1
+metadata:
+  labels:
+    app: myelasticsearch
+    elasticsearch-role: all
+  name: myelasticsearch
+  namespace: default
+spec:
+  ports:
+    - name: discovery
+      port: 9300
+      targetPort: discovery
+    - name: restful
+      port: 9200
+      protocol: TCP
+      targetPort: restful
+  selector:
+    app: myelasticsearch
+    elasticsearch-role: all
+  type: NodePort
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个编排精髓的一点在于用了节点<code class="highlighter-rouge">affinity</code>使每一个节点最多会运行一个容器,确保了高可用.</p>
+
+<p>如果要把节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+</pre></td><td class="rouge-code"><pre><span class="na">kind</span><span class="pi">:</span> <span class="s">Service</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">elasticsearch</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">elasticsearch-discovery</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">default</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">port</span><span class="pi">:</span> <span class="m">9300</span>
+      <span class="na">targetPort</span><span class="pi">:</span> <span class="s">discovery</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">myelasticsearch</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ol>
+  <li><a href="https://blog.csdn.net/chenleiking/article/details/79453460">在Kubernetes上部署Elasticsearch集群</a></li>
+  <li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html">重要配置的修改</a></li>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/6.x/docker.html">Install Elasticsearch with Docker</a></li>
+  <li><a href="http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/">学习Elasticsearch之4：配置一个3节点Elasticsearch集群(不区分主节点和数据节点)</a></li>
+  <li><a href="https://blog.csdn.net/zwgdft/article/details/54585644">谈一谈Elasticsearch的集群部署</a></li>
+  <li><a href="https://github.com/elastic/elasticsearch-docker/tree/master/templates">官方docker镜像构建项目</a></li>
+  <li><a href="https://blog.csdn.net/changong28/article/details/38377863">Elasticsearch模块功能之-自动发现（Discovery）</a></li>
+  <li><a href="https://www.elastic.co/subscriptions">订阅费用</a></li>
+  <li><a href="https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html">故障转移</a></li>
+  <li><a href="https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node">节点配置</a></li>
+  <li><a href="https://blog.csdn.net/laoyang360/article/details/78290484">Elasticsearch 5.X集群多节点角色配置深入详解</a></li>
+  <li><a href="https://github.com/fabric8io/elasticsearch-cloud-kubernetes">elasticsearch-cloud-kubernetes</a></li>
+  <li><a href="https://blog.csdn.net/laoyang360/article/details/79998974">吃透Elasticsearch 堆内存</a></li>
+</ol>
+
+<h3 id="安装插件">安装插件</h3>
+
+<p><a href="https://www.elastic.co/blog/elasticsearch-docker-plugin-management">elasticsearch-docker-plugin-management</a></p>
+
+<p>GET /_cat/plugins?v&amp;s=component&amp;h=name,component,version,description</p>
+
+<h2 id="压力测试">压力测试</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>esrally configure
+esrally list tracks
+esrally --pipeline=benchmark-only --target-hosts=127.0.0.1:9200 --track=geonames
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>datastore.type = elasticsearch
+datastore.host = 127.0.0.1
+datastore.port = 9200
+datastore.secure = False
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>通过 Elasticsearch 官方提供的 benchmark 脚本 rally</p>
+
+<h2 id="elasticsearch集群的维护">ElasticSearch集群的维护</h2>
+
+<p>更新的时候务必使用灰度更新,从序号最大的镜像开始更新,不然分片丢失了,相信我,你会死的很惨</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>kubectl patch statefulset elasticsearch <span class="nt">-p</span> <span class="se">\</span>
+<span class="s1">'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":0}}}}'</span> <span class="se">\</span>
+<span class="nt">-n</span> <span class="nb">test
+
+</span>kubectl patch statefulset elasticsearch <span class="nt">-p</span> <span class="se">\</span>
+<span class="s1">'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":1}}}}'</span> <span class="se">\</span>
+<span class="nt">-n</span> <span class="nb">test
+
+</span>kubectl patch statefulset elasticsearch <span class="nt">-p</span> <span class="se">\</span>
+<span class="s1">'{"spec":{"updateStrategy":{"type":"RollingUpdate","rollingUpdate":{"partition":2}}}}'</span> <span class="se">\</span>
+<span class="nt">-n</span> <span class="nb">test</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+:ET

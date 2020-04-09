@@ -1,0 +1,145 @@
+I"V<p>最近发现网站总是出问题,具体特征是并发连接数在整点时陡然升高,看了一下网站并发,新建连接数其实很少,推测后端程序php-fpm的问题</p>
+
+<h2 id="docker-系统镜像的优化">docker 系统镜像的优化</h2>
+
+<p>可以参考 <a href="https://www.8090st.com/lnmp-youhua.html">lnmp高并发优化简介</a>
+和参考链接里面的资料,从 nginx , 内核 以及 php-fpm.conf 下手,指定对应的方案.</p>
+
+<h2 id="优化后的-php-fpmconf">优化后的 php-fpm.conf</h2>
+
+<div class="language-conf highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre>[<span class="n">www</span>]
+<span class="n">user</span> = <span class="n">nobody</span>
+<span class="n">group</span> = <span class="n">nobody</span>
+<span class="n">listen</span> = [::]:<span class="m">9000</span>
+<span class="n">chdir</span> = /<span class="n">application</span>
+<span class="c"># 动态线程
+</span><span class="n">pm</span> = <span class="n">dynamic</span>
+<span class="n">pm</span>.<span class="n">max_children</span> = <span class="m">200</span>
+<span class="n">pm</span>.<span class="n">start_servers</span> = <span class="m">20</span>
+<span class="n">pm</span>.<span class="n">max_requests</span> = <span class="m">10240</span>
+<span class="n">pm</span>.<span class="n">min_spare_servers</span> = <span class="m">20</span>
+<span class="n">pm</span>.<span class="n">max_spare_servers</span> = <span class="m">200</span>
+<span class="n">catch_workers_output</span> = <span class="n">Yes</span>
+
+<span class="n">request_terminate_timeout</span> = <span class="m">50</span><span class="n">s</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>max_execution_time 这个配置在php.ini中；php-fpm 的 request_terminate_timeout，在php-fpm.conf中。当以 php-fpm 提供服务时，request_terminate_timeout 设置会覆盖 max_execution_time 的设置，因此我们这里只测试 request_terminate_timeout。</p>
+
+<p>之前的配置忽略了<code class="highlighter-rouge">request_terminate_timeout</code>这个配置,而<code class="highlighter-rouge">request_terminate_timeout</code>默认是无限等待的现在把它加上去,让 php-fpm 能够自动终止连接</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre># request_slowlog_timeout = 2
+# slowlog = /var/log/php7/slow.log
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>坑爹的是,php-fpm.conf文件是不能注释的</p>
+
+<h2 id="代码层面的优化">代码层面的优化</h2>
+
+<h3 id="取消file_get_contents的调用转而用-curl-库">取消<code class="highlighter-rouge">file_get_contents</code>的调用,转而用 curl 库.</h3>
+
+<h3 id="分析慢日志">分析慢日志</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="c"># 取前五十条慢日志分析</span>
+/application <span class="c"># grep -v "^$" /var/log/php7/slow.log | cut -d " " -f 3,2 | sort | uniq -c | sort -k1,1nr | head -n 50</span>
+  27314 <span class="o">=</span> /application/public/index.php
+  27115 run<span class="o">()</span> /application/thinkphp/start.php:19
+  27113 <span class="o">[</span>INCLUDE_OR_EVAL]<span class="o">()</span> /application/public/index.php:17
+  26607 <span class="nb">exec</span><span class="o">()</span> /application/thinkphp/library/think/App.php:139
+  26607 module<span class="o">()</span> /application/thinkphp/library/think/App.php:456
+  25758 invokeArgs<span class="o">()</span> /application/thinkphp/library/think/App.php:343
+  25758 invokeMethod<span class="o">()</span> /application/thinkphp/library/think/App.php:611
+  21076 get<span class="o">()</span> /application/vendor/marlon/thinkphp-redis/src/RedisPro.php:73
+  19256 item<span class="o">()</span> /application/thinkphp/library/think/App.php:343
+  18706 get<span class="o">()</span> /application/extend/util/RedisCacheUtil.php:12
+  15410 getCacheAdvertList<span class="o">()</span> /application/extend/service/Advert/AdvertSource.php:1150
+  15395 get<span class="o">()</span> /application/extend/service/Advert/AdvertSource.php:1206
+  13852 commonGetAdvertListByPage<span class="o">()</span> /application/extend/service/Advert/AdvertSource.php:344
+  13852 getListByProductDetail<span class="o">()</span> /application/application/main/controller/Good.php:1087
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="highlighter-rouge">/application/thinkphp/*</code> 都是框架内部问题.</p>
+
+<p>后边分析代码发现是 redis 读取缓慢,于是进入方法内部,看看是怎么一个情况,结果我惊呆了,发现一个函数是这样写的</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>protected function getCacheAdvertList($keyList)
+    {
+        $advertList = [];
+        foreach ($keyList as $ruleName =&gt; $key) {
+            $advert = RedisCacheUtil::get($key);
+            $advertList[$ruleName] = $advert !== false ? $advert : [];
+            $advertList[$ruleName] = $this-&gt;formatAdvert($advertList[$ruleName]);
+        }
+
+        return $advertList;
+    }
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>我结合上下文和具体数据分析后发现,传入的$keyList长度上百,也就是说,单单这个功能,就要访问串行访问redis 100 多次.</p>
+
+<h2 id="最后">最后</h2>
+
+<p>改代码是不大可能的,我观察到服务器的规格是ecs.sn2.medium,带宽500Mb/s,问题出现时,机器内网带宽总是跑满,甚至升到600Mb/s.于是升级服务器规格,提高到1.5Gb/s,问题解决.</p>
+
+<p>不过到最后还是没找到网站并发周期性升高的原因(机器配置升高后问题依旧还在,只是不再那么明显).</p>
+
+<p>总结一句话就是 <strong>能用钱解决的问题都不叫问题!</strong></p>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ol>
+  <li><a href="https://juejin.im/post/5b54635ae51d451951133d85">nginx 502 和 504 超时演示</a></li>
+  <li><a href="https://www.cnblogs.com/cocoliu/p/8566193.html">PHP-php-fpm配置优化</a></li>
+  <li><a href="https://www.php.net/manual/zh/install.fpm.configuration.php">php-fpm.conf 全局配置段</a></li>
+  <li><a href="https://www.kancloud.cn/digest/php-src/136260">php-fpm 与 Nginx优化总结</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/33725635">你确定你真的懂Nginx与PHP的交互？</a></li>
+  <li><a href="https://blog.csdn.net/sinat_22991367/article/details/73431269">php-fpm.conf重要参数详解</a></li>
+  <li><a href="https://learnku.com/php/t/34358">为高性能优化 PHP-FPM</a></li>
+</ol>
+:ET

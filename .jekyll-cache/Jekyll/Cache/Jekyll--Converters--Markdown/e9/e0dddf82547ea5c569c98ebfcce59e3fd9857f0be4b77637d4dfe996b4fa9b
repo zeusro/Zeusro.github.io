@@ -1,0 +1,352 @@
+I"�\<p><img src="/img/in-post/improve-mysql/640.webp" alt="image" /></p>
+
+<h2 id="慢查询优化基本步骤">慢查询优化基本步骤</h2>
+
+<ol>
+  <li>先运行看看是否真的很慢，注意设置SQL_NO_CACHE</li>
+  <li>where条件单表查，锁定最小返回记录表。这句话的意思是把查询语句的where都应用到表中返回的记录数最小的表开始查起，单表每个字段分别查询，看哪个字段的区分度最高</li>
+  <li>explain查看执行计划，是否与1预期一致（从锁定记录较少的表开始查询）</li>
+  <li>order by limit 形式的sql语句让排序的表优先查</li>
+  <li>了解业务方使用场景</li>
+  <li>加索引时参照建索引的几大原则</li>
+  <li>观察结果，不符合预期继续从0分析</li>
+</ol>
+
+<h2 id="mysql查询技巧">mysql查询技巧</h2>
+
+<h3 id="分析查询">分析查询</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="k">explain</span>  <span class="k">select</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>explain 可以分析查询语句的性能</li>
+  <li>sleep秒</li>
+</ul>
+
+<h3 id="变量赋值">变量赋值</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>set @current =0;
+select @current :=@current +1;
+</pre></td></tr></tbody></table></code></pre></div></div>
+<ul>
+  <li>在查询中可以通过使用:=对变量进行重新赋值</li>
+</ul>
+
+<h3 id="查看数据库大小">查看数据库大小</h3>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="k">SELECT</span> <span class="n">table_schema</span> <span class="s1">'DB Name'</span><span class="p">,</span>
+        <span class="n">ROUND</span><span class="p">(</span><span class="k">SUM</span><span class="p">(</span><span class="n">data_length</span> <span class="o">+</span> <span class="n">index_length</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1024</span> <span class="o">/</span> <span class="mi">1024</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>   <span class="n">MB</span>
+<span class="k">FROM</span> <span class="n">information_schema</span><span class="p">.</span><span class="n">tables</span>
+<span class="k">GROUP</span> <span class="k">BY</span> <span class="n">table_schema</span> <span class="k">order</span> <span class="k">by</span> <span class="n">MB</span> <span class="k">desc</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="utf-8的表里面搜索带中文的数据">utf-8的表里面搜索带中文的数据</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>select number from Chinese_Test where HEX(contents) REGEXP '^(..)*(E[4-9])';
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>the Chinese Character is from E4 to E9</p>
+
+<h2 id="一些套路">一些套路</h2>
+
+<h3 id="不要使用utf-8">不要使用”utf-8”</h3>
+
+<p>utf-8不是真正的UTF-8,应该使用<code class="highlighter-rouge">utf8mb4</code>作为替代。系统中有一个参数<code class="highlighter-rouge">character_set_server</code>,改为<code class="highlighter-rouge">utf8mb4</code></p>
+
+<h3 id="显示数据库引擎">显示数据库引擎</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>SELECT * FROM INFORMATION_SCHEMA.ENGINES;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="显示长事务">显示长事务</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>select * from information_schema.innodb_trx;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="暴力改表">暴力改表</h3>
+
+<p>改表期间,运行</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+</pre></td><td class="rouge-code"><pre><span class="k">SELECT</span> 
+    <span class="n">CONCAT</span><span class="p">(</span><span class="s1">'kill '</span><span class="p">,</span> <span class="n">thread_id</span><span class="p">,</span> <span class="s1">';'</span><span class="p">)</span>
+<span class="k">FROM</span>
+    <span class="p">(</span><span class="k">SELECT</span> <span class="k">DISTINCT</span>
+        <span class="p">(</span><span class="n">i</span><span class="p">.</span><span class="n">trx_mysql_thread_id</span><span class="p">)</span> <span class="n">thread_id</span>
+    <span class="k">FROM</span>
+        <span class="n">information_schema</span><span class="p">.</span><span class="n">innodb_trx</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="k">SELECT</span> 
+        <span class="n">id</span><span class="p">,</span> <span class="nb">time</span>
+    <span class="k">FROM</span>
+        <span class="n">information_schema</span><span class="p">.</span><span class="n">processlist</span>
+    <span class="k">WHERE</span>
+        <span class="nb">time</span> <span class="o">=</span> <span class="p">(</span><span class="k">SELECT</span> 
+                <span class="k">MAX</span><span class="p">(</span><span class="nb">time</span><span class="p">)</span>
+            <span class="k">FROM</span>
+                <span class="n">information_schema</span><span class="p">.</span><span class="n">processlist</span>
+            <span class="k">WHERE</span>
+                <span class="k">state</span> <span class="o">=</span> <span class="s1">'Waiting for table metadata lock'</span>
+                    <span class="k">AND</span> <span class="k">SUBSTRING</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span> <span class="k">IN</span> <span class="p">(</span><span class="s1">'alter'</span> <span class="p">,</span> <span class="s1">'optim'</span><span class="p">,</span> <span class="s1">'repai'</span><span class="p">,</span> <span class="s1">'lock '</span><span class="p">,</span> <span class="s1">'drop '</span><span class="p">,</span> <span class="s1">'creat'</span><span class="p">)))</span> <span class="n">p</span>
+    <span class="k">WHERE</span>
+        <span class="n">TIMESTAMPDIFF</span><span class="p">(</span><span class="k">SECOND</span><span class="p">,</span> <span class="n">i</span><span class="p">.</span><span class="n">trx_started</span><span class="p">,</span> <span class="n">NOW</span><span class="p">())</span> <span class="o">&gt;</span> <span class="n">p</span><span class="p">.</span><span class="nb">time</span>
+            <span class="k">AND</span> <span class="n">i</span><span class="p">.</span><span class="n">trx_mysql_thread_id</span> <span class="k">NOT</span> <span class="k">IN</span> <span class="p">(</span><span class="n">CONNECTION_ID</span><span class="p">()</span> <span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">id</span><span class="p">))</span> <span class="n">t</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程</p>
+
+<p><code class="highlighter-rouge">PS</code>:虽然mysql 5.7支持onlineDDL,但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用<a href="https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html">pt-online-schema-change</a>,例子见<a href="http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/">pt-online-schema-change使用说明、限制与比较</a></p>
+
+<p>参考:
+<a href="https://www.cnblogs.com/xinysu/p/6758170.html">pt-online-schema-change的原理解析与应用说明</a></p>
+
+<h3 id="允许-mysql-远程访问">允许 mysql 远程访问</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>vi /etc/mysql/my.cnf
+```
+[mysqld]
+bind-address    = 0.0.0.0
+```
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="修改大数据表">修改大数据表</h3>
+
+<ol>
+  <li>被修改的表 Table A 需要有一个记录时间戳的字段， 这个时间戳就是每次数据更新，都会更新的字段， 这个字段需要有索引，在django里可以使用 auto_now=True</li>
+  <li>创建一个新的临时表 Table B， 不是tmp_table, 是一个新的表，但是是临时使用的。 这个表和要修改的表拥有一模一样的数据结构， 加上你要修改的部分， 比如增加的字段；</li>
+  <li>记录下Table A 的索引</li>
+  <li>删除 Table B 的全部索引</li>
+  <li>把Table A 的数据全部复制到Table B, 是不是执行 INSERT INTO B(field1, field2) SELECT field1, field2 FROM A？ 当然不是， 这么做不还是锁死了Table A 么， 这里的迁移就是一个需要细分的地方，需要写一个脚本， 让程序每次读取比如5000条数据出来， 插入到Table B里面， 因为Table B 是没有索引的， 所以要当心不要使用多进程来做； 如果是多进程， 要确保插入到B的时候是不会有重复数据的； 如果是1000万的数据，每次5000条， 假设这个操作需要500ms， 那么 2000*200ms = 16 分钟。 这只是一个估值， 具体情况和服务器当时的情况有关， 不好细说。 另外， 我们要记录这个迁移开始的时间点，记为t1;
+5 为B建立索引， 待索引全部好了之后， 再继续6</li>
+  <li>那么这个时候Table A 的数据是不是都进入了Table B 呢， 应当说差不多大部分都进入了， 但5中说， 这大概需要16分钟， 这么长的时间里， 可能有新的数据进入了， 也有可能已有的数据发生了更新， 所以我们要把Table A 中在t1 之后发生变化的数据查找出来， 然后更新到Table B 中， 我们的做法是：
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre> 记录这个操作对应的时间点 t2
+ BEGIN;
+ DELETE FROM B WHERE updated_time &gt; t1;
+ INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time &gt;t1;
+ COMMIT;
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>现在A 和 B 差不多該同步了吧？ 差不多了， 但是6 执行完之后， A仍然在写， 子子孙孙无穷尽也 … , 但这个时候 A 和 B 的差异已经非常非常小了， 所以在下一步，我们在一个transaction 里执行下面的操作：
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre> BEGIN;
+ DELETE FROM B WHERE updated_time &gt; t2;
+ INSERT INTO B(field1, field2) SELECT field1, field2 FROM A WHERE updated_time &gt;t2;
+
+ ALTER TABLE A RENAME TO C;
+ ALTER TABLE B RENAME TO A;
+ COMMIT;
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+</ol>
+
+<h2 id="mysql-workbech">MySQL Workbech</h2>
+
+<h3 id="允许update不where更新">允许update不where更新</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>SET SQL_SAFE_UPDATES = 0;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="客户端提示">客户端提示</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>Error Code: 2013. Lost connection to MySQL server during query
+Error Code: 2006. MySQL server has gone away
+
+Go to Edit -&gt; Preferences -&gt; SQL Editor and set to a higher value this parameter: DBMS connection read time out (in seconds). For instance: 86400.
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="修改为f5执行选中当前选中语句">修改为F5执行选中当前选中语句</h3>
+
+<p>方法:修改C:\Program Files\MySQL\MySQL Workbench 6.3 CE\data\main_menu.xml里面的内容</p>
+
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre>
+        <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"object"</span> <span class="na">struct-name=</span><span class="s">"app.MenuItem"</span> <span class="na">id=</span><span class="s">"com.mysql.wb.menu.query.execute_current_statementwin"</span><span class="nt">&gt;</span> 
+          <span class="nt">&lt;link</span> <span class="na">type=</span><span class="s">"object"</span> <span class="na">key=</span><span class="s">"owner"</span> <span class="na">struct-name=</span><span class="s">"app.MenuItem"</span><span class="nt">&gt;</span>com.mysql.wb.menu.query<span class="nt">&lt;/link&gt;</span> 
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"caption"</span><span class="nt">&gt;</span>Execute Current Statement<span class="nt">&lt;/value&gt;</span> 
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"name"</span><span class="nt">&gt;</span>query.execute_current_statement<span class="nt">&lt;/value&gt;</span> 
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"command"</span><span class="nt">&gt;</span>builtin:query.execute_current_statement<span class="nt">&lt;/value&gt;</span> 
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"itemType"</span><span class="nt">&gt;</span>action<span class="nt">&lt;/value&gt;</span> 
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"shortcut"</span><span class="nt">&gt;</span>F5<span class="nt">&lt;/value&gt;</span>
+          <span class="nt">&lt;value</span> <span class="na">type=</span><span class="s">"string"</span> <span class="na">key=</span><span class="s">"platform"</span><span class="nt">&gt;</span>windows<span class="nt">&lt;/value&gt;</span>
+        <span class="nt">&lt;/value&gt;</span> 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="故障处理">故障处理</h2>
+
+<h3 id="忘记密码">忘记密码</h3>
+
+<ul>
+  <li>mysql 5.7 Ubuntu 64</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nb">sudo </span>service mysql status
+<span class="nb">sudo </span>service mysql stop
+<span class="nb">mkdir</span> <span class="nt">-p</span> /var/run/mysqld
+<span class="nb">chown </span>mysql:mysql /var/run/mysqld
+<span class="nb">sudo </span>mysqld_safe <span class="nt">--skip-grant-tables</span> <span class="nt">--skip-networking</span> &amp;  
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>mysql <span class="nt">-u</span> root <span class="nt">--socket</span><span class="o">=</span>/tmp/mysql.sock
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="n">use</span> <span class="n">mysql</span><span class="p">;</span> 
+<span class="k">update</span> <span class="k">user</span> <span class="k">set</span> <span class="n">authentication_string</span><span class="o">=</span><span class="n">PASSWORD</span><span class="p">(</span><span class="nv">"aaaaaaaaaaa"</span><span class="p">)</span> <span class="k">where</span> <span class="k">User</span><span class="o">=</span><span class="s1">'root'</span><span class="p">;</span>
+<span class="n">flush</span> <span class="k">privileges</span><span class="p">;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>sudo service mysql restart
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="磁盘已满">磁盘已满</h3>
+
+<p>阿里云的RDS,磁盘满了，会出现 <code class="highlighter-rouge">--rds-read-drop-only</code> 状态。此时只能读取数据或者删库（毕竟升级磁盘要重启）。</p>
+
+<p>此时最快的解决办法是删库。</p>
+
+<p>退而求其次，转移数据库，然后删库。</p>
+
+<p>或者在业务低峰期优化数据表结构</p>
+
+<div class="language-sql highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre><span class="k">SELECT</span> 
+    <span class="n">ROW_FORMAT</span><span class="p">,</span>
+    <span class="n">TABLE_ROWS</span><span class="p">,</span>
+    <span class="n">DATA_LENGTH</span><span class="p">,</span>
+    <span class="n">INDEX_LENGTH</span><span class="p">,</span>
+    <span class="n">MAX_DATA_LENGTH</span><span class="p">,</span>
+    <span class="n">DATA_FREE</span><span class="p">,</span>
+    <span class="n">TABLE_SCHEMA</span><span class="p">,</span>
+    <span class="k">TABLE_NAME</span><span class="p">,</span>
+    <span class="n">ENGINE</span>
+<span class="k">FROM</span>
+    <span class="n">information_schema</span><span class="p">.</span><span class="n">TABLES</span>
+    <span class="k">order</span> <span class="k">by</span> <span class="n">data_free</span> <span class="k">desc</span><span class="p">,</span> <span class="k">TABLE_NAME</span>
+
+<span class="n">OPTIMIZE</span> <span class="k">TABLE</span>  <span class="n">db</span><span class="p">.</span><span class="n">tables</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>释放那些无效的空间</p>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ol>
+  <li><a href="https://dev.mysql.com/doc/refman/8.0/en/table-locking.html"> Table Locking Issues</a></li>
+  <li><a href="https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html">privileges-provided</a></li>
+  <li><a href="https://help.aliyun.com/knowledge_detail/41723.html">RDS MySQL 表上 Metadata lock 的产生和处理</a></li>
+  <li><a href="https://www.cnblogs.com/digdeep/p/4892953.html">MySQL出现Waiting for table metadata lock的原因以及解决方法</a></li>
+  <li><a href="https://www.digitalocean.com/community/questions/how-to-allow-remote-mysql-database-connection">How to Allow Remote MySQL Database Connection</a></li>
+  <li><a href="https://blog.csdn.net/lovemysea/article/details/79121154">解决Lost connection to MySQL server during query错误方法</a></li>
+  <li><a href="https://blog.csdn.net/juan083/article/details/54889893">mysql的show processlist命令大作用</a></li>
+  <li><a href="https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html">Privileges Provided by MySQL</a></li>
+  <li><a href="http://www.infoq.com/cn/articles/in-mysql-never-use-utf8-use-utf8">记住，永远不要在MySQL中使用“utf8”</a></li>
+  <li><a href="https://yq.aliyun.com/articles/66680">MySQL索引原理及慢查询优化</a></li>
+  <li><a href="https://www.v2ex.com/t/44841">Mysql 如何修改大数据表</a></li>
+  <li><a href="https://blog.csdn.net/leshami/article/details/39801867">MySQL 二进制日志(Binary Log)</a></li>
+  <li><a href="https://stackoverflow.com/questions/1733507/how-to-get-size-of-mysql-database">how-to-get-size-of-mysql-database</a></li>
+  <li><a href="https://stackoverflow.com/questions/9795137/how-to-detect-rows-with-chinese-characters-in-mysql">How to detect rows with chinese characters in MySQL?</a></li>
+  <li><a href="https://help.aliyun.com/knowledge_list/41698.html">云数据库 RDS 版 &gt; 技术运维问题 &gt; MYSQL使用</a></li>
+  <li><a href="https://zhuanlan.zhihu.com/p/30743094">mysql: show processlist 详解</a></li>
+  <li><a href="http://www.ywnds.com/?p=9337">MySQL SHOW PROCESSLIST协助故障诊断</a></li>
+  <li><a href="http://blog.csdn.net/Z_YTTT/article/details/73650495">解决mysqld_safe Directory ‘/var/run/mysqld’ for UNIX socket file don’t exists</a></li>
+  <li><a href="http://blog.csdn.net/u010603691/article/details/50379282">MySQL5.7更改密码时出现ERROR 1054 (42S22): Unknown column ‘password’ in ‘field list’</a></li>
+  <li><a href="https://www.yiibai.com/mysql/create-user.html">create-user</a></li>
+  <li><a href="https://www.yiibai.com/mysql/grant.html">GRANT</a></li>
+  <li><a href="https://dev.mysql.com/doc/refman/5.7/en/privileges-provided.html#priv_all">privileges-provided</a></li>
+  <li><a href="https://www.cnblogs.com/chanshuyi/p/mysql_user_mng.html">MySQL用户管理：添加用户、授权、删除用户</a></li>
+  <li><a href="https://www.kancloud.cn/thinkphp/mysql-design-optimalize/39320">详解慢查询</a></li>
+  <li><a href="https://mp.weixin.qq.com/s/69XIz-UhuQTZ44InJEL98w">MySQL 数据库优化，看这篇就够了</a></li>
+</ol>
+
+<h3 id="阿里云">阿里云</h3>
+
+<ol>
+  <li><a href="https://help.aliyun.com/document_detail/63255.html">参数调优建议</a></li>
+  <li><a href="https://yq.aliyun.com/articles/338423">10分钟搭建MySQL Binlog分析+可视化方案</a></li>
+  <li><a href="https://help.aliyun.com/knowledge_detail/51682.html">如何排查MySQL实例空间满后自动锁定的原因</a></li>
+</ol>
+:ET

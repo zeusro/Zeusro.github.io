@@ -1,0 +1,159 @@
+I"�"<!-- Chinese Version -->
+<div class="zh post-container">
+    
+    <p><img src="/img/sticker/p.jpg" alt="" /></p>
+
+<p>今天是2020-03-17，让我向大家隆重介绍一种划时代的元编程开发技巧：<strong>面向调皮开发</strong></p>
+
+<p>我们中学课本的好朋友鲁迅，曾经没有这样说过：</p>
+<blockquote>
+  <p>非调皮无以明志，非滑稽无以致远</p>
+</blockquote>
+
+<p><img src="/img/sticker/luxun.jpg" alt="" /></p>
+
+<p>21世纪是生物(调皮)的世纪,只有懂得<strong>面向调皮开发</strong>，才能世人皆醉,唯我独醒，才能在滚滚红尘中，迅速被人淘汰。</p>
+
+<h2 id="写代码的错误姿势">写代码的错误姿势</h2>
+
+<ol>
+  <li>配备完善的内部健康检查机制</li>
+  <li>合并分支之前都有2个以上<code class="highlighter-rouge">code reviewer</code></li>
+  <li>正式更新之前建立完备测试环境</li>
+  <li>测试覆盖率在80%以上</li>
+  <li>每次更新上线都用灰度</li>
+  <li>不使用root管理运维服务器</li>
+  <li>聘请计算机基础扎实的的工程师</li>
+  <li>底层基础依赖（Redis，MySQL）保证99.99%的可用性</li>
+  <li>不使用<code class="highlighter-rouge">sudo rm -rf /</code>来完成对服务器的升级</li>
+</ol>
+
+<p>如果你想要成为一个<strong>面向调皮开发者</strong>，<strong>面向调皮管理者</strong>，<strong>面向调皮XX</strong>,这些陋习都要统统去掉。</p>
+
+<h2 id="写代码的正确姿势">写代码的正确姿势</h2>
+
+<p><img src="/img/p-programming/code.jpg" alt="" /></p>
+
+<p>风清扬曾经说过：</p>
+<blockquote>
+  <p>“单以武学而论，这些魔教长老们也不能说真正已窥上乘武学之门。他们不懂得，招数是死的，发招之人却是活的。死招数破得再妙，遇上了活招数，免不了缚手缚脚，只有任人屠戮。这个‘活’字，你要牢牢记住了。学招时要活学，使招时要活使。倘若拘泥不化，便练熟了几千万手绝招，遇上了真正高手，终究还是给人家破得干干净净。</p>
+</blockquote>
+
+<p><img src="/img/p-programming/another.jpg" alt="" /></p>
+
+<p>风清扬又道：</p>
+
+<blockquote>
+  <p>“大丈夫行事，爱怎样便怎，行云流水，任意所至，甚么武林规矩，门派教条，全都是放他妈的狗臭屁!”</p>
+</blockquote>
+
+<p><code class="highlighter-rouge">#define TRUE FALSE</code></p>
+
+<p>记住，对过早优化说不，需要优化就马上跑路。</p>
+
+<p><img src="/img/p-programming/thread.png" alt="" /></p>
+
+<h2 id="搞前端的正确姿势">搞前端的正确姿势</h2>
+
+<p><img src="/img/p-programming/jq.jpg" alt="" /></p>
+
+<h2 id="写bug的正确姿势">写bug的正确姿势</h2>
+
+<p><img src="/img/p-programming/hand-over.jpg" alt="" /></p>
+
+<p>写出bug不要紧，只要不是你的就行。</p>
+
+<p>如果是你写的代码出问题，那就<code class="highlighter-rouge">hack</code>同事的电脑，用<code class="highlighter-rouge">git rebase</code>重写仓库的提交历史，有锅全让别人来背。</p>
+
+<h2 id="搞测试的正确姿势">搞测试的正确姿势</h2>
+
+<p><img src="/img/p-programming/test.gif" alt="" /></p>
+
+<h2 id="开源社区的正确姿势">开源社区的正确姿势</h2>
+
+<p>自己的开源项目，要突出一个“<strong>皮</strong>”字，这个项目必须要有趣，比如</p>
+<ol>
+  <li><a href="https://www.zeusro.com/2020/03/14/dynamic-optimization/">用动态规划做一个渣男挖别人墙角</a></li>
+  <li><a href="https://github.com/p-program/common-bandwidth-auto-switch">人为制造带宽均衡态</a>让阿里云的共享带宽挣不到钱。</li>
+  <li>嫌弃<code class="highlighter-rouge">dnspod</code>网站做的太破，<a href="https://www.zeusro.com/2019/07/05/mydnspod/">开发一个油猴插件魔改dnspod</a>,最后再发邮件给腾讯的HR，吐槽下他们的产品设计</li>
+</ol>
+
+<h3 id="pull-request的正确姿势">pull request的正确姿势</h3>
+
+<p><code class="highlighter-rouge">pull request</code>,也要突出一个“<strong>皮</strong>”字</p>
+
+<p>要记住，<code class="highlighter-rouge">pull request</code>就是你报复<code class="highlighter-rouge">reviewers</code>(这些人通常是你上司)的最好机会。要竭尽全力，在代码和文档里面拼命挖坑。比如</p>
+
+<ol>
+  <li>本该是<code class="highlighter-rouge">int64</code>的变量用<code class="highlighter-rouge">int32</code>表示，让这个问题随着时间的推移而逐渐出现</li>
+  <li>创造性的拼写错误</li>
+  <li>充分利用<code class="highlighter-rouge">UTF-8</code>的字符集，使用非英语字母，ASCII 字符</li>
+  <li>尽可能模块化，util , interface ，service implement ，web front-end, web back-end 都各自做成 <code class="highlighter-rouge">git</code> 的 <code class="highlighter-rouge">submodule</code>，并且各个<code class="highlighter-rouge">submodule</code>之间还有菱形依赖。反正顶层的web项目天知道哪天能运行起来。项目一多，KPI 就有了。</li>
+  <li>坚持使用<code class="highlighter-rouge">Java</code>编程，并违背<a href="https://github.com/alibaba/p3c">阿里巴巴Java开发手册</a>上面的任何一条规则</li>
+  <li>产品文档上面不要写跟产品有关的任何细节（这是为了保护你的产品不被破坏！）</li>
+  <li>为了阻挠任何雇佣外部维护承包商的倾向，可以在代码中散布针对其他同行软件公司的攻击和抹黑，特别是可能接替你工作的其中任何一家</li>
+</ol>
+
+<p>自带混淆的代码是给上帝看的，保护好我们的代码，就算它们落入了竞争对手手上，也丝毫不慌。只要你写的bug足够奇怪，单位就不敢轻易辞退你！竞争对手也会对你肃然起敬！</p>
+
+<p><strong>面向调皮开发</strong>，注重的是思路，而不是结果。要学会一本正经的胡说八道，写出满是bug的代码。</p>
+
+<p>如果有人质疑你，你就发这张图：</p>
+
+<p><img src="/img/p-programming/chicken.png" alt="" /></p>
+
+<h3 id="处理-issue-的正确姿势">处理 <code class="highlighter-rouge">issue</code> 的正确姿势</h3>
+
+<p>不管别人问你什么问题，先让他<a href="https://github.com/ryanhanwu/How-To-Ask-Questions-The-Smart-Way/blob/master/README-zh_CN.md">提问的智慧</a></p>
+
+<p>如果他学会了，就让他自己解决问题。</p>
+
+<h3 id="code-review-的正确姿势"><code class="highlighter-rouge">code review</code> 的正确姿势</h3>
+
+<p>不管他写了什么代码，先让他测试覆盖率达到99.99%再说，如果他做到了，我们直接关掉他<code class="highlighter-rouge">pull request</code>,并告诉他，这个项目我已经不打算维护了。</p>
+
+<p>参考</p>
+
+<ol>
+  <li><a href="https://github.com/cloudnativeapp/charts/pull/33">hexo Chart</a></li>
+  <li><a href="https://coderlmn.github.io/frontEndCourse/unmaintainable.html">如何编写无法维护的代码</a></li>
+  <li><a href="https://github.com/zxystd/IntelBluetoothFirmware/pull/61">Update README-zh_Hans.md</a></li>
+</ol>
+
+<h2 id="服务器运维的正确姿势">服务器运维的正确姿势</h2>
+
+<p><img src="/img/p-programming/rm.jpg" alt="" /></p>
+
+<ol>
+  <li><code class="highlighter-rouge">sudo rm -rf /</code></li>
+  <li>拔插头</li>
+  <li>插插头</li>
+</ol>
+
+<h2 id="数据库管理的正确姿势">数据库管理的正确姿势</h2>
+
+<p><img src="/img/p-programming/delete-db.gif" alt="" /></p>
+
+<h2 id="kubernetes-管理员的正确姿势">Kubernetes 管理员的正确姿势</h2>
+
+<p><img src="/img/p-programming/rm.gif" alt="" /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>kubectl delete namespace default <span class="nt">--grace-period</span><span class="o">=</span>0 <span class="nt">--force</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="结语">结语</h2>
+
+<p>相信我，当你体会了<strong>面向调皮开发</strong>的真谛以后，相信用不了多久，降职减薪，当上CAO(首席背锅官)，出入拘留所，勾搭检察官，堕入人生低谷。收入减半，仇人加倍，铁窗生活不是梦！</p>
+
+<p><img src="/img/p-programming/CAO.png" alt="" /></p>
+
+<h2 id="参考链接">参考链接</h2>
+<ol>
+  <li><a href="https://baike.baidu.com/tashuo/browse/content?id=465f421a9dfaa9bbf1492227&amp;lemmaId=7056998&amp;fromLemmaModule=pcBottom">风清扬：另有高处比天高</a></li>
+  <li><a href="https://news.ycombinator.com/item?id=18442637">Ask HN: What’s the largest amount of bad code you have ever seen work?</a></li>
+  <li><a href="https://www.reddit.com/r/ProgrammerHumor/comments/9xuhyj/is_there_an_award_for_ugliest_code/">is there an award for ugliest code?</a></li>
+</ol>
+
+</div>
+:ET
