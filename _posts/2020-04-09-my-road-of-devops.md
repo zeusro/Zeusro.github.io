@@ -8,7 +8,7 @@ header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 multilingual: true
-published:    false
+published:    true
 tags:
     -  DevOps
 excerpt_separator: <!--more-->
@@ -83,6 +83,8 @@ Jenkins build 又可细分为
 
 ## 2018 ~ 至今：swarm + Concourse
 
+![image](/img/road-of-devops/concourse-1.png)
+
 如果说`Jenkins` 是一个基于插件的纯瀑布流的航空母舰，那么 Concourse 就是极简主义忍者。
 
 Concourse 的最大优点在于可重用的模板配置，其次，活跃的社区也是不错的一个点（说明最起码用的人不少）。而且，他们的 releases 有时候也写的很皮，带点表情包什么的。
@@ -91,9 +93,11 @@ Concourse 的最大优点在于可重用的模板配置，其次，活跃的社�
 
 4.x 版本的时候，出现了无数次 docker hung，load15 过高等状况，当时只能重启。非常滴蛋疼。这个问题，在升级到[5.x](https://github.com/concourse/concourse/releases/tag/v5.0.0)之后略有缓解。
 
-
+![image](/img/road-of-devops/concourse-2.png)
 
 BTW , Concourse 本身是一套分布式系统，未来计划在 `Kubernetes` 中运行，但目前还只是一个[草案](https://github.com/concourse/concourse/pull/5223)
+
+![image](/img/road-of-devops/concourse-3.png)
 
 ### 结论
 
