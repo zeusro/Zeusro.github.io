@@ -1,0 +1,260 @@
+I"i5<p><img src="/img/road-of-devops/devops-elephant.png" alt="image" /></p>
+
+<p>[TOC]</p>
+
+<p><strong>持续优化</strong>是我工作和生活的唯一算法。</p>
+
+<p>其一体现就是 <code class="highlighter-rouge">DevOps</code> 。</p>
+
+<p>今天讲下我跟 <code class="highlighter-rouge">DevOps</code> 相爱相杀的历史。</p>
+
+<h2 id="2016--2018static-jenkins">2016 ~ 2018：static Jenkins</h2>
+
+<p>在16年的时候，我就在想怎么提高工作的效率，让应用发布跟得上迭代。</p>
+
+<p>那个时候我也不知道这叫 <code class="highlighter-rouge">DevOps</code> 。反正有啥就用啥。最后我选择了 <code class="highlighter-rouge">Jenkins</code> 。<code class="highlighter-rouge">Jenkins</code> 是一个基于插件的纯瀑布流的CI模型。也就是说，配置是最为繁重的那部分。</p>
+
+<p><img src="/img/road-of-devops/jenkins-1.png" alt="image" /></p>
+
+<p>每一个项目，都需要重复配置（虽然后来我建了一个模板项目，但我发现不能解决根本问题）。每一个项目里面的配置，都包含N个插件。以里面一个<code class="highlighter-rouge">Java</code>项目来说。</p>
+
+<p>整个CI的流程，分为</p>
+
+<blockquote>
+  <p>webhook –&gt; Jenkins build –&gt; docker push</p>
+</blockquote>
+
+<p>Jenkins build 又可细分为</p>
+
+<blockquote>
+  <p>git pull/clone –&gt; gradle/maven build –&gt; docker build</p>
+</blockquote>
+
+<p><img src="/img/road-of-devops/jenkins-2.png" alt="image" /></p>
+
+<p>这里面每一个步骤，甚至是数据的流动（比如根据tag和branch判定是否需要触发构建）都需要用到插件。</p>
+
+<p><img src="/img/road-of-devops/jenkins-3.png" alt="branch插件" /></p>
+
+<p>以这个项目为例，最终我们使用的插件有：</p>
+<ol>
+  <li>docker</li>
+  <li>Environment Injector Plugin</li>
+  <li>Gitea（源仓库是gitea）</li>
+  <li>gradle（构建工具用的是gradle）</li>
+  <li>Mask Passwords（用于掩盖docker login密码）</li>
+  <li>Generic Webhook Trigger Plugin（就是上图那个 Optional filter 符合输入要求的branch才会触发下一步构建）</li>
+</ol>
+
+<p>除了项目配置，还得做一些全局配置。。。</p>
+
+<p>最终我们会发现， <code class="highlighter-rouge">Jenkins</code>变成了一架超级航空母舰，谁也不知道里面放了啥。留下的只是</p>
+
+<blockquote>
+  <p>provider_version=<code class="highlighter-rouge">docker image ls $image1 |grep -Eo '([0-9]{0,2}\.){2}[0-9]+'| head -1</code></p>
+</blockquote>
+
+<p>这一行最有用的 tag 提取脚本，哈哈哈。。。</p>
+
+<h3 id="结论">结论</h3>
+
+<p>小型构建系统（ &lt;30 个构建任务）的最优解</p>
+
+<h3 id="相关工作回顾">相关工作回顾</h3>
+
+<ol>
+  <li><a href="http://www.zeusro.com/2016/02/26/net-ci/">从零开始用Jenkins搭建.NET CI环境</a></li>
+  <li><a href="http://www.zeusro.com/2018/08/17/gogs-Jenkins-java-docker/">Gogs+Jenkins构建java项目,最后docker化</a></li>
+  <li><a href="http://www.zeusro.com/2019/10/29/jenkins-on-kubernetes/">在kubernetes上面使用Jenkins</a></li>
+</ol>
+
+<h2 id="2018--至今swarm--concourse">2018 ~ 至今：swarm + Concourse</h2>
+
+<p><img src="/img/road-of-devops/concourse-1.png" alt="image" /></p>
+
+<p>如果说<code class="highlighter-rouge">Jenkins</code> 是一个基于插件的纯瀑布流的航空母舰，那么 Concourse 就是极简主义忍者。</p>
+
+<p>Concourse 的最大优点在于可重用的模板配置，其次，活跃的社区也是不错的一个点（说明最起码用的人不少）。而且，他们的 releases 有时候也写的很皮，带点表情包什么的。</p>
+
+<p>缺点在于 breaking change 不少，如果用 docker运行，就会变成 docker in docker。</p>
+
+<p>4.x 版本的时候，出现了无数次 docker hung，load15 过高等状况，当时只能重启。非常滴蛋疼。这个问题，在升级到<a href="https://github.com/concourse/concourse/releases/tag/v5.0.0">5.x</a>之后略有缓解。</p>
+
+<p><img src="/img/road-of-devops/concourse-2.png" alt="image" /></p>
+
+<p>BTW , Concourse 本身是一套分布式系统，未来计划在 <code class="highlighter-rouge">Kubernetes</code> 中运行，但目前还只是一个<a href="https://github.com/concourse/concourse/pull/5223">草案</a></p>
+
+<p><img src="/img/road-of-devops/concourse-3.png" alt="image" /></p>
+
+<h3 id="结论-1">结论</h3>
+
+<p>2020年3月末发布了<a href="https://github.com/concourse/concourse/releases/tag/v6.0.0">6.x</a>版本，值得一试。</p>
+
+<h3 id="相关工作回顾-1">相关工作回顾</h3>
+<ol>
+  <li><a href="http://www.zeusro.com/2018/09/02/give-up-concourse-ci/">Concourse-CI集成maven/gradle项目</a></li>
+</ol>
+
+<p>TODO：补点图片</p>
+
+<h2 id="2020tektoncd">2020：tektoncd</h2>
+
+<p><img src="/img/road-of-devops/devops.png" alt="image" /></p>
+
+<p>其实，我还折腾过 <code class="highlighter-rouge">JenkinsX</code> ,但那时候，<code class="highlighter-rouge">JenkinsX</code> 的文档太少，导致工作一直不顺利。<code class="highlighter-rouge">JenkinsX</code> 有点像 <code class="highlighter-rouge">Jenkins Blue Ocean</code>，还加入点 <code class="highlighter-rouge">serverless</code> 但他并没有放弃 <code class="highlighter-rouge">static Jenkins</code> 那套玩意。最后变得有点不伦不类。</p>
+
+<p>2020/03/11，<code class="highlighter-rouge">JenkinsX</code> 宣布自(我)(倒)闭。</p>
+
+<p>函数型 serverless 框架<a href="https://github.com/knative">knative</a>也宣布放弃自家CI的开发，指向 <code class="highlighter-rouge">tektoncd</code>。</p>
+
+<p>在2019年3月的时候，我就已经作为云玩家参与体验了 <code class="highlighter-rouge">tektoncd</code> 。那时候，模型的定义还是非常简单。</p>
+
+<p>不过现在上看，当时觉得欠缺的构建缓存现在已经加上去了。不过，2019年我提出的</p>
+<blockquote>
+  <p>通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.</p>
+</blockquote>
+
+<p>这个问题没能很好解决。目前的思路是通过 <code class="highlighter-rouge">Cronjob</code> 实现定期清除。</p>
+
+<h3 id="结论-2">结论</h3>
+
+<p>潜力不小，值得一试。</p>
+
+<h3 id="相关工作回顾-2">相关工作回顾</h3>
+
+<ol>
+  <li><a href="http://www.zeusro.com/2019/03/16/install-Jenkins-X/">国内服务器安装JenkinsX</a></li>
+  <li><a href="http://www.zeusro.com/2019/03/16/Jenkins-X-build-Java/">Jenkins-X构建Java应用</a></li>
+  <li><a href="http://www.zeusro.com/2019/03/25/tektoncd/">tektoncd云玩家初体验</a></li>
+  <li><a href="https://github.com/tektoncd/pipeline/issues/2088">Please support build cache in PipelineResources</a></li>
+  <li><a href="https://github.com/tektoncd/pipeline/issues/1302">Can’t rerun existing completed taskruns or delete completed taskruns automatically</a></li>
+  <li><a href="https://github.com/tektoncd/pipeline/issues/2332">Introduce runHistoryLimit</a></li>
+</ol>
+
+<h3 id="参考链接">参考链接</h3>
+
+<ol>
+  <li><a href="https://mp.weixin.qq.com/s/n_AfL63DQsOXZLsw08Iwbg">Jenkins X选择了Tekton｜将弃用Jenkins</a></li>
+  <li><a href="https://jenkins-x.io/blog/2020/03/11/tekton/">Jenkins X ❤ Tekton</a></li>
+</ol>
+
+<h2 id="201806--至今kubernetes">2018.06 ~ 至今：Kubernetes</h2>
+
+<p>关于 <code class="highlighter-rouge">Kubernetes</code> 我已经发表过无数话题。18年的时候，在稍微了解了一下 <code class="highlighter-rouge">Kubernetes</code> 的发布工作流之后（那个时候我对 <code class="highlighter-rouge">docker</code> 都不太熟练），我当天立刻决定，就算只有我一个人，我也要在公司内部推广这套系统。</p>
+
+<p>事实证明，我是对的。我们后来又整了一套完整的 <code class="highlighter-rouge">DevOps</code> 的体系，<code class="highlighter-rouge">Kubernetes</code> 是其中最后，并且最重要的一环。我们从“无运维时代”，直接走向了“无需运维时代”（甩锅给阿里云售后🤣🤣🤣）。</p>
+
+<p>但事实证明，我也是错的。传统应用变成流动的<code class="highlighter-rouge">pod</code>之后，要解决</p>
+
+<ol>
+  <li>volume</li>
+  <li>网络诊断</li>
+  <li>资源监控与配额</li>
+  <li>云厂商组件bug</li>
+  <li>docker自身bug</li>
+  <li>系统内核（比如IPtable，cgroup，namespace）自身bug</li>
+</ol>
+
+<p>等等一系列问题。随便挑一个都是大问题。。。</p>
+
+<h3 id="结论-3">结论</h3>
+
+<p><strong>没有银弹</strong>。但我相信 <code class="highlighter-rouge">Kubernetes</code> 是未来10年应用部署的首选模型。</p>
+
+<h3 id="相关工作回顾-3">相关工作回顾</h3>
+<ol>
+  <li><a href="http://www.zeusro.com/archive/?tag=Kubernetes">Kubernetes系列文章</a></li>
+  <li><a href="https://github.com/zeusro/awesome-kubernetes-notes">Kubernetes 中文书</a></li>
+</ol>
+
+<h3 id="参考链接-1">参考链接</h3>
+<ol>
+  <li><a href="yq.aliyun.com/articles/742165">孙健波：Kubernetes 会不会“杀死” DevOps？</a></li>
+</ol>
+
+<h2 id="2020阿里巴巴广告位招租中--">2020：阿里巴巴（广告位招租中 ~ ）</h2>
+
+<p>这方面的我关注的比较少（分辨是公关文还是技术分享比较浪费时间，所以干脆不看算了）。</p>
+
+<p>阿里巴巴的公司体量比较大，他们遇到的问题和提出的解决方案（比如中台，修改JVM）很多更像是屠龙技，对于小型公司其实没有多大卵用。</p>
+
+<p>不过值得借鉴的地方也有不少。</p>
+
+<p>比如这个 <code class="highlighter-rouge">golang</code> 的 <code class="highlighter-rouge">Dockerfile</code>，还有云效那套 <code class="highlighter-rouge">DevOps</code> 文化。</p>
+<pre><code class="language-Dockerfile">FROM golang:1.14 AS build-env
+ADD . /src/github.com/AliyunContainerService/kube-eventer
+ENV GOPATH /:/src/github.com/AliyunContainerService/kube-eventer/vendor
+ENV GO111MODULE on
+WORKDIR /src/github.com/AliyunContainerService/kube-eventer
+RUN apt-get update -y &amp;&amp; apt-get install gcc ca-certificates
+RUN make
+
+
+FROM alpine:3.10
+
+COPY --from=build-env /src/github.com/AliyunContainerService/kube-eventer/kube-eventer /
+COPY --from=build-env /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
+
+ENV TZ "Asia/Shanghai"
+RUN apk add --no-cache tzdata
+COPY deploy/entrypoint.sh /
+
+ENTRYPOINT ["/kube-eventer"]
+</code></pre>
+
+<h3 id="云效-devops-文化">云效 <code class="highlighter-rouge">DevOps</code> 文化</h3>
+
+<p><img src="46CA1A225996450685AC54A17DDF9AE9" alt="image" /></p>
+
+<h4 id="研发模式全自动化">研发模式全自动化</h4>
+
+<blockquote>
+  <p>随着“容器化”的浪潮来临，我们研发平台再一次升级，将线上容器定义、运维监控责任全部交给了开发者，应用运维岗位不复存在。</p>
+</blockquote>
+
+<h4 id="流量回放测试">流量回放测试</h4>
+
+<blockquote>
+  <p>第二个是流量回放测试技术。这项技术的创新给测试团队带来了很大影响，通过线上流量复制到线下，低成本的解决了测试回归的问题，将传统通过编写用例进行测试，简化为编排数据进行测试。第二层是Mock技术的应用，将一个分布式系统问题，转化为单机问题，可以在几秒钟完成上千个用例运行。有了这两个基础技术后，在上层可以发展测试平台，通过算法的手段去识别有效流量，去自动化处理数据，去识别异常流量背后的缺陷。通过这三层面的变革，可以说让阿里巴巴测试效率有了质的变化。</p>
+</blockquote>
+
+<h4 id="全链路压测">全链路压测</h4>
+
+<blockquote>
+  <p>第三个是全链路压测技术（对应阿里云上的产品叫PTS）。双11大家之所以能放心剁手，一年比一年顺滑，核心就是这项技术在每次大促前帮助开发者发现风险。发现以后就需要快速的响应，通过DevOps工具去解决线上问题。每次压测都是一次练兵，有点类似于军事演习，快速发现问题，快速解决，不断锤炼团队DevOps能力，也可以这样说阿里巴巴的DevOps能力正是一次一次“双11”给练出来的。</p>
+</blockquote>
+
+<h4 id="大胆尝试把握底线">大胆尝试，把握底线</h4>
+
+<p><img src="D554CB70BE6B475ABA1B0FF94812223A" alt="image" /></p>
+
+<h3 id="结论-4">结论</h3>
+
+<p>合适自己的才是最好。</p>
+
+<h3 id="参考链接-2">参考链接</h3>
+<ol>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>[分享实录</td>
+          <td>阿里巴巴DevOps文化浅谈](https://yq.aliyun.com/articles/752195)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li><a href="https://yq.aliyun.com/articles/738405">DevOps研发模式下CI/CD实践详解指南</a></li>
+</ol>
+
+<h2 id="其他可选方案">其他可选方案</h2>
+
+<p><a href="https://github.com/gocd/gocd">gocd</a></p>
+
+<p><a href="https://mp.weixin.qq.com/s?__biz=MzAwMDU1MTE1OQ==&amp;mid=2653552052&amp;idx=1&amp;sn=bbc6dd52c9451dc807530ff5af2f50fd&amp;chksm=813a6c2cb64de53a1d6818d72974150805dffcfda32f896c67e158a047b706036ab433b11e1d&amp;mpshare=1&amp;scene=23&amp;srcid=&amp;sharer_sharetime=1586425526712&amp;sharer_shareid=75da3ea8231bb63b18e055a6e877643e#rd">理想的DevOp流程怎么做？看看Slack的代码部署实践</a></p>
+
+<h2 id="总结">总结</h2>
+
+<p><code class="highlighter-rouge">DevOps</code> 核心思路只有一个：<strong>不断提高应用开发，部署，监控，升级/迭代效率</strong>。</p>
+
+:ET

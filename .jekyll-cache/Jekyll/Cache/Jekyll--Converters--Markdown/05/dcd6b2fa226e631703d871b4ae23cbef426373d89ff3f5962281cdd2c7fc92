@@ -1,0 +1,216 @@
+I"�!<h2 id="主要思路">主要思路</h2>
+
+<p>实时分析(<code class="highlighter-rouge">show full processlist;</code>)结合延后分析(<code class="highlighter-rouge">mysql.slow_log</code>),对SQL语句进行优化</p>
+
+<h2 id="实时分析">实时分析</h2>
+
+<h3 id="查看有哪些线程正在执行">查看有哪些线程正在执行</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>show processlist;
+show full processlist;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>相比<code class="highlighter-rouge">show processlist;</code>我比较喜欢用.因为这个查询可以用where条件</p>
+
+<pre><code class="language-SQL">SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where state !='' order by state,time desc,command ;
+-- 按照客户端IP对当前连接用户进行分组
+SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by h  order by c desc,user;
+-- 按用户名对当前连接用户进行分组
+SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by user  order by c desc,user;
+</code></pre>
+
+<h3 id="各种耗时sql对应的特征">各种耗时SQL对应的特征</h3>
+
+<ul>
+  <li>改表</li>
+</ul>
+
+<ol>
+  <li>Copying to tmp table</li>
+</ol>
+
+<ul>
+  <li>内存不够用,转成磁盘</li>
+</ul>
+
+<ol>
+  <li>Copying to tmp table on disk</li>
+</ol>
+
+<ul>
+  <li>传输数据量大</li>
+</ul>
+
+<ol>
+  <li>Reading from net</li>
+  <li>Sending data</li>
+</ol>
+
+<ul>
+  <li>没有索引</li>
+</ul>
+
+<ol>
+  <li>Copying to tmp table</li>
+  <li>Sorting result</li>
+  <li>Creating sort index</li>
+  <li>Sorting result</li>
+</ol>
+
+<p>重点关注这些状态,参考<a href="https://www.kancloud.cn/thinkphp/mysql-faq/47446">processlist中哪些状态要引起关注</a>进行优化</p>
+
+<h2 id="延后分析">延后分析</h2>
+
+<h3 id="设置慢查询参数">设置慢查询参数</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>slow_query_log 1
+log_queries_not_using_indexes OFF
+long_query_time 5
+slow_query_log 1  
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<pre><code class="language-SQL"># 建数据库
+CREATE TABLE `slow_log_2019-05-30` (
+  `start_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+  `user_host` mediumtext NOT NULL,
+  `query_time` time(6) NOT NULL,
+  `lock_time` time(6) NOT NULL,
+  `rows_sent` int(11) NOT NULL,
+  `rows_examined` int(11) NOT NULL,
+  `db` varchar(512) NOT NULL,
+  `last_insert_id` int(11) NOT NULL,
+  `insert_id` int(11) NOT NULL,
+  `server_id` int(10) unsigned NOT NULL,
+  `sql_text` mediumtext NOT NULL,
+  `thread_id` bigint(21) unsigned NOT NULL,
+  KEY `idx_start_time` (`start_time`),
+  KEY `idx_query_time` (`query_time`),
+  KEY `idx_lock_time` (`lock_time`),
+  KEY `idx_rows_examined` (`rows_examined`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- insert into slow_log.slow_log_2019-05-30 select * from mysql.slow_log;
+-- truncate table mysql.slow_log ;
+select * FROM slow_log.`slow_log_2019-05-30`
+where sql_text not like 'xxx`%'
+order by  query_time desc,query_time desc;
+</code></pre>
+
+<p>按优先级排列,需要关注的列是<code class="highlighter-rouge">lock_time</code>,<code class="highlighter-rouge">query_time</code>,<code class="highlighter-rouge">rows_examined</code>.分析的时候应用二八法则,先找出最坑爹的那部分SQL,率先优化掉,然后不断not like或者删除掉排除掉已经优化好的低效SQL.</p>
+
+<h2 id="低效sql的优化思路">低效SQL的优化思路</h2>
+
+<p>对于每一个查询,先用<code class="highlighter-rouge">explain SQL</code>分析一遍,是比较明智的做法.</p>
+
+<p>一般而言,rows越少越好,提防Extra:<code class="highlighter-rouge">Using where</code>这种情况,这种情况一般是扫全表,在数据量大(&gt;10万)的时候考虑增加索引.</p>
+
+<h3 id="慎用子查询">慎用子查询</h3>
+
+<p>尽力避免嵌套子查询，使用索引来优化它们</p>
+
+<pre><code class="language-SQL">EXPLAIN SELECT *
+FROM (
+	SELECT *
+	FROM `s`.`t`
+	WHERE status IN (-15, -11)
+	LIMIT 0, 10
+) a
+ORDER BY a.modified DESC
+</code></pre>
+
+<p>比如说这种的,根本毫无必要.表面上看,比去掉子查询更快一点,实际上是因为mysql 5.7对子查询进行了优化,生成了<a href="http://mysql.taobao.org/monthly/2017/03/05/">Derived table</a>,把结果集做了一层缓存.</p>
+
+<p>按照实际的场景分析发现,<code class="highlighter-rouge">status</code>这个字段没有做索引,导致查询变成了全表扫描(using where),加了索引后,问题解决.</p>
+
+<h3 id="json类型">json类型</h3>
+
+<p>json数据类型,如果存入的JSON很长,读取出来自然越慢.在实际场景中,首先要确定是否有使用这一类型的必要,其次,尽量只取所需字段.</p>
+
+<p>见过这样写的</p>
+
+<pre><code class="language-SQL">WHERE j_a like '%"sid":514572%'
+</code></pre>
+
+<p>这种行为明显是对mysql不熟悉,MYSQL是有JSON提取函数的.</p>
+
+<pre><code class="language-SQL">WHERE JSON_EXTRACT(j_a, "$[0].sid")=514572;
+</code></pre>
+
+<p>虽然也是全表扫描,但怎么说也比like全模糊查询好吧?</p>
+
+<p>更好的做法,是通过虚拟字段建索引</p>
+
+<p><a href="http://mysql.taobao.org/monthly/2017/12/09/">MySQL · 最佳实践 · 如何索引JSON字段</a></p>
+
+<p>但是现阶段MYSQL对json的索引做的是不够的,如果json数据列过大,建议还是存<code class="highlighter-rouge">MongoDB</code>(见过把12万json存mysql的,那读取速度简直无语).</p>
+
+<h3 id="字符串类型">字符串类型</h3>
+
+<pre><code class="language-SQL">WHERE a=1
+</code></pre>
+
+<p>用数字给字符串类型的字段赋值会导致该字段上的索引失效.</p>
+
+<pre><code class="language-SQL">WHERE a='1'
+</code></pre>
+
+<h3 id="分组查询">分组查询</h3>
+
+<p><code class="highlighter-rouge">group by</code>,<code class="highlighter-rouge">count(x)</code>,<code class="highlighter-rouge">sum(x)</code>,慎用.非常消耗CPU</p>
+
+<h4 id="group-by"><code class="highlighter-rouge">group by</code></h4>
+
+<pre><code class="language-SQL">select col_1 from table_a where (col_2 &gt; 7 or mtsp_col_2 &gt; 0) and col_3 = 1 group by col_1
+</code></pre>
+
+<p>这种不涉及聚合查询(<code class="highlighter-rouge">count(x)</code>,<code class="highlighter-rouge">sum(x)</code>)的<code class="highlighter-rouge">group by</code>明显就是不合理的,去重复查询效果更高点</p>
+
+<pre><code class="language-SQL">select distinct(col_1) from table_a where (col_2 &gt; 7 or mtsp_col_2 &gt; 0) and col_3 = 1 limit xxx;
+</code></pre>
+
+<h3 id="countxsumx"><code class="highlighter-rouge">count(x)</code>,<code class="highlighter-rouge">sum(x)</code></h3>
+
+<p>x 这个字段最好带索引,不然就算筛选条件有索引也会很慢</p>
+
+<h3 id="order-by-x">order by x</h3>
+
+<p>x这字段最好带上索引,不然<code class="highlighter-rouge">show processlist;</code>里面可能会出现大量<code class="highlighter-rouge">Creating sort index</code>的结果</p>
+
+<h3 id="组合索引失效">组合索引失效</h3>
+
+<p>组合索引有个最左匹配原则</p>
+
+<pre><code class="language-SQL">KEY 'idx_a' (a,b,c)
+</code></pre>
+
+<pre><code class="language-SQL">WHERE b='' and c =''
+</code></pre>
+
+<p>这时组合索引是无效的.</p>
+
+<h2 id="其他">其他</h2>
+
+<pre><code class="language-SQL">EXPLAIN SQL
+DESC SQL
+</code></pre>
+
+<pre><code class="language-SQL"># INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
+SELECT * FROM information_schema.INNODB_TRX;
+SELECT * FROM information_schema.innodb_locks;
+SELECT * FROM information_schema.INNODB_LOCK_WAITS;
+</code></pre>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ol>
+  <li><a href="https://www.cnblogs.com/kerrycode/p/5593204.html">MySQL慢查询日志总结</a></li>
+  <li><a href="https://help.aliyun.com/knowledge_detail/51587.html">MySQL CPU 使用率高的原因和解决方法</a></li>
+  <li><a href="https://blog.csdn.net/m0_37808356/article/details/72526687">mysql优化，导致查询不走索引的原因总结</a></li>
+  <li><a href="https://blog.csdn.net/and1kaney/article/details/51213979">information_schema中Innodb相关表用于分析sql查询锁的使用情况介绍</a></li>
+</ol>
+:ET

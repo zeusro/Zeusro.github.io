@@ -1,0 +1,494 @@
+I"��<p>在翻阅kubernetes的文档时，里面刚好谈到go一些注意事项。</p>
+
+<p>结合以前遇过的坑爹API,汇成此文.</p>
+
+<h2 id="语言特性">语言特性</h2>
+
+<h3 id="数据切片">数据切片</h3>
+
+<p>原则是取下标,不取上标</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>	<span class="n">a</span><span class="o">:=</span><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="m">0</span><span class="p">,</span><span class="m">1</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">}</span>
+	<span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="o">:</span><span class="p">]</span>
+	<span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="m">2</span><span class="o">:</span><span class="m">4</span><span class="p">]</span> <span class="c">//从第[2]位起取,直至[4-1]位,所以结果只有2个元素</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(a):%d ; cap(a):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="n">a</span><span class="p">)</span> 
+	<span class="c">//len(a):2 ; cap(a):3; values:[2 3]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>数组切片是一种指针,所以才会引申出len/cap/append的问题</p>
+
+<h3 id="lencapappend的问题">len/cap/append的问题</h3>
+
+<p>关于len/cap的问题可以看下面2篇文章</p>
+
+<ol>
+  <li><a href="https://tour.golang.org/moretypes/11">Slice length and capacity</a></li>
+  <li><a href="https://blog.golang.org/go-slices-usage-and-internals">Go Slices: usage and internals</a></li>
+</ol>
+
+<p>简单地说,len就是当前数组/切片实际元素的计数,cap是底层数组的长度,砍头不砍尾</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="rouge-code"><pre>	<span class="n">a</span> <span class="o">:=</span><span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">)</span> 
+	<span class="c">// a[2]=666  //panic: runtime error: index out of range</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(a):%d ; cap(a):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="n">a</span><span class="p">)</span> 
+	<span class="c">// len(a):2 ; cap(a):3; values:[0 0] </span>
+	<span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="p">[</span><span class="m">1</span><span class="o">:</span><span class="p">]</span>
+	<span class="c">// 第0位没了,但是后面的还在,所以cap=3-1</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(a):%d ; cap(a):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="n">a</span><span class="p">)</span> 
+	<span class="c">// len(a):1 ; cap(a):2; values:[0] </span>
+	<span class="n">a</span><span class="o">=</span><span class="nb">append</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="m">2</span><span class="p">)</span>
+	<span class="n">a</span><span class="o">=</span><span class="nb">append</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="m">3</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(a):%d ; cap(a):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="n">a</span><span class="p">)</span> 
+	<span class="c">//len(a):3 ; cap(a):4; values:[0 2 3]</span>
+	<span class="n">b</span><span class="o">:=</span><span class="nb">append</span><span class="p">(</span><span class="n">a</span><span class="p">,</span><span class="m">4</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(a):%d ; cap(a):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">a</span><span class="p">),</span><span class="n">a</span><span class="p">)</span> 
+	<span class="c">// len(a):3 ; cap(a):4; values:[0 2 3] </span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(b):%d ; cap(b):%d; values:%v </span><span class="se">\n</span><span class="s">"</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">b</span><span class="p">),</span><span class="nb">cap</span><span class="p">(</span><span class="n">b</span><span class="p">),</span><span class="n">b</span><span class="p">)</span> 
+	<span class="c">// len(b):4 ; cap(b):4; values:[0 2 3 4]</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="highlighter-rouge">append</code>是在数组末尾追加元素,返回一个新的数组,原数组不会发生改变.</p>
+
+<p>len=cap时,继续<code class="highlighter-rouge">append</code>,cap会翻倍</p>
+
+<h3 id="不会用defer就别瞎装逼">不会用defer就别瞎装逼</h3>
+
+<p><code class="highlighter-rouge">defer</code>是倒序执行,而且后定义的<code class="highlighter-rouge">defer</code>先执行(这个很好理解,先定义A变量,然后定义B变量，A的作用域比B长，先清理B是正确选择).</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>	<span class="k">for</span> <span class="n">i</span> <span class="o">:=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="m">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+		<span class="k">defer</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>              <span class="c">// OK; prints 9 ... 0</span>
+		<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}()</span> <span class="c">// WRONG; prints "10" 10 times</span>
+		<span class="k">defer</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="c">//跟下面一行结果一样</span>
+		<span class="k">defer</span> <span class="k">func</span><span class="p">(</span><span class="n">i</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}(</span><span class="n">i</span><span class="p">)</span> <span class="c">// OK  prints 0 ... 9 in</span>
+		<span class="k">defer</span> <span class="nb">print</span><span class="p">(</span><span class="o">&amp;</span><span class="n">i</span><span class="p">)</span>                         <span class="c">// WRONG; prints "10" 10 times unpredictable order</span>
+		<span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}()</span>          <span class="c">// WRONG; totally unpredictable.</span>
+	<span class="p">}</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这个例子是<a href="https://gist.github.com/lavalamp/4bd23295a9f32706a48f">The Three Go Landmines.markdown</a>提出来的。要理解其实不难，把for拆解出来就行了。注意for只是控制了循环的边界,循环结束后,i=10.</p>
+
+<p>需要分清的传入参数的情况</p>
+
+<p><code class="highlighter-rouge">defer func() { fmt.Println(i) }()</code>
+相当于</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="n">i</span><span class="o">:=</span><span class="m">0</span>
+<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}()</span>
+<span class="n">i</span><span class="o">=</span><span class="m">1</span>
+<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}()</span>
+<span class="o">......</span>
+<span class="n">i</span><span class="o">=</span><span class="m">9</span>
+<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}()</span>
+<span class="n">i</span><span class="o">=</span><span class="m">10</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>所以<code class="highlighter-rouge">defer func() { fmt.Println(i) }()</code>的结果为打印10次10</p>
+
+<p>而<code class="highlighter-rouge">defer fmt.Println(i)</code>等价于<code class="highlighter-rouge">defer func(i int) { fmt.Println(i) }(i)</code></p>
+
+<p>把局部变量传入,defer内部获得的是值的复制,所以实际上是</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+</pre></td><td class="rouge-code"><pre><span class="n">i</span><span class="o">:=</span><span class="m">0</span>
+<span class="k">defer</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
+<span class="n">i</span><span class="o">=</span><span class="m">1</span>
+<span class="k">defer</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+<span class="o">......</span>
+<span class="n">i</span><span class="o">=</span><span class="m">9</span>
+<span class="k">defer</span> <span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="m">9</span><span class="p">)</span>
+<span class="n">i</span><span class="o">=</span><span class="m">10</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>还有无法定义变量获取defer函数的返回值，defer函数带返回值根本毫无意义</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre>
+	<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">str</span> <span class="o">:=</span> <span class="s">"e"</span><span class="p">;</span> <span class="n">str</span> <span class="o">==</span> <span class="s">"e"</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">str</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="s">"e"</span>
+	<span class="p">}()</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="if变量作用域">if变量作用域</h3>
+
+<p>if 里面定义的变量，即便是跟已定义变量同名，在if中对其赋值，对已经被定义的变量不会有影响。</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="k">var</span> <span class="n">ErrDidNotWork</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">New</span><span class="p">(</span><span class="s">"did not work"</span><span class="p">)</span>
+
+<span class="k">func</span> <span class="n">DoTheThing</span><span class="p">(</span><span class="n">reallyDoIt</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">(</span><span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+  <span class="k">if</span> <span class="n">reallyDoIt</span> <span class="p">{</span>
+    <span class="n">result</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">tryTheThing</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="o">||</span> <span class="n">result</span> <span class="o">!=</span> <span class="s">"it worked"</span> <span class="p">{</span>
+      <span class="n">err</span> <span class="o">=</span> <span class="n">ErrDidNotWork</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+  <span class="k">return</span> <span class="n">err</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="半新不旧变量">半新不旧变量</h3>
+
+<p>常见于err和多重返回值函数，针对这种情况，可以通过if作用域强制覆盖，或者命名一个新变量解决</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre><span class="k">var</span> <span class="n">e</span> <span class="kt">error</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="o">:=</span> <span class="n">a</span><span class="p">()</span> <span class="c">//无法编译</span>
+	<span class="n">s</span><span class="p">,</span> <span class="n">err2</span> <span class="o">:=</span> <span class="n">a</span><span class="p">()</span> <span class="c">//OK</span>
+	<span class="k">if</span> <span class="n">s</span><span class="p">,</span> <span class="n">e</span> <span class="o">:=</span> <span class="n">a</span><span class="p">();</span> <span class="n">e</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span> <span class="c">//OK</span>
+	<span class="p">}</span>
+	<span class="err">······</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="k">func</span> <span class="n">a</span><span class="p">()</span> <span class="p">(</span><span class="n">str</span> <span class="kt">string</span><span class="p">,</span> <span class="n">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">return</span> <span class="s">""</span><span class="p">,</span> <span class="no">nil</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="goroutine-机制">goroutine 机制</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre><span class="k">package</span> <span class="n">main</span>
+
+<span class="k">import</span> <span class="p">(</span>
+	<span class="s">"fmt"</span>
+	<span class="s">"runtime"</span>
+<span class="p">)</span>
+
+<span class="k">func</span> <span class="n">main</span><span class="p">()</span> <span class="p">{</span>
+	<span class="k">var</span> <span class="n">i</span> <span class="kt">byte</span>
+	<span class="k">go</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">for</span> <span class="n">i</span> <span class="o">=</span> <span class="m">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="m">255</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">{</span>
+			<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+		<span class="p">}</span>
+	<span class="p">}()</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"start"</span><span class="p">)</span>
+	<span class="n">runtime</span><span class="o">.</span><span class="n">Gosched</span><span class="p">()</span>
+	<span class="n">runtime</span><span class="o">.</span><span class="n">GC</span><span class="p">()</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Println</span><span class="p">(</span><span class="s">"end"</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ol>
+  <li>问题1: 运行的结果</li>
+  <li>问题2: 去掉<code class="highlighter-rouge">runtime.GC()</code>之后的结果</li>
+  <li>问题3: 如果你是goruntime,去掉<code class="highlighter-rouge">fmt.Println(i)</code>之后要怎么优化编译</li>
+</ol>
+
+<p>答案:</p>
+
+<p>Gosched() 让出了CPU时间片,让 goroutine 有机会运行</p>
+
+<p>Goroutine采用的是半抢占式的协作调度，只有在当前Goroutine发生阻塞时才会导致调度</p>
+
+<p>GC()需要stop the world,所以会等待协程运行完</p>
+
+<p>如果没有 GC()这个方法,则运行结果完全不可控</p>
+
+<p>for 里面一堆废话,最合理的优化,应该是连协程都不创建,哈哈哈哈哈</p>
+
+<h2 id="坑爹api">坑爹API</h2>
+
+<h3 id="获取字符串长度">获取字符串长度:</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nb">len</span><span class="p">([]</span><span class="kt">rune</span><span class="p">(</span><span class="s">"文件夹,子文件夹,"</span><span class="p">))</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="split的坑">Split的坑</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>	<span class="n">s</span> <span class="o">:=</span> <span class="n">strings</span><span class="o">.</span><span class="n">Split</span><span class="p">(</span><span class="s">"shit,"</span><span class="p">,</span> <span class="s">","</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"len(s):%d</span><span class="se">\n</span><span class="s">"</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">))</span><span class="c">//2</span>
+	<span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="n">s</span> <span class="p">{</span>
+		<span class="n">fmt</span><span class="o">.</span><span class="n">Printf</span><span class="p">(</span><span class="s">"%s"</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+	<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>strings.Split的字符串,如果用来分割的字符串恰好出现完整字符串的最后面,获得的数组长度会+1,这个数组的最后一个元素会是一个空白</p>
+
+<h3 id="时间转换函数">时间转换函数</h3>
+
+<p>golang的字符串转日期函数非常不灵活,并且格式化的字符串是一个魔术变量,代表golang的面世时间…</p>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="rouge-code"><pre><span class="c">// ToTime 字符串转golang内置当地时间</span>
+<span class="k">func</span> <span class="n">ToTime</span><span class="p">(</span><span class="n">str</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">Time</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">var</span> <span class="n">err</span> <span class="kt">error</span>
+    <span class="n">format1</span> <span class="o">:=</span> <span class="s">"2006-01-02 15:04:05"</span>    
+	<span class="n">loc</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">time</span><span class="o">.</span><span class="n">LoadLocation</span><span class="p">(</span><span class="s">"Local"</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">!=</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">(),</span> <span class="n">err</span>
+	<span class="p">}</span>
+	<span class="n">date</span><span class="p">,</span> <span class="n">err</span> <span class="o">:=</span> <span class="n">time</span><span class="o">.</span><span class="n">ParseInLocation</span><span class="p">(</span><span class="n">format1</span><span class="p">,</span> <span class="n">str</span><span class="p">,</span> <span class="n">loc</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">date</span><span class="p">,</span> <span class="no">nil</span>
+	<span class="p">}</span>
+	<span class="n">format2</span> <span class="o">:=</span> <span class="s">"2006-01-02"</span>
+	<span class="n">date</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ParseInLocation</span><span class="p">(</span><span class="n">format2</span><span class="p">,</span> <span class="n">str</span><span class="p">,</span> <span class="n">loc</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">date</span><span class="p">,</span> <span class="no">nil</span>
+	<span class="p">}</span>
+	<span class="n">sqlserverFormat</span><span class="o">:=</span> <span class="s">"2006-01-02T15:04:05"</span>
+	<span class="n">date</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ParseInLocation</span><span class="p">(</span><span class="n">sqlserverFormat</span><span class="p">,</span> <span class="n">str</span><span class="p">,</span> <span class="n">loc</span><span class="p">);</span>
+	<span class="k">if</span> <span class="n">err</span> <span class="o">==</span> <span class="no">nil</span> <span class="p">{</span>
+		<span class="k">return</span> <span class="n">date</span><span class="p">,</span> <span class="no">nil</span>
+	<span class="p">}</span>
+    <span class="k">return</span> <span class="n">time</span><span class="o">.</span><span class="n">Now</span><span class="p">(),</span> <span class="n">err</span>
+<span class="p">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="值类型不会溢出">值类型不会溢出</h3>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+</pre></td><td class="rouge-code"><pre>	<span class="k">var</span> <span class="n">s</span> <span class="kt">int32</span> <span class="o">=</span> <span class="m">5120</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="m">1024</span> <span class="o">*</span> <span class="m">1024</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="kt">int64</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">*</span> <span class="m">1024</span> <span class="o">*</span> <span class="m">1024</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">MaxInt32</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="s">"</span><span class="se">\n</span><span class="s">"</span><span class="p">)</span>
+	<span class="n">fmt</span><span class="o">.</span><span class="n">Print</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">MaxInt64</span><span class="p">)</span>
+    <span class="c">/*
+1073741824
+5368709120
+2147483647
+9223372036854775807
+*/</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>以前用C#的时候,如果定义一个值类型变量,赋予它一个超出范围的值的话是会出异常的,然而到了golang,直接变成这个类型无符号最大值</p>
+
+<h2 id="构建篇">构建篇</h2>
+
+<p>启用了<code class="highlighter-rouge">go module</code>之后，对依赖的拉取变得更加频繁。但是基于中国有中国特色的互联网，我们有时候很难get到我们需要的依赖源代码，进而导致项目编译失败，CI失败。于是，我们需要一个proxy。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nb">export </span><span class="nv">GOPROXY</span><span class="o">=</span>https://goproxy.io
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><a href="https://cloud.tencent.com/developer/news/308442">goproxy.io for Go modules</a></p>
+
+<h2 id="开发建议">开发建议</h2>
+
+<ol>
+  <li><a href="https://github.com/golang/go/wiki/CodeReviewComments">CodeReviewComments</a></li>
+  <li><a href="https://golang.org/doc/effective_go.html">Effective Go</a></li>
+</ol>
+
+<p>其他语言的可看
+<a href="https://google.github.io/styleguide/">Google Style Guides</a></p>
+
+<p>论喷子，还是没<a href="http://www.yinwang.org/blog-cn/2014/04/18/golang">王垠</a>强</p>
+
+<h2 id="课后作业">课后作业</h2>
+
+<div class="language-go highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+</pre></td><td class="rouge-code"><pre>
+<span class="k">func</span> <span class="n">a</span><span class="p">()</span> <span class="p">(</span><span class="n">str</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+	<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="n">str</span> <span class="o">=</span> <span class="s">"a"</span>
+	<span class="p">}()</span>
+
+	<span class="k">defer</span> <span class="k">func</span><span class="p">(</span><span class="n">str</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+		<span class="n">str</span> <span class="o">=</span> <span class="s">"b"</span>
+	<span class="p">}(</span><span class="n">str</span><span class="p">)</span>
+
+	<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">str2</span> <span class="o">:=</span> <span class="s">"c"</span><span class="p">;</span> <span class="n">str2</span> <span class="o">==</span> <span class="s">"c"</span> <span class="p">{</span>
+			<span class="n">str</span> <span class="o">=</span> <span class="n">str2</span>
+		<span class="p">}</span>
+	<span class="p">}()</span>
+
+	<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">str</span> <span class="o">:=</span> <span class="s">"d"</span><span class="p">;</span> <span class="n">str</span> <span class="o">==</span> <span class="s">"d"</span> <span class="p">{</span>
+			<span class="n">str</span> <span class="o">=</span> <span class="s">"d"</span>
+		<span class="p">}</span>
+	<span class="p">}()</span>
+
+	<span class="k">defer</span> <span class="k">func</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+		<span class="k">if</span> <span class="n">str</span> <span class="o">:=</span> <span class="s">"e"</span><span class="p">;</span> <span class="n">str</span> <span class="o">==</span> <span class="s">"e"</span> <span class="p">{</span>
+			<span class="k">return</span> <span class="n">str</span>
+		<span class="p">}</span>
+		<span class="k">return</span> <span class="s">"e"</span>
+	<span class="p">}()</span>
+
+	<span class="n">str</span> <span class="o">=</span> <span class="s">"f"</span>
+	<span class="k">return</span> <span class="n">str</span>
+<span class="p">}</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>注释掉里面的<code class="highlighter-rouge">defer</code>，观察一下不同组合下的函数的结果，看懂了，就算理解defer了</p>
+:ET

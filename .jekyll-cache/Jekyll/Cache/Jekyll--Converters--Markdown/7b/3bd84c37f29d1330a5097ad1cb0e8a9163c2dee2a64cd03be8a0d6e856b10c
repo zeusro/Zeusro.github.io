@@ -1,0 +1,1078 @@
+I"-N<ol>
+  <li><a href="#前期准备">前期准备</a>
+    <ul>
+      <li>定义实体</li>
+      <li>定义集合</li>
+    </ul>
+  </li>
+  <li><a href="#stream的其他用法">stream的其他用法</a>
+    <ul>
+      <li>[用于校验集合](#用于校验集合(引用自<a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/">IBM</a>)</li>
+      <li><a href="#自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))">自己生成流</a></li>
+      <li>Stream.iterate</li>
+    </ul>
+  </li>
+  <li><a href="#stream的注意事项">stream的注意事项</a>
+    <ul>
+      <li>流只能用一次,重复使用会导致以下异常</li>
+      <li>filter</li>
+    </ul>
+  </li>
+  <li><a href="#完整代码">完整代码</a></li>
+  <li><a href="#参考链接">参考链接</a></li>
+</ol>
+
+<script src="https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98.js"></script>
+
+<h2 id="前期准备">前期准备</h2>
+
+<ul>
+  <li>定义实体</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+</pre></td><td class="rouge-code"><pre><span class="c1">// </span>
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">zeusro</span><span class="o">;</span>
+
+
+<span class="kn">import</span> <span class="nn">java.util.Date</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.List</span><span class="o">;</span>
+
+<span class="cm">/**
+ * The type Person &lt;p/&gt;
+ * author: &lt;a href="http://zeusro.github.io/"&gt;Zeusro&lt;/a&gt; &lt;p/&gt;
+ *
+ * @date Created in 2018.03.08 &lt;p/&gt;
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Person</span> <span class="kd">implements</span> <span class="nc">Cloneable</span> <span class="o">{</span>
+
+    <span class="c1">// 身高</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">height</span><span class="o">;</span>
+    <span class="c1">//体重-</span>
+    <span class="kd">private</span> <span class="kt">int</span> <span class="n">weight</span><span class="o">;</span>
+    <span class="c1">//身份证号</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">identifier</span><span class="o">;</span>
+    <span class="c1">//地址</span>
+    <span class="kd">private</span> <span class="nc">String</span> <span class="n">address</span><span class="o">;</span>
+    <span class="c1">//生日</span>
+    <span class="kd">private</span> <span class="nc">Date</span> <span class="n">birthday</span><span class="o">;</span>
+    <span class="c1">//爱好</span>
+    <span class="kd">private</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">hobbies</span><span class="o">;</span>
+
+    <span class="c1">//性别</span>
+    <span class="kd">private</span> <span class="nc">Sex</span> <span class="n">sex</span><span class="o">;</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">protected</span> <span class="nc">Object</span> <span class="nf">clone</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">CloneNotSupportedException</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="o">(</span><span class="nc">Person</span><span class="o">)</span> <span class="kd">super</span><span class="o">.</span><span class="na">clone</span><span class="o">();</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">Sex</span> <span class="nf">getSex</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">sex</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setSex</span><span class="o">(</span><span class="nc">Sex</span> <span class="n">sex</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">sex</span> <span class="o">=</span> <span class="n">sex</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getAddress</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">address</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setAddress</span><span class="o">(</span><span class="nc">String</span> <span class="n">address</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">address</span> <span class="o">=</span> <span class="n">address</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">Date</span> <span class="nf">getBirthday</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">birthday</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setBirthday</span><span class="o">(</span><span class="nc">Date</span> <span class="n">birthday</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">birthday</span> <span class="o">=</span> <span class="n">birthday</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getHeight</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">height</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHeight</span><span class="o">(</span><span class="kt">int</span> <span class="n">height</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">height</span> <span class="o">=</span> <span class="n">height</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="nf">getHobbies</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">hobbies</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setHobbies</span><span class="o">(</span><span class="nc">List</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;</span> <span class="n">hobbies</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">hobbies</span> <span class="o">=</span> <span class="n">hobbies</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="nc">String</span> <span class="nf">getIdentifier</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">identifier</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setIdentifier</span><span class="o">(</span><span class="nc">String</span> <span class="n">identifier</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">identifier</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getWeight</span><span class="o">()</span> <span class="o">{</span>
+        <span class="k">return</span> <span class="n">weight</span><span class="o">;</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">setWeight</span><span class="o">(</span><span class="kt">int</span> <span class="n">weight</span><span class="o">)</span> <span class="o">{</span>
+        <span class="k">this</span><span class="o">.</span><span class="na">weight</span> <span class="o">=</span> <span class="n">weight</span><span class="o">;</span>
+    <span class="o">}</span>
+
+
+<span class="o">}</span>
+<span class="c1">//</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>
+<span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">zeusro</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">enum</span> <span class="nc">Sex</span> <span class="o">{</span>
+    <span class="c1">//男</span>
+    <span class="nc">Male</span><span class="o">,</span>
+    <span class="c1">//女</span>
+    <span class="nc">Female</span><span class="o">,</span>
+    <span class="c1">//第三性 https://zh.wikipedia.org/wiki/%E7%AC%AC%E4%B8%89%E6%80%A7</span>
+    <span class="no">X</span><span class="o">,</span>
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>定义集合</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+</pre></td><td class="rouge-code"><pre><span class="c1">// </span>
+            <span class="c1">// LocalDate.of(2018, 02, 29);</span>
+            <span class="c1">//java.time.DateTimeException: Invalid date 'February 29' as '2018' is not a leap year</span>
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">female</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1981</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">165</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Female</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"逛街"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">male</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1982</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">170</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Male</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"2"</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"看電影"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1983</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">170</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">X</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"3"</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"上網"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">male2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1984</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">150</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">35</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Male</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"4"</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"看電影"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="o">{</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">female</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">male</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">x</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="o">{</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">female</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">male2</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+<span class="c1">//</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="stream的其他用法">stream的其他用法</h2>
+
+<h3 id="用于校验集合引用自ibm">用于校验集合(引用自<a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/">IBM</a>)</h3>
+
+<blockquote>
+  <p>allMatch：Stream 中全部元素符合传入的 predicate，返回 true</p>
+
+  <p>anyMatch：Stream 中只要有一个元素符合传入的 predicate，返回 true</p>
+
+  <p>noneMatch：Stream 中没有一个元素符合传入的 predicate，返回 true</p>
+</blockquote>
+
+<h3 id="自己生成流引用自ibm">自己生成流(引用自<a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/">IBM</a>)</h3>
+
+<ul>
+  <li>Stream.generate</li>
+</ul>
+
+<p>通过实现 Supplier 接口，你可以自己来控制流的生成。这种情形通常用于随机数、常量的 Stream，或者需要前后元素间维持着某种状态信息的 Stream。把 Supplier 实例传递给 Stream.generate() 生成的 Stream，默认是串行（相对 parallel 而言）但无序的（相对 ordered 而言）。由于它是无限的，在管道中，必须利用 limit 之类的操作限制 Stream 大小。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre><span class="nc">Random</span> <span class="n">seed</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+<span class="nc">Supplier</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">random</span> <span class="o">=</span> <span class="nl">seed:</span><span class="o">:</span><span class="n">nextInt</span><span class="o">;</span>
+<span class="nc">Stream</span><span class="o">.</span><span class="na">generate</span><span class="o">(</span><span class="n">random</span><span class="o">).</span><span class="na">limit</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+<span class="c1">//Another way</span>
+<span class="nc">IntStream</span><span class="o">.</span><span class="na">generate</span><span class="o">(()</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="kt">int</span><span class="o">)</span> <span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">nanoTime</span><span class="o">()</span> <span class="o">%</span> <span class="mi">100</span><span class="o">)).</span>
+<span class="n">limit</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span><span class="na">forEach</span><span class="o">(</span><span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">::</span><span class="n">println</span><span class="o">);</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>Stream.generate() 还接受自己实现的 Supplier。例如在构造海量测试数据的时候，用某种自动的规则给每一个变量赋值；或者依据公式计算 Stream 的每个元素值。这些都是维持状态信息的情形。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="nc">Stream</span><span class="o">.</span><span class="na">generate</span><span class="o">(</span><span class="k">new</span> <span class="nc">PersonSupplier</span><span class="o">()).</span>
+<span class="n">limit</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span>
+<span class="n">forEach</span><span class="o">(</span><span class="n">p</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">p</span><span class="o">.</span><span class="na">getName</span><span class="o">()</span> <span class="o">+</span> <span class="s">", "</span> <span class="o">+</span> <span class="n">p</span><span class="o">.</span><span class="na">getAge</span><span class="o">()));</span>
+<span class="kd">private</span> <span class="kd">class</span> <span class="nc">PersonSupplier</span> <span class="kd">implements</span> <span class="nc">Supplier</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="o">{</span>
+ <span class="kd">private</span> <span class="kt">int</span> <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span><span class="o">;</span>
+ <span class="kd">private</span> <span class="nc">Random</span> <span class="n">random</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+ <span class="nd">@Override</span>
+ <span class="kd">public</span> <span class="nc">Person</span> <span class="nf">get</span><span class="o">()</span> <span class="o">{</span>
+ <span class="k">return</span> <span class="k">new</span> <span class="nf">Person</span><span class="o">(</span><span class="n">index</span><span class="o">++,</span> <span class="s">"StormTestUser"</span> <span class="o">+</span> <span class="n">index</span><span class="o">,</span> <span class="n">random</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">100</span><span class="o">));</span>
+ <span class="o">}</span>
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre># 输出结果：
+StormTestUser1, 9
+StormTestUser2, 12
+StormTestUser3, 88
+StormTestUser4, 51
+StormTestUser5, 22
+StormTestUser6, 28
+StormTestUser7, 81
+StormTestUser8, 51
+StormTestUser9, 4
+StormTestUser10, 76
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>Stream.iterate</li>
+</ul>
+
+<p>iterate 跟 reduce 操作很像，接受一个种子值，和一个 UnaryOperator（例如 f）。然后种子值成为 Stream 的第一个元素，f(seed) 为第二个，f(f(seed)) 第三个，以此类推。</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre><span class="nc">Stream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="n">n</span> <span class="o">-&gt;</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">3</span><span class="o">).</span><span class="na">limit</span><span class="o">(</span><span class="mi">10</span><span class="o">).</span> <span class="n">forEach</span><span class="o">(</span><span class="n">x</span> <span class="o">-&gt;</span> <span class="nc">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">print</span><span class="o">(</span><span class="n">x</span> <span class="o">+</span> <span class="s">" "</span><span class="o">));.</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre># 输出结果：
+0 3 6 9 12 15 18 21 24 27
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><strong>与 Stream.generate 相仿，在 iterate 时候管道必须有 limit 这样的操作来限制 Stream 大小。</strong></p>
+
+<h2 id="stream的注意事项">stream的注意事项</h2>
+
+<ul>
+  <li>流只能用一次,重复使用会导致以下异常</li>
+</ul>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="nc">Stream</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list1Stream</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">();</span>
+<span class="n">list1Stream</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">time1</span><span class="o">)).</span><span class="na">count</span><span class="o">();</span>
+<span class="n">list1Stream</span><span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">!</span><span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">time1</span><span class="o">)).</span><span class="na">count</span><span class="o">();</span><span class="c1">//java.lang.IllegalStateException: stream has already been operated upon or closed</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>所以我建议每次需要集合操作的时候都直接新建一个 stream, 而不是使用<code class="highlighter-rouge">Stream&lt;Person&gt; list1Stream = list1.stream();</code>去定义</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">time1</span><span class="o">)).</span><span class="na">count</span><span class="o">();</span>
+<span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">!</span><span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">time1</span><span class="o">)).</span><span class="na">count</span><span class="o">();</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>filter</li>
+</ul>
+
+<p>一般有filter 操作时，不用并行流parallelStream ,如果用的话可能会导致线程安全问题</p>
+
+<h2 id="完整代码">完整代码</h2>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261
+262
+263
+264
+265
+266
+267
+</pre></td><td class="rouge-code"><pre><span class="c1">// </span>
+
+<span class="kn">import</span> <span class="nn">com.google.gson.Gson</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.zeusro.Person</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">com.zeusro.Sex</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">java.time.LocalDate</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.time.ZoneId</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.*</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.stream.Collectors</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.stream.Stream</span><span class="o">;</span>
+
+<span class="kn">import</span> <span class="nn">static</span> <span class="n">java</span><span class="o">.</span><span class="na">lang</span><span class="o">.</span><span class="na">System</span><span class="o">.</span><span class="na">out</span><span class="o">;</span>
+
+
+<span class="cm">/**
+ * The type Main &lt;p/&gt;
+ * author: &lt;a href="http://zeusro.github.io/"&gt;Zeusro&lt;/a&gt; &lt;p/&gt;
+ *
+ * @date Created in 2018.03.09 &lt;p/&gt;
+ */</span>
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">Main</span> <span class="o">{</span>
+
+
+    <span class="kd">private</span> <span class="kd">static</span> <span class="nc">Date</span> <span class="nf">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span> <span class="n">localDate</span><span class="o">)</span> <span class="o">{</span>
+        <span class="nc">ZoneId</span> <span class="n">zoneID</span> <span class="o">=</span> <span class="nc">ZoneId</span><span class="o">.</span><span class="na">systemDefault</span><span class="o">();</span>
+        <span class="k">return</span> <span class="nc">Date</span><span class="o">.</span><span class="na">from</span><span class="o">(</span><span class="n">localDate</span><span class="o">.</span><span class="na">atStartOfDay</span><span class="o">(</span><span class="n">zoneID</span><span class="o">).</span><span class="na">toInstant</span><span class="o">());</span>
+    <span class="o">}</span>
+
+    <span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="nc">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="k">try</span> <span class="o">{</span>
+            <span class="c1">// LocalDate.of(2018, 02, 29);</span>
+            <span class="c1">//java.time.DateTimeException: Invalid date 'February 29' as '2018' is not a leap year</span>
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">female</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1981</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">165</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Female</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"1"</span><span class="o">);</span>
+            <span class="n">female</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"逛街"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">male</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1982</span><span class="o">,</span> <span class="mi">2</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">170</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Male</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"2"</span><span class="o">);</span>
+            <span class="n">male</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"看電影"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">x</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1983</span><span class="o">,</span> <span class="mi">3</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">170</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">50</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">X</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"3"</span><span class="o">);</span>
+            <span class="n">x</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"上網"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="kd">final</span> <span class="nc">Person</span> <span class="n">male2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Person</span><span class="o">();</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setBirthday</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1984</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">)));</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setHeight</span><span class="o">(</span><span class="mi">150</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setWeight</span><span class="o">(</span><span class="mi">35</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">Male</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setAddress</span><span class="o">(</span><span class="s">"北京"</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setIdentifier</span><span class="o">(</span><span class="s">"4"</span><span class="o">);</span>
+            <span class="n">male2</span><span class="o">.</span><span class="na">setHobbies</span><span class="o">(</span><span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">String</span><span class="o">&gt;()</span> <span class="o">{{</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"吃飯"</span><span class="o">);</span>
+                <span class="n">add</span><span class="o">(</span><span class="s">"看電影"</span><span class="o">);</span>
+            <span class="o">}});</span>
+
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list1</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="o">{</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">female</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">male</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">x</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list2</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;()</span> <span class="o">{</span>
+                <span class="o">{</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">female</span><span class="o">);</span>
+                    <span class="n">add</span><span class="o">(</span><span class="n">male2</span><span class="o">);</span>
+                <span class="o">}</span>
+            <span class="o">};</span>
+            <span class="c1">//流只能用一次,重复使用会导致以下异常</span>
+            <span class="c1">//java.lang.IllegalStateException: stream has already been operated upon or closed</span>
+            <span class="nc">Stream</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list1Stream</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">();</span>
+            <span class="nc">Date</span> <span class="n">time1</span> <span class="o">=</span> <span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1990</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">));</span>
+            <span class="c1">//0</span>
+            <span class="nc">Long</span> <span class="n">count1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">equals</span><span class="o">(</span><span class="n">time1</span><span class="o">)).</span><span class="na">count</span><span class="o">();</span>
+            <span class="nc">Map</span><span class="o">&lt;</span><span class="nc">Sex</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;&gt;</span> <span class="n">group1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">groupingBy</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getSex</span><span class="o">));</span>
+            <span class="nc">Iterator</span> <span class="n">it</span> <span class="o">=</span> <span class="n">group1</span><span class="o">.</span><span class="na">entrySet</span><span class="o">().</span><span class="na">iterator</span><span class="o">();</span>
+            <span class="k">while</span> <span class="o">(</span><span class="n">it</span><span class="o">.</span><span class="na">hasNext</span><span class="o">())</span> <span class="o">{</span>
+                <span class="nc">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">&lt;</span><span class="nc">Sex</span><span class="o">,</span> <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;&gt;</span> <span class="n">groupByItem</span> <span class="o">=</span> <span class="o">(</span><span class="nc">Map</span><span class="o">.</span><span class="na">Entry</span><span class="o">)</span> <span class="n">it</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+                <span class="nc">Sex</span> <span class="n">sex</span> <span class="o">=</span> <span class="n">groupByItem</span><span class="o">.</span><span class="na">getKey</span><span class="o">();</span>
+                <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">sex</span><span class="o">);</span>
+                <span class="n">groupByItem</span><span class="o">.</span><span class="na">getValue</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">person</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                    <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">person</span><span class="o">));</span>
+                <span class="o">});</span>
+            <span class="o">}</span>
+<span class="cm">/*
+输出结果:
+Male
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
+Female
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"Female"}
+X
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+ */</span>
+            <span class="c1">//stream没有RemoveAll的操作</span>
+            <span class="nc">Person</span> <span class="n">after90</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">()</span>
+                    <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">after</span><span class="o">(</span><span class="n">convertLocalDateToTimeZone</span><span class="o">(</span><span class="nc">LocalDate</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="mi">1990</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="mi">1</span><span class="o">))))</span>
+                    <span class="o">.</span><span class="na">findFirst</span><span class="o">()</span>
+                    <span class="o">.</span><span class="na">orElse</span><span class="o">(</span><span class="kc">null</span><span class="o">);</span>
+            <span class="c1">// null</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="c1">//在ForEach當中可對集合進行操作</span>
+                <span class="n">o</span><span class="o">.</span><span class="na">setSex</span><span class="o">(</span><span class="nc">Sex</span><span class="o">.</span><span class="na">X</span><span class="o">);</span>
+            <span class="o">});</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">forEach</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">o</span><span class="o">));</span>
+            <span class="o">});</span>
+<span class="cm">/*
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+ */</span>
+            <span class="c1">//IntStream的max方法返回的是OptionalInt,要先判断有没有值再读取值.isPresent=false 时直接getAsInt会报错.mapToLong,mapToDouble同理</span>
+            <span class="nc">OptionalInt</span> <span class="n">maxHeightOption</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">max</span><span class="o">();</span>
+            <span class="c1">//字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。</span>
+            <span class="c1">//当集合为长度0的集合时会返回起始值Integer.MIN_VALUE,起始值也不能乱传,个中缘由我暂不清楚</span>
+            <span class="kt">int</span> <span class="n">maxHeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">reduce</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MIN_VALUE</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">max</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">maxHeight</span><span class="o">);</span>
+            <span class="c1">//170</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">maxHeightOption</span><span class="o">.</span><span class="na">isPresent</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">maxHeight</span> <span class="o">=</span> <span class="n">maxHeightOption</span><span class="o">.</span><span class="na">getAsInt</span><span class="o">();</span>
+                <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">maxHeight</span><span class="o">);</span>
+                <span class="c1">//170</span>
+            <span class="o">}</span>
+            <span class="c1">//mapToInt参数的2种写法都一样,我比较喜欢以下写法,但是 idea 会报 warning</span>
+            <span class="nc">OptionalInt</span> <span class="n">minWeightOption</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()).</span><span class="na">min</span><span class="o">();</span>
+            <span class="kt">int</span> <span class="n">minWeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()).</span><span class="na">reduce</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">min</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">map</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getIdentifier</span><span class="o">).</span><span class="na">distinct</span><span class="o">();</span>
+            <span class="c1">//skip和 limit参数都是long, 这个要注意</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">skip</span><span class="o">(</span><span class="mi">1L</span><span class="o">).</span><span class="na">limit</span><span class="o">(</span><span class="mi">2L</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|升序|------------------------------------"</span><span class="o">);</span>
+            <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">sorted</span><span class="o">(</span><span class="nc">Comparator</span><span class="o">.</span><span class="na">comparing</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getBirthday</span><span class="o">)).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">list1</span><span class="o">));</span>
+            <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">sorted</span><span class="o">((</span><span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">left</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">right</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">())).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">list1</span><span class="o">));</span>
+            <span class="cm">/*
+[{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]
+[{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]            
+             */</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|降序|------------------------------------"</span><span class="o">);</span>
+            <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">sorted</span><span class="o">(</span><span class="nc">Comparator</span><span class="o">.</span><span class="na">comparing</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getBirthday</span><span class="o">).</span><span class="na">reversed</span><span class="o">()).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">list1</span><span class="o">));</span>
+            <span class="n">list1</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">sorted</span><span class="o">((</span><span class="n">left</span><span class="o">,</span> <span class="n">right</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">right</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">().</span><span class="na">compareTo</span><span class="o">(</span><span class="n">left</span><span class="o">.</span><span class="na">getBirthday</span><span class="o">())).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">list1</span><span class="o">));</span>
+<span class="cm">/*
+[{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
+[{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
+ */</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|交集 list1 ∩ list2|------------------------------------"</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">list2</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">o</span><span class="o">)).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|并集list1 ∪ list2 |------------------------------------"</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">addAll</span><span class="o">(</span><span class="n">list2</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">distinct</span><span class="o">().</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|差集list1 - list2|------------------------------------"</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">item1</span> <span class="o">-&gt;</span> <span class="o">!</span><span class="n">list2</span><span class="o">.</span><span class="na">contains</span><span class="o">(</span><span class="n">item1</span><span class="o">)).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|数据结构转换|------------------------------------"</span><span class="o">);</span>
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list3</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="kc">true</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="nc">ArrayList</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list4</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="kc">true</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toCollection</span><span class="o">(</span><span class="nl">ArrayList:</span><span class="o">:</span><span class="k">new</span><span class="o">));</span>
+            <span class="nc">Set</span><span class="o">&lt;</span><span class="nc">Person</span><span class="o">&gt;</span> <span class="n">list5</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">filter</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="kc">true</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toSet</span><span class="o">());</span>
+            <span class="nc">Object</span><span class="o">[]</span> <span class="n">list6</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">toArray</span><span class="o">();</span>
+            <span class="nc">Person</span><span class="o">[]</span> <span class="n">list7</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">toArray</span><span class="o">(</span><span class="nc">Person</span><span class="o">[]::</span><span class="k">new</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|其他需要注意的地方|------------------------------------"</span><span class="o">);</span>
+            <span class="c1">//2个数组合并用这种方法的话, list2会为空</span>
+            <span class="nc">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="n">list1</span><span class="o">,</span> <span class="n">list2</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="c1">//以下才是正确用法</span>
+            <span class="nc">Stream</span><span class="o">.</span><span class="na">of</span><span class="o">(</span><span class="n">list1</span><span class="o">,</span> <span class="n">list2</span><span class="o">).</span><span class="na">flatMap</span><span class="o">(</span><span class="nl">List:</span><span class="o">:</span><span class="n">stream</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|reduce|------------------------------------"</span><span class="o">);</span>
+            <span class="c1">//字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。</span>
+            <span class="n">maxHeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">reduce</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MIN_VALUE</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">max</span><span class="o">);</span>
+            <span class="n">minWeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="n">o</span><span class="o">.</span><span class="na">getHeight</span><span class="o">()).</span><span class="na">reduce</span><span class="o">(</span><span class="nc">Integer</span><span class="o">.</span><span class="na">MAX_VALUE</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">min</span><span class="o">);</span>
+            <span class="kt">int</span> <span class="n">sumWeight</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="o">;</span>
+            <span class="nc">OptionalInt</span> <span class="n">sumWeightOption</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">reduce</span><span class="o">(</span><span class="nl">Integer:</span><span class="o">:</span><span class="n">sum</span><span class="o">);</span>
+            <span class="k">if</span> <span class="o">(</span><span class="n">sumWeightOption</span><span class="o">.</span><span class="na">isPresent</span><span class="o">())</span> <span class="o">{</span>
+                <span class="n">sumWeight</span> <span class="o">=</span> <span class="n">sumWeightOption</span><span class="o">.</span><span class="na">getAsInt</span><span class="o">();</span>
+            <span class="o">}</span>
+            <span class="n">sumWeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="n">a</span><span class="o">,</span> <span class="n">b</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span><span class="o">);</span>
+            <span class="n">sumWeight</span> <span class="o">=</span> <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">mapToInt</span><span class="o">(</span><span class="nl">Person:</span><span class="o">:</span><span class="n">getHeight</span><span class="o">).</span><span class="na">reduce</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="nl">Integer:</span><span class="o">:</span><span class="n">sum</span><span class="o">);</span>
+
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"------------------------------------|peek ,forEach ,forEachOrdered |------------------------------------"</span><span class="o">);</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"forEach后面无法继续执行方法"</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEach</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">o</span><span class="o">));</span>
+            <span class="o">});</span>
+            <span class="cm">/*
+forEach后面无法继续执行方法
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}            
+             */</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"先排序,然后遍历"</span><span class="o">);</span>
+            <span class="n">list1</span><span class="o">.</span><span class="na">stream</span><span class="o">().</span><span class="na">forEachOrdered</span><span class="o">(</span><span class="n">o</span> <span class="o">-&gt;</span> <span class="o">{</span>
+                <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">o</span><span class="o">));</span>
+            <span class="o">});</span>
+<span class="cm">/*
+先排序,然后遍历
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
+ */</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"peek*2"</span><span class="o">);</span>
+            <span class="nc">List</span><span class="o">&lt;</span><span class="nc">Integer</span><span class="o">&gt;</span> <span class="n">l</span> <span class="o">=</span> <span class="nc">Stream</span><span class="o">.</span><span class="na">iterate</span><span class="o">(</span><span class="mi">0</span><span class="o">,</span> <span class="o">(</span><span class="nc">Integer</span> <span class="n">n</span><span class="o">)</span> <span class="o">-&gt;</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="o">)</span> <span class="c1">//生成一个每次递增1的等差数列</span>
+                    <span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">n</span> <span class="o">-&gt;</span> <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"number generated:"</span> <span class="o">+</span> <span class="n">n</span><span class="o">))</span>
+                    <span class="o">.</span><span class="na">filter</span><span class="o">(</span><span class="n">n</span> <span class="o">-&gt;</span> <span class="o">(</span><span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="o">))</span>
+                    <span class="o">.</span><span class="na">peek</span><span class="o">(</span><span class="n">n</span> <span class="o">-&gt;</span> <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"Even number filter passed for"</span> <span class="o">+</span> <span class="n">n</span><span class="o">))</span> <span class="c1">//遇到偶数时继续输出</span>
+                    <span class="o">.</span><span class="na">limit</span><span class="o">(</span><span class="mi">5</span><span class="o">).</span><span class="na">collect</span><span class="o">(</span><span class="nc">Collectors</span><span class="o">.</span><span class="na">toList</span><span class="o">());</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="k">new</span> <span class="nc">Gson</span><span class="o">().</span><span class="na">toJson</span><span class="o">(</span><span class="n">l</span><span class="o">));</span>
+            <span class="c1">//可以看到在生成到9时,这个操作结束了,是因为设置了limit</span>
+            <span class="cm">/*
+peek*2
+number generated:0
+Even number filter passed for0
+number generated:1
+number generated:2
+Even number filter passed for2
+number generated:3
+number generated:4
+Even number filter passed for4
+number generated:5
+number generated:6
+Even number filter passed for6
+number generated:7
+number generated:8
+Even number filter passed for8
+[0,2,4,6,8]            
+             */</span>
+        <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="nc">Exception</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">e</span><span class="o">);</span>
+        <span class="o">}</span> <span class="k">finally</span> <span class="o">{</span>
+            <span class="n">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">"done"</span><span class="o">);</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+
+
+<span class="o">}</span>
+
+<span class="c1">// </span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="参考链接">参考链接:</h2>
+
+<ol>
+  <li><a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/">Java 8 中的 Streams API 详解</a></li>
+  <li><a href="http://www.baeldung.com/java-8-date-time-intro">Introduction to the Java 8 Date/Time API</a></li>
+  <li><a href="https://stackoverflow.com/questions/22929237/convert-java-time-localdate-into-java-util-date-type">Convert java.time.LocalDate into java.util.Date type</a></li>
+  <li><a href="http://irusist.github.io/2015/12/30/Java-8%E4%B9%8BStream-API/">Java 8之Stream API</a></li>
+  <li><a href="https://stackoverflow.com/questions/43274306/comparator-comparing-throwing-non-static-reference-exception-while-taking-s">Comparator.comparing(…) throwing non-static reference exception while taking String::compareTo</a></li>
+  <li><a href="http://blog.csdn.net/gzt19881123/article/details/78327465">采用java8 lambda表达式 实现java list 交集/并集/差集/去重并集</a></li>
+  <li><a href="http://blog.csdn.net/zhangjg_blog/article/details/18369201">详解Java中的clone方法 – 原型模式</a></li>
+  <li><a href="https://stackoverflow.com/questions/21522341/collection-to-stream-to-a-new-collection">Collection to stream to a new collection
+</a></li>
+  <li><a href="http://www.cnblogs.com/huangzifu/p/7631164.html">Java parallel stream用法</a></li>
+  <li>
+    <table>
+      <tbody>
+        <tr>
+          <td>[Java 8 – How to ‘peek’ into a running Stream</td>
+          <td>Stream.peek method tutorial with examples](https://www.javabrahman.com/java-8/java-8-how-to-peek-into-a-running-stream-peek-method-tutorial-with-examples/)</td>
+        </tr>
+      </tbody>
+    </table>
+  </li>
+  <li><a href="https://blog.csdn.net/z834410038/article/details/77370785">JDK8函数式接口Function、Consumer、Predicate、Supplier</a></li>
+</ol>
+:ET

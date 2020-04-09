@@ -1,0 +1,24 @@
+I"H<ol>
+  <li><a href="#前期准备">前期准备</a>
+    <ul>
+      <li>定义实体</li>
+      <li>定义集合</li>
+    </ul>
+  </li>
+  <li><a href="#stream的其他用法">stream的其他用法</a>
+    <ul>
+      <li>[用于校验集合](#用于校验集合(引用自<a href="https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/">IBM</a>)</li>
+      <li><a href="#自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))">自己生成流</a></li>
+      <li>Stream.iterate</li>
+    </ul>
+  </li>
+  <li><a href="#stream的注意事项">stream的注意事项</a>
+    <ul>
+      <li>流只能用一次,重复使用会导致以下异常</li>
+      <li>filter</li>
+    </ul>
+  </li>
+  <li><a href="#完整代码">完整代码</a></li>
+  <li><a href="#参考链接">参考链接</a></li>
+</ol>
+:ET

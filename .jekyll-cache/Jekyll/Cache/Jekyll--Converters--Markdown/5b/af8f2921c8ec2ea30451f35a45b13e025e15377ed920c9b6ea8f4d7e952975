@@ -1,0 +1,161 @@
+I"<h2 id="安装主题">安装主题</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>wget -O leanote-linux-amd64-v2.6.1.bin.tar.gz https://sourceforge.net/projects/leanote-bin/files/2.6.1/leanote-linux-amd64-v2.6.1.bin.tar.gz/download
+tar -xzvf leanote-linux-amd64-v2.6.1.bin.tar.gz
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="mongodb">mongodb</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>
+wget -O mongodb-linux-x86_64-3.6.3.tgz https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.3.tgz
+tar -xzvf mongodb-linux-x86_64-3.6.3.tgz
+mv  mongodb-linux-x86_64-3.6.3  mongodb-linux
+
+vi /etc/profile
+export PATH=$PATH:/mongodb-linux/bin
+source /etc/profile
+
+mkdir /mongoData
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="设置密码验证登录">设置密码验证登录</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+</pre></td><td class="rouge-code"><pre>
+mongod   --dbpath=/mongoData  --fork --logpath=/mongoLog/mongodb.log --storageEngine wiredTiger --journal
+
+
+cd /mongodb-linux/bin            
+./mongo   
+
+ use admin;
+ # 设置角色
+db.createRole({role:'sysadmin',roles:[],privileges:[{resource:{anyResource:true},actions:['anyAction']}]})   
+
+# 为admin数据库设置一个超级管理员账号与密码 
+db.createUser({user:'god',pwd:'530cb1dd-cf40-4bcd-9408-fec8dbc6aa4c',roles:[{role:'sysadmin',db:'admin'}]});    
+
+db.shutdownServer();  
+
+quit()
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="初始化配置">初始化配置</h3>
+
+<h4 id="导入初始数据">导入初始数据</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre>mongorestore  -h localhost -d leanote --dir /leanote/mongodb_backup/leanote_install_data/
+
+mongo
+use leanote;
+db.createUser({
+    user: 'zzzz',
+    pwd: '008103de-90c8-40e6-91df-effb12e51b93',
+    roles: [{role: 'dbOwner', db: 'leanote'}]
+});
+db.auth("zzzz", "008103de-90c8-40e6-91df-effb12e51b93");
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>vi /leanote/conf/app.conf<span class="p">;</span>
+db.username<span class="o">=</span>zzzz 
+db.password<span class="o">=</span>008103de-90c8-40e6-91df-effb12e51b93 
+site.url<span class="o">=</span>http://note.zeusro.tech
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="配置-nginx">配置 Nginx</h2>
+
+<p>见
+https://github.com/leanote/leanote/wiki/QA#2-%E9%85%8D%E7%BD%AEnginx</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>
+ vi /usr/local/nginx/conf/nginx.conf
+ 
+ <span class="nb">cd</span> /usr/local/nginx/sbin/
+./nginx <span class="nt">-s</span> reload
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="准备启动">准备启动</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="nb">cd</span> /leanote/bin
+
+<span class="nb">nohup </span>bash /leanote/bin/run.sh <span class="o">&gt;</span> /dev/null 2&gt;&amp;1 &amp;
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h1 id="第一次使用">第一次使用</h1>
+
+<p>admin</p>
+
+<p>abc123</p>
+
+<p>记得上去重置demo这个默认创建的密码</p>
+
+<p>还有就是关闭注册</p>
+
+<h1 id="参考链接">参考链接:</h1>
+<ol>
+  <li><a href="https://www.jianshu.com/p/660e8c5a3307">tgz解压失败：gzip: stdin: not in gzip format</a></li>
+  <li><a href="https://github.com/leanote/leanote/wiki/QA">QA</a></li>
+  <li><a href="https://github.com/leanote/leanote/wiki/Leanote-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%89%88%E8%AF%A6%E7%BB%86%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B----Mac-and-Linux">Leanote 二进制版详细安装教程 Mac and Linux</a></li>
+</ol>
+:ET

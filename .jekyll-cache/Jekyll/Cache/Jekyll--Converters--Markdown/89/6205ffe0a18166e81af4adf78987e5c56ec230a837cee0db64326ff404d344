@@ -1,0 +1,2 @@
+I"<p><code class="highlighter-rouge">kubernetes</code>内部容器通讯都需要通过<code class="highlighter-rouge">api-server</code>进行通讯.外部通过<code class="highlighter-rouge">kubectl</code>访问管理集群,本质上也是访问<code class="highlighter-rouge">api-server</code>,<code class="highlighter-rouge">api-server</code>就是整个集群的指挥中枢.</p>
+:ET

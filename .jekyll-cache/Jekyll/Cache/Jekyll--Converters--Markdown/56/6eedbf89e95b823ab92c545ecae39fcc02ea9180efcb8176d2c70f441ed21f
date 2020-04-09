@@ -1,0 +1,142 @@
+I"�<h2 id="it基础资源监控平台si">IT基础资源监控平台(Si)</h2>
+
+<p>界面粗糙,加载较慢</p>
+
+<p><img src="/img/oneapm/image1.png" alt="" /></p>
+
+<h3 id="资源管理">资源管理</h3>
+
+<p><img src="/img/oneapm/image2.png" alt="" /></p>
+
+<p><img src="/img/oneapm/image3.png" alt="" /></p>
+
+<p><img src="/img/oneapm/image4.png" alt="" /></p>
+
+<h3 id="业务服务">业务服务</h3>
+
+<h3 id="告警管理">告警管理</h3>
+
+<h3 id="拓扑">拓扑</h3>
+
+<h3 id="虚拟化">虚拟化</h3>
+
+<h3 id="巡检">巡检</h3>
+
+<h3 id="流量分析">流量分析</h3>
+
+<h3 id="报表">报表</h3>
+
+<h3 id="配置管理">配置管理</h3>
+
+<h3 id="几番监控">几番监控</h3>
+
+<h2 id="代码级服务器端性能监控">代码级服务器端性能监控</h2>
+
+<p><img src="/img/oneapm/image5.png" alt="" /></p>
+
+<p>实施方式:在服务器上面安装程序,然后运行</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:需要重启应用服务器（Ｔｏｍｃａｔ／Ａｐａｃｈｅ／php-fpm）</p>
+
+<p>价格:12000一年</p>
+
+<p>试用体验:接入失败</p>
+
+<h2 id="浏览器端性能监控">浏览器端性能监控</h2>
+
+<p><img src="/img/oneapm/image6.png" alt="" /></p>
+
+<p>实施方式:在页面加入<script>标记</script></p>
+
+<p>实施效果:应该是类似百度统计</p>
+
+<p>潜在的负面影响:</p>
+
+<p>价格:15840一年</p>
+
+<p>试用体验:</p>
+
+<p>接入到网站之后,会分析页面加载耗时, 分析 js 错误,分析用户来源等.</p>
+
+<p><img src="/img/oneapm/image7.png" alt="" /></p>
+
+<p>会分析ajax性能,这点比较好</p>
+
+<p><img src="/img/oneapm/image8.png" alt="" /></p>
+
+<h2 id="新一代云压力测试平台">新一代云压力测试平台</h2>
+
+<p><img src="/img/oneapm/image9.png" alt="" /></p>
+
+<p>实施方式:在oneapm配置脚本,然后运行</p>
+
+<p>实施效果:jmeter的在线版本</p>
+
+<p>潜在的负面影响:可能因为录制脚本设置的并发过大而把测试的目标服务器弄跨</p>
+
+<p>备注:需要运维人员花费一定时间学习他们的录制脚本规则</p>
+
+<p><img src="/img/oneapm/image10.png" alt="" /></p>
+
+<h2 id="移动端性能监控">移动端性能监控</h2>
+
+<p><img src="/img/oneapm/image11.png" alt="" /></p>
+
+<p>实施方式:在移动 app 中接入他们的 SDK</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>价格:11988一年</p>
+
+<p>备注:</p>
+
+<h2 id="平台告警">平台告警</h2>
+
+<p><img src="/img/oneapm/image12.png" alt="" /></p>
+
+<p>实施方式:在网页界面配置或者配合探针使用</p>
+
+<p>价格:8304一年</p>
+
+<p>试用体验:在阿里云、腾讯云、OneAPM SaaS版、监控宝、Open-Falcon平台上面试用需要界面配置,在Zabbix、Nagios、Solarwinds、VMWare vSphere 平台上启用的话需要探针.结合我们的场景,我本打算配合阿里云试用,不过由于我们阿里云上面没有创建信息服务,所以无法试用.</p>
+
+<h2 id="cloud-test">cloud test</h2>
+
+<p><img src="/img/oneapm/image13.png" alt="" /></p>
+
+<p>实施方式:在他们官网上面手动配置监控的网址, dns</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:监控的方式比较简单,可选5个运营商同时验证 url 的可用性.</p>
+
+<p><img src="/img/oneapm/image14.png" alt="" /></p>
+
+<h2 id="售后">售后</h2>
+
+<p>提了2个工单,平均回复时间是1小时</p>
+
+<h2 id="bug">Bug:</h2>
+<p>在 mac 版 Chrome64上面提交工单,会提示重复重定向,需要直接访问以下链接
+http://support.oneapm.com/request/listview/</p>
+
+<p>已经登录的情况下,访问http://www.oneapm.com/ 右上角并没有相应显示用户状态.</p>
+
+<p><img src="/img/oneapm/image15.png" alt="" /></p>
+
+<p>不过此时点击登录会直接跳转到总控制面板</p>
+
+<p><img src="/img/oneapm/image16.png" alt="" /></p>
+
+<h2 id="总结">总结</h2>
+
+<p>价格偏贵,试用体验一般.</p>
+
+<p>IT基础资源监控平台(Si)和网络端性能监控(Ni)由于没有开通,无法试用.</p>
+:ET

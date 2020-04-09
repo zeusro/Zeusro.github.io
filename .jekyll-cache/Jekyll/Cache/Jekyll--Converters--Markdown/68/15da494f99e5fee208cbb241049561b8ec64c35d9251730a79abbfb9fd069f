@@ -1,0 +1,617 @@
+I"�f<h2 id="前言">前言</h2>
+
+<p>接收到 Gogs 的web hook 之后,Jenkins对Java 项目进行自动构建/测试, 最后将应用容器化,推送到私有 docker 源(阿里云)</p>
+
+<h2 id="前期准备">前期准备</h2>
+
+<ol>
+  <li>gitea/Gogs</li>
+  <li>Jenkins
+    <ol>
+      <li>Mask Passwords Plugin</li>
+      <li>Generic Webhook Trigger</li>
+      <li>Gogs plugin</li>
+      <li>Maven Integration plugin</li>
+      <li>Gradle Plugin</li>
+    </ol>
+  </li>
+</ol>
+
+<p>也许可用到的 Jenkins 插件:</p>
+<ol>
+  <li>Deploy to container Plugin</li>
+  <li>Docker Plugin</li>
+</ol>
+
+<h2 id="java项目的配置">java项目的配置</h2>
+
+<p>自定义私有框架依赖,那么前置工作需要先更新Jenkins环境的依赖,打包到 maven local 里面.gradle 同理(gradle可以指定先读取本地 maven 依赖,所以都一样).</p>
+
+<h3 id="maven插件的选择1dockerfile-maven-extension">maven插件的选择(1):dockerfile-maven-extension</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>我对这个插件比较熟,所以我一般用这个.不过这插件有个限制, **dockerfile 必须放在模块根目录里面.**
+
+切换到模块所在的目录,然后执行`mvn install dockerfile:build -Dmaven.test.skip=true`,源代码没问题的话就可以在 docker image ls里面看到 **${docker.image.host}/${docker.image.image}:${project.version}** 这个新镜像的产生.
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>pom.xml</p>
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+</pre></td><td class="rouge-code"><pre>	<span class="nt">&lt;properties&gt;</span>
+		<span class="nt">&lt;docker.image.host&gt;</span>${docker-registry}<span class="nt">&lt;/docker.image.host&gt;</span>
+		<span class="nt">&lt;docker.image.image&gt;</span>${imagename}<span class="nt">&lt;/docker.image.image&gt;</span>
+		<span class="nt">&lt;project.build.sourceEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.build.sourceEncoding&gt;</span>
+		<span class="nt">&lt;project.reporting.outputEncoding&gt;</span>UTF-8<span class="nt">&lt;/project.reporting.outputEncoding&gt;</span>
+		<span class="nt">&lt;java.version&gt;</span>1.8<span class="nt">&lt;/java.version&gt;</span>
+	<span class="nt">&lt;/properties&gt;</span>
+
+<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;extensions&gt;</span>
+			<span class="nt">&lt;extension&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>com.spotify<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>dockerfile-maven-extension<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>1.4.0<span class="nt">&lt;/version&gt;</span>
+			<span class="nt">&lt;/extension&gt;</span>
+		<span class="nt">&lt;/extensions&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.springframework.boot<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>spring-boot-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>com.spotify<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>dockerfile-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>1.4.0<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;configuration&gt;</span>
+					<span class="nt">&lt;repository&gt;</span>${docker.image.host}/${docker.image.image}<span class="nt">&lt;/repository&gt;</span>
+					<span class="nt">&lt;tag&gt;</span>${project.version}<span class="nt">&lt;/tag&gt;</span>
+					<span class="nt">&lt;buildArgs&gt;</span>
+						<span class="nt">&lt;JAR_FILE&gt;</span>target/${project.build.finalName}.jar<span class="nt">&lt;/JAR_FILE&gt;</span>
+					<span class="nt">&lt;/buildArgs&gt;</span>
+				<span class="nt">&lt;/configuration&gt;</span>
+				<span class="nt">&lt;dependencies&gt;</span>
+					<span class="nt">&lt;dependency&gt;</span>
+						<span class="nt">&lt;groupId&gt;</span>org.codehaus.plexus<span class="nt">&lt;/groupId&gt;</span>
+						<span class="nt">&lt;artifactId&gt;</span>plexus-archiver<span class="nt">&lt;/artifactId&gt;</span>
+						<span class="nt">&lt;version&gt;</span>3.4<span class="nt">&lt;/version&gt;</span>
+					<span class="nt">&lt;/dependency&gt;</span>
+					<span class="nt">&lt;dependency&gt;</span>
+						<span class="nt">&lt;groupId&gt;</span>javax.activation<span class="nt">&lt;/groupId&gt;</span>
+						<span class="nt">&lt;artifactId&gt;</span>javax.activation-api<span class="nt">&lt;/artifactId&gt;</span>
+						<span class="nt">&lt;version&gt;</span>1.2.0<span class="nt">&lt;/version&gt;</span>
+					<span class="nt">&lt;/dependency&gt;</span>
+				<span class="nt">&lt;/dependencies&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="maven插件的选择2maven-dependency-plugin--docker-maven-plugin">maven插件的选择(2):maven-dependency-plugin + docker-maven-plugin</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>这2个插件比较复杂,主要因为它把 dockerfile 放到了项目的 docker 目录,导致需要copy-resources这一步
+
+切换到模块所在的目录,然后执行 `mvn ` 
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>pom.xml</p>
+<div class="language-xml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+</pre></td><td class="rouge-code"><pre>
+<span class="nt">&lt;build&gt;</span>
+		<span class="nt">&lt;plugins&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>maven-jar-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>2.6<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;configuration&gt;</span>
+					<span class="nt">&lt;skip&gt;</span>true<span class="nt">&lt;/skip&gt;</span>
+					<span class="nt">&lt;archive&gt;</span>
+						<span class="nt">&lt;manifest&gt;</span>
+							<span class="nt">&lt;addClasspath&gt;</span>true<span class="nt">&lt;/addClasspath&gt;</span>
+							<span class="nt">&lt;classpathPrefix&gt;</span>lib/<span class="nt">&lt;/classpathPrefix&gt;</span>
+							<span class="nt">&lt;mainClass&gt;</span>com.amiba.zwd.pic.web.ZwdPicWebApplication<span class="nt">&lt;/mainClass&gt;</span>
+						<span class="nt">&lt;/manifest&gt;</span>
+					<span class="nt">&lt;/archive&gt;</span>
+					<span class="nt">&lt;outputDirectory&gt;</span>target/release<span class="nt">&lt;/outputDirectory&gt;</span>
+				<span class="nt">&lt;/configuration&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>maven-dependency-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>2.1<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;executions&gt;</span>
+					<span class="nt">&lt;execution&gt;</span>
+						<span class="nt">&lt;id&gt;</span>copy-dependencies<span class="nt">&lt;/id&gt;</span>
+						<span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+						<span class="nt">&lt;goals&gt;</span>
+							<span class="nt">&lt;goal&gt;</span>copy-dependencies<span class="nt">&lt;/goal&gt;</span>
+						<span class="nt">&lt;/goals&gt;</span>
+						<span class="nt">&lt;configuration&gt;</span>
+							<span class="nt">&lt;includeScope&gt;</span>compile<span class="nt">&lt;/includeScope&gt;</span>
+							<span class="nt">&lt;outputDirectory&gt;</span>target/release/lib<span class="nt">&lt;/outputDirectory&gt;</span>
+						<span class="nt">&lt;/configuration&gt;</span>
+					<span class="nt">&lt;/execution&gt;</span>
+				<span class="nt">&lt;/executions&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>org.apache.maven.plugins<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>maven-resources-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>2.6<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;executions&gt;</span>
+					<span class="nt">&lt;execution&gt;</span>
+						<span class="nt">&lt;id&gt;</span>text<span class="nt">&lt;/id&gt;</span>
+						<span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+						<span class="nt">&lt;goals&gt;</span>
+							<span class="nt">&lt;goal&gt;</span>copy-resources<span class="nt">&lt;/goal&gt;</span>
+						<span class="nt">&lt;/goals&gt;</span>
+						<span class="nt">&lt;configuration&gt;</span>
+							<span class="nt">&lt;outputDirectory&gt;</span>target/release<span class="nt">&lt;/outputDirectory&gt;</span>
+							<span class="nt">&lt;encoding&gt;</span>UTF-8<span class="nt">&lt;/encoding&gt;</span>
+							<span class="nt">&lt;resources&gt;</span>
+								<span class="nt">&lt;resource&gt;</span>
+									<span class="nt">&lt;directory&gt;</span>config<span class="nt">&lt;/directory&gt;</span>
+									<span class="nt">&lt;includes&gt;</span>
+										<span class="nt">&lt;include&gt;</span>*.*<span class="nt">&lt;/include&gt;</span>
+									<span class="nt">&lt;/includes&gt;</span>
+									<span class="nt">&lt;targetPath&gt;</span>config<span class="nt">&lt;/targetPath&gt;</span>
+								<span class="nt">&lt;/resource&gt;</span>
+								<span class="nt">&lt;resource&gt;</span>
+									<span class="nt">&lt;directory&gt;</span>bin<span class="nt">&lt;/directory&gt;</span>
+									<span class="nt">&lt;includes&gt;</span>
+										<span class="nt">&lt;include&gt;</span>*.*<span class="nt">&lt;/include&gt;</span>
+									<span class="nt">&lt;/includes&gt;</span>
+									<span class="nt">&lt;targetPath&gt;</span>bin<span class="nt">&lt;/targetPath&gt;</span>
+								<span class="nt">&lt;/resource&gt;</span>
+								<span class="nt">&lt;resource&gt;</span>
+									<span class="nt">&lt;directory&gt;</span>src/main/docker<span class="nt">&lt;/directory&gt;</span>
+								<span class="nt">&lt;/resource&gt;</span>
+							<span class="nt">&lt;/resources&gt;</span>
+						<span class="nt">&lt;/configuration&gt;</span>
+					<span class="nt">&lt;/execution&gt;</span>
+				<span class="nt">&lt;/executions&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+			<span class="nt">&lt;plugin&gt;</span>
+				<span class="nt">&lt;groupId&gt;</span>com.spotify<span class="nt">&lt;/groupId&gt;</span>
+				<span class="nt">&lt;artifactId&gt;</span>docker-maven-plugin<span class="nt">&lt;/artifactId&gt;</span>
+				<span class="nt">&lt;version&gt;</span>0.4.13<span class="nt">&lt;/version&gt;</span>
+				<span class="nt">&lt;executions&gt;</span>
+					<span class="nt">&lt;execution&gt;</span>
+						<span class="nt">&lt;phase&gt;</span>package<span class="nt">&lt;/phase&gt;</span>
+						<span class="nt">&lt;goals&gt;</span>
+							<span class="nt">&lt;goal&gt;</span>build<span class="nt">&lt;/goal&gt;</span>
+						<span class="nt">&lt;/goals&gt;</span>
+						<span class="nt">&lt;configuration&gt;</span>
+							<span class="nt">&lt;imageName&gt;</span>${project.artifactId}:${project.version}<span class="nt">&lt;/imageName&gt;</span>
+						<span class="nt">&lt;/configuration&gt;</span>
+					<span class="nt">&lt;/execution&gt;</span>
+				<span class="nt">&lt;/executions&gt;</span>
+				<span class="nt">&lt;configuration&gt;</span>
+					<span class="nt">&lt;dockerDirectory&gt;</span>target/release<span class="nt">&lt;/dockerDirectory&gt;</span>
+				<span class="nt">&lt;/configuration&gt;</span>
+			<span class="nt">&lt;/plugin&gt;</span>
+		<span class="nt">&lt;/plugins&gt;</span>
+	<span class="nt">&lt;/build&gt;</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="gradle插件的选择compalantirdocker">gradle插件的选择:com.palantir.docker</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>gradle &lt;module&gt;:build -x test --debug  &lt;module&gt;:docker
+
+gradle比 maven 好的地方就在于简洁高效,而且可以继续复用 mavenlocal 和 maven 的远程仓库.
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+</pre></td><td class="rouge-code"><pre><span class="na">apply plugin</span><span class="pi">:</span> <span class="s1">'</span><span class="s">com.palantir.docker'</span>
+<span class="na">apply plugin</span><span class="pi">:</span> <span class="s1">'</span><span class="s">application'</span>
+<span class="na">apply plugin</span><span class="pi">:</span> <span class="s1">'</span><span class="s">org.springframework.boot'</span>
+
+
+<span class="s">group = '${docker-registry}'</span>
+<span class="s">version = project.findProperty('projVersion') ?</span><span class="pi">:</span> <span class="s1">'</span><span class="s">3.0.7'</span>
+<span class="s">mainClassName = 'com.zeusro.SBApplication'</span>
+
+<span class="s">buildscript {</span>
+    <span class="s">ext {</span>
+        <span class="s">springBootVersion = '2.0.4.RELEASE'</span>
+    <span class="s">}</span>
+    <span class="s">repositories {</span>
+        <span class="s">mavenLocal()</span>
+        <span class="s">maven { url 'https://maven.aliyun.com/nexus/content/groups/public/' }</span>
+        <span class="s">maven { url 'https://maven.aliyun.com/nexus/content/repositories/jcenter' }</span>
+        <span class="s">maven { url "https://plugins.gradle.org/m2/" }</span>
+    <span class="s">}</span>
+    <span class="s">dependencies {</span>
+        <span class="s">classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")</span>
+        <span class="s">classpath('gradle.plugin.com.palantir.gradle.docker:gradle-docker:0.19.2')</span>
+    <span class="s">}</span>
+<span class="err">}</span>
+
+
+<span class="s">tasks.withType(JavaCompile) {</span>
+<span class="err">	</span><span class="s">options.encoding = 'UTF-8'</span>
+<span class="err">}</span>
+<span class="s">dependencies {</span>
+    
+    <span class="s">compile 'org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.0'</span>
+    <span class="s">compile group</span><span class="pi">:</span> <span class="s1">'</span><span class="s">org.springframework.boot'</span><span class="err">,</span> <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">spring-boot-starter-thymeleaf'</span><span class="err">,</span> <span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.0.4.RELEASE'</span>
+    <span class="na">testCompile group</span><span class="pi">:</span> <span class="s1">'</span><span class="s">org.springframework.boot'</span><span class="err">,</span> <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">spring-boot-starter-test'</span><span class="err">,</span> <span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.0.4.RELEASE'</span>
+    <span class="na">compile group</span><span class="pi">:</span> <span class="s1">'</span><span class="s">org.springframework.data'</span><span class="err">,</span> <span class="na">name</span><span class="pi">:</span> <span class="s1">'</span><span class="s">spring-data-redis'</span><span class="err">,</span> <span class="na">version</span><span class="pi">:</span> <span class="s1">'</span><span class="s">2.0.6.RELEASE'</span>
+    <span class="s">compile 'net.sourceforge.nekohtml:nekohtml:1.9.21'</span>
+<span class="err">}</span>
+
+<span class="s">docker {</span>
+    <span class="s">dockerfile file('Dockerfile') //DockerFile路径</span>
+    <span class="s">name "${project.group}/${jar.baseName}:${jar.version}"</span>
+    <span class="s">files jar.archivePath</span>
+    <span class="s">buildArgs(['JAR_FILE'</span><span class="pi">:</span> <span class="s2">"</span><span class="s">${jar.archiveName}"</span><span class="err">]</span><span class="s">)</span>
+<span class="err">}</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="自动化构建的理念">自动化构建的理念</h2>
+
+<p>源代码分为 master 和 develop分支</p>
+
+<p>develop 对应 docker image的 latest 版本,表示每日更新;</p>
+
+<p>master 提取gradle 的 version 作为tag, 表示一种稳定的发布.master 触发有2种机制,一种是 tag event,一种是merge/push event.因为 tag 事件需要自己写一些 git的操作,我一般偷懒,选择 merge/push event 作为触发.</p>
+
+<p>本文将先后介绍2种触发方式在 Jenkins 配置上面的细微差别.</p>
+
+<h2 id="jenkins-的配置">Jenkins 的配置</h2>
+
+<h3 id="创建的时候选择-maven-job">创建的时候选择 maven job</h3>
+
+<h3 id="配置触发器">配置触发器</h3>
+
+<p>这里先介绍一下Generic Webhook Trigger 这个插件.</p>
+
+<p>Generic Webhook Trigger主要有： Post content parameters、 Header parameters、Request parameters和Optional filter这几个组成。</p>
+
+<p>其中，Post content parameters是对POST请求数据的处理，其他 Header parameters、Request parameters类似，在众多变量中，我们可以筛选到一个具有标识分支的变量，ref。</p>
+
+<p>当我们push到develop时，WebHook推送的信息中，ref为refs/heads/develop，而push到master是ref则为refs/heads/master，所以使用Generic Webhook Trigger Plugin则可以通过正则对推送内容中的ref进行匹配构建.</p>
+
+<p>如果是master merge/push 事件的话,Expression填<code class="highlighter-rouge">^(refs/heads/master)$</code>;</p>
+
+<p>develop merge/push 事件的话,Expression填<code class="highlighter-rouge">^(refs/heads/develop)$</code>;</p>
+
+<p>这个 Optional filter 很关键.</p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/006mOQRagy1ftoe5v08qvj30z50n7abz.jpg" alt="image" /></p>
+
+<p>如果是 git 的 tag 事件的话,则是</p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/tag1.png" alt="image" /></p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/tag2.png" alt="image" /></p>
+
+<p>参考:
+<a href="https://blog.csdn.net/xlgen157387/article/details/76216351">使用Generic Webhook Trigger插件实现Jenkins+WebHooks（码云）持续集成–指定具体项目和分支进行集成</a></p>
+
+<h3 id="mask-password-的设置选配">MasK password 的设置(选配)</h3>
+
+<p>全局设置</p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817201130.png" alt="image" /></p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817200417.png" alt="image" /></p>
+
+<h3 id="maven-构建">maven 构建</h3>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817201545.png" alt="image" /></p>
+
+<p>Post Steps的内容是执行Shell</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>cd xxxx
+mvn versions:set -DnewVersion=latest
+cd ..
+mvn clean package
+cd xxxx
+mvn install dockerfile:build -Dmaven.test.skip=true
+export image=abcde/sadasdf
+docker login --username=aaaaaa --password=${DOCKER_PUSH} registry.docker.com
+docker push $image:latest;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>这里按需配置即可.<code class="highlighter-rouge">DOCKER_PUSH</code>对应系统配置的mask password.</p>
+
+<h3 id="gradle构建">gradle构建</h3>
+
+<p>创建一个<code class="highlighter-rouge">free style</code>的Jenkins job.构建步骤先增加<code class="highlighter-rouge">Invoke Gradle script</code></p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/QQ截图20180817203704.png" alt="image" /></p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="c">#这个正则只适用于版本号形似1.0.1这种,按需定制即可.</span>
+<span class="nv">version</span><span class="o">=</span><span class="sb">`</span>docker image <span class="nb">ls</span> &lt;imagename&gt; |grep <span class="nt">-Eo</span> <span class="s1">'([0-9]{0,2}\.){2}[0-9]+'</span>| <span class="nb">head</span> <span class="nt">-1</span><span class="sb">`</span> 
+docker login <span class="nt">--username</span><span class="o">=</span>aaaaaa <span class="nt">--password</span><span class="o">=</span><span class="k">${</span><span class="nv">DOCKER_PUSH</span><span class="k">}</span> registry.docker.com
+docker push <span class="nv">$image</span>:<span class="nv">$version</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="giteagogs-的配置">gitea/gogs 的配置</h2>
+
+<p>加一个 gogs型的 web hook,触发类型按照实际需要配置就行. 地址填 Jenkins job里面写的 url.形似http://[host]/generic-webhook-trigger/invoke?token=abc123</p>
+
+<p>下图中身份验证令牌打的马赛克就是了.</p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/QQ20180817-173620.png" alt="image" /></p>
+
+<p>如果你还嫌不够安全，可以在为触发构建添加一个Secret，对应的jenkins设置处如下图：
+<img src="/img/in-post/gogs-Jenkins-java-docker/006mOQRagy1ftswi8yepfj31940aot94.jpg" alt="image" /></p>
+
+<p>事件的就按照实际需要了,我一般勾选merger/tag这2类事件.最后点击测试web hook检查一下Jenkins的构建就好了.</p>
+
+<p><img src="/img/in-post/gogs-Jenkins-java-docker/006mOQRagy1ftswl83ae2j311h07hweq.jpg" alt="image" /></p>
+
+<p>额外说明一点,构建同一个仓库develop和master分支对应的2个Jenkins job可以填同一个url,因为我们用了<code class="highlighter-rouge">Generic Webhook Trigger </code>,满足条件才会触发构建</p>
+
+<h2 id="其他注意事项">其他注意事项：</h2>
+
+<h3 id="gradle相关问题">gradle相关问题</h3>
+
+<p>gradle项目接入jenkins，因为develop分支对应的项目版本要为latest，这个镜像构建出来的才为latest，所以需要为build.gradle添加version设置，如：</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>if (project.hasProperty('projVersion')) {
+  project.version = project.projVersion
+} else {
+  project.version = '10.0.0'
+}
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>构建时便可以动态改变版本了。</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>gradle <span class="nt">-PprojVersion</span><span class="o">=</span>latest build
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="maven相关问题">maven相关问题</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>	<span class="c"># 这样构建出来的jar包是带latest结尾的</span>
+	mvn versions:set <span class="nt">-DnewVersion</span><span class="o">=</span>latest
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="其他依赖的问题">其他依赖的问题</h3>
+
+<p>需要导入本地jar时，有两种方法：</p>
+<ol>
+  <li>传统方法，直接拉到jenkins所在服务器，进行手动导包。</li>
+  <li>创建Jenkins项目，进行自动构建并执行导入仓库命令。</li>
+</ol>
+
+<h2 id="介绍一些优化技巧">介绍一些优化技巧</h2>
+
+<ul>
+  <li>
+    <p>设置Jenkins国内镜像
+【系统管理】【管理插件】【高级】升级站点项的的地址修改成
+https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/2.107/update-center.json</p>
+  </li>
+  <li>
+    <p>gitlab-hook安装失败的问题
+https://stackoverflow.com/questions/44403642/jenkins-plugin-installation-failing</p>
+  </li>
+  <li>
+    <p><a href="http://www.cnblogs.com/EasonJim/p/6373769.html">设置 Jenkins 为中文</a></p>
+    <ol>
+      <li>安装Locale plugin</li>
+      <li>Jenkins-&gt;【系统管理】-&gt;【系统设置】-&gt;【Locale】，输入：zh_CN</li>
+    </ol>
+  </li>
+</ul>
+
+<h2 id="参考链接">参考链接:</h2>
+<ol>
+  <li><a href="https://www.phpsong.com/3394.html">jenkins 更新插件源</a></li>
+</ol>
+:ET

@@ -1,0 +1,476 @@
+I"�S<p>注意,<code class="highlighter-rouge">/consul/data</code>这个存储被我注释掉了,请按需自行配置相应的volume</p>
+
+<p>主要思路就是先启动3台server,彼此之间通过<code class="highlighter-rouge">consul-server</code>实现自动加入节点.并通过反亲和度确保每个节点只允许一个consul-server.实现真正高可用.</p>
+
+<p>然后启动<code class="highlighter-rouge">consul-client</code>,通过<code class="highlighter-rouge">consul-server</code>实现自动加入节点.</p>
+
+<h2 id="server">server</h2>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+</pre></td><td class="rouge-code"><pre><span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Service</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">$(namespace)</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">consul-server</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">consul-server</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8500</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">serflan-tcp</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s2">"</span><span class="s">TCP"</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8301</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">serfwan-tcp</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s2">"</span><span class="s">TCP"</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8302</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">server</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8300</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">consuldns</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8600</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">consul</span>
+    <span class="na">consul-role</span><span class="pi">:</span> <span class="s">server</span>
+<span class="nn">---</span>
+<span class="c1"># kgpo -l app=consul</span>
+<span class="c1"># kgpo -l app=consul  -o  wide -w</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">StatefulSet</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">consul-server</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">updateStrategy</span><span class="pi">:</span>
+    <span class="na">rollingUpdate</span><span class="pi">:</span>
+      <span class="na">partition</span><span class="pi">:</span> <span class="m">0</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">RollingUpdate</span>
+  <span class="na">serviceName</span><span class="pi">:</span> <span class="s">consul-server</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">3</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">consul</span>
+        <span class="na">consul-role</span><span class="pi">:</span> <span class="s">server</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">affinity</span><span class="pi">:</span>
+        <span class="na">podAntiAffinity</span><span class="pi">:</span>
+          <span class="na">preferredDuringSchedulingIgnoredDuringExecution</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="na">weight</span><span class="pi">:</span> <span class="m">100</span>
+            <span class="na">podAffinityTerm</span><span class="pi">:</span>
+              <span class="na">topologyKey</span><span class="pi">:</span> <span class="s2">"</span><span class="s">kubernetes.io/hostname"</span>
+              <span class="na">namespaces</span><span class="pi">:</span> 
+              <span class="pi">-</span> <span class="s">$(namespace)</span>
+              <span class="na">labelSelector</span><span class="pi">:</span>
+                <span class="na">matchExpressions</span><span class="pi">:</span>
+                <span class="pi">-</span> <span class="na">key</span><span class="pi">:</span> <span class="s1">'</span><span class="s">consul-role'</span>
+                  <span class="na">operator</span><span class="pi">:</span> <span class="s">In</span>
+                  <span class="na">values</span><span class="pi">:</span> 
+                   <span class="pi">-</span> <span class="s2">"</span><span class="s">server"</span>
+      <span class="na">terminationGracePeriodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+      <span class="na">securityContext</span><span class="pi">:</span>
+        <span class="na">fsGroup</span><span class="pi">:</span> <span class="m">1000</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">consul</span>
+          <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">consul:1.4.2"</span>
+          <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+          <span class="na">resources</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s">500Mi</span>
+          <span class="na">env</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">POD_IP</span>
+              <span class="na">valueFrom</span><span class="pi">:</span>
+                <span class="na">fieldRef</span><span class="pi">:</span>
+                  <span class="na">fieldPath</span><span class="pi">:</span> <span class="s">status.podIP</span>
+          <span class="na">args</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">agent"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-advertise=$(POD_IP)"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-bind=0.0.0.0"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-bootstrap-expect=3"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-retry-join=consul-server"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-client=0.0.0.0"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-datacenter=dc1"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-data-dir=/consul/data"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-domain=cluster.local"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-server"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-ui"</span>
+            <span class="pi">-</span> <span class="s2">"</span><span class="s">-disable-host-node-id"</span>
+            <span class="pi">-</span> <span class="s1">'</span><span class="s">-recursor=114.114.114.114'</span>
+        <span class="c1">#   volumeMounts:</span>
+        <span class="c1">#     - name: data</span>
+        <span class="c1">#       mountPath: /consul/data</span>
+          <span class="na">lifecycle</span><span class="pi">:</span>
+            <span class="na">preStop</span><span class="pi">:</span>
+              <span class="na">exec</span><span class="pi">:</span>
+                <span class="na">command</span><span class="pi">:</span>
+                <span class="pi">-</span> <span class="s">/bin/sh</span>
+                <span class="pi">-</span> <span class="s">-c</span>
+                <span class="pi">-</span> <span class="s">consul leave</span>
+          <span class="na">ports</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8500</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">ui-port</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8400</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">alt-port</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">53</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">udp-port</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8301</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">serflan</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8302</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">serfwan</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8600</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">consuldns</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8300</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">server</span>
+<span class="c1">#   volumeClaimTemplates:</span>
+<span class="c1">#   - metadata:</span>
+<span class="c1">#       name: data</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="client">client</h2>
+
+<div class="language-yml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+</pre></td><td class="rouge-code"><pre>
+<span class="nn">---</span>    
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">apps/v1beta1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">StatefulSet</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">consul-client</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">updateStrategy</span><span class="pi">:</span>
+    <span class="na">rollingUpdate</span><span class="pi">:</span>
+      <span class="na">partition</span><span class="pi">:</span> <span class="m">0</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">RollingUpdate</span>
+  <span class="na">serviceName</span><span class="pi">:</span> <span class="s">consul-client</span>
+  <span class="na">replicas</span><span class="pi">:</span> <span class="m">10</span>
+  <span class="na">template</span><span class="pi">:</span>
+    <span class="na">metadata</span><span class="pi">:</span>
+      <span class="na">labels</span><span class="pi">:</span>
+        <span class="na">app</span><span class="pi">:</span> <span class="s">consul</span>
+        <span class="na">consul-role</span><span class="pi">:</span> <span class="s">client</span>
+    <span class="na">spec</span><span class="pi">:</span>
+      <span class="na">terminationGracePeriodSeconds</span><span class="pi">:</span> <span class="m">10</span>
+      <span class="na">securityContext</span><span class="pi">:</span>
+        <span class="na">fsGroup</span><span class="pi">:</span> <span class="m">1000</span>
+      <span class="na">containers</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">consul</span>
+          <span class="na">image</span><span class="pi">:</span> <span class="s2">"</span><span class="s">consul:1.4.2"</span>
+          <span class="na">imagePullPolicy</span><span class="pi">:</span> <span class="s">Always</span>
+          <span class="na">resources</span><span class="pi">:</span>
+            <span class="na">requests</span><span class="pi">:</span>
+              <span class="na">memory</span><span class="pi">:</span> <span class="s">500Mi</span>
+          <span class="na">env</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">podname</span>
+              <span class="na">valueFrom</span><span class="pi">:</span> 
+                <span class="na">fieldRef</span><span class="pi">:</span>
+                  <span class="na">fieldPath</span><span class="pi">:</span> <span class="s">metadata.name</span>
+          <span class="na">args</span><span class="pi">:</span>
+          <span class="pi">-</span> <span class="s">agent</span>
+          <span class="pi">-</span> <span class="s">-ui</span>
+          <span class="pi">-</span> <span class="s">-retry-join=consul-server</span>
+          <span class="pi">-</span> <span class="s">-node=$(podname)</span>
+          <span class="pi">-</span> <span class="s">-bind=0.0.0.0</span>
+          <span class="pi">-</span> <span class="s">-client=0.0.0.0</span>
+          <span class="pi">-</span> <span class="s1">'</span><span class="s">-recursor=114.114.114.114'</span>
+        <span class="c1">#   volumeMounts:</span>
+        <span class="c1">#     - name: data</span>
+        <span class="c1">#       mountPath: /consul/data</span>
+          <span class="na">lifecycle</span><span class="pi">:</span>
+            <span class="na">preStop</span><span class="pi">:</span>
+              <span class="na">exec</span><span class="pi">:</span>
+                <span class="na">command</span><span class="pi">:</span>
+                <span class="pi">-</span> <span class="s">/bin/sh</span>
+                <span class="pi">-</span> <span class="s">-c</span>
+                <span class="pi">-</span> <span class="s">consul leave</span>
+          <span class="na">readinessProbe</span><span class="pi">:</span>
+            <span class="c1"># NOTE(mitchellh): when our HTTP status endpoints support the</span>
+            <span class="c1"># proper status codes, we should switch to that. This is temporary.</span>
+            <span class="na">exec</span><span class="pi">:</span>
+              <span class="na">command</span><span class="pi">:</span>
+                <span class="pi">-</span> <span class="s2">"</span><span class="s">/bin/sh"</span>
+                <span class="pi">-</span> <span class="s2">"</span><span class="s">-ec"</span>
+                <span class="pi">-</span> <span class="pi">|</span>
+                  <span class="s">curl http://127.0.0.1:8500/v1/status/leader 2&gt;/dev/null | \</span>
+                  <span class="s">grep -E '".+"'</span>
+          <span class="na">ports</span><span class="pi">:</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8301</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">serflan</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8500</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">ui-port</span>
+            <span class="pi">-</span> <span class="na">containerPort</span><span class="pi">:</span> <span class="m">8600</span>
+              <span class="na">name</span><span class="pi">:</span> <span class="s">consuldns</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Service</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">namespace</span><span class="pi">:</span> <span class="s">$(namespace)</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">consul-client</span>
+  <span class="na">labels</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">consul-client</span>
+    <span class="na">consul-role</span><span class="pi">:</span> <span class="s">consul-client</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">ports</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">serflan-tcp</span>
+      <span class="na">protocol</span><span class="pi">:</span> <span class="s2">"</span><span class="s">TCP"</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8301</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">http</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8500</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">consuldns</span>
+      <span class="na">port</span><span class="pi">:</span> <span class="m">8600</span>
+  <span class="na">selector</span><span class="pi">:</span>
+    <span class="na">app</span><span class="pi">:</span> <span class="s">consul</span>
+    <span class="na">consul-role</span><span class="pi">:</span> <span class="s">client</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="ui">UI</h2>
+
+<p>带<code class="highlighter-rouge">-ui</code>参数的节点都能作为ui呈现,记住是用8500这个端口.例子我就不写了.</p>
+
+<h2 id="不足之处">不足之处</h2>
+
+<p>重启机制没做好.应该在server那里配置<code class="highlighter-rouge">livenessProbe</code>,当自身离开时自动重启,不过这个问题不是很大,consul自身挺稳定的,本身很少出事.</p>
+
+<p>主要是<code class="highlighter-rouge">consul-client</code>,<code class="highlighter-rouge">consul-client</code>在检测离开了server节点之后,应该直接重启,重新加入.但是这一点我没做.</p>
+
+<h2 id="其他问题">其他问题</h2>
+
+<h3 id="加密通讯">加密通讯</h3>
+
+<p>consul还支持彼此间加密通讯,但是我之前配置client的时候失败了,这就比较遗憾了.加密通讯要加多一些配置,比较麻烦,所以我改成无加密通讯了.</p>
+
+<h3 id="反注册失败">反注册失败</h3>
+
+<p>这个问题遇到很多次了,有些服务需要手动反注册3次(可能因为我有个server节点).有些流氓服务不管多少次也是反注册失败,相当残念.</p>
+
+<h3 id="consul很卡">consul很卡</h3>
+
+<p>consul的架构,server一定要跟client分离.如果直接往server注册服务,server担任了服务健康检查的角色,就会使整个consul变得非常的卡,我本想通过反注册服务给它降低负荷,但还是失败了,搞得最后我迁移了配置,重新搭了一套consul,相当蛋疼.</p>
+
+<h2 id="常用api">常用api</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+</pre></td><td class="rouge-code"><pre># 反注册服务
+put /v1/agent/service/deregister/&lt;serviceid&gt;
+# 获取配置
+get /v1/kv/goms/config/&lt;config&gt;
+# 获取服务列表
+get /v1/agent/services
+# 查询节点状态
+get /v1/status/leader
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="参考链接">参考链接</h2>
+
+<p>https://github.com/hashicorp/consul-helm</p>
+:ET

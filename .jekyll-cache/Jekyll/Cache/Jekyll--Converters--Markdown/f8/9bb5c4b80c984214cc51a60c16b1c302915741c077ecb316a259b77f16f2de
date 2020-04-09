@@ -1,0 +1,61 @@
+I"U<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>graph TB
+A(Callable&lt;V&gt;)--&gt;B(DocumentationTool.DocumentationTask)
+A--&gt;C(JavaCompiler.CompilationTask)
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><img src="/img/in-post/java-concurrent/Callable.png" alt="image" /></p>
+
+<p>一般情况下是配合ExecutorService来使用的，在ExecutorService接口中声明了若干个submit方法的重载版本：</p>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Future</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">submit</span><span class="o">(</span><span class="nc">Callable</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="n">task</span><span class="o">);</span>
+<span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nc">Future</span><span class="o">&lt;</span><span class="no">T</span><span class="o">&gt;</span> <span class="nf">submit</span><span class="o">(</span><span class="nc">Runnable</span> <span class="n">task</span><span class="o">,</span> <span class="no">T</span> <span class="n">result</span><span class="o">);</span>
+<span class="nc">Future</span><span class="o">&lt;?&gt;</span> <span class="n">submit</span><span class="o">(</span><span class="nc">Runnable</span> <span class="n">task</span><span class="o">);</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-java highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+</pre></td><td class="rouge-code"><pre><span class="kn">import</span> <span class="nn">java.util.Random</span><span class="o">;</span>
+<span class="kn">import</span> <span class="nn">java.util.concurrent.Callable</span><span class="o">;</span>
+
+<span class="kd">public</span> <span class="kd">class</span> <span class="nc">CallableExample</span> <span class="kd">implements</span> <span class="nc">Callable</span> <span class="o">{</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="nc">Object</span> <span class="nf">call</span><span class="o">()</span> <span class="kd">throws</span> <span class="nc">Exception</span> <span class="o">{</span>
+        <span class="c1">// Create random number generator</span>
+        <span class="nc">Random</span> <span class="n">generator</span> <span class="o">=</span> <span class="k">new</span> <span class="nc">Random</span><span class="o">();</span>
+
+        <span class="nc">Integer</span> <span class="n">randomNumber</span> <span class="o">=</span> <span class="n">generator</span><span class="o">.</span><span class="na">nextInt</span><span class="o">(</span><span class="mi">5</span><span class="o">);</span>
+
+        <span class="c1">// To simulate a heavy computation,</span>
+        <span class="c1">// we delay the thread for some random time</span>
+        <span class="nc">Thread</span><span class="o">.</span><span class="na">sleep</span><span class="o">(</span><span class="n">randomNumber</span> <span class="o">*</span> <span class="mi">1000</span><span class="o">);</span>
+
+        <span class="k">return</span> <span class="n">randomNumber</span><span class="o">;</span>
+    <span class="o">}</span>
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+:ET

@@ -1,0 +1,525 @@
+I"�o<h2 id="安装">安装</h2>
+
+<h3 id="ubuntu">Ubuntu</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+</pre></td><td class="rouge-code"><pre><span class="c"># SET UP THE REPOSITORY</span>
+<span class="nb">sudo </span>apt-get remove docker docker-engine docker.io
+<span class="nb">sudo </span>apt-get update
+<span class="nb">sudo </span>apt-get <span class="nb">install</span> <span class="se">\</span>
+    apt-transport-https <span class="se">\</span>
+    ca-certificates <span class="se">\</span>
+    curl <span class="se">\</span>
+    software-properties-common
+curl <span class="nt">-fsSL</span> https://download.docker.com/linux/ubuntu/gpg | <span class="nb">sudo </span>apt-key add -
+<span class="nb">sudo </span>apt-key fingerprint 0EBFCD88
+ <span class="nb">sudo </span>add-apt-repository <span class="se">\</span>
+   <span class="s2">"deb [arch=amd64] https://download.docker.com/linux/ubuntu </span><span class="se">\</span><span class="s2">
+   </span><span class="si">$(</span>lsb_release <span class="nt">-cs</span><span class="si">)</span><span class="s2"> </span><span class="se">\</span><span class="s2">
+   stable"</span>
+<span class="c"># INSTALL DOCKER CE</span>
+ <span class="nb">sudo </span>apt-get update
+ <span class="nb">sudo </span>apt-get <span class="nb">install </span>docker-ce
+apt-cache madison docker-ce
+<span class="c"># 阿里云公司镜像</span>
+<span class="nb">sudo mkdir</span> <span class="nt">-p</span> /etc/docker
+<span class="nb">sudo tee</span> /etc/docker/daemon.json <span class="o">&lt;&lt;-</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+{
+  "registry-mirrors": ["https://vhc6pxhv.mirror.aliyuncs.com"]
+}
+</span><span class="no">EOF
+</span><span class="nb">sudo </span>systemctl daemon-reload
+<span class="nb">sudo </span>systemctl restart docker
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nb">sudo </span>curl <span class="nt">-L</span> https://github.com/docker/compose/releases/download/1.21.2/docker-compose-<span class="si">$(</span><span class="nb">uname</span> <span class="nt">-s</span><span class="si">)</span>-<span class="si">$(</span><span class="nb">uname</span> <span class="nt">-m</span><span class="si">)</span> <span class="nt">-o</span> /usr/local/bin/docker-compose
+<span class="nb">sudo chmod</span> +x /usr/local/bin/docker-compose
+docker-compose <span class="nt">--version</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>参考:</p>
+<ol>
+  <li>https://docs.docker.com/compose/install/#install-compose</li>
+  <li></li>
+</ol>
+
+<h3 id="mac">mac</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>brew cask install docker
+docker ps
+docker-machine create default
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="命令">命令</h2>
+
+<h3 id="run">run</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+</pre></td><td class="rouge-code"><pre> docker run [OPTIONS] IMAGE [COMMAND] [ARG...]  
+  -a, --attach=[]            登录容器（以docker run -d启动的容器）  
+  -c, --cpu-shares=0         设置容器CPU权重，在CPU共享场景使用  
+  --cap-add=[]               添加权限，权限清单详见：http://linux.die.net/man/7/capabilities  
+  --cap-drop=[]              删除权限，权限清单详见：http://linux.die.net/man/7/capabilities  
+  --cidfile=""               运行容器后，在指定文件中写入容器PID值，一种典型的监控系统用法  
+  --cpuset=""                设置容器可以使用哪些CPU，此参数可以用来容器独占CPU  
+  -d, --detach=false         指定容器运行于前台还是后台   
+  --device=[]                添加主机设备给容器，相当于设备直通  
+  --dns=[]                   指定容器的dns服务器  
+  --dns-search=[]            指定容器的dns搜索域名，写入到容器的/etc/resolv.conf文件  
+  -e, --env=[]               指定环境变量，容器中可以使用该环境变量  
+  --entrypoint=""            覆盖image的入口点  
+  --env-file=[]              指定环境变量文件，文件格式为每行一个环境变量  
+  --expose=[]                指定容器暴露的端口，即修改镜像的暴露端口  
+  -h, --hostname=""          指定容器的主机名  
+  -i, --interactive=false    打开STDIN，用于控制台交互  
+  --link=[]                  指定容器间的关联，使用其他容器的IP、env等信息  
+  --lxc-conf=[]              指定容器的配置文件，只有在指定--exec-driver=lxc时使用  
+  -m, --memory=""            指定容器的内存上限  
+  --name=""                  指定容器名字，后续可以通过名字进行容器管理，links特性需要使用名字  
+  --net="bridge"             容器网络设置，待详述  
+  -P, --publish-all=false    指定容器暴露的端口，待详述  
+  -p, --publish=[]           指定容器暴露的端口，待详述  
+  --privileged=false         指定容器是否为特权容器，特权容器拥有所有的capabilities  
+  --restart=""               指定容器停止后的重启策略，待详述  
+  --rm=false                 指定容器停止后自动删除容器(不支持以docker run -d启动的容器)  
+  --sig-proxy=true           设置由代理接受并处理信号，但是SIGCHLD、SIGSTOP和SIGKILL不能被代理  
+  -t, --tty=false            分配tty设备，该可以支持终端登录  
+  -u, --user=""              指定容器的用户  
+  -v, --volume=[]            给容器挂载存储卷，挂载到容器的某个目录  
+  --volumes-from=[]          给容器挂载其他容器上的卷，挂载到容器的某个目录  
+  -w, --workdir=""           指定容器的工作目录  
+
+
+# 启动一个 bash 终端，允许用户进行交互
+docker run -t -i ubuntu:14.04 /bin/bash
+
+# 启动已终止容器  
+docker container start
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>–restart参数，支持三种逻辑实现：
+    <div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>no：容器退出时不重启  
+on-failure：容器故障退出（返回值非零）时重启  
+always：容器退出时总是重启
+</pre></td></tr></tbody></table></code></pre></div>    </div>
+  </li>
+  <li>网络参数 –net</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre><span class="nt">--net</span><span class="o">=</span>bridge： //使用docker daemon指定的网桥
+<span class="nt">--net</span><span class="o">=</span>host： //容器使用主机的网络
+<span class="nt">--net</span><span class="o">=</span>container:NAME_or_ID：//使用其他容器的网路，共享IP和PORT等网络资源
+<span class="nt">--net</span><span class="o">=</span>none： //容器使用自己的网络（类似--net<span class="o">=</span>bridge），但是不进行配置
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<ul>
+  <li>最简单的例子</li>
+</ul>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>docker run <span class="nt">--name</span> myredis <span class="nt">-d</span> redis
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="build">build</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>docker build -t runoob/ubuntu:v1 .
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="内置监控">内置监控</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre><span class="c"># </span>
+  docker stats <span class="si">$(</span>docker ps <span class="nt">--format</span><span class="o">={{</span>.Names<span class="o">}}</span><span class="si">)</span>
+<span class="c">#   </span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>参考:
+<a href="https://docs.docker.com/engine/reference/commandline/stats/">docker stats</a></p>
+
+<h2 id="一些坑点">一些坑点</h2>
+
+<h3 id="docker是有网络瓶颈的这时可通过---nethost解决">docker是有网络瓶颈的,这时可通过<code class="highlighter-rouge"> --net=host</code>解决.</h3>
+<blockquote>
+  <p>Docker 支持的网络模式有：</p>
+
+  <p>none。关闭容器内的网络连接</p>
+
+  <p>bridge。通过 veth 接口来连接容器，默认配置。</p>
+
+  <p>host。允许容器使用 host 的网络堆栈信息。注意：这种方式将允许容器访问 host 中类似 D-BUS 之类的系统服务，所以认为是不安全的。</p>
+
+  <p>container。使用另外一个容器的网络堆栈信息。　</p>
+  <ul>
+    <li></li>
+  </ul>
+</blockquote>
+
+<h3 id="cannot-connect-to-the-docker-daemon-on-macos">Cannot connect to the Docker daemon on macOS</h3>
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>brew cask install docker
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="少用-add-指令">少用 ADD 指令</h3>
+
+<p>ADD的另一个功能是能够自动解压缩压缩文件。如果参数是一个识别压缩格式（tar，gzip，bzip2等）的本地文件，那么它将被解压到容器文件系统中的指定处。</p>
+
+<p>参考链接：
+<a href="https://juejin.im/post/5aa5d08e6fb9a028de4455d1">Dockerfile:ADD VS COPY</a></p>
+
+<h3 id="entrypoint-执行的容器-接收不到-unix-信号">entrypoint 执行的容器 接收不到 <a href="https://zh.wikipedia.org/wiki/Unix%E4%BF%A1%E5%8F%B7">Unix 信号</a></h3>
+
+<p>entrypoint 通过 sh -c 执行，这会导致应用的pid!=1</p>
+
+<h2 id="要点">要点:</h2>
+<ul>
+  <li>所有的文件写入操作，都应该使用 数据卷（Volume）、或者绑定宿主目录，在这些位置的读写会跳过容器存储层，直接对宿主（或网络存储）发生读写，其性能和稳定性更高。</li>
+  <li>所以对于 CentOS/RHEL 的用户来说，在没有办法使用 UnionFS 的情况下，一定要配置 direct-lvm 给 devicemapper，无论是为了性能、稳定性还是空间利用率。</li>
+  <li>构建镜像的时候用<code class="highlighter-rouge">&amp;&amp;</code>连接指令,最后需要清理多余的文件</li>
+  <li>应该会将 Dockerfile 置于一个空目录下，或者项目根目录下</li>
+  <li>目录下有些东西确实不希望构建时传给 Docker 引擎，那么可以用 .gitignore 一样的语法写一个 .dockerignore</li>
+  <li></li>
+</ul>
+
+<ol>
+  <li><a href="https://blog.phpgao.com/docker_alpine.html">体验Alpine Linux Docker Image</a></li>
+</ol>
+
+<h2 id="一些技巧">一些技巧</h2>
+
+<h3 id="查看镜像tag">查看镜像tag</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>brew install httpie
+http -a &lt;用户名&gt;:&lt;密码&gt; https://auth.docker.io/token  service==registry.docker.io scope==repository:library/nginx:pull
+# 把命令结果的token替换到$token
+http https://registry.hub.docker.com/v2/library/nginx/tags/list 'Authorization: Bearer $token'
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>参考</p>
+
+<p><a href="https://yq.aliyun.com/articles/635236?spm=a2c4e.11155435.0.0.70446906jG4z8L">通过OAuth方式与docker hub v2 API交互</a></p>
+
+<h3 id="查看google-container的tag">查看Google container的tag</h3>
+
+<p><a href="https://cloud.google.com/sdk/gcloud/reference/container/images/list-tags">命令行方式</a></p>
+
+<p><a href="https://gcr.io/v2/google-containers/pause/tags/list">接口方式</a></p>
+
+<p><a href="https://console.cloud.google.com/gcr/images/google-containers/GLOBAL">网页方式</a></p>
+
+<h3 id="查看容器占用的临时存储">查看容器占用的临时存储</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>docker ps
+docker inspect &lt;containerid&gt;
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>结果是一个json,<code class="highlighter-rouge">GraphDriver</code>字段里面的内容便是该容器读写层占用的空间</p>
+
+<p><a href="https://docs.docker.com/storage/storagedriver/overlayfs-driver/#how-the-overlay2-driver-works">overlay2</a>这种存储驱动,大概长这样</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre>        "GraphDriver": {
+            "Data": {
+                "LowerDir": "/var/lib/docker/overlay2/a37aa91098cae96ea46461786e1fe5e737e6a9f6659aaecae03cb1a6649f2ec5-init/diff:/var/lib/docker/overlay2/bc8e51a75f0c75a4c99aee3365e61d819db62c40567d19065803f604c37b037c/diff:/var/lib/docker/overlay2/c6b772109941ef801751cc79df1fff5365d802313e62d891709fa5dc0a77e5ee/diff:/var/lib/docker/overlay2/57825e2f123ee01d2a0316633797eea092d456e86313e57f387f55984539fa12/diff:/var/lib/docker/overlay2/85a562eb1efa7fb47d73c1f3a872eff792e2897fb10acc7f5c3a36a949267ea8/diff:/var/lib/docker/overlay2/175ef167c94fabfcdd71c9c0c00cf84aff09092c525a23eb34ef1abdc5353315/diff:/var/lib/docker/overlay2/7f3e18afdbf72eef8cf3c3c85be17fd690bd8d08ab845351f13e2ab9373f7116/diff:/var/lib/docker/overlay2/6587c9c58d7fbeaa3b2d485033cea9ed16b5e58f5ffb1ab52cbf0ce5d10015db/diff:/var/lib/docker/overlay2/7a5a3316ee39f485f5834604b4ed2943864935601cb53d1ff4e61523236fd7e3/diff:/var/lib/docker/overlay2/e823c204b197123caf2cb190a4a7eb6b1664ef91610578cd3a9230edd9948711/diff:/var/lib/docker/overlay2/5ee74f69388ee558000e54fab92d7f245e38cbcb74d1d428e6e8acb1d84d5785/diff:/var/lib/docker/overlay2/a716238ee065c05799244c3bd375ecc3132f3039f4e041254a150b4900b43c84/diff:/var/lib/docker/overlay2/8cf97acec90c72c19d9efe245d7196a27903c2593d64c34d4fd68c0f3244afe3/diff:/var/lib/docker/overlay2/d31d19d7f6dae649f5318546dd374b7c332dbdab01bc61b7e47bafec0f1a33e9/diff",
+                "MergedDir": "/var/lib/docker/overlay2/a37aa91098cae96ea46461786e1fe5e737e6a9f6659aaecae03cb1a6649f2ec5/merged",
+                "UpperDir": "/var/lib/docker/overlay2/a37aa91098cae96ea46461786e1fe5e737e6a9f6659aaecae03cb1a6649f2ec5/diff",
+                "WorkDir": "/var/lib/docker/overlay2/a37aa91098cae96ea46461786e1fe5e737e6a9f6659aaecae03cb1a6649f2ec5/work"
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>关于存储驱动,<a href="http://dockone.io/article/1765">这篇文章</a>讲的还行</p>
+
+<h3 id="清理容器">清理容器</h3>
+
+<p>清理前后使用下列命令可对比效果</p>
+
+<p>docker system df -v</p>
+
+<h4 id="方式1">方式1</h4>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre>    <span class="c"># 另外可以使用以下命令，来删除所有处于停止（Exited）状态下的容器：</span>
+    docker <span class="nb">rm</span> <span class="nt">-v</span> <span class="si">$(</span>docker ps <span class="nt">-a</span> <span class="nt">-q</span> <span class="nt">-f</span> <span class="nv">status</span><span class="o">=</span>exited<span class="si">)</span>
+    <span class="c">#要删除（所谓的）悬挂卷，您应该输入如下命令：</span>
+    docker volume <span class="nb">rm</span> <span class="si">$(</span>docker volume <span class="nb">ls</span> <span class="nt">-qf</span> <span class="nv">dangling</span><span class="o">=</span><span class="nb">true</span><span class="si">)</span>
+    <span class="c"># 最后，输入以下命令以确保完成清理任务：</span>
+    docker volume <span class="nb">ls</span> <span class="nt">-qf</span> <span class="nv">dangling</span><span class="o">=</span><span class="nb">true</span> | xargs <span class="nt">-r</span> docker volume <span class="nb">rm</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre><span class="c">#! /bin/sh 是指此脚本使用/bin/sh来解释执行，#!是特殊的表示符，其后面根的是此解释此脚本的shell的路径</span>
+<span class="c">#!/bin/bash</span>
+docker rmi <span class="nv">$ </span><span class="o">(</span>docker images <span class="nt">-q</span> <span class="nt">-f</span> <span class="nv">dangling</span><span class="o">=</span><span class="nb">true</span><span class="o">)</span>
+docker volume <span class="nb">rm</span> <span class="si">$(</span>docker volume <span class="nb">ls</span> <span class="nt">-qf</span> <span class="nv">dangling</span><span class="o">=</span><span class="nb">true</span><span class="si">)</span>
+0 0 1 ~/docker_clean.sh <span class="o">&gt;</span> /dev/null 2&gt;&amp;1
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+</pre></td><td class="rouge-code"><pre><span class="nb">chmod </span>755 ~/docker_clean.sh
+<span class="c"># 其中USER是真实的用户名</span>
+<span class="nb">sudo </span>usermod <span class="nt">-aG</span> docker USER
+<span class="c"># 注销后重新登录 我们通过输入以下命令来创建cron作业</span>
+crontab –e
+<span class="c"># 保存并关闭crontab文件。之后在每个午夜12点，Docker将自动进行清理任务，届时您就可以体验一个干净、整洁的Docker了。</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>参考:<a href="https://yq.aliyun.com/articles/279136?spm=a2c4e.11153959.0.0.16b9d55awTBOj5">4个实用小技巧，来给你的Docker 进行一次“大扫除”吧</a></p>
+
+<h4 id="强烈推荐方式2">【强烈推荐】方式2</h4>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>docker system prune -a
+docker system prune --volumes
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="oom排查">OOM排查</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="nb">grep</span> <span class="nt">-i</span> OOM <span class="nt">-A</span> 5 <span class="nt">-B</span> 5 /var/log/messages
+docker ps <span class="nt">-a</span> | <span class="nb">grep </span>5c223ed
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+</pre></td><td class="rouge-code"><pre>Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: Tasks state (memory values in pages):
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  pid  ]   uid  tgid total_vm      rss pgtables_bytes swapents oom_score_adj name
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  26934]     0 26934      411      128    40960        0           937 entrypoint.sh
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  26981]     0 26981    48758     1814   118784        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  26982] 65534 26982    69086    25949   323584        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  26983] 65534 26983    70117    26791   331776        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  26986] 65534 26986    68812    25937   323584        0           937 php-fpm7
+--
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  23381] 65534 23381    51941     8278   184320        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  29842] 65534 29842    51729     8041   180224        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  29854] 65534 29854    50988     7278   176128        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [  30426] 65534 30426    52385     8720   184320        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: [    317] 65534   317    51335     7618   176128        0           937 php-fpm7
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: oom-kill:constraint=CONSTRAINT_NONE,nodemask=(null),cpuset=docker-5c223edfde3b17676cb982efdc201218a674578704d33d09de4775b721cb4702.scope,mems_allowed=0,oom_memcg=/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podef7ce918_ae07_11e9_bf64_00163e08cd06.slice/docker-5c223edfde3b17676cb982efdc201218a674578704d33d09de4775b721cb4702.scope,task_memcg=/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podef7ce918_ae07_11e9_bf64_00163e08cd06.slice/docker-5c223edfde3b17676cb982efdc201218a674578704d33d09de4775b721cb4702.scope,task=php-fpm7,pid=26865,uid=65534
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: Memory cgroup out of memory: Killed process 26865 (php-fpm7) total-vm:367860kB, anon-rss:177544kB, file-rss:1720kB, shmem-rss:13216kB
+Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: oom_reaper: reaped process 26865 (php-fpm7), now anon-rss:0kB, file-rss:0kB, shmem-rss:13216kB
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><code class="highlighter-rouge">5c223edfde3b17676cb982efdc201218a674578704d33d09de4775b721cb4702</code> 这个就是出现OOM的 container ID</p>
+
+<h2 id="dockerfile-技巧"><a href="https://mp.weixin.qq.com/s?__biz=MzI1OTY2MzMxOQ==&amp;mid=2247486135&amp;idx=2&amp;sn=0136343fedfb03d18ecd52f4b0297250&amp;chksm=ea743e0fdd03b719a4e31b0bf508d305c8ea95595fa6f94d1d149a1f39af950a97a08c21b831&amp;mpshare=1&amp;scene=23&amp;srcid=0722hfZqf9tVS6zNAMxua63c#rd">Dockerfile 技巧</a></h2>
+
+<p>变动的层数放最后,可缓存的层放前面</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>apt-get -y install -–no-install-recommends
+rm -rf /var/lib/apt/lists/*
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="根据pid查找容器信息">根据PID查找容器信息</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>
+  docker ps <span class="nt">-q</span> | xargs docker inspect <span class="nt">--format</span> <span class="s1">'{{.State.Pid}}, {{.ID}}, {{.Name}}, {{.Config.Image}}'</span> | <span class="nb">grep</span> <span class="s2">"^</span><span class="k">${</span><span class="nv">PID</span><span class="k">}</span><span class="s2">,"</span>
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>PS: docker inspect 的命令结果是一个json,可以先不加 format ,然后自己定义格式</p>
+
+<p>参考链接:
+<a href="https://stackoverflow.com/questions/24406743/coreos-get-docker-container-name-by-pid">CoreOS - get docker container name by PID?</a></p>
+
+<h2 id="docker-ps--排序">docker ps  排序</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre></td><td class="rouge-code"><pre>
+
+docker ps <span class="nt">--format</span> <span class="s2">"table {{.ID}}</span><span class="se">\t</span><span class="s2">{{.Image}}"</span> | <span class="o">(</span><span class="nb">read</span> <span class="nt">-r</span><span class="p">;</span> <span class="nb">printf</span> <span class="s2">"%s</span><span class="se">\n</span><span class="s2">"</span> <span class="s2">"</span><span class="nv">$REPLY</span><span class="s2">"</span><span class="p">;</span> <span class="nb">sort</span> <span class="nt">-k</span> 2 <span class="o">)</span>
+
+docker ps <span class="o">[</span><span class="nt">--format</span><span class="o">=</span><span class="s2">"TEMPLATE"</span><span class="o">]</span>
+
+<span class="nt">--format</span><span class="o">=</span><span class="s2">"TEMPLATE"</span>
+  Pretty-print containers using a Go template.
+  Valid placeholders:
+     .ID - Container ID
+     .Image - Image ID
+     .Command - Quoted <span class="nb">command</span>
+     .CreatedAt - Time when the container was created.
+     .RunningFor - Elapsed <span class="nb">time </span>since the container was started.
+     .Ports - Exposed ports.
+     .Status - Container status.
+     .Size - Container disk size.
+     .Names - Container names.
+     .Labels - All labels assigned to the container.
+     .Label - Value of a specific label <span class="k">for </span>this container. For example <span class="o">{{</span>.Label <span class="s2">"com.docker.swarm.cpu"</span><span class="o">}}</span>
+     .Mounts - Names of the volumes mounted <span class="k">in </span>this container.
+
+
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p><a href="https://stackoverflow.com/questions/46173298/how-to-sort-or-order-results-docker-ps-format">参考链接</a></p>
+
+<h2 id="学不动啦">学不动啦</h2>
+
+<p>学不动 docker 命令没关系, <a href="https://github.com/jesseduffield/lazydocker">lazydocker</a> 帮你忙,哪里不会点哪里,妈妈再也不用担心我的 docker 问题.</p>
+
+<h2 id="参考链接">参考链接:</h2>
+
+<ol>
+  <li><a href="https://kevinguo.me/2017/08/23/Docker-container-communication/">Docker基础-理解容器之间的通信</a></li>
+  <li><a href="https://blog.csdn.net/one_clouder/article/details/39224767">【docker】docker run命令详解</a></li>
+  <li><a href="https://blog.csdn.net/wsbgmofo/article/details/79173920">启动docker的时候怎么把参数传递给docker里面的项目</a></li>
+  <li><a href="http://wiki.jikexueyuan.com/project/openresty/web/docker.html">与 Docker 使用的网络瓶颈</a></li>
+  <li><a href="https://deepzz.com/post/docker-compose-file.html">如何写docker-compose.yml，Docker compose file 参考文档</a></li>
+  <li><a href="http://dockone.io/article/128">深入理解Docker Volume（一）</a></li>
+  <li><a href="https://docs.docker.com/storage/volumes/">Use volumes</a></li>
+  <li><a href="https://itbilu.com/linux/docker/4kkTyS8Pf.html#docker-inspect">Docker 容器(Container)的管理</a></li>
+  <li><a href="https://docs.docker.com/compose/install/">Install Docker Compose</a></li>
+</ol>
+:ET

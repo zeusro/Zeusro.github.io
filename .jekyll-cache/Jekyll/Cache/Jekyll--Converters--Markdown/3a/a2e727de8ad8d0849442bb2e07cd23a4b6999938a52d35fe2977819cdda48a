@@ -1,0 +1,564 @@
+I"�i<p><code class="highlighter-rouge">tektoncd</code>是面向<code class="highlighter-rouge">kubernetes</code>的<code class="highlighter-rouge">pipeline</code>型CI/CD(kubectl apply)系统,自定义<code class="highlighter-rouge">kaniko</code>构建<code class="highlighter-rouge">docker</code>镜像</p>
+
+<p>部署方式是创建一些RBAC相关的资源（ClusterRole，ClusterRoleBinding)以及CustomResourceDefinition。</p>
+
+<p>常驻的容器只有tekton-pipelines-controller，tekton-pipelines-webhook。</p>
+
+<p>首先声明,我没有实际安装使用过<code class="highlighter-rouge">tektoncd</code>,以下内容纯属扯淡.
+<img src="/img/in-post/tektoncd/9150e4e5ly1fve14owghxj206o06omx8.jpg" alt="image" /></p>
+
+<h2 id="tektoncd的五类公民">tektoncd的五类公民</h2>
+
+<ol>
+  <li>Task</li>
+  <li>TaskRun</li>
+  <li>PipelineResource
+    <ol>
+      <li>type: git</li>
+      <li>type: image</li>
+    </ol>
+  </li>
+  <li>Pipeline</li>
+  <li>PipelineRun</li>
+</ol>
+
+<p>tektoncd目前(0.1.0)有5类对象,核心理念是通过定义yaml定义构建过程.构建任务的状态存放在status字段中</p>
+
+<p>Task是单个任务的构建过程,定义TaskRun任务才会运行.</p>
+
+<p>Pipeline包含多个Task,并在此基础上定义input和output,input和output以PipelineResource作为交付,PipelineResource的本质是PVC.</p>
+
+<p>同样地,需要定义PipelineRun才会运行Pipeline</p>
+
+<p>官方Github这个例子能够让大家理清这几类对象之间的关系</p>
+
+<div class="language-yaml highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+</pre></td><td class="rouge-code"><pre><span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PipelineResource</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-image-leeroy-app</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+  <span class="na">params</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">url</span>
+    <span class="na">value</span><span class="pi">:</span> <span class="s">gcr.io/christiewilson-catfactory/leeroy-app</span>
+<span class="nn">---</span>
+<span class="c1"># This demo modifies the cluster (deploys to it) you must use a service</span>
+<span class="c1"># account with permission to admin the cluster (or make your default user an admin</span>
+<span class="c1"># of the `default` namespace with default-cluster-admin.</span>
+
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io/v1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRoleBinding</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">default-cluster-admin</span>
+<span class="na">subjects</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">kind</span><span class="pi">:</span> <span class="s">ServiceAccount</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">default</span>
+    <span class="na">namespace</span><span class="pi">:</span> <span class="s">default</span>
+<span class="na">roleRef</span><span class="pi">:</span>
+  <span class="na">kind</span><span class="pi">:</span> <span class="s">ClusterRole</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">cluster-admin</span>
+  <span class="na">apiGroup</span><span class="pi">:</span> <span class="s">rbac.authorization.k8s.io</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PipelineResource</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-image-leeroy-web</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+  <span class="na">params</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">url</span>
+    <span class="na">value</span><span class="pi">:</span> <span class="s">gcr.io/christiewilson-catfactory/leeroy-web</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PipelineResource</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-git</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">type</span><span class="pi">:</span> <span class="s">git</span>
+  <span class="na">params</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">revision</span>
+    <span class="na">value</span><span class="pi">:</span> <span class="s">master</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">url</span>
+    <span class="na">value</span><span class="pi">:</span> <span class="s">https://github.com/GoogleContainerTools/skaffold</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Task</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">unit-tests</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">inputs</span><span class="pi">:</span>
+    <span class="na">resources</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">git</span>
+      <span class="na">targetPath</span><span class="pi">:</span> <span class="s">go/src/github.com/GoogleContainerTools/skaffold</span>
+  <span class="na">steps</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">run-tests</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">golang</span>
+    <span class="na">env</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">GOPATH</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">/workspace/go</span>
+    <span class="na">workingDir</span><span class="pi">:</span> <span class="s">/workspace/go/src/github.com/GoogleContainerTools/skaffold</span>
+    <span class="na">command</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">make</span>
+    <span class="na">args</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">test</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Task</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">build-push</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">inputs</span><span class="pi">:</span>
+    <span class="na">resources</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">git</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToDockerFile</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">The path to the dockerfile to build</span>
+      <span class="na">default</span><span class="pi">:</span> <span class="s">/workspace/workspace/Dockerfile</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToContext</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">The build context used by Kaniko (https://github.com/GoogleContainerTools/kaniko#kaniko-build-contexts)</span>
+      <span class="na">default</span><span class="pi">:</span> <span class="s">/workspace/workspace</span>
+  <span class="na">outputs</span><span class="pi">:</span>
+    <span class="na">resources</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">builtImage</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+  <span class="na">steps</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">build-and-push</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">gcr.io/kaniko-project/executor</span>
+    <span class="na">command</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">/kaniko/executor</span>
+    <span class="na">args</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s">--dockerfile=${inputs.params.pathToDockerFile}</span>
+    <span class="pi">-</span> <span class="s">--destination=${outputs.resources.builtImage.url}</span>
+    <span class="pi">-</span> <span class="s">--context=${inputs.params.pathToContext}</span>
+<span class="nn">---</span>
+<span class="c1">#This task deploys with kubectl apply -f &lt;filename&gt;</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Task</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">demo-deploy-kubectl</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">inputs</span><span class="pi">:</span>
+    <span class="na">resources</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">git</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image</span>
+      <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">path</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Path to the manifest to apply</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yqArg</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Okay this is a hack, but I didn't feel right hard-codeing `-d1` down below</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yamlPathToImage</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">The path to the image to replace in the yaml manifest (arg to yq)</span>
+    <span class="na">clusters</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">targetCluster</span>
+      <span class="na">description</span><span class="pi">:</span> <span class="s">Not yet used, kubectl command below should use this cluster</span>
+  <span class="na">steps</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">replace-image</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">mikefarah/yq</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">yq'</span><span class="pi">]</span>
+    <span class="na">args</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">w"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">-i"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">${inputs.params.yqArg}"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">${inputs.params.path}"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">${inputs.params.yamlPathToImage}"</span>
+    <span class="pi">-</span> <span class="s2">"</span><span class="s">${inputs.resources.image.url}"</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">run-kubectl</span>
+    <span class="na">image</span><span class="pi">:</span> <span class="s">lachlanevenson/k8s-kubectl</span>
+    <span class="na">command</span><span class="pi">:</span> <span class="pi">[</span><span class="s1">'</span><span class="s">kubectl'</span><span class="pi">]</span>
+    <span class="na">args</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">apply'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">-f'</span>
+    <span class="pi">-</span> <span class="s1">'</span><span class="s">${inputs.params.path}'</span>
+<span class="nn">---</span>
+<span class="c1"># This Pipeline Builds two microservice images(https://github.com/GoogleContainerTools/skaffold/tree/master/examples/microservices)</span>
+<span class="c1"># from the Skaffold repo (https://github.com/GoogleContainerTools/skaffold) and deploys them to the repo currently running Tekton Pipelines.</span>
+
+<span class="c1"># **Note** : It does this using the k8s `Deployment` in the skaffold repos's existing yaml</span>
+<span class="c1"># files, so at the moment there is no guarantee that the image that are built and</span>
+<span class="c1"># pushed are the ones that are deployed (that would require using the digest of</span>
+<span class="c1"># the built image, see https://github.com/tektoncd/pipeline/issues/216).</span>
+
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">Pipeline</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">demo-pipeline</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">resources</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">source-repo</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">git</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">web-image</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">app-image</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">image</span>
+  <span class="na">tasks</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-unit-tests</span>
+    <span class="na">taskRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">unit-tests</span>
+    <span class="na">resources</span><span class="pi">:</span>
+      <span class="na">inputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">source-repo</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">build-skaffold-web</span>
+    <span class="na">runAfter</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">skaffold-unit-tests</span><span class="pi">]</span>
+    <span class="na">taskRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">build-push</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToDockerFile</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToContext</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">/workspace/workspace/examples/microservices/leeroy-web</span>
+    <span class="na">resources</span><span class="pi">:</span>
+      <span class="na">inputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">source-repo</span>
+      <span class="na">outputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">builtImage</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">web-image</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">build-skaffold-app</span>
+    <span class="na">runAfter</span><span class="pi">:</span> <span class="pi">[</span><span class="nv">skaffold-unit-tests</span><span class="pi">]</span>
+    <span class="na">taskRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">build-push</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToDockerFile</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">Dockerfile</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">pathToContext</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">/workspace/workspace/examples/microservices/leeroy-app</span>
+    <span class="na">resources</span><span class="pi">:</span>
+      <span class="na">inputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">source-repo</span>
+      <span class="na">outputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">builtImage</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">app-image</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">deploy-app</span>
+    <span class="na">taskRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">demo-deploy-kubectl</span>
+    <span class="na">resources</span><span class="pi">:</span>
+      <span class="na">inputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">source-repo</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">app-image</span>
+        <span class="na">from</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="s">build-skaffold-app</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">path</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">/workspace/workspace/examples/microservices/leeroy-app/kubernetes/deployment.yaml</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yqArg</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">-d1"</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yamlPathToImage</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">spec.template.spec.containers[0].image"</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">deploy-web</span>
+    <span class="na">taskRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">demo-deploy-kubectl</span>
+    <span class="na">resources</span><span class="pi">:</span>
+      <span class="na">inputs</span><span class="pi">:</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">workspace</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">source-repo</span>
+      <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">image</span>
+        <span class="na">resource</span><span class="pi">:</span> <span class="s">web-image</span>
+        <span class="na">from</span><span class="pi">:</span>
+        <span class="pi">-</span> <span class="s">build-skaffold-web</span>
+    <span class="na">params</span><span class="pi">:</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">path</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s">/workspace/workspace/examples/microservices/leeroy-web/kubernetes/deployment.yaml</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yqArg</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">-d1"</span>
+    <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">yamlPathToImage</span>
+      <span class="na">value</span><span class="pi">:</span> <span class="s2">"</span><span class="s">spec.template.spec.containers[0].image"</span>
+<span class="nn">---</span>
+<span class="na">apiVersion</span><span class="pi">:</span> <span class="s">tekton.dev/v1alpha1</span>
+<span class="na">kind</span><span class="pi">:</span> <span class="s">PipelineRun</span>
+<span class="na">metadata</span><span class="pi">:</span>
+  <span class="na">name</span><span class="pi">:</span> <span class="s">demo-pipeline-run-1</span>
+<span class="na">spec</span><span class="pi">:</span>
+  <span class="na">pipelineRef</span><span class="pi">:</span>
+    <span class="na">name</span><span class="pi">:</span> <span class="s">demo-pipeline</span>
+  <span class="na">trigger</span><span class="pi">:</span>
+    <span class="na">type</span><span class="pi">:</span> <span class="s">manual</span>
+  <span class="na">serviceAccount</span><span class="pi">:</span> <span class="s1">'</span><span class="s">default'</span>
+  <span class="na">resources</span><span class="pi">:</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">source-repo</span>
+    <span class="na">resourceRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-git</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">web-image</span>
+    <span class="na">resourceRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-image-leeroy-web</span>
+  <span class="pi">-</span> <span class="na">name</span><span class="pi">:</span> <span class="s">app-image</span>
+    <span class="na">resourceRef</span><span class="pi">:</span>
+      <span class="na">name</span><span class="pi">:</span> <span class="s">skaffold-image-leeroy-app</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="总结">总结</h2>
+
+<p>通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.</p>
+
+<p><img src="/img/in-post/tektoncd/1543218293905992.jpg" alt="image" /></p>
+
+<p><code class="highlighter-rouge">serviceaccount</code>+<code class="highlighter-rouge">secret</code>配置SSH/auth实现对git仓库进行连接的,建议<code class="highlighter-rouge">Jenkins-X</code>好好学学.目前<code class="highlighter-rouge">Jenkins-X</code>还是无法在pipeline中定义<code class="highlighter-rouge">resource</code>,雪花配置荼毒不浅.</p>
+:ET

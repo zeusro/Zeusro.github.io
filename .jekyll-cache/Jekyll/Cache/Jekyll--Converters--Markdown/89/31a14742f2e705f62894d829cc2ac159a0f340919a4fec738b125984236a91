@@ -1,0 +1,38 @@
+I"�<ol>
+  <li><a href="#前期准备">前期准备</a>
+    <ul>
+      <li>定义实体</li>
+      <li>定义集合</li>
+    </ul>
+  </li>
+  <li><a href="#单集合">单集合</a>
+    <ol>
+      <li><a href="#分类筛选">分类筛选</a>
+        <ul>
+          <li>计数(Count)</li>
+          <li>分组(GroupBy)</li>
+          <li>匹配的第一项(findFirst/First,FirstOrDefault)</li>
+          <li>遍历(ForEach)</li>
+          <li>极值Max/Min</li>
+          <li>跳过(skip/Skip),截取(limit/Take)</li>
+        </ul>
+      </li>
+      <li><a href="#排序">排序</a>
+        <ul>
+          <li>去重复(Distinct)</li>
+          <li>升序(sort/OrderBy)</li>
+          <li>降序(sort/OrderByDescending)</li>
+        </ul>
+      </li>
+    </ol>
+  </li>
+  <li><a href="#多集合">多集合</a>
+    <ul>
+      <li>交集 list1 ∩ list2</li>
+      <li>并集list1 ∪ list2</li>
+      <li>差集list1 - list2</li>
+    </ul>
+  </li>
+  <li><a href="#数据结构转换">数据结构转换</a></li>
+</ol>
+:ET

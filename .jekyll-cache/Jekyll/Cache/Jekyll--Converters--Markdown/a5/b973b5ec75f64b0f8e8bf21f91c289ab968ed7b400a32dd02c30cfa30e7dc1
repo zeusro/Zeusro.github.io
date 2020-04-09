@@ -1,0 +1,245 @@
+I"5<h2 id="听云server">听云Server</h2>
+
+<p>实施方式:服务器安装</p>
+
+<p>价格:2万一个探针/年,10个起15000一年.按应用收费,比如 gz.17zwd.com用负载均衡挂到10台服务器上面,需要安装10个探针,但是计费的话是算一个.</p>
+
+<p>https://saas.tingyun.com/web/product/price/2</p>
+
+<p>备注:探针是按照应用的,也就是说如果我有一台服务器上面,跑了 Tomcat 和 IIS, 算2个应用,也就是需要支付2个探针的钱</p>
+
+<p>试用体验:单就 Windows server 来说,整体体验还是挺满意的.有些功能(数据库,后台任务,线程剖析)由于数据空白,就没有体验到.</p>
+
+<h3 id="iis探针运行概况">IIS探针运行概况</h3>
+
+<p>网站响应, apdex 指标,吞吐率,应用 CPU 使用率,应用内存使用量</p>
+
+<p><img src="/img/tingyun/image1.png" alt="" /></p>
+
+<h4 id="事务">事务</h4>
+
+<p><img src="/img/tingyun/image2.png" alt="" /></p>
+
+<h4 id="errortrace分析">ErrorTrace分析</h4>
+
+<p><img src="/img/tingyun/image3.png" alt="" /></p>
+
+<p>它将 IIS 内部的错误提取了出来,这点做的不错</p>
+
+<h4 id="外部应用">外部应用</h4>
+
+<p><img src="/img/tingyun/image4.png" alt="" /></p>
+
+<p>外部应用会分析网站对外的请求.从网页上面看,支持 http,dubbo,web service,grpc 等,实测 HTTP 是监察新款提交页面引用的外部 http 资源.比如新款提交页面在头尾那部分我用了几个外部接口.这些接口它们探针都能检测到,然后显示在网页上面.</p>
+
+<p><img src="/img/tingyun/image5.png" alt="" /></p>
+
+<p>对于这些外部的请求,它提供观测的指标有平均响应时间,响应总时间,吞吐率,错误率等.</p>
+
+<h2 id="听云app">听云App</h2>
+
+<p>实施方式:app 接入他们的 SDK, 然后在线查看.</p>
+
+<p>价格:App按月活卖，0.05分/月活.1台设备算做一个活跃量</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:</p>
+
+<p>试用体验:</p>
+
+<h2 id="听云browser">听云Browser</h2>
+
+<p>实施方式:网页接入 script 脚本</p>
+
+<p>价格:100万PV6万元</p>
+
+<p>1页面算1PV</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:</p>
+
+<p>试用体验:</p>
+
+<h3 id="概览">概览</h3>
+
+<p><img src="/img/tingyun/browser1.png" alt="" /></p>
+
+<h3 id="情报汇总">情报汇总</h3>
+
+<p><img src="/img/tingyun/browser2.png" alt="" /></p>
+
+<p><img src="/img/tingyun/browser3.png" alt="" /></p>
+
+<p><img src="/img/tingyun/browser4.png" alt="" /></p>
+
+<p>主要是统计用户来源信息</p>
+
+<h3 id="页面分析">页面分析</h3>
+
+<p><img src="/img/tingyun/browser5.png" alt="" /></p>
+
+<p><img src="/img/tingyun/browser6.png" alt="" /></p>
+
+<p>主要是观测页面的加载速度,用于分析慢页面</p>
+
+<h3 id="地域">地域</h3>
+
+<p><img src="/img/tingyun/browser7.png" alt="" /></p>
+
+<p>主要是分析各个省份用户的页面加载速率</p>
+
+<h3 id="运营商">运营商</h3>
+
+<p><img src="/img/tingyun/browser8.png" alt="" /></p>
+
+<p>统计不同省份,不同城市,不同运营商用户加载页面需要的耗时</p>
+
+<h3 id="浏览器">浏览器</h3>
+
+<p><img src="/img/tingyun/browser9.png" alt="" /></p>
+
+<p>统计不同用户使用不同浏览器需要的耗时</p>
+
+<h3 id="ajax-请求">ajax 请求</h3>
+
+<p><img src="/img/tingyun/browser10-ajax.png" alt="" /></p>
+
+<p>统计网站自身 ajax 需要的耗时</p>
+
+<h3 id="js错误">js错误</h3>
+
+<p><img src="/img/tingyun/browser11-js.png" alt="" /></p>
+
+<p>统计页面 js 本身的错误,这个比较少用</p>
+
+<h2 id="听云sys">听云Sys</h2>
+
+<p>实施方式:在服务器上面安装程序</p>
+
+<p>价格:买 server 的话就会送.</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:</p>
+
+<p>试用体验:</p>
+
+<p>这里我选取了阿里云上面一台资源占用不是很高的Ubuntu 14.04.4 LTS (GNU/Linux 3.13.0-86-generic x86_64)来测试.
+安装和使用很简单,以下是接入平台后获得的数据汇总.</p>
+
+<h3 id="情报汇总-1">情报汇总</h3>
+
+<p><img src="/img/tingyun/sys-1.png" alt="" /></p>
+
+<p>可查看 CPU 使用率,内存使用率,磁盘 IO使用率,网络 IO</p>
+
+<h3 id="磁盘-io">磁盘 IO</h3>
+
+<p><img src="/img/tingyun/sys-2.png" alt="" /></p>
+
+<p>可以看到磁盘使用量, IO 读写使用率</p>
+
+<h3 id="网络">网络</h3>
+
+<p><img src="/img/tingyun/sys-3-network.png" alt="" /></p>
+
+<h3 id="进程">进程</h3>
+
+<p><img src="/img/tingyun/network-4-process.png" alt="" /></p>
+
+<p>加载时间比较长,但加载成功之后,可以看到该系统上面运行的所有进程,不过查看的指标比较少,目前只有 CPU使用率</p>
+
+<h2 id="听云-network">听云 network</h2>
+
+<p>实施方式:在他们网页上面操作,按次数收费</p>
+
+<p>价格:network按点次卖0.2元/点次</p>
+
+<p>5万,30点次</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:</p>
+
+<p>试用体验:</p>
+
+<h2 id="应用告警">应用告警</h2>
+
+<p>实施方式:网页配置</p>
+
+<p>价格:免费,不过要配合 server 使用</p>
+
+<p>实施效果:</p>
+
+<p>潜在的负面影响:</p>
+
+<p>备注:</p>
+
+<p>试用体验:</p>
+
+<p>支持server, browser,sys 报警</p>
+
+<p>支持邮件,短信(需要自己接入接口),微信,QQ通知,多人通知,密信通知</p>
+
+<p>举例:设置了每半个小时监测一次,告警方式设置为电话通知殿冕,🐔哥,00:00~04:00网站发生故障,那么他们2人会收到8次语音电话通知.</p>
+
+<h3 id="server">server</h3>
+
+<p><img src="/img/tingyun/server1.png" alt="" /></p>
+
+<p>告警指标,server 里面目前有3种监控类型,每一种类型选择的指标都有所不同</p>
+
+<p><img src="/img/tingyun/server2.png" alt="" /></p>
+
+<h3 id="browser">browser</h3>
+
+<p>监控类型有</p>
+
+<p><img src="/img/tingyun/alarm1.png" alt="" /></p>
+
+<p>不同监控类型对应不同的指标</p>
+
+<p>比如</p>
+<ol>
+  <li>检测页面加载事件,在页面加载时间超过多少秒时</li>
+  <li>检测 ajax 请求,耗时过多时报警</li>
+  <li>特定页面加载超时时报警</li>
+</ol>
+
+<h3 id="sys">sys</h3>
+
+<p><img src="/img/tingyun/alarm2.png" alt="" /></p>
+
+<p>主要是硬件资源占用过高时可以报警.</p>
+
+<p>比如设置 cpu 占用超过80%,持续5分钟以上时,触发报警</p>
+
+<h2 id="售后">售后</h2>
+
+<p>在线客服响应及时</p>
+
+<p>如果付费开通服务,会有专门对接的售后人员</p>
+
+<p>广州售后人员电话:138 0243 **</p>
+
+<h2 id="总结">总结</h2>
+
+<ol>
+  <li>新三板上市公司,成功客户案例比较多,但是价格很贵.</li>
+  <li>听云 network 需要明天才能体验,总体而言,听云 server 这一产品完成度比较高</li>
+</ol>
+
+<h2 id="建议">建议</h2>
+
+<p>重要的网站可以先行小范围试用.</p>
+:ET

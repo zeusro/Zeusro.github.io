@@ -1,0 +1,83 @@
+I"�<h2 id="前期准备">前期准备</h2>
+
+<ol>
+  <li>twrp-3.2.1-0-universal-codeworkx-cheeseburger.img</li>
+  <li>Aurora_O_A5000_1111_Stable_9.0.6_V41.0.zip</li>
+</ol>
+
+<h2 id="安装-window驱动">安装 window驱动</h2>
+
+<p>这一步可能需要禁用驱动程序签名认证</p>
+
+<h2 id="解锁">解锁</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>adb reboot bootloader
+fastboot oem unlock
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="刷twrp">刷TWRP</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+</pre></td><td class="rouge-code"><pre>adb reboot bootloader
+fastboot devices
+fastboot flash recovery D:<span class="se">\t</span>wrp-3.2.1-0-universal-codeworkx-cheeseburger.img
+<span class="c"># 启动 twrp,黑屏说明twrp有问题，要重新刷别的版本</span>
+fastboot boot D:<span class="se">\t</span>wrp-3.2.1-0-universal-codeworkx-cheeseburger.img
+<span class="c"># 进入twrp 清理文件</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="刷机">刷机</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>adb push G:<span class="se">\o</span>neplus3<span class="se">\A</span>urora_OnePlus_A3000_O_0629_OPEN37_V59.0.zip /sdcard/
+<span class="c"># 这一步很慢，</span>
+<span class="c"># 6982 KB/s (2361816600 bytes in 330.299s)</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后在twrp 那里选择安装，点击sdcard内的zip包即可</p>
+
+<p><strong>已经前两步已经做了的,可以直接双清,然后刷机</strong></p>
+
+<h2 id="81-升级-90-注意事项">8.1 升级 9.0 注意事项</h2>
+
+<p>不能跨越太大的版本,比如我的手机原本是<a href="https://www.oneplusbbs.com/thread-4240181-1.html">氢5.1.1</a>的升9.0就会失败,要刷入11版的过渡版本</p>
+
+<p>下载地址是
+<a href="http://otafsc.h2os.com/patch/CHN/OnePlus5Hydrogen/OnePlus5Hydrogen_23.Y.14_014_1806141244/OnePlus5Hydrogen_23_OTA_014_all_1806141244_4ad9db4b58.zip">OnePlus5Hydrogen_23_OTA_014_all_1806141244_4ad9db4b58</a></p>
+
+<p>刷完之后重启直接暂停然后关掉,进入recovery模式,这样也许能够跳过解密data分区那个步骤.</p>
+
+<p>解密data分区比较麻烦,要进入系统后输入复杂密码,重启进入 twrp 输入复杂密码才行.</p>
+
+<p>刷入过渡版本的系统后,recovery变成官方的,这时又要在bootloader重新刷</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>fastboot flash recovery D:\twrp-3.2.1-0-universal-codeworkx-cheeseburger.img
+fastboot boot D:\twrp-3.2.1-0-universal-codeworkx-cheeseburger.img
+adb push  d:\Aurora_O_A5000_1111_Stable_9.0.6_V41.0.zip /sdcard/
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后用adb 推送安装包,在twrp里面安装系统,重启.</p>
+
+<h2 id="官方系统刷入google全家桶的办法">官方系统刷入Google全家桶的办法</h2>
+
+<p>偶然在<a href="https://melty.land/blog/lineageos-16">https://melty.land/blog/lineageos-16</a> 这篇文章看到的,有个<a href="https://opengapps.org/">神奇的网站</a>,在那里按照架构选择,下载对应的zip文件,在刷入系统后,<strong>LineageOS 第一次启动前 进入twrp 安装</strong></p>
+
+<h2 id="参考链接">参考链接:</h2>
+<ol>
+  <li><a href="https://forums.oneplus.com/threads/guide-oneplus-3t-how-to-unlock-bootloader-flash-twrp-root-nandroid-efs-backup-and-more.475142/">OnePlus 3T: How to Unlock Bootloader </a></li>
+  <li><a href="http://bbs.zhiyoo.com/thread-12644311-1-1.html">Fastboot与ADB工具使用指南 </a></li>
+  <li><a href="http://oneplusbbs.com/thread-4253107-1.html">一加5 刷机 挂载/vendor 失败 (invalid argument)</a></li>
+</ol>
+:ET

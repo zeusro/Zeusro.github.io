@@ -1,0 +1,557 @@
+I"xR<h2 id="基础设施">基础设施</h2>
+
+<p>centos 7.6 64位</p>
+
+<p>内核版本:5.1.3-1.el7.elrepo.x86_64(手动升级,可免)</p>
+
+<p>kubeadm</p>
+
+<p>kubelet</p>
+
+<p>node*3</p>
+
+<h2 id="初始准备">初始准备</h2>
+
+<h3 id="repo镜像">repo镜像</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>wget <span class="nt">-O</span> /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="升级内核">升级内核</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+</pre></td><td class="rouge-code"><pre>rpm <span class="nt">--import</span> https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm <span class="nt">-Uvh</span> http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+yum <span class="nt">--enablerepo</span><span class="o">=</span>elrepo-kernel <span class="nb">install</span> <span class="nt">-y</span> kernel-ml
+<span class="c"># 改引导</span>
+<span class="c"># awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg</span>
+<span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g'</span> /etc/default/grub
+grub2-mkconfig <span class="nt">-o</span> /boot/grub2/grub.cfg
+reboot
+<span class="nb">uname</span> <span class="nt">-sr</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="系统设置">系统设置</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+</pre></td><td class="rouge-code"><pre><span class="c"># 禁用交换区</span>
+swapoff <span class="nt">-a</span>
+<span class="c"># 关闭防火墙</span>
+systemctl stop firewalld
+systemctl disable firewalld
+setenforce 0
+<span class="c"># 开启forward</span>
+<span class="c"># Docker从1.13版本开始调整了默认的防火墙规则</span>
+<span class="c"># 禁用了iptables filter表中FOWARD链</span>
+<span class="c"># 这样会引起Kubernetes集群中跨Node的Pod无法通信</span>
+iptables <span class="nt">-P</span> FORWARD ACCEPT
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="启用ipvs">启用IPVS</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+</pre></td><td class="rouge-code"><pre><span class="nb">cat</span> <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh"> &gt;  /etc/sysctl.d/k8s.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+</span><span class="no">EOF
+
+</span><span class="c"># https://github.com/easzlab/kubeasz/issues/374</span>
+<span class="c"># 4.18内核将nf_conntrack_ipv4更名为nf_conntrack</span>
+<span class="nb">cat</span> <span class="o">&gt;</span> /etc/sysconfig/modules/ipvs.modules <span class="o">&lt;&lt;</span><span class="no">EOF</span><span class="sh">
+#!/bin/bash
+ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack"
+for kernel_module in </span><span class="se">\$</span><span class="sh">{ipvs_modules}; do
+    /sbin/modinfo -F filename </span><span class="se">\$</span><span class="sh">{kernel_module} &gt; /dev/null 2&gt;&amp;1
+    if [ </span><span class="nv">$?</span><span class="sh"> -eq 0 ]; then
+        /sbin/modprobe </span><span class="se">\$</span><span class="sh">{kernel_module}
+    fi
+done
+</span><span class="no">EOF
+
+</span><span class="nb">chmod </span>755 /etc/sysconfig/modules/ipvs.modules <span class="o">&amp;&amp;</span> bash /etc/sysconfig/modules/ipvs.modules 
+lsmod | <span class="nb">grep </span>ip_vs
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="装18062的docker">装18.06.2的docker</h3>
+
+<p>按照<a href="https://github.com/kubernetes/kops/blob/master/nodeup/pkg/model/docker.go#L57-L485">kubernetes源代码</a>安装特定docker版本</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+</pre></td><td class="rouge-code"><pre><span class="c"># http://mirror.azure.cn/docker-ce/linux/centos/7/x86_64/stable/</span>
+<span class="nb">sudo tee</span> /etc/yum.repos.d/docker.repo <span class="o">&lt;&lt;-</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+[dockerrepo]
+name=Docker Repository
+baseurl=http://mirror.azure.cn/docker-ce/linux/centos/7/x86_64/stable/
+enabled=1 
+gpgcheck=1
+gpgkey=http://mirror.azure.cn/docker-ce/linux/centos/gpg
+</span><span class="no">EOF
+
+</span>yum <span class="nb">install</span> <span class="nt">-y</span> docker-ce-18.06.2.ce-3.el7.x86_64
+
+<span class="c"># 配置docker加速</span>
+<span class="nb">sudo mkdir</span> <span class="nt">-p</span> /etc/docker
+<span class="nb">sudo tee</span> /etc/docker/daemon.json <span class="o">&lt;&lt;-</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+{
+  "exec-opts": ["native.cgroupdriver=systemd"],
+  "registry-mirrors": ["https://vhc6pxhv.mirror.aliyuncs.com"]
+}
+</span><span class="no">EOF
+
+</span><span class="nb">sudo </span>systemctl start docker
+systemctl <span class="nb">enable </span>docker.service
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="安装其他依赖">安装其他依赖</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>yum <span class="nt">-y</span> <span class="nb">install </span>yum nfs-utils wget nano yum-utils device-mapper-persistent-data lvm2 git docker-compose ipvsadm net-tools telnet
+yum update <span class="nt">-y</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="install-kubeadm">install-kubeadm</h3>
+
+<p>配置k8s的镜像</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+</pre></td><td class="rouge-code"><pre><span class="nb">sudo tee</span> /etc/yum.repos.d/kubernetes.repo <span class="o">&lt;&lt;-</span><span class="sh">'</span><span class="no">EOF</span><span class="sh">'
+[kubernetes]
+name=Kubernetes
+baseurl=https://mirrors.aliyun.com/kubernetes/yum/repos/kubernetes-el7-x86_64/
+enabled=1
+gpgcheck=1
+repo_gpgcheck=1
+gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
+</span><span class="no">EOF
+
+</span><span class="nb">sed</span> <span class="nt">-i</span> <span class="s1">'s/^SELINUX=enforcing$/SELINUX=permissive/'</span> /etc/selinux/config
+yum <span class="nb">install</span> <span class="nt">-y</span>  kubeadm kubectl <span class="nt">--disableexcludes</span><span class="o">=</span>kubernetes
+
+systemctl <span class="nb">enable </span>kubelet
+<span class="c"># &amp;&amp; systemctl start kubelet</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="安装集群">安装集群</h2>
+
+<p>接下来要根据实际情况选择单master还是奇数台master了</p>
+
+<p>kubeadm的默认配置文件”藏”在<code class="highlighter-rouge">kubeadm config print init-defaults</code>和<code class="highlighter-rouge">kubeadm config print join-defaults</code>中,这里要根据中国特色社会主义的实际情况进行修改.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>kubeadm config print join-defaults --component-configs KubeProxyConfiguration //JoinConfiguration KubeProxyConfiguration
+kubeadm config print join-defaults --component-configs KubeletConfiguration // JoinConfiguration KubeletConfiguration
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>一般来说<code class="highlighter-rouge">serviceSubnet</code>范围要比<code class="highlighter-rouge">podSubnet</code>小</p>
+
+<p><code class="highlighter-rouge">podSubnet: 10.66.0.0/16</code>注定了最多只能有65534个pod,serviceSubnet同理.</p>
+
+<h3 id="高可用型生产用">高可用型(生产用)</h3>
+
+<p>高可用性的特点在于N个etcd,kube-apiserver,kube-scheduler,kube-controller-manager,以组件的冗余作为高可用的基础.</p>
+
+<p>api-server以负载均衡作为对外的入口.</p>
+
+<p><a href="https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/">设置master</a></p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+</pre></td><td class="rouge-code"><pre># https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta1#ClusterConfiguration
+
+
+
+export HOST0=172.18.221.35
+export HOST1=172.18.243.72
+export HOST2=172.18.243.77
+mkdir -p ${HOST0}/ ${HOST1}/ ${HOST2}/
+ETCDHOSTS=(${HOST0} ${HOST1} ${HOST2})
+NAMES=("infra0" "infra1" "infra2")
+
+
+for i in "${!ETCDHOSTS[@]}"; do
+HOST=${ETCDHOSTS[$i]}
+NAME=${NAMES[$i]}
+cat &lt;&lt; EOF &gt; ${HOST}/kubeadm-config.yaml
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+---
+apiVersion: "kubeadm.k8s.io/v1beta1"
+kind: ClusterConfiguration
+# kubernetesVersion: stable
+kubernetesVersion: v1.14.2
+imageRepository: gcr.azk8s.cn/google_containers
+# 这里配置了一个阿里云内网负载均衡作为入口,如果没有的话请自行忽略
+# controlPlaneEndpoint: "172.18.221.7:6443"
+networking:
+# 规划pod CIDR
+  podSubnet: 10.66.0.0/16
+  serviceSubnet: 10.88.0.0/16
+etcd:
+    local:
+        serverCertSANs:
+        - "${HOST}"
+        peerCertSANs:
+        - "${HOST}"
+        extraArgs:
+            initial-cluster: ${NAMES[0]}=https://${ETCDHOSTS[0]}:2380,${NAMES[1]}=https://${ETCDHOSTS[1]}:2380,${NAMES[2]}=https://${ETCDHOSTS[2]}:2380
+            initial-cluster-state: new
+            name: ${NAME}
+            listen-peer-urls: https://${HOST}:2380
+            listen-client-urls: https://${HOST}:2379
+            advertise-client-urls: https://${HOST}:2379
+            initial-advertise-peer-urls: https://${HOST}:2380
+EOF
+done
+
+
+
+
+
+kubeadm config images pull --config=kubeadm-config.yaml
+sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
+
+sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs --ignore-preflight-errors=all
+
+# todo:
+kubeadm join 172.18.221.35:6443 --token l0ei3n.rqqqseno29oo564z \
+    --discovery-token-ca-cert-hash sha256:9752be9ff3b619f5b6baadc98ed184e3e1dc2ff02b080aea2457b8f89496de2f
+    
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="单master型实验用">单master型(实验用)</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+</pre></td><td class="rouge-code"><pre>sudo tee kubeadm-config.yaml &lt;&lt;-'EOF'
+apiVersion: kubelet.config.k8s.io/v1beta1
+kind: KubeletConfiguration
+cgroupDriver: systemd
+---
+apiVersion: kubeproxy.config.k8s.io/v1alpha1
+kind: KubeProxyConfiguration
+mode: ipvs
+---
+apiVersion: kubeadm.k8s.io/v1beta1
+kind: ClusterConfiguration
+# kubernetesVersion: stable
+kubernetesVersion: v1.14.2
+# 这里配置了一个阿里云内网负载均衡作为入口,如果没有的话请自行忽略
+# controlPlaneEndpoint: "172.18.221.7:6443"
+imageRepository: gcr.azk8s.cn/google_containers
+networking:
+# 规划pod CIDR
+  podSubnet: 10.66.0.0/16
+  serviceSubnet: 10.88.0.0/16
+EOF
+
+kubeadm config images pull --config=kubeadm-config.yaml
+sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="配置kubelet客户端">配置kubelet客户端</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+</pre></td><td class="rouge-code"><pre>  <span class="nb">mkdir</span> <span class="nt">-p</span> <span class="nv">$HOME</span>/.kube
+  <span class="nb">sudo cp</span> <span class="nt">-i</span> /etc/kubernetes/admin.conf <span class="nv">$HOME</span>/.kube/config
+  <span class="nb">sudo chown</span> <span class="si">$(</span><span class="nb">id</span> <span class="nt">-u</span><span class="si">)</span>:<span class="si">$(</span><span class="nb">id</span> <span class="nt">-g</span><span class="si">)</span> <span class="nv">$HOME</span>/.kube/config
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="配置网络插件"><a href="https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network">配置网络插件</a></h3>
+
+<p>这里我选择<code class="highlighter-rouge">quay.io/coreos/flannel:v0.11.0-amd64</code>,因为架构比较齐全</p>
+
+<h3 id="引入其他master节点高可用版">引入其他master节点(高可用版)</h3>
+
+<p>在<code class="highlighter-rouge">kubeadm init</code>的输出中,有一行是</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>[upload-certs] Using certificate key: 05ae8e3c139a960c6e4e01aebf26869ce5f9abd9fa5cf4ce347e8308b9c276f9
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>复制起来,在别的master上面运行命令</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+5
+</pre></td><td class="rouge-code"><pre>kubeadm join 172.18.221.35:6443 \
+--token 29ciq3.5mtkr4nzc11mlzd6 \
+--discovery-token-ca-cert-hash sha256:03b46745a1f3887417270e33fc9b3fb5ddd82599f0d0ec789ed4edf2c310faae \
+--experimental-control-plane \
+--certificate-key 05ae8e3c139a960c6e4e01aebf26869ce5f9abd9fa5cf4ce347e8308b9c276f9
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="工作节点加入集群">工作节点加入集群</h2>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>kubeadm <span class="nb">join </span>172.18.221.35:6443 <span class="nt">--token</span> c63abt.45sn8bhyxxo2lh0r <span class="se">\</span>
+    <span class="nt">--discovery-token-ca-cert-hash</span> sha256:891e41e798c29f7235078479ca3e0622594c91db08160bea620f60fffcd558f5
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="收尾工作">收尾工作</h2>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>  ipvsadm -l
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="其他参考">其他参考</h2>
+
+<h3 id="kubelet-check-initial-timeout-of-40s-passed">[kubelet-check] Initial timeout of 40s passed.</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>systemctl status kubelet
+journalctl -xeu kubelet
+</pre></td></tr></tbody></table></code></pre></div></div>
+<p>通过以上任意一个命令看到,kubernetes服务虽然启动中,但是提示节点找不到.</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>May 20 14:55:22 xxx kubelet[3457]: E0520 14:55:22.095536    3457 kubelet.go:2244] node "xxx" not found
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<p>最后发现是一开始指定了负载均衡,负载均衡连接不上导致超时</p>
+
+<p>–ignore-preflight-errors=all</p>
+
+<h3 id="修改driver之后的注意事项">修改driver之后的注意事项</h3>
+
+<p>如果docker是之前安装的,改一下配置然后重启服务即可</p>
+
+<p>改成systemd要在kubelet的服务上要加多一个参数,不然服务无法启动</p>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre>vi /etc/docker/daemon.json
+<span class="o">{</span>
+  <span class="s2">"exec-opts"</span>: <span class="o">[</span><span class="s2">"native.cgroupdriver=systemd"</span><span class="o">]</span>
+<span class="o">}</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+3
+4
+</pre></td><td class="rouge-code"><pre># Restart docker.
+systemctl daemon-reload
+systemctl restart docker
+systemctl restart kubelet
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="master参与调度">master参与调度</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre><span class="c"># 去掉master污点,让其参与调度</span>
+kubectl taint <span class="nv">$node</span> <span class="nt">--all</span> node-role.kubernetes.io/master-
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="重置">重置</h3>
+
+<div class="language-bash highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+2
+</pre></td><td class="rouge-code"><pre>kubeadm reset
+ipvsadm <span class="nt">--clear</span>
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h3 id="重新计算discovery-token-ca-cert-hash">重新计算discovery-token-ca-cert-hash</h3>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code><table class="rouge-table"><tbody><tr><td class="rouge-gutter gl"><pre class="lineno">1
+</pre></td><td class="rouge-code"><pre>openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2&gt;/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+</pre></td></tr></tbody></table></code></pre></div></div>
+
+<h2 id="todo">todo</h2>
+
+<p>https://github.com/kubernetes/kubeadm/issues/1331</p>
+
+<p><a href="https://kubernetes.io/docs/tasks/tls/certificate-rotation/">证书轮换</a></p>
+
+<p><a href="https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/">setup-ha-etcd-with-kubeadm</a></p>
+
+<h2 id="参考链接">参考链接</h2>
+
+<ol>
+  <li><a href="https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/">Overview of kubeadm</a></li>
+  <li><a href="https://opsx.alibaba.com/mirror/search?q=kubelet&amp;lang=zh-CN">阿里云镜像仓库</a></li>
+  <li><a href="https://kubernetes.io/docs/setup/independent/install-kubeadm/">官方安装指南</a></li>
+  <li><a href="http://bazingafeng.com/2017/11/20/using-kubeadm-install-kubernetes/">使用kubeadm安装kubernetes</a></li>
+  <li><a href="http://www.maogx.win/posts/15/">centos7安装kubeadm</a></li>
+  <li><a href="http://www.maogx.win/posts/33/">centos7使用kubeadm安装k8s-1.11版本多主高可用</a></li>
+  <li><a href="http://www.maogx.win/posts/16/">centos7使用kubeadm安装k8s集群</a></li>
+  <li><a href="https://juejin.im/post/5bbf7dd05188255c652d62fe">kubernetes集群的安装异常汇总</a></li>
+  <li><a href="https://k8smeetup.github.io/docs/admin/kubeadm/">kubeadm 设置工具参考指南</a></li>
+  <li><a href="https://github.com/kubernetes/kubernetes/tree/master/pkg/proxy/ipvs">ipvs</a></li>
+</ol>
+
+:ET
