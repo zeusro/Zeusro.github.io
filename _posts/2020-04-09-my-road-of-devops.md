@@ -11,14 +11,7 @@ multilingual: true
 published:    true
 tags:
     -  DevOps
-excerpt_separator: <!--more-->
 ---  
-
-溯洄从之，道阻且长。溯游从之，宛在水中央。
-
-<!--more-->
-
-
 
 ![image](/img/road-of-devops/devops-elephant.png)
 
