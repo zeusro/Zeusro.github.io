@@ -4,7 +4,7 @@ title:        "我的DevOps之路"
 subtitle:     "My Road Of DevOps"
 date:         2020-04-09
 author:       "Zeusro"
-header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
 header-mask:  0.3
 catalog:      true
 multilingual: true
