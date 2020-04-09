@@ -1,2 +1,0 @@
-I"0<p><code class="highlighter-rouge">tektoncd</code>是面向<code class="highlighter-rouge">kubernetes</code>的<code class="highlighter-rouge">pipeline</code>型CI/CD(kubectl apply)系统,自定义<code class="highlighter-rouge">kaniko</code>构建<code class="highlighter-rouge">docker</code>镜像</p>
-:ET

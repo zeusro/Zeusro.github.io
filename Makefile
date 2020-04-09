@@ -37,3 +37,9 @@ new:
 
 up:
 	docker-compose up --force-recreate --build
+
+clean:
+	git rm -r --cached .
+	git add .
+	git commit -am "auto clean"
+	git push
