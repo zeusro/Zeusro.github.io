@@ -8,7 +8,7 @@ header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
 catalog:      true
 multilingual: true
-published:    false
+published:    true
 tags:
     -  DevOps
 excerpt_separator: <!--more-->
