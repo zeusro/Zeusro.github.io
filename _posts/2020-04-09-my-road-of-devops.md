@@ -7,11 +7,7 @@ author:       "Zeusro"
 header-img:   "img/road-of-devops/devops-elephant.png" 
 header-mask:  0.3
 catalog:      true
-<<<<<<< HEAD
-multilingual: true
-=======
 multilingual: false
->>>>>>> b99cad1a7ad4f3b8cd98be482075cb595d60a675
 published:    true
 tags:
     -  DevOps
