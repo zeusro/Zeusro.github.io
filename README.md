@@ -1,7 +1,7 @@
 ## 新建博文
 
-  make new post=test
-  make new post=test today=2018-03-28
+  make new post=ss
+  make new post=ss today=2018-03-28
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
 
