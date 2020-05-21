@@ -13,9 +13,11 @@ title:        ""
 subtitle:     ""
 date:         
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
+# 目录
 catalog:      true
+# 多语言
 multilingual: true
 published:    true
 tags:
