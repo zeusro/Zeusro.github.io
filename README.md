@@ -1,7 +1,7 @@
 ## 新建博文
 
-  make new post=test
-  make new post=test today=2018-03-28
+  make new post=ss
+  make new post=ss today=2018-03-28
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
 
@@ -13,14 +13,16 @@ title:        ""
 subtitle:     ""
 date:         
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
 header-mask:  0.3
+# 目录
 catalog:      true
+# 多语言
 multilingual: true
 published:    true
 tags:
     -  
----  
+---
 
 ```
 
