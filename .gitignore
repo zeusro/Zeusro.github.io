@@ -1,9 +1,12 @@
 _site
 node_modules
 npm-debug.log
+
+# MAC
 .DS_Store
 */.DS_Store
 */*/.DS_Store
-*.sh
 
+*.sh
+.jekyll-cache/
 .gradle/
