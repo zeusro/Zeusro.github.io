@@ -28,7 +28,7 @@ tags:
 
 当时我们的系统已经有一部分运行在阿里云的 docker swarm 上面，但我看了一下 release note ，觉得那玩意肯定是弃子。于是，在三个月左右的时间内，通过看英文版的《kubernetes in action》和参与社群，我从 0 docker 基础的渣渣升级为集团内部**首席云原生步道师**。并升级为社群的管理员。
 
-## 阿里云 Kubernetes 早期产品经理
+## 阿里云`Kubernetes`早期产品经理
 
 此外，我还成为了阿里云 Kubernetes 的早期产品经理。很多产品建议都是我提出来，由他们内部加以评估改进的。
 
@@ -65,6 +65,8 @@ tags:
 1. [让用户灵活选择 K8S master 付费方式](https://connect.console.aliyun.com/connect/detail/43655)
 1. [容器服务-健康检查形同鸡肋](https://connect.console.aliyun.com/connect/detail/40484)
 1. [容器服务-改进日志服务](https://connect.console.aliyun.com/connect/detail/40792)
+
+2018-05-13 至今，围绕容器领域，陆陆续续提了几十个建议。虽然有一部分没被采纳，但我觉得我应该担得起“**阿里云Kubernetes早期产品经理**”这个称号。
 
 最有印象的 BUG 是这个
 [k8s:取消ingress的TLS不生效](https://connect.console.aliyun.com/connect/detail/48979)
