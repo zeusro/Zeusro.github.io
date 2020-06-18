@@ -11,7 +11,7 @@ multilingual: true
 published:    true
 tags:
     - go
-    - kubernetes
+    - Kubernetes
 ---
 
 

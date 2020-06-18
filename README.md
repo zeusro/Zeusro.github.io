@@ -1,6 +1,6 @@
 ## 新建博文
 
-  make new post=ss
+  make new post=death-of-devops-engineer
   make new post=ss today=2018-03-28
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
@@ -18,7 +18,7 @@ header-mask:  0.3
 # 目录
 catalog:      true
 # 多语言
-multilingual: true
+multilingual: false
 published:    true
 tags:
     -  
