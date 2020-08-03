@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "容器内部请求Kubernetes api-server"
+title:        "多种方式请求Kubernetes api-server"
 subtitle:     ""
 date:         2019-04-19
 author:       "Zeusro"
@@ -13,22 +13,19 @@ tags:
 
 
 
-连接api-server分3种情况
+连接api-server一般分3种情况：
 
-1. 通过kubectl proxy中转连接
+1. Kubernetes Node通过kubectl proxy中转连接
 2. 通过授权验证,直接连接(kubectl和各种client就是这种情况)
-    `kubectl`加载`~/.kube/config`作为授权信息,请求远端的`api-server`的resetful
-    API.`api-server`根据你提交的授权信息判断有没有权限,有权限的话就将对应的结果返回给你.
+  - `kubectl`加载`~/.kube/config`作为授权信息,请求远端的`api-server`的resetful API.`api-server`根据你提交的授权信息判断有没有权限,有权限的话就将对应的结果返回给你。
 3. 容器内部通过`ServiceAccount`连接
 
-今天来介绍容器内部连接`api-server`的办法.
 
-## 一个简单的例子
+## 容器请求api-server
 
 ![img](https://d33wubrfki0l68.cloudfront.net/673dbafd771491a080c02c6de3fdd41b09623c90/50100/images/docs/admin/access-control-overview.svg)
 
 `Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.tech/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
-
 
 为了方便起见,我直接使用`kube-system`的`admin`作为例子.
 
@@ -97,7 +94,6 @@ subjects:
     metadata.spec.template.spec.serviceAccount: admin
 
 
-## 容器请求api-server的细节
 
 ### deploy声明sa(`ServiceAccount`)的本质
 
@@ -105,7 +101,7 @@ subjects:
 
 不声明sa,则把`default`作为sa挂载进去
 
-```
+```bash
 # k edit secret admin-token-wggwk
 # 用edit加载的secret内容都会以base64形式表示
 # base64(kube-system):a3ViZS1zeXN0ZW0=
@@ -128,7 +124,7 @@ type: kubernetes.io/service-account-token
 所以deploy衍生的每一个pod里面的容器,
 `/var/run/secrets/kubernetes.io/serviceaccount`目录下面都会有这3个文件
 
-```
+```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -l
 total 0
 lrwxrwxrwx    1 root     root            13 Apr 19 06:46 ca.crt -> ..data/ca.crt
@@ -137,7 +133,8 @@ lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
 虽然这3个文件都是软链接而且最终指向了下面那个带日期的文件夹,但是我们不用管它.
-```
+
+```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -a -l
 total 4
 drwxrwxrwt    3 root     root           140 Apr 19 06:46 .
@@ -149,13 +146,13 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-## 请求api-server
+## curl请求api-server
 
 集群就绪之后,在`default`这个命名空间下会有`kubernetes`这个svc,容器透过ca.crt作为证书去请求即可.跨ns的访问方式为`https://kubernetes.default.svc:443`
 
 ### 前期准备
 
-```
+```bash
 kubectl exec -it $po sh -n kube-system
 cd /var/run/secrets/kubernetes.io/serviceaccount
 TOKEN=$(cat token)
@@ -253,9 +250,9 @@ curl \
 完整API见[kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)
 
 
-## 后记(使用JavaScript客户端访问 api service)
+## 使用JavaScript客户端访问 api-server
 
-最近(2019-08-23)在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
+2019-08-23，我在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
 
 ```ts
 
@@ -377,8 +374,6 @@ import { Cluster } from '@kubernetes/client-node/dist/config_types';
       this.kubeConfig.makeApiClient(k8s.Custom_objectsApi);
 ```
 
-
 ## 参考链接
 1. [Access Clusters Using the Kubernetes API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
 2. [cURLing the Kubernetes API server](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)
-

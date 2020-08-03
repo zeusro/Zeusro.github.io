@@ -19,7 +19,6 @@ ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,�
 
 ### 创建
 
-
 ```
 POST /a/_doc/2
 {"content":"公安部：各地校车将享最高路权"}
@@ -27,7 +26,6 @@ POST /a/_doc/1
 {"content":"男人老狗穿什么连衣裙"}
 
 ```
-
 
 ### 查询
 
@@ -41,8 +39,6 @@ POST /a/_doc/1
 get /a/text/1
 get /a/text/2
 ```
-
-
 
 ### 更新
 
@@ -67,7 +63,6 @@ GET _analyze
 
 ## 分片
 
-
 ```
 PUT test
 {
@@ -82,19 +77,14 @@ PUT test
 }
 GET /kimchy,elasticsearch/_search?q=tag:wow
 GET /_all/_search?q=tag:wow
-
-```
-
-
 GET _cat/indices
-
+```
 
 ## 系统查询
 
 - 健康检查
 
 GET /_cluster/health
-
 
 ## 基于插件的查询
 
@@ -123,10 +113,9 @@ PUT /a
 
 热更新的词语存在内存中,不会更新dic文件
 
-
 ## 分片管理
 
-默认模板设置
+### 默认模板设置
 
 ```
 POST _template/default
@@ -139,16 +128,31 @@ POST _template/default
 }
 ```
 
-- 自定义模板-设置副本数默认为0
+### 自定义模板-设置副本数默认为0
 
-```
+```bash
 curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/json' -d '
 {
-"template" : "*",
+"index_patterns" : "*",
 "settings" : {
 "number_of_replicas" : 0
 }
 }'
+```
+
+### 缩容
+
+```
+put */_settings
+{
+ 
+    "settings" : {
+      "index" : {
+        "number_of_replicas" : "0"
+    }
+  
+}
+}
 ```
 
 ## ingest/pipeline 用法
@@ -206,7 +210,6 @@ PUT _ingest/pipeline/monthlyindex
 
 参考链接：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
 
-
 ## 付费功能(_xpack)
 
 es默认没有密码,需要用户授权功能的话买商业版的许可.
@@ -215,8 +218,6 @@ es默认没有密码,需要用户授权功能的话买商业版的许可.
 
 
 GET /_xpack/security/user
-
-
 
 ## 7.0废弃的查询
 
@@ -239,8 +240,6 @@ Deprecation: Deprecated field [inline] used, expected [source] instead
 			},
 ```
 inline
-
-
 
 ## 参考链接:
 
