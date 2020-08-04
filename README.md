@@ -1,7 +1,7 @@
 ## 新建博文
 
-  make new post=death-of-devops-engineer
-  make new post=ss today=2018-03-28
+  make new post=oci-v2
+  make new post=oci-v2 date=2020-08-03
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
 
@@ -52,6 +52,7 @@ tags:
 ## 本地预览
 
 ```bash
+# npm install grunt -g
 # 编译less
 grunt less  
 npm run watch
@@ -60,7 +61,6 @@ npm run watch
 ## 第一次使用
 
 ```bash
-npm install grunt -g
 sudo gem uninstall --all
 # 安装Ruby
 sudo gem install github-pages bundler jekyll
@@ -73,6 +73,7 @@ sudo gem install github-pages bundler jekyll
 两个大括号用来引入 [jekyll](http://jekyllcn.com/) 的对象,其他语境需要使用,需要使用raw标记,这是liquid的语法.
 
 ```
+
 {% raw %}
   In Handlebars, {{ this }} will be HTML-escaped, but
   {{{ that }}} will not.
