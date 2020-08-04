@@ -1,13 +1,13 @@
 now    := $(shell date)
-today  ?=  $(shell date "+%Y-%m-%d")
+date  ?=  $(shell date "+%Y-%m-%d")
 post   ?= ""
 
 define NEW_POST=
---- 
+---
 layout:       post 
 title:        "" 
 subtitle:     "" 
-date:         $(today) 
+date:         $(date) 
 author:       "Zeusro" 
 header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
 header-mask:  0.3 
@@ -15,7 +15,7 @@ catalog:      true
 multilingual: true 
 tags: 
     -  
----  
+---
 
 endef
 
@@ -25,19 +25,25 @@ auto_commit:
 	git commit -am "$(now)"
 	git pull
 	git push
-	
-docker:
-	docker build -t zeusro/blog:1 .
-
-new:
-	cat >> _posts/$(today)-$(post).md<<"$(NEW_POST)"
-
-
-up:
-	docker-compose up --force-recreate --build
 
 clean:
 	git rm -r --cached .
 	git add .
 	git commit -am "auto clean"
 	git push
+
+docker:
+	docker build -t zeusro/blog:1 .
+
+live:
+	# 编译less
+	grunt less  
+	npm run watch
+
+new:
+	cat >> _posts/$(date)-$(post).md<<"$(NEW_POST)"
+
+
+up:
+	docker-compose up --force-recreate --build
+
