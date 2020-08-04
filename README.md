@@ -54,7 +54,7 @@ tags:
 ```bash
 # npm install grunt -g
 # 编译less
-grunt less  
+grunt less
 npm run watch
 ```
 

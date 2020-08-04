@@ -35,11 +35,6 @@ clean:
 docker:
 	docker build -t zeusro/blog:1 .
 
-live:
-	# 编译less
-	grunt less  
-	npm run watch
-
 new:
 	cat >> _posts/$(date)-$(post).md<<"$(NEW_POST)"
 
