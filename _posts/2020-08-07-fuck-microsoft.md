@@ -22,6 +22,16 @@ tags:
 而 `C#` 这门语言，单就语言特性，10年的版本前就比 `Java8` 优秀得多。可惜狮子难敌群狼，也许也是一开始就对搜索引擎不友好，一直命途多舛。
 面世至今18年，在我看来基本是原地踏步。
 
+## 优美的C#语言
+
+C#的泛型是一个很优美的设计。这个设计，直到今天，Java 还是在用类型擦除的方式去实现，至于 golang ，根本就是在纸上谈兵，到现在还没有实现。
+
+C#泛型(MSIL)的内部是怎么实现的? - RednaxelaFX的回答 - 知乎
+https://www.zhihu.com/question/27634924/answer/40854909
+
+CLR天才论文
+https://www.microsoft.com/en-us/research/publication/design-and-implementation-of-generics-for-the-net-common-language-runtime/?from=http%3A%2F%2Fresearch.microsoft.com%2Fpubs%2F64031%2Fdesignandimplementationofgenerics.pdf
+
 ## 喜欢拥抱变化的微软
 
 可能微软比较喜欢拥抱变化吧，每隔几年就喜欢整一套新的技术框架。
