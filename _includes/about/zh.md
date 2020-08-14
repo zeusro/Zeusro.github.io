@@ -7,6 +7,14 @@
 
 2014年到2020年，基本上都在阿米巴集团里面工作。
 
+总结这些年，无非是**千淘万漉虽辛苦，竹篮打水一场空**。
+
+不过从自闭到走向开源世界的过程中，认识了不少阿里的大佬，比如默默帮我擦屁股并鼓励我投递阿里岗位的[刘中巍大哥](https://github.com/ringtail)，开发 [溪恒](https://github.com/AliyunContainerService/terway) 的超级网管 [terway](https://github.com/BSWANG) ，教我kubernetes的了哥，跟我五行不合的商务经理宝敏，华南尼姑庵毕业的陈艺丹，著作等身，童心未泯的[宋净超](https://github.com/rootsongjc)，为了给中国挣外汇而不惜旅美的爱国主义 `coding hero` [邓洪超](https://github.com/hongchaodeng)，圆明园职业技术学院的高材生[易立](https://www.linkedin.com/in/li-yi-7427b5/?originalSubdomain=cn)等一众大佬。大家抛开title，就事论（撕）事（逼），不亦乐乎.
+
+当然还有其他有趣的灵魂，比如喜欢给我发黄图的背锅大仙，整天跟我吐槽网络插件的[耐小心](https://github.com/qiqizjl)，运维大佬[狗哥](https://github.com/sunny0826)
+
+有些人走着走着就散了，真应了那句话：**花开花落终有时，缘来缘去缘如水**。
+
 ### 2020
 
 #### 面向调皮编程
@@ -16,6 +24,14 @@
 #### Alibaba Cloud Kubernetes社群联合管理员
 
 2020-07-22，我终于成为钉群的联合运营，可以管理钉群啦。
+
+#### 阿里系开源
+
+
+
+#### 其他
+
+参与了一些开源项目组的讨论（zero code，bullshit everywhere）
 
 1. [我的机器学习之路(1)-kubeflow](https://zhuanlan.zhihu.com/p/78595556)
 1. [云计算时代的CRUD](https://zhuanlan.zhihu.com/p/143005015)
@@ -30,6 +46,14 @@
 #### 阿里云 kubernetes 早期产品经理
 
 具体见[某运维负责人之死](https://developer.aliyun.com/article/765447),单就kubernetes这个产品，累计提了33条建议，累计提了上百条建议。代金券已经续满所有域名10年。
+
+#### 云原生开放大赛
+
+当时为了学习 helm ，顺便摸点纯棉T恤参加了阿里云举办的[云原生开放大赛](https://github.com/cloudnativeapp/charts/pulls?q=is%3Apr+author%3Azeusro+is%3Aclosed)。
+
+当时不知道[hongchaodeng](https://github.com/hongchaodeng)是谁，还以为他是追星的实习生。
+
+最好玩的是这个 https://github.com/cloudnativeapp/charts/pull/33 。
 
 ### 2018
 
