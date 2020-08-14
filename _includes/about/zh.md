@@ -75,6 +75,8 @@
 1. [自建elasticsearch优化](https://www.zeusro.com/2018/12/26/improve-elasticsearch/)
 1. [Java JVM优化](https://www.zeusro.com/2018/06/21/jvm/)
 
+自动化运维工程师是我一直以来的工作，我写了一篇 [总结](http://www.zeusro.com/2020/04/09/my-road-of-devops/) 。
+
 ### 2016~2017
 
 曾经去
