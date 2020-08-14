@@ -27,7 +27,8 @@
 
 #### 阿里系开源
 
-
+1. [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
+1. [kt-connect](https://github.com/zeusro/kt-connect)
 
 #### 其他
 
