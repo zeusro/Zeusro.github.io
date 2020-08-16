@@ -7,11 +7,13 @@
 
 2014年到2020年，基本上都在阿米巴集团里面工作。
 
-总结这些年，无非是**千淘万漉虽辛苦，竹篮打水一场空**。
+总结这些年，不过是 **千淘万漉虽辛苦，竹篮打水一场空** ，故自号骑天大圣挖井空。
 
 不过从自闭到走向开源世界的过程中，认识了不少阿里的大佬，比如默默帮我擦屁股并鼓励我投递阿里岗位的 [刘中巍大哥](https://github.com/ringtail) ，开发 [溪恒](https://github.com/AliyunContainerService/terway) 的超级网管 [terway](https://github.com/BSWANG) ，教我kubernetes的了哥，跟我五行不合的商务经理宝敏，华南尼姑庵毕业的陈艺丹，著作等身，童心未泯的 [宋净超](https://github.com/rootsongjc) ，为了给中国挣外汇而不惜旅美的爱国主义 `coding hero` [邓洪超](https://github.com/hongchaodeng)，圆明园职业技术学院的高材生[易立](https://www.linkedin.com/in/li-yi-7427b5/?originalSubdomain=cn)等一众大佬。大家抛开title，就事论（撕）事（逼），不亦乐乎.
 
 当然还有其他有趣的灵魂，比如喜欢给我发黄图的背锅大仙，整天跟我吐槽网络插件的 [耐小心](https://github.com/qiqizjl) ，运维大佬 [狗哥](https://github.com/sunny0826) 等。
+
+有个叫张全蛋的腾讯云客服经理妹子被质检抓了，这让我觉得有点可惜。
 
 有些人走着走着就散了，真应了那句话：**花开花落终有时，缘来缘去缘如水**。
 
