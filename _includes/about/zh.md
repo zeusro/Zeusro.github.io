@@ -5,7 +5,7 @@
 
 ## 光
 
-2014年到2020年，基本上都在阿米巴集团里面工作。
+2014年到2020年，从最终一致性方向上考虑，基本上都是在汕头市阿米巴集团里面工作。
 
 总结这些年，不过是 **千淘万漉虽辛苦，竹篮打水一场空** ，故自号骑天大圣挖井空。
 
@@ -105,6 +105,7 @@
 ASP.NET MVC 开发工程师
 
 相关工作回顾：
+
 1. [博客园](https://www.cnblogs.com/zeusro/)
 1. [ASB.NET](https://www.cnblogs.com/zeusro/category/678946.html)
 
@@ -155,5 +156,5 @@ https://developer.aliyun.com/profile/tatxblqgajwbu
 博客园
 https://www.cnblogs.com/zeusro/
 
-英文
+英文博客
 https://medium.com/@zeusro
