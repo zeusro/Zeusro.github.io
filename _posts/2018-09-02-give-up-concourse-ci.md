@@ -9,6 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
     - CI
+    - DevOps
     - Java
     - Gradle
     - Maven

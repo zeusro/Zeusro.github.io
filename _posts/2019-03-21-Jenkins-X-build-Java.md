@@ -12,6 +12,7 @@ tags:
     - Jenkins-X
     - pipeline
     - CI
+    - DevOps
     - Java
     - 从入门到放弃
 ---

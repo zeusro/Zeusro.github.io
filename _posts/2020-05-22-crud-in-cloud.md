@@ -10,8 +10,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    -  cloud
-    -  god-theory
+    - cloud native
 ---  
 
 希望大家尽快认识到，云计算时代的CRUD跟传统开发模式的区别。
