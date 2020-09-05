@@ -9,9 +9,10 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Java
-    - CI这
+    - CI
     - Jenkins
-    - docker
+	- docker
+	- DevOps
 ---
 
 ## 前言

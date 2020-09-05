@@ -9,6 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
   - kustomize
+  - DevOps
   - 从入门到放弃
 ---
 

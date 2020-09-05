@@ -10,13 +10,14 @@ catalog:      true
 tags:
     - Jenkins
     - CI
+    - DevOps
 ---
 
 阿里云swam宣布退市了,把上面的 Jenkins 移到 kubernetes 这边.
 
 直接用 taint node + hostpath 了事.
 
-```
+```bash
 node=c
 kubectl taint node $node jenkins-ready=true:NoExecute
 ```
@@ -232,7 +233,7 @@ spec:
 
 翻车了,看了一下日志,说是权限问题
 
-```
+```bash
 touch: cannot touch '/var/jenkins_home/copy_reference_file.log': Permission denied
 Can not write to /var/jenkins_home/copy_reference_file.log. Wrong volume permissions?
 
