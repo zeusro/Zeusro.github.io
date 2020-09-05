@@ -34,28 +34,17 @@ SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_
 
 ### 各种耗时SQL对应的特征
 
-- 改表
-
+1. 改表
 1. Copying to tmp table
-
-- 内存不够用,转成磁盘
-
 1. Copying to tmp table on disk
-
-- 传输数据量大
-
 1. Reading from net
 1. Sending data
-
-- 没有索引
-
-1. Copying to tmp table
+1. 没有索引
 1. Sorting result
 1. Creating sort index
 1. Sorting result
 
-重点关注这些状态,参考[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)进行优化
-
+重点关注这些状态,参考《[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)》进行优化
 
 ## 延后分析
 
@@ -99,13 +88,13 @@ order by  query_time desc,query_time desc;
 
 ## 低效SQL的优化思路
 
-对于每一个查询,先用`explain SQL`分析一遍,是比较明智的做法.
+对于每一个查询,先用 `explain SQL` 分析一遍,是比较明智的做法.
 
 一般而言,rows越少越好,提防Extra:`Using where`这种情况,这种情况一般是扫全表,在数据量大(>10万)的时候考虑增加索引.
 
 ### 慎用子查询
 
-尽力避免嵌套子查询，使用索引来优化它们
+尽力避免嵌套子查询，使用索引来优化它们。
 
 ```SQL
 EXPLAIN SELECT *
@@ -180,7 +169,7 @@ x 这个字段最好带索引,不然就算筛选条件有索引也会很慢
 
 ### order by x
 
-x这字段最好带上索引,不然`show processlist;`里面可能会出现大量`Creating sort index`的结果
+x这字段最好带上索引,不然 `show processlist;` 里面可能会出现大量 `Creating sort index` 的结果
 
 ### 组合索引失效
 
