@@ -124,13 +124,16 @@ mac 系统文件位于 /etc/hosts
 
 进阶方案是写程序用调用web接口动态更新HOST
 
-```
+```host
 # raw.githubusercontent.com 是 GitHub 的静态文件托管域名
 199.232.28.133 raw.githubusercontent.com
 ```
 
 我当时是急着用`raw.githubusercontent.com`上面的代码，所以我改成一个美国的IP，然后通过代理访问上了。
 
+### Chrome浏览器插件
+
+搜索安装 **GitHub加速** 即可，他们用一个中转的国内域名来 clone ，规避了 DNS解析的问题。
 
 ## git 加速
 
