@@ -182,9 +182,10 @@ git config --list --system
 ![img](/img/逃.jpg)
 
 最后多说一句，
-[最近有人还原了s协议客户端的整个攻击过程](https://www.leadroyal.cn/?p=1036)
+[最近有人还原了ss协议客户端的整个攻击过程](https://www.leadroyal.cn/?p=1036)
 
-## 参考链接：
+## 参考链接
+
 1. [修改Hosts临时解决GitHub的raw.githubusercontent.com无法链接的问题](https://www.ioiox.com/archives/62.html)
 1. [解决Github国内访问出现的问题](http://rovo98.coding.me/posts/7e3029b3/)
 1. [如何为 Git 设置代理？](https://segmentfault.com/q/1010000000118837)
