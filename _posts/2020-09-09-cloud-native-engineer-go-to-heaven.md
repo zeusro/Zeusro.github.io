@@ -4,7 +4,7 @@ title:        "云原生开发工程师的五重境界"
 subtitle:     "Cloud Native Engineers go to heaven"
 date:         2020-09-09
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/in-post/cloud-native-engineer-go-to-heaven/Great-Sphinx-Giza-Egypt.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -15,7 +15,6 @@ tags:
     - cloud native
 ---
 
-![image](/img/in-post/cloud-native-engineer-go-to-heaven/Great-Sphinx-Giza-Egypt.jpg)
 
 斯芬克斯是
 [地狱双头犬](http://mp.weixin.qq.com/s?__biz=MzI1ODEyNDg3MA==&mid=2655475426&idx=1&sn=46f0e640feae4c4afac374b3928b691e&chksm=f1bf0bcbc6c882dd4159982119c36e091be1d4cf12cd8d9f29f05bc3e38d378f030347ee80a2&mpshare=1&scene=23&srcid=0909hfH7Peo4PyTVSU8U3yyv&sharer_sharetime=1599615406806&sharer_shareid=9b8919de2238b20229856a42c8974cdc#rd)
@@ -52,6 +51,8 @@ Docker 底层的核心技术包括 Linux 上的命名空间（Namespaces）、�
 1. 《精神病症状学》
 
 到了这个时候，就得看余华写的《活着》。脊椎病的治疗其实很简单，练习 [下腰](https://www.bilibili.com/video/BV197411n7U8) 即可。至于其他疾病，只能靠多运动解决，比如慢跑，游泳，打篮球等。
+
+以前我还在写 `ASP.NET MVC` 的时候，有个网名叫
 
 ## 《六祖坛经》
 
