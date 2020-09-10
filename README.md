@@ -1,6 +1,6 @@
 ## 新建博文
 
-  make new post=cloud-native-engineer-go-to-heaven
+  make new post=teenager-oriented-programming
   make new post=oci-v2 date=2020-08-03
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
