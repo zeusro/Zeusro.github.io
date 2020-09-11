@@ -1,6 +1,6 @@
 ## 新建博文
 
-  make new post=teenager-oriented-programming
+  make new post=date-with-hr
   make new post=oci-v2 date=2020-08-03
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定）
@@ -21,7 +21,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    -  
+    - 
 ---
 
 ```
