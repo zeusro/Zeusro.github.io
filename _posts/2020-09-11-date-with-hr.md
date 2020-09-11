@@ -30,7 +30,7 @@ tags:
 
 ## 谈恋爱（HR面）
 
-- 当你遇到一个记忆力不太好的奶奶
+- 偶尔遇到一个记忆力不太好的姐姐
 
 ![image](/img/in-post/date-with-hr/nainai.png)
 
