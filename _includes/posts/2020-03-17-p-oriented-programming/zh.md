@@ -1,11 +1,11 @@
-![](/img/sticker/p.jpg)
+![image](/img/sticker/p.jpg)
 
 今天是2020-03-17，让我向大家隆重介绍一种划时代的元编程开发技巧：**面向调皮开发**
 
 我们中学课本的好朋友鲁迅，曾经没有这样说过：
 > 非调皮无以明志，非滑稽无以致远
 
-![](/img/sticker/luxun.jpg)
+![image](/img/sticker/luxun.jpg)
 
 21世纪是生物(调皮)的世纪,只有懂得**面向调皮开发**，才能世人皆醉,唯我独醒，才能在滚滚红尘中，迅速被人淘汰。
 
@@ -25,12 +25,12 @@
 
 ## 写代码的正确姿势
 
-![](/img/p-programming/code.jpg)
+![image](/img/p-programming/code.jpg)
 
 风清扬曾经说过：
 > “单以武学而论，这些魔教长老们也不能说真正已窥上乘武学之门。他们不懂得，招数是死的，发招之人却是活的。死招数破得再妙，遇上了活招数，免不了缚手缚脚，只有任人屠戮。这个‘活’字，你要牢牢记住了。学招时要活学，使招时要活使。倘若拘泥不化，便练熟了几千万手绝招，遇上了真正高手，终究还是给人家破得干干净净。
 
-![](/img/p-programming/another.jpg)
+![image](/img/p-programming/another.jpg)
 
 风清扬又道：
 
@@ -40,23 +40,23 @@
 
 记住，对过早优化说不，需要优化就马上跑路。
 
-![](/img/p-programming/thread.png)
+![image](/img/p-programming/thread.png)
 
 ## 搞前端的正确姿势
 
-![](/img/p-programming/jq.jpg)
+![image](/img/p-programming/jq.jpg)
 
 ## 写bug的正确姿势
 
-![](/img/p-programming/hand-over.jpg)
+![image](/img/p-programming/hand-over.jpg)
 
 写出bug不要紧，只要不是你的就行。
 
-如果是你写的代码出问题，那就`hack`同事的电脑，用`git rebase`重写仓库的提交历史，有锅全让别人来背。
+如果是你写的代码出问题，那就 `hack` 同事的电脑，用 `git rebase` 重写仓库的提交历史，有锅全让别人来背。
 
 ## 搞测试的正确姿势
 
-![](/img/p-programming/test.gif)
+![image](/img/p-programming/test.gif)
 
 ## 开源社区的正确姿势
 
@@ -85,7 +85,7 @@
 
 如果有人质疑你，你就发这张图：
 
-![](/img/p-programming/chicken.png)
+![image](/img/p-programming/chicken.png)
 
 ### 处理 `issue` 的正确姿势
 
@@ -103,7 +103,6 @@
 1. [如何编写无法维护的代码](https://coderlmn.github.io/frontEndCourse/unmaintainable.html)
 1. [Update README-zh_Hans.md](https://github.com/zxystd/IntelBluetoothFirmware/pull/61)
 
-
 ## 服务器运维的正确姿势
 
 ![](/img/p-programming/rm.jpg)
@@ -114,11 +113,11 @@
 
 ## 数据库管理的正确姿势
 
-![](/img/p-programming/delete-db.gif)
+![image](/img/p-programming/delete-db.gif)
 
 ## Kubernetes 管理员的正确姿势
 
-![](/img/p-programming/rm.gif)
+![image](/img/p-programming/rm.gif)
 
 ```bash
 kubectl delete namespace default --grace-period=0 --force
@@ -128,9 +127,12 @@ kubectl delete namespace default --grace-period=0 --force
 
 相信我，当你体会了**面向调皮开发**的真谛以后，相信用不了多久，降职减薪，当上CAO(首席背锅官)，出入拘留所，勾搭检察官，堕入人生低谷。收入减半，仇人加倍，铁窗生活不是梦！
 
-![](/img/p-programming/CAO.png)
+![image](/img/p-programming/CAO.png)
+
+[我最近买了个域名](http://www.bullshitprogram.com/)，欢迎大家给我打钱。
 
 ## 参考链接
+
 1. [风清扬：另有高处比天高](https://baike.baidu.com/tashuo/browse/content?id=465f421a9dfaa9bbf1492227&lemmaId=7056998&fromLemmaModule=pcBottom)
 1. [Ask HN: What's the largest amount of bad code you have ever seen work?](https://news.ycombinator.com/item?id=18442637)
 1. [is there an award for ugliest code?](https://www.reddit.com/r/ProgrammerHumor/comments/9xuhyj/is_there_an_award_for_ugliest_code/)
