@@ -61,10 +61,6 @@ tags:
 
 ![image](/img/in-post/date-with-hr/hr.jpg)
 
-- 我不想努力了
-
-![image](/img/in-post/date-with-hr/nuli.jpg)
-
 世纪佳缘能不能不要给我推 `Java` 的岗位了！我真的有点烦。
 
 ## 见家长（技术面）
