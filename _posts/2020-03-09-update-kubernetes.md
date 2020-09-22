@@ -55,7 +55,7 @@ apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容
 
 ![](/img/sticker/云原生开发.gif)
 
-## 参考链接:
+## 参考链接
 
 1. [error: At least one of apiVersion, kind and name was changed](https://stackoverflow.com/questions/56386647/error-at-least-one-of-apiversion-kind-and-name-was-changed)
 1. [Kubernetes Version 1.16 Removes Deprecated APIs](https://www.ibm.com/cloud/blog/announcements/kubernetes-version-1-16-removes-deprecated-apis)
