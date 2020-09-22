@@ -107,7 +107,7 @@ nohup bash /leanote/bin/run.sh > /dev/null 2>&1 &
 
 ```
 
-# 第一次使用
+## 第一次使用
 
 admin
 
@@ -117,10 +117,8 @@ abc123
 
 还有就是关闭注册
 
+## 参考链接
 
-
-
-# 参考链接:
 1. [tgz解压失败：gzip: stdin: not in gzip format](https://www.jianshu.com/p/660e8c5a3307)
 2. [QA](https://github.com/leanote/leanote/wiki/QA)
 3. [Leanote 二进制版详细安装教程 Mac and Linux](https://github.com/leanote/leanote/wiki/Leanote-%E4%BA%8C%E8%BF%9B%E5%88%B6%E7%89%88%E8%AF%A6%E7%BB%86%E5%AE%89%E8%A3%85%E6%95%99%E7%A8%8B----Mac-and-Linux)
