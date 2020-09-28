@@ -1,2 +1,2 @@
 
-Fight to the death
+Fight to the death.
