@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - education
+    - 教育
 ---
 
 最近几年其实我带了2个学生学编程。
