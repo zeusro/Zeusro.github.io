@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "ElasticSearch深度集成kubernetes"
+title:        "ElasticSearch深度集成kubernetes 6.5"
 subtitle:     ""
 date:         2018-12-08
 author:       "Zeusro"
