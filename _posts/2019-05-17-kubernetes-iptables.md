@@ -173,7 +173,8 @@ g-->|loadbalancer的IP在节点上截获后转给service|h(KUBE-SVC-M42ZCW2EYUCR
 3. svcIP是一个中转的虚拟IP
 
 
-## 参考链接:
+## 参考链接
+
 1. [Kubernetes 从1.10到1.11升级记录(续)：Kubernetes kube-proxy开启IPVS模式](https://blog.frognew.com/2018/10/kubernetes-kube-proxy-enable-ipvs.htm)
 2. [如何在 kubernetes 中启用 ipvs](https://juejin.im/entry/5b7e409ce51d4538b35c03df)
 3. [华为云在 K8S 大规模场景下的 Service 性能优化实践](https://zhuanlan.zhihu.com/p/37230013)

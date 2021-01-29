@@ -21,7 +21,6 @@ tags:
 ## 安装类工具
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
-2. 
 
 参考:
 1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)

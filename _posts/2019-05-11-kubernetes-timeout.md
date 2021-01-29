@@ -1,7 +1,7 @@
 ---
 layout:       post
-title:        "kubernetes的timeout问题"
-subtitle:     ""
+title:        "alpine系统的网络诊断"
+subtitle:     "排查kubernetes的timeout问题"
 date:         2019-05-11
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
