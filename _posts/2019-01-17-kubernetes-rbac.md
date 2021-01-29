@@ -163,7 +163,6 @@ ClusterRoleBinding 适用于集群范围内的授权。
 |RoleBinding|将赋予被授权对象和Role| 
 |ClusterRole |可视为Role的超集,是从集群角度做的一种授权| 
 |ClusterRoleBinding|将赋予被授权对象和ClusterRole| 
-| | |
 
 理解`kubernetes`RBAC的最简单办法,就是进入kube-system内部,看看各类集群资源是怎么定义的.
 
