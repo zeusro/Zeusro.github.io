@@ -1,7 +1,7 @@
 ---
 layout:       post
 title:        "合理管理规划TKE，成为一个日理万机的男人！"
-subtitle:     ""
+subtitle:     "我宇智波斑愿称你为机佬"
 date:         2021-2-7
 author:       "Zeusro"
 header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
@@ -138,7 +138,7 @@ TKE的节点资源规划其实是一个有点复杂的「费米估算」问题�
 2. Tracing
 3. Logging 
 
-这几部分。在这一方面，我们腾讯云基于 Prometheus 做了一套[云原生监控](https://cloud.tencent.com/document/product/457/49888)以及[日志采集](https://cloud.tencent.com/document/product/457/48836) , [事件存储](https://cloud.tencent.com/document/product/457/50988)涵盖了指标监控，日志采集,事件存储和监控告警等各个方面。
+这几部分。在这一方面，我们腾讯云基于 Prometheus 做了一套[云原生监控](https://cloud.tencent.com/document/product/457/49888)的方案，以及[日志采集](https://cloud.tencent.com/document/product/457/48836) , [事件存储](https://cloud.tencent.com/document/product/457/50988)。这几套方案涵盖了指标监控，日志采集,事件存储和监控告警等各个方面。
 
 而从 Tracing 角度方面考虑，分布式服务的跟踪监测我觉得还可以再细分为非侵入式和侵入式的方案。侵入式的方案指的是修改代码，比如在请求的链路里面加入特定请求头，request header；非侵入式方案则是现在很流行的 `Service Mesh`方案,让业务更加注重于业务，而让流量管控交给 sidecar 。由于篇幅限制，这里就不过多展开了。
 
@@ -219,7 +219,7 @@ Trying "baidu.com"
 
 希望大家不管是运维也好，开发也罢，能在运维中提炼管理的技巧，在开发中解锁新的 ~~翻车~~编程 招式。
 
-![image](6ECBEB24576E4610B8A5E257226CD410)
+![image](/img/in-post/manage-tke/win.png)
 
 没有问题才是最大的问题，没有答案，就自己找答案！
 
