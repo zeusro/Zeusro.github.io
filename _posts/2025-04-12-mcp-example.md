@@ -163,7 +163,7 @@ Content-Type: application/json
 - path：假设桌面路径为 /home/user/Desktop，实际路径由 MCP 客户端或上下文提供。
 - Gemini 将首先调用 list_files 获取文件列表。
 
-### Gemini API 响应（生成 list_files 调用）
+### 2. Gemini API 响应（生成 list_files 调用）
 
 Gemini 解析用户提示，决定先调用 list_files 获取桌面文件列表。
 
@@ -462,14 +462,14 @@ Gemini 总结 delete_file 的结果，生成自然语言响应。
 [函数调用的工作原理](https://ai.google.dev/gemini-api/docs/function-calling?hl=zh-cn&example=meeting#use_model_context_protocol_mcp)
 》说的很清楚，这里只挂一个图：
 
-[!img](/img/in-post/mcp-example/function-calling-overview.png)
+![image](/img/in-post/mcp-example/function-calling-overview.png)
 
 mcp server 通过
 [Discovering prompts](https://modelcontextprotocol.io/docs/concepts/prompts#discovering-prompts)
 将自身的能力归纳为一种提示（prompts）。
 以 MCP-timeserver举例
 
-1. MCP 客户端查询工具列表（工具发现）
+### 1. MCP 客户端查询工具列表（工具发现）
 
 MCP 客户端通过 ListToolsRequest 获取 TimeServer 的工具列表。
 
@@ -515,11 +515,11 @@ Content-Type: application/json
 }
 ```
 
-2. 用户向 Gemini API 发送提示
+### 2. 用户向 Gemini API 发送提示
 
 用户通过 HTTP POST 请求向 Gemini API 发送提示，要求获取当前时间。
 
-```
+```json
 POST https://us-central1-aiplatform.googleapis.com/v1/projects/your-project-id/locations/us-central1/publishers/google/models/gemini-1.5-flash-002:generateContent
 Authorization: Bearer your-access-token
 Content-Type: application/json
@@ -575,7 +575,7 @@ tools：包含 TimeServer 的工具 schema，由 MCP 客户端提供。
 
 提示：“告诉我当前时间”明确要求时间信息。
 
-3. Gemini 匹配工具（语义匹配）
+### 3. Gemini 匹配工具（语义匹配）
 
 ```
 {
@@ -598,7 +598,7 @@ tools：包含 TimeServer 的工具 schema，由 MCP 客户端提供。
 }
 ```
 
-4. MCP 客户端调用 TimeServer 工具
+### 4. MCP 客户端调用 TimeServer 工具
 
 ```
 POST http://localhost:8081/mcp
