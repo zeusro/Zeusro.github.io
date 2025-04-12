@@ -629,3 +629,8 @@ get_current_time 只是简化的一种需求，实际的执行流程，可能还
 以我们人类看来，让AI删除桌面文件，这个流程非常繁琐，我们需要把多个上下文作为提示词导入到API调用之中，从而渐进地让AI找到答案，并执行。这其实就有点像开卷考试——老师说答案都在那本书里面，让考生自己找并写出来。
 
 看起来有点蠢，只能说是在当前历史局限性下的一种过渡方案。如果能制定一种通用知识库的标准，让离线的AI先行预热知识库数据，那么往后的调用会高效地多。
+
+
+## 参考链接
+https://modelcontextprotocol.io/docs/concepts/prompts#discovering-prompts
+https://www.youtube.com/watch?v=Qor2VZoBib0&ab_channel=LearnDatawithMark
