@@ -53,7 +53,6 @@ tags:
 ![image](/img/in-post/mcp-example/2.png)
 
 
-点击Approve表示同意让Cline查阅目录文件。
 
 ![image](/img/in-post/mcp-example/3.png)
 
