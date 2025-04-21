@@ -103,7 +103,7 @@ find /Users/zeusro/Desktop -type f -name "Screenshot*.png" -delete && find /User
 ![image](/img/in-post/mcp-limitation//传统ai问路.png)
 
 
-这个计算过程取决于大模型自身的能力，如果是 gemimi-2.0 这种是第一种情况直接一步到位的，而国内其他的白痴模型（特别是百度这种）我就不知道了，因为他们做的垃圾，还有脸收费。
+这个计算过程取决于大模型自身的能力，如果是 gemini-2.0 这种是第一种情况直接一步到位的，而国内其他的白痴模型（特别是百度这种）我就不知道了，因为他们做的垃圾，还有脸收费。
 
 
 ```bash
