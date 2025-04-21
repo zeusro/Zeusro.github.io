@@ -100,7 +100,7 @@ find /Users/zeusro/Desktop -type f -name "Screenshot*.png" -delete && find /User
 1. 删除截图图片n
 
 
-![image](/img/in-post/mcp- limitation//传统ai问路.png)
+![image](/img/in-post/mcp-limitation//传统ai问路.png)
 
 
 这个计算过程取决于大模型自身的能力，如果是 gemimi-2.0 这种是第一种情况直接一步到位的，而国内其他的白痴模型（特别是百度这种）我就不知道了，因为他们做的垃圾，还有脸收费。
@@ -130,7 +130,7 @@ func 计算(){
 ```
 
 
-![image](/img/in-post/mcp- limitation//远程本地函数分离.png)
+![image](/img/in-post/mcp-limitation/远程本地函数分离.png)
 
 我在之前的文章讲到， mcp 协议目前这种实现只能算是次选（过渡方案）。实际上，我觉得现阶段更需要做的事情是“分离函数”，把函数分为 `local function call` 和 `cloud function call` ,对于  `local function call` ，甚至不需要网络都能进行，像是“打开xx应用”，“给我grandma发短信”，像这类需求根本用不到云函数，“离线计算”就能进行。
 
@@ -141,3 +141,5 @@ AI 应该有一个预备的知识库，面对不同的操作系统时内置一�
 ## 结论
 
 MCP 协议作为一种过渡设计，作用有点像是制定一种 AI API(面向AI的语言/操作系统无关接口)的 `app store`标准，完成这个任务之后就可以淘汰。
+
+![image](/img/in-post/mcp-limitation/ps.gif)
