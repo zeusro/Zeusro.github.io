@@ -105,6 +105,11 @@ find /Users/zeusro/Desktop -type f -name "Screenshot*.png" -delete && find /User
 
 这个计算过程取决于大模型自身的能力，如果是 gemimi-2.0 这种是第一种情况直接一步到位的，而国内其他的白痴模型（特别是百度这种）我就不知道了，因为他们做的垃圾，还有脸收费。
 
+
+```bash
+input --> process --> output -->（评估）influence，考虑是否要执行下一次计算
+```
+
 人类，作为外部观察者，通过评估，观察计算产生的影响，补充提示词，诱导ai继续计算，一直修正，直到获取最终结果。
 
 
@@ -132,10 +137,7 @@ func 计算(){
 AI 应该有一个预备的知识库，面对不同的操作系统时内置一些能够支持的api，而不是像现在这样，连删除个文件都要建一个 [file-system](github.com/modelcontextprotocol/servers/tree/main/src/filesystem) 来实现。
 
 
-```bash
-input --> process --> output -->（评估）influence，考虑是否要执行下一次计算
-```
 
 ## 结论
 
-MCP 协议作为一种过渡设计，作用有点像是制定一种 AI 的 `app store`标准，完成这个任务之后就可以淘汰。
+MCP 协议作为一种过渡设计，作用有点像是制定一种 AI API(面向AI的语言/操作系统无关接口)的 `app store`标准，完成这个任务之后就可以淘汰。
