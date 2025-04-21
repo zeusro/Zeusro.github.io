@@ -17,9 +17,6 @@ tags:
 
 ## 回顾
 
-[5年前](https://www.bullshitprogram.com/the-seed-of-robot/)，我把 AI 比喻为一种智能化的 API 网关，提出一种分治的思想，将一个大问题转换为若干可解的小问题，如今，这种思想正在 [mcp](https://modelcontextprotocol.io/introduction) 这种协议沿用。但目前来看，它的实现方式还是有点丑陋的，并且有一些问题。
-
-## 现状
 
 ```
 function solve(problem):
@@ -30,6 +27,8 @@ function solve(problem):
         分别递归解决子问题
         合并子问题的结果，返回
 ```
+
+[5年前](https://www.bullshitprogram.com/the-seed-of-robot/)，我把 AI 比喻为一种智能化的 API 网关，提出一种分治的思想，将一个大问题转换为若干可解的小问题，如今，这种思想正在 [mcp](https://modelcontextprotocol.io/introduction) 这种协议沿用。但目前来看，它的实现方式还是有点丑陋的，并且有一些问题。
 
 
 ```go
@@ -43,6 +42,9 @@ func sum(arr []int) int {
     return leftSum + rightSum
 }
 ```
+
+
+## 现状
 
 mcp 协议里面内置了一个服务发现系统，各个 mcp server 把自身的实现和调用方法注册到里面，然后在调用的时候加到提示词，作为参数去请求远程的 AI 服务器，让AI 找到正确的命令然后在本地执行。
 
