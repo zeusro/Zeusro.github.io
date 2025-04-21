@@ -19,6 +19,7 @@ tags:
 
 [5年前](https://www.bullshitprogram.com/the-seed-of-robot/)，我把 AI 比喻为一种智能化的 API 网关，提出一种分治的思想，将一个大问题转换为若干可解的小问题，如今，这种思想正在 mcp 这种协议沿用。但目前来看，它的实现方式还是有点丑陋的，并且有一些问题。
 
+## 现状
 
 ```
 function solve(problem):
@@ -123,7 +124,7 @@ func 计算(){
 
 我在之前的文章讲到， mcp 协议目前这种实现只能算是次选（过渡方案）。实际上，我觉得现阶段更需要做的事情是“分离函数”，把函数分为 `local function call` 和 `cloud function call` ,对于  `local function call` ，甚至不需要网络都能进行，像是“打开xx应用”，“给我grandma发短信”，像这类需求根本用不到云函数，“离线计算”就能进行。
 
-AI 应该有一个预备的知识库，面对不同的操作系统时内置一些能够支持的api，而不是像现在这样，连删除个文件都要建一个 【file-system】(github.com/modelcontextprotocol/servers/tree/main/src/filesystem) 来实现。
+AI 应该有一个预备的知识库，面对不同的操作系统时内置一些能够支持的api，而不是像现在这样，连删除个文件都要建一个 [file-system](github.com/modelcontextprotocol/servers/tree/main/src/filesystem) 来实现。
 
 ![image](/img/in-post/mcp- limitation//远程本地函数分离.png)
 
