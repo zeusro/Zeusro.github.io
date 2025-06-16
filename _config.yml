@@ -6,7 +6,7 @@ email: qnod@hotmail.com
 description: "none"
 keyword: "Zeusro"
 url: "Zeusro.github.io"              # your host, for absolute URL
-baseurl: "www.zeusro.com"                             # for example, '/blog' if your blog hosted on 'host/blog'
+baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
 future: true
@@ -84,7 +84,7 @@ ga_domain: www.zeusro.tech
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
 sidebar-about-description: "No dick problem"
-sidebar-avatar: /img/7F55041ECCDC6D8D2DA97A1E9115B2B5_B500_900_500_600.JPEG      # use absolute URL, seeing it's used in both `/` and `/about/`
+sidebar-avatar: /img/成振宇a.webp      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
 
@@ -104,7 +104,7 @@ page-mathjax: false
 # Friends
 friends: [
   {
-        title: "Google翻译",
-        href: "https://translate.google.cn/"
+        title: "girigirilove",
+        href: "https://anime.girigirilove.com/"
     }
 ]
