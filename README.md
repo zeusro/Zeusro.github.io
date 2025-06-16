@@ -1,9 +1,12 @@
 ## 新建博文
 
+```bash
+  make new post=today-mcp-limitation date=2025-4-21
+  # 或者简化版本
   make new post=critical-thinking
-  make new post=oci-v2 date=2020-08-03
+```
 
-然后复制这一部分（本来想加到Makefile里面，结果搞不定）
+然后复制这一部分（本来想加到Makefile里面，结果搞不定最多只能创建一个文件，没办法初始化内容模版）
 
 ```markdown
 
