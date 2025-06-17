@@ -1,7 +1,7 @@
 ## 新建博文
 
 ```bash
-  make new post=today-mcp-limitation date=2025-4-21
+  make new post=TSP date=2025-06-17
   # 或者简化版本
   make new post=critical-thinking
 ```
