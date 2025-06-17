@@ -83,7 +83,7 @@ ga_domain: www.zeusro.tech
 
 # Sidebar settings
 sidebar: true                           # whether or not using Sidebar.
-sidebar-about-description: "No dick problem"
+sidebar-about-description: "Solo Leveling"
 sidebar-avatar: /img/成振宇a.webp      # use absolute URL, seeing it's used in both `/` and `/about/`
 
 
