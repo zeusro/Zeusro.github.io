@@ -1,13 +1,13 @@
 
-
 ```TXT
-    Where there is a will there's a way
+    踏上旅程，寻找真我
 ```
 
 ## P=NP之TSP问题的golang证明
 
-[源代码](https://github.com/zeusro/system/blob/main/problems/np/tsp.go)
+![image](/img/USA.png)
 
+[源代码](https://github.com/zeusro/system/blob/main/problems/np/tsp.go)
 
 ## 主体函数
 
@@ -181,7 +181,6 @@ func IsInContinentalUS(lat, lon float64) bool {
 
 ## 测试用例
 
-
 ```golang
 package np
 
@@ -218,10 +217,4 @@ func TestTravel(t *testing.T) {
 	}
 }
 
-```
-
-## 结论
-
-```TXT
-    踏上旅程，寻找真我
 ```
