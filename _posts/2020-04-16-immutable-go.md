@@ -10,7 +10,7 @@ catalog:      true
 multilingual: true
 published:    true
 tags:
-    - golang
+    - go
     - Kubernetes
 ---
 
