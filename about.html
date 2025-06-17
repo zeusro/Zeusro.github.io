@@ -1,14 +1,14 @@
 ---
 layout: page
 title: "About"
-description: "精通所有符号学"
+description: "MVP in every game"
 header-img: "img/about-bg-walle.jpg"
 multilingual: true
 ---
 
 <!-- Language Selector -->
 <select class="sel-lang" onchange= "onLanChange(this.options[this.options.selectedIndex].value)">
-    <option value="0" selected> All </option>
+    <option value="0" selected> Me </option>
     {{/* <option value="2" selected> 中文 Chinese </option>
     <option value="1"> 英文 English </option> */}}
 </select>
@@ -19,17 +19,18 @@ multilingual: true
     {{ about_zh | markdownify }}
 </div>
 
+<!-- Chinese Version -->
+{{/* <div class="zh post-container">
+    {% capture about_zh %}{% include about/zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div> */}}
+
 <!-- English Version -->
 <div class="en post-container">
     {% capture about_en %}{% include about/en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
 
-<!-- Chinese Version -->
-<div class="zh post-container">
-    {% capture about_zh %}{% include about/zh.md %}{% endcapture %}
-    {{ about_zh | markdownify }}
-</div>
 
 
 {% if site.disqus_username %}
