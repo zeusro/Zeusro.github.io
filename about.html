@@ -6,12 +6,31 @@ header-img: "img/about-bg-walle.jpg"
 multilingual: true
 ---
 
+<!-- Language Selector -->
+<select class="sel-lang" onchange= "onLanChange(this.options[this.options.selectedIndex].value)">
+    <option value="0" selected> All </option>
+    {{/* <option value="2" selected> 中文 Chinese </option>
+    <option value="1"> 英文 English </option> */}}
+</select>
 
-
-<div class="en post-container">
- {% capture about_en %}{% include about/readme.md %}{% endcapture %}
-    {{ readme | markdownify }}
+<!-- All Version -->
+<div class="all post-container">
+    {% capture about_zh %}{% include about/readme.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
 </div>
+
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include about/en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
+
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include about/zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
+
 
 {% if site.disqus_username %}
 <!-- disqus 评论框 start -->
