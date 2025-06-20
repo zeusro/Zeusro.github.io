@@ -7,4 +7,4 @@
 
 ![image](/img/USA.png)
 
-[source](https://github.com/zeusro/system/blob/main/problems/np/tsp.go)
+[source](https://github.com/zeusro/system/tree/main/problems/np)
