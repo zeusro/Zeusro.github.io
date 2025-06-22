@@ -1,1 +1,24 @@
-{"meta":{"version":1,"warehouse":"2.2.0"},"models":{"Asset":[],"Cache":[{"_id":"public/sitemap.xml","hash":"8741e43444787b338ff5ada107dcd48693a2679a","modified":1552985096173}],"Category":[],"Data":[],"Page":[],"Post":[],"PostAsset":[],"PostCategory":[],"PostTag":[],"Tag":[]}}
+{
+    "meta": {
+        "version": 1,
+        "warehouse": "2.2.0"
+    },
+    "models": {
+        "Asset": [],
+        "Cache": [
+            {
+                "_id": "public/sitemap.xml",
+                "hash": "8741e43444787b338ff5ada107dcd48693a2679a",
+                "modified": 1552985096173
+            }
+        ],
+        "Category": [],
+        "Data": [],
+        "Page": [],
+        "Post": [],
+        "PostAsset": [],
+        "PostCategory": [],
+        "PostTag": [],
+        "Tag": []
+    }
+}
