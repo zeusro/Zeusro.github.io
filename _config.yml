@@ -13,7 +13,7 @@ future: true
 
 # SNS settings
 RSS: false
-#weibo_username:     
+weibo_username: https://weibo.com/u/1900915594    
 #zhihu_username:     
 github_username:    zeusro
 twitter_username:   M2_49
