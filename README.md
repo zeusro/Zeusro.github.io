@@ -29,17 +29,6 @@ tags:
 
 ```
 
-## TODO
-
-- 等我有空再研究下摘要要怎么做
-
-```
-{% raw %}
-{% if post.excerpt %}{{post.excerpt }}{% else %}{{ post.content | strip_html | truncate:200 }}{% endif %} 
-{% endraw %}
-```
-
-- Makefile 多行变量输入要咋整？
 
 ## 说明
 
@@ -55,18 +44,23 @@ tags:
 ## 本地预览
 
 ```bash
-# npm install grunt -g
-# 编译less
-grunt less
-npm run watch
-```
+# 🔧 一、卸载系统残留的 Jekyll 和 Protobuf
+sudo gem uninstall jekyll
+sudo gem uninstall google-protobuf
+sudo gem uninstall sass-embedded
+# 🔧 二、使用 rbenv 安装隔离 Ruby 环境（推荐）
+brew install rbenv
+rbenv init
+# ⬆️ 按提示将 eval "$(rbenv init -)" 添加到你的 ~/.zshrc 或 ~/.bashrc
+source ~/.zshrc  # 或 ~/.bash_profile
+# 📦 三、安装 Jekyll 和依赖（使用 Bundler）
+sudo gem install -y bundler jekyll
+# 还是有bug
+bundle install
 
-## 第一次使用
 
-```bash
-sudo gem uninstall --all
-# 安装Ruby
-sudo gem install github-pages bundler jekyll
+
+
 ```
 
 ## 备注
