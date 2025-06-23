@@ -1,4 +1,4 @@
-FROM jekyll/jekyll:4.0.0
+FROM jekyll/jekyll:4.2.2
 
 LABEL author=Zeusro site=https://github.com/theme-next/hexo-theme-next.git
 ENV FULL_CHOWN='FULL_CHOWN'
