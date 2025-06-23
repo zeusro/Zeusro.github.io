@@ -32,13 +32,11 @@ clean:
 	git commit -am "auto clean"
 	git push
 
-docker:
-	docker build -t zeusro/blog:1 .
-
 new:
 	cat >> _posts/$(date)-$(post).md<<"$(NEW_POST)"
 
 
 up:
+	git pull origin new
 	docker-compose up --force-recreate --build
 
