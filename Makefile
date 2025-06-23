@@ -38,5 +38,5 @@ new:
 
 up:
 	git pull origin new
-	docker-compose up --force-recreate --build
-
+	# docker-compose up --force-recreate --build
+	docker-compose up --build
