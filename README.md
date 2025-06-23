@@ -29,7 +29,6 @@ tags:
 
 ```
 
-
 ## 说明
 
 <details>
@@ -40,28 +39,6 @@ tags:
 </code>
 </pre>
 </details>
-
-## 本地预览
-
-```bash
-# 🔧 一、卸载系统残留的 Jekyll 和 Protobuf
-sudo gem uninstall jekyll
-sudo gem uninstall google-protobuf
-sudo gem uninstall sass-embedded
-# 🔧 二、使用 rbenv 安装隔离 Ruby 环境（推荐）
-brew install rbenv
-rbenv init
-# ⬆️ 按提示将 eval "$(rbenv init -)" 添加到你的 ~/.zshrc 或 ~/.bashrc
-source ~/.zshrc  # 或 ~/.bash_profile
-# 📦 三、安装 Jekyll 和依赖（使用 Bundler）
-sudo gem install -y bundler jekyll
-# 还是有bug
-bundle install
-
-
-
-
-```
 
 ## 备注
 
