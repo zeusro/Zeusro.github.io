@@ -18,7 +18,7 @@ tags:
 ## 前言
 
 之前介绍了
-[Concourse-CI从入门到放弃](https://www.zeusro.tech/2018/09/02/give-up-concourse-ci/)
+[Concourse-CI从入门到放弃](https://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
 今天来讲讲`Jenkins`的划时代版本--**JenkinsX**!
 
 `JenkinsX`是一个Jenkins的子项目,专门运行在K8S上面.
