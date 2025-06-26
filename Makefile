@@ -1,6 +1,12 @@
 now    := $(shell date)
-date  ?=  $(shell date "+%Y-%m-%d")
 post   ?= ""
+ifeq ($(OS),Windows_NT)
+    # Windows 系统
+    date ?= $(shell powershell -command "Get-Date -Format 'yyyy-MM-dd'")
+else
+    # macOS/Linux 系统
+    date ?= $(shell date "+%Y-%m-%d")
+endif
 
 define NEW_POST=
 ---
@@ -9,7 +15,7 @@ title:        ""
 subtitle:     "" 
 date:         $(date) 
 author:       "Zeusro" 
-header-img:   "imgoYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "2025/13z.webp" 
 header-mask:  0.3 
 catalog:      true 
 multilingual: true 
