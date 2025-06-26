@@ -1,3 +1,7 @@
+## todo
+
+感觉应该一年一个主题背景图，不能老是用恶魔猎手
+
 ## 新建博文
 
 ```bash
@@ -16,7 +20,7 @@ title:        ""
 subtitle:     ""
 date:         
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/ku.webp"
 header-mask:  0.3
 # 目录
 catalog:      true
