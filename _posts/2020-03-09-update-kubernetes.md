@@ -4,7 +4,7 @@ title:        "更新kubernetes大版本需要注意的问题"
 subtitle:     "坑,都是坑!"
 date:         2020-03-09
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "/img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

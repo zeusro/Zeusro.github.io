@@ -4,7 +4,7 @@ title:        "kube-eventer，一个超好用的事件监控工具"
 subtitle:     ""
 date:         2020-02-20
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "/img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:
