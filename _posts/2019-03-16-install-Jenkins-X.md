@@ -4,7 +4,7 @@ title:        "国内服务器安装JenkinsX"
 subtitle:     "安装不算很难"
 date:         2019-03-16
 author:       "Zeusro"
-header-img:   "/img/b/2019/Silver-Days.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

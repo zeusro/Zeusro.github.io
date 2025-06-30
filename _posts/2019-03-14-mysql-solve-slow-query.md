@@ -4,7 +4,7 @@ title:        "干掉mysql慢查询"
 subtitle:     ""
 date:         2019-03-14
 author:       "Zeusro"
-header-img:   "/img/b/2019/Silver-Days.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

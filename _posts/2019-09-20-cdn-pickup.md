@@ -4,7 +4,7 @@ title:        "多公有云CDN最佳实践"
 subtitle:     ""
 date:         2019-09-20
 author:       "Zeusro"
-header-img:   "/img/b/2019/Silver-Days.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
