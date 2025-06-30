@@ -1,11 +1,9 @@
-## todo
-
-感觉应该一年一个主题背景图，不能老是用恶魔猎手
+# www.zeusro.com
 
 ## 新建博文
 
 ```bash
-  make new post=TSP date=2025-06-17
+  make new post=ab date=2025-06-29
   # 或者简化版本
   make new post=critical-thinking
 ```

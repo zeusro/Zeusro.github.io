@@ -1,26 +1,24 @@
 # Site settings
-title:  Unknown
+title: Unknown
 SEOTitle: Zeusro
 header-img: img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg
 email: qnod@hotmail.com
 description: "none"
 keyword: "Zeusro"
-url: "Zeusro.github.io"              # your host, for absolute URL
-baseurl: ""                             # for example, '/blog' if your blog hosted on 'host/blog'
+url: "Zeusro.github.io" # your host, for absolute URL
+baseurl: "" # for example, '/blog' if your blog hosted on 'host/blog'
 
 # Publish posts or collection documents with a future date.
 future: true
 
 # SNS settings
 RSS: false
-weibo_username: https://weibo.com/u/1900915594    
-#zhihu_username:     
-github_username:    zeusro
-twitter_username:   M2_49
-#facebook_username:  
+weibo_username: https://weibo.com/u/1900915594
+#zhihu_username:
+github_username: zeusro
+twitter_username: M2_49
+#facebook_username:
 #linkedin_username:  firstname-lastname-idxxxx
-
-
 
 # Build settings
 # from 2016, 'pygments' is unsupported on GitHub Pages. Use 'rouge' for highlighting instead.
@@ -36,14 +34,12 @@ exclude:
     "README.md",
     "README.zh.md",
   ]
-anchorjs: true                          # if you want to customize anchor. check out line:181 of `post.html`
-
-
+anchorjs: true # if you want to customize anchor. check out line:181 of `post.html`
 
 # Gems
 # from PR#40, to support local preview for Jekyll 3.0
-plugins: 
-- jekyll-paginate
+plugins:
+  - jekyll-paginate
 # - hexo-generator-baidu-sitemap
 # - hexo-generator-sitemap
 
@@ -59,15 +55,13 @@ plugins:
 # document: http://jekyllrb.com/docs/configuration/#kramdown
 markdown: kramdown
 kramdown:
-  input: GFM                            # use Github Flavored Markdown !important
+  input: GFM # use Github Flavored Markdown !important
   syntax_highlighter_opts:
     span:
       line_numbers: false
     block:
       line_numbers: true
-      start_line: 1                        # use Github Flavored Markdown !important
-
-
+      start_line: 1 # use Github Flavored Markdown !important
 
 # Disqus settings
 #没有账户,先关闭了
@@ -76,31 +70,23 @@ kramdown:
 # Netease settings
 netease_comment: false
 
-
-
 # Analytics settings
-# Baidu Analytics 
+# Baidu Analytics
 # ba_track_id: [your track id]
 
 # Google Analytics
 
-ga_track_id: 'UA-136502877-1'            # Format: UA-xxxxxx-xx
+ga_track_id: "UA-136502877-1" # Format: UA-xxxxxx-xx
 ga_domain: www.zeusro.tech
 
-
-
 # Sidebar settings
-sidebar: true                           # whether or not using Sidebar.
+sidebar: true # whether or not using Sidebar.
 sidebar-about-description: "Solo Leveling"
-sidebar-avatar: /img/成振宇a.webp      # use absolute URL, seeing it's used in both `/` and `/about/`
-
-
+sidebar-avatar: /img/成振宇a.webp # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
-featured-tags: true                     # whether or not using Feature-Tags
-featured-condition-size: 1              # A tag will be featured if the size of it is more than this condition value
-
-
+featured-tags: true # whether or not using Feature-Tags
+featured-condition-size: 1 # A tag will be featured if the size of it is more than this condition value
 
 # Progressive Web Apps
 chrome-tab-theme-color: "#000000"
@@ -110,9 +96,12 @@ service-worker: true
 page-mathjax: false
 
 # Friends
-friends: [
-  {
-        title: "girigirilove",
-        href: "https://anime.girigirilove.com/"
+friends:
+  [
+    { title: "girigirilove", href: "https://anime.girigirilove.com/" },
+    { title: "Alibaba Cloud", href: "https://github.com/aliyun" },
+    {
+      title: "WXG",
+      href: "https://topd.tencent.com/career/company/tencent/WXG",
     }
-]
+  ]

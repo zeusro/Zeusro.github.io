@@ -4,7 +4,7 @@ title:        "暗黑互联网产业"
 subtitle:     "Dark Internet"
 date:         2021-05-02
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/2021/dark-knight.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
