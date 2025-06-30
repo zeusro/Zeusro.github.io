@@ -4,7 +4,7 @@ title:        "在 gorm 中使用自定义类型"
 subtitle:     ""
 date:         2024-12-25
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2024/となりのトトロ -1840x1234.webp"
 header-mask:  0.3
 # 目录
 catalog:      true

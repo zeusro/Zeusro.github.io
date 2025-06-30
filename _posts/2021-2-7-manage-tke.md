@@ -4,7 +4,7 @@ title:        "合理管理规划TKE，成为一个日理万机的男人！"
 subtitle:     "我宇智波斑愿称你为机佬"
 date:         2021-2-7
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2021/ケロロ軍曹.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
