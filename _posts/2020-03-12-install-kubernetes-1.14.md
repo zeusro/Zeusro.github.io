@@ -4,7 +4,7 @@ title:        "利用Azure中国搭建Kubernetes 1.14.2集群"
 subtitle:     "从入门到放弃!"
 date:         2020-03-12
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

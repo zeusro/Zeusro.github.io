@@ -4,7 +4,7 @@ title:        "多种方式请求Kubernetes api-server"
 subtitle:     ""
 date:         2019-04-19
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
@@ -25,7 +25,7 @@ tags:
 
 ![img](https://d33wubrfki0l68.cloudfront.net/673dbafd771491a080c02c6de3fdd41b09623c90/50100/images/docs/admin/access-control-overview.svg)
 
-`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.tech/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
+`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
 
 为了方便起见,我直接使用`kube-system`的`admin`作为例子.
 
