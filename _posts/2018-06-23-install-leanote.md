@@ -4,7 +4,7 @@ title:        "安装蚂蚁笔记"
 subtitle:     ""
 date:         2018-06-23
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
 tags:

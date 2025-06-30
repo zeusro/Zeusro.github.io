@@ -4,7 +4,7 @@ title:        "[转载]golang和传统语言的网络层处理的对比"
 subtitle:     ""
 date:         2018-08-19
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
 tags:
