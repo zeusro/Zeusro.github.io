@@ -4,7 +4,7 @@ title:        "[转载]一句话概括设计模式"
 subtitle:     ""
 date:         2018-11-08
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
 tags:
