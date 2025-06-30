@@ -4,7 +4,7 @@ title:        "应用架构的演变——理解虚拟化环境"
 subtitle:     "Application Evolution"
 date:         2020-10-29
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2021/ケロロ軍曹.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true

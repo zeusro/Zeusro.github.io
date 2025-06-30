@@ -4,7 +4,7 @@ title:        "教育信息化对教育工作者的新要求"
 subtitle:     "Critical Thinking"
 date:         2020-10-31
 author:       "Zeusro"
-header-img:   "img/b/2020/hero-mac5-ipad-large_2x.webp"
+header-img:   "img/b/2021/ケロロ軍曹.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
