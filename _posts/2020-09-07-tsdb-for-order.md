@@ -1,10 +1,10 @@
 ---
 layout:       post
 title:        "时间序列数据库怎么处理电商订单"
-subtitle:     ""
+subtitle:     "time series"
 date:         2020-09-07
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "/img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -94,13 +94,4 @@ http://www.zeusro.com/2020/04/02/tsdb/
 [4]
 电商网站中，50W-100W高并发，秒杀功能是怎么实现的？ - 九章算法的回答 - 知乎
 https://www.zhihu.com/question/20978066/answer/1415294056
-
-[5]
-
-
-
-[6]
-
-
-
 

@@ -4,7 +4,7 @@ title:        "微软2.0"
 subtitle:     "Microsoft 2.0"
 date:         2020-08-07
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "/img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true

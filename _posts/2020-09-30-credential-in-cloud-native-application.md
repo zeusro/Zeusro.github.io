@@ -4,7 +4,7 @@ title:        "改变公有云接口调用的凭据系统"
 subtitle:     ""
 date:         2020-09-30
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "/img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
