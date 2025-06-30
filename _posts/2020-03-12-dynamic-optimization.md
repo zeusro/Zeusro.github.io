@@ -4,7 +4,7 @@ title:        "教你怎么用动态规划做一个渣男🤣"
 subtitle:     "高筑墙，广积粮，缓称王"
 date:         2020-03-12
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

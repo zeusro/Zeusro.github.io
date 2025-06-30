@@ -4,7 +4,7 @@ title:        "kt-connect，一辆解决Kubernetes集群内外互访问的玩具
 subtitle:     "妈妈再也不担心我访问不了 virtual service"
 date:         2020-02-28
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

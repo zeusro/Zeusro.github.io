@@ -4,7 +4,7 @@ title:        "理解kubernetes的service流量转发链路"
 subtitle:     "iptables"
 date:         2019-05-17
 author:       "Zeusro"
-header-img:   "/img/b/2019/Silver-Days.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

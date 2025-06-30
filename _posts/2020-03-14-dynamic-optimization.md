@@ -4,7 +4,7 @@ title:        "再谈动态规划"
 subtitle:     "If you can't explain it simply, you don't understand it well enough."
 date:         2020-03-14
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

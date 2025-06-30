@@ -4,7 +4,7 @@ title:        "golang 的不可变（Immutable）编程"
 subtitle:     "Immutable go"
 date:         2020-04-16
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png" 
+header-img:   "img/b/2020/Mononoke.png" 
 header-mask:  0.3
 catalog:      true
 multilingual: true

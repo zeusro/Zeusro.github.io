@@ -4,7 +4,7 @@ title:        "时间序列数据库怎么处理电商订单"
 subtitle:     "time series"
 date:         2020-09-07
 author:       "Zeusro"
-header-img:   "/img/b/2020/szw.jpg"
+header-img:   "img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true

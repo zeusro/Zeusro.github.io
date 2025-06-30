@@ -4,7 +4,7 @@ title:        "Github 加速"
 subtitle:     ""
 date:         2020-02-17
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:

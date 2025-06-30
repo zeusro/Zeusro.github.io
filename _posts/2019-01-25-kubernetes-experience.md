@@ -4,7 +4,7 @@ title:        "Kubernetes集群管理经验"
 subtitle:     "Kubernetes Management Experience"
 date:         2019-01-25
 author:       "Zeusro"
-header-img:   "/img/b/2019/Silver-Days.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

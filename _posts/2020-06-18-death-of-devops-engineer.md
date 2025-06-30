@@ -4,7 +4,7 @@ title:        "某运维负责人之死"
 subtitle:     ""
 date:         2020-06-18
 author:       "Zeusro"
-header-img:   "/img/b/2020/Mononoke.png"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 # 目录
 catalog:      true
