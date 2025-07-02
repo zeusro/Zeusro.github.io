@@ -8,6 +8,7 @@ header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
 multilingual: true
+published:    false
 tags:
     -  monitor
 ---  
