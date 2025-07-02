@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - tsdb
+    - time
 ---
 
 ## 一道面试题
