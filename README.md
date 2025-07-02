@@ -3,7 +3,7 @@
 ## 新建博文
 
 ```bash
-  make new post=ab date=2025-06-29
+  make new post=zero-in-n date=2025-07-02
   # 或者简化版本
   make new post=critical-thinking
 ```
