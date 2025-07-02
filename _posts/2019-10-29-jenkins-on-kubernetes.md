@@ -6,9 +6,9 @@ date:         2019-10-29
 author:       "Zeusro"
 header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
+published:    false
 catalog:      true
 tags:
-    - Jenkins
     - DevOps
 ---
 

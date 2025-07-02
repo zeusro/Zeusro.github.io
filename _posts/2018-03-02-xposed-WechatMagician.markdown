@@ -8,7 +8,6 @@ header-img:   "img/in-post/post-eleme-pwa/eleme-at-io.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - Xposed
     - 从入门到放弃
     - P
 ---

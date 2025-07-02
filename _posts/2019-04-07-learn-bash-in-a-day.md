@@ -7,6 +7,7 @@ author:       "Zeusro"
 header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.2
 catalog:      true
+published:    false
 tags:
     - bash
 ---
