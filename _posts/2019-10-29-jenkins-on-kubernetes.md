@@ -9,7 +9,6 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Jenkins
-    - CI
     - DevOps
 ---
 
