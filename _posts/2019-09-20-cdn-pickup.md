@@ -7,8 +7,9 @@ author:       "Zeusro"
 header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
+published:   false
 tags:
-  - CDN
+  - Devops
 ---
 
 源站类型:
