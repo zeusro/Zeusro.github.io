@@ -9,7 +9,6 @@ header-mask:  0.3
 catalog:      true
 published:   false
 tags:
-    - CI
     - DevOps
     - Java
     - Gradle

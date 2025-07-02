@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - kubernetes
+    - Kubernetes
 ---
 
 

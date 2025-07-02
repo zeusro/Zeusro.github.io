@@ -8,9 +8,6 @@ header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - Jenkins
-    - Jenkins-X
-    - CI
     - DevOps
     - Kubernetes
 ---
