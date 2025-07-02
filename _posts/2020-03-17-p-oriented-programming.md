@@ -10,7 +10,7 @@ catalog:      true
 # 多语言
 multilingual: true
 tags:
-    - 面向调皮编程
+    - P
 ---
 
 <!-- Chinese Version -->
