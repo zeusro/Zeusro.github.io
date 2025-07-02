@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - gorm
+    - go
 ---
 
 对于简单类型，gorm 实现了从数据库类型到程序语言类型的转换，而对于自定义类型，需要实现序列化和反序列化方法。
