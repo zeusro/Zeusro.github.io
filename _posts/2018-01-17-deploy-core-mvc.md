@@ -7,9 +7,9 @@ author:       "Zeusro"
 header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
+published:    true
 tags:
     - C#
-    - core
 ---
 
 
