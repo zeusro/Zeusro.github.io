@@ -4,10 +4,11 @@ title:        "云监控商业化-可以用钱解决的问题不是问题"
 subtitle:     ""
 date:         2018-03-28
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/b/2018/psc.jpeg" 
 header-mask:  0.3
 catalog:      true
 multilingual: true
+published:    false
 tags:
     -  monitor
 ---  

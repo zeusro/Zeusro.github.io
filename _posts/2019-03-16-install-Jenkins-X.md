@@ -4,13 +4,10 @@ title:        "国内服务器安装JenkinsX"
 subtitle:     "安装不算很难"
 date:         2019-03-16
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - Jenkins
-    - Jenkins-X
-    - CI
     - DevOps
     - Kubernetes
 ---
@@ -18,7 +15,7 @@ tags:
 ## 前言
 
 之前介绍了
-[Concourse-CI从入门到放弃](https://www.zeusro.tech/2018/09/02/give-up-concourse-ci/)
+[Concourse-CI从入门到放弃](https://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
 今天来讲讲`Jenkins`的划时代版本--**JenkinsX**!
 
 `JenkinsX`是一个Jenkins的子项目,专门运行在K8S上面.
