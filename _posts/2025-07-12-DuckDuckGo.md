@@ -4,7 +4,7 @@ title:        "DuckDuckGo game"
 subtitle:     ""
 date:         2025-07-12
 author:       "Zeusro"
-header-img:   "img/in-post/duck.png"
+header-img:   "img/in-post/duck-duck-go/duck.png"
 header-mask:  0.3
 # 目录
 catalog:      true
