@@ -98,6 +98,7 @@ page-mathjax: false
 # Friends
 friends:
   [
+    { title: "犬夜叉", href: "https://www.aniplex.co.jp/inuyasha/" },
     { title: "Naruto", href: "https://naruto.fandom.com/wiki/Narutopedia" },
     { title: "McDonald", href: "https://mcdonalds.com.hk/" },
     { title: "广州地铁集团有限公司", href: "https://www.gzmtr.com" },
