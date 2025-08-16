@@ -4,14 +4,10 @@ title:        "Jenkins-X构建Java应用"
 subtitle:     ""
 date:         2019-03-16
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:
-    - Jenkins
-    - Jenkins-X
-    - pipeline
-    - CI
     - DevOps
     - Java
     - 从入门到放弃

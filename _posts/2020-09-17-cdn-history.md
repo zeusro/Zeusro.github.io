@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - cdn
+    - Devops
 ---
 
 2018年3月，我正式陆续接管阿米巴集团公司的所有数字资产，成为实际意义上的运维负责人。

@@ -4,7 +4,7 @@ title:        "理解kubernetes的角色控制"
 subtitle:     "RBAC"
 date:         2019-01-17
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

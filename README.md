@@ -1,7 +1,9 @@
+# www.zeusro.com
+
 ## 新建博文
 
 ```bash
-  make new post=TSP date=2025-06-17
+  make new post=DuckDuckGo Game date=2025-07-12
   # 或者简化版本
   make new post=critical-thinking
 ```
@@ -16,7 +18,7 @@ title:        ""
 subtitle:     ""
 date:         
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/ku.webp"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -29,18 +31,6 @@ tags:
 
 ```
 
-## TODO
-
-- 等我有空再研究下摘要要怎么做
-
-```
-{% raw %}
-{% if post.excerpt %}{{post.excerpt }}{% else %}{{ post.content | strip_html | truncate:200 }}{% endif %} 
-{% endraw %}
-```
-
-- Makefile 多行变量输入要咋整？
-
 ## 说明
 
 <details>
@@ -51,23 +41,6 @@ tags:
 </code>
 </pre>
 </details>
-
-## 本地预览
-
-```bash
-# npm install grunt -g
-# 编译less
-grunt less
-npm run watch
-```
-
-## 第一次使用
-
-```bash
-sudo gem uninstall --all
-# 安装Ruby
-sudo gem install github-pages bundler jekyll
-```
 
 ## 备注
 

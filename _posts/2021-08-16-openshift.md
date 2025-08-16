@@ -1,10 +1,10 @@
 ---
 layout:       post
 title:        "openshift踩坑日记"
-subtitle:     ""
+subtitle:     "SHIT"
 date:         2021-08-16
 author:       "Zeusro"
-header-img:   "img/in-post/kubernetes/deploy-pod.png"
+header-img:   "img/b/2021/うずまきナルト.webp"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - kubernetes
+    - Kubernetes
 ---
 
 
@@ -171,16 +171,8 @@ https://kubernetes.io/docs/concepts/policy/pod-security-policy/
 [3]
 https://cloud.tencent.com/developer/article/1603597
 
-
 [4]
 https://docs.openshift.com/container-platform/4.8/rest_api/network_apis/route-route-openshift-io-v1.html
 
-
 [5]
 https://docs.openshift.com/container-platform/3.5/admin_guide/managing_networking.html
-
-
-[6]
-
-
-

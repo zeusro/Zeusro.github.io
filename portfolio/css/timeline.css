@@ -76,7 +76,8 @@ body, html {
 	position: relative;
 	border-radius: 3px;
 	border: 1px solid #edeeee;
-	margin: 0 0 30px 0;
+	/* margin: 0 0 30px 0; */
+	margin: 120px 0 30px 0;
 	font-weight: 400;
 	font-size: 95%;
 }

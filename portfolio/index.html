@@ -1,28 +1,33 @@
 ---
-title: Portfolio
+title: Creation
 layout: default
+header-img: "img/pika13.jpg"
 ---
 
 <!DOCTYPE html>
 <html class="no-js">
-	<head>
-		<meta charset="UTF-8" />
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Zeusro - Timeline</title>
-		<link rel="stylesheet" type="text/css" href="css/timeline.css" />
-		<script src="js/modernizr.custom.js"></script>
-	</head>
-	<body>
-		<div class="container" style="margin:0;padding:0;width:100%;">
-			<header>
-				<img width="175" height="175" style="border-radius:50%;" src="/img/成振宇a.webp">
-				<h1>Zeusro</h1>
-			</header>
-			<div class="main">
-				<ul class="cbp_tmtimeline">
 
-					<!-- <li>
+<head>
+	<meta charset="UTF-8" />
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Zeusro - Timeline</title>
+	<link rel="stylesheet" type="text/css" href="css/timeline.css" />
+	<script src="js/modernizr.custom.js"></script>
+</head>
+
+<body>
+	{% include mvp.html type='page'  short=true %}
+
+	<div class="container" style="margin:0;padding:0;width:100%;">
+		{{/* <header>
+			<img width="175" height="175" style="border-radius:50%;" src="/img/成振宇a.webp">
+			<h1>MVP</h1>
+		</header> */}}
+		<div class="main">
+			<ul class="cbp_tmtimeline">
+
+				<!-- <li>
 						<div class="cbp_tmlabel">
 							<h2 id="boxoffice">SpecialAlarmClock</h2>
 							<time>2016.03</time>
@@ -39,25 +44,28 @@ layout: default
 						</div>
 					</li>	 -->
 
-					<li>
-						<div class="cbp_tmlabel">
-							<h2 id="boxoffice">shit</h2>
-							<time>2025</time>
-							<img src="https://raw.githubusercontent.com/p-program/shit/refs/heads/main/doc/mac.png">
-							<ul>
-								<li>
-									一位商人曾经说过，如果生活给了你一个柠檬，你应该把它榨成汁，然后喝下去。
-									如果有人在我头上拉屎，我会记录下来，提取关键生物信息，找到一个适当的时机，再充分利用。
-								</li>
-								<li class="skill">
-									<span><b>Go</b></span>
-									<span class="link"><a target="_blank" href="https://github.com/p-program/shit">Try it</a></span>
-								</li>
-							</ul>
-						</div>
-					</li>							
-				</ul>
-			</div>
+				<li>
+					<div class="cbp_tmlabel">
+						
+							<!-- Shit -->
+						
+						<h2 id="boxoffice"><a target="_blank" href="https://github.com/p-program/shit">Github.com/p-program/shit</a></h2>
+						<time>2025</time>
+						<img src="https://raw.githubusercontent.com/p-program/shit/refs/heads/main/doc/shit.png">
+						<ul>
+							<li>
+								If they shit on me, I’ll make art out of it.
+							</li>
+							<li class="skill">
+								<span><b>Go</b></span>
+								<span class="link"><a target="_blank" href="https://github.com/p-program/shit">Shit</a></span>
+							</li>
+						</ul>
+					</div>
+				</li>
+			</ul>
 		</div>
-	</body>
+	</div>
+</body>
+
 </html>
