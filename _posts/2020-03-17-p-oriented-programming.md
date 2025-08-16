@@ -4,13 +4,13 @@ title:        "面向调皮编程"
 subtitle:     "P Oriented Programming"
 date:         2020-03-17
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 # 多语言
 multilingual: true
 tags:
-    - 面向调皮编程
+    - P
 ---
 
 <!-- Chinese Version -->

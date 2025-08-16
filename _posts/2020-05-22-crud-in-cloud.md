@@ -4,7 +4,7 @@ title:        "云计算时代的CRUD"
 subtitle:     ""
 date:         2020-05-22
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg" 
+header-img:   "img/b/2020/Mononoke.png" 
 header-mask:  0.3
 catalog:      true
 multilingual: false

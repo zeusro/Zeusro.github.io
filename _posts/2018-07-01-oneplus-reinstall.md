@@ -4,9 +4,10 @@ title:        "一加5刷机"
 subtitle:     ""
 date:         2018-07-01
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
+published:   false
 tags:
     - oneplus
 ---

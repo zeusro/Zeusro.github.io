@@ -4,13 +4,13 @@ title:        "选择努力比什么都重要"
 subtitle:     ""
 date:         2020-11-05
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2021/ケロロ軍曹.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
 # 多语言
 multilingual: false
-published:    true
+published:    false
 tags:
     - 人生
 ---

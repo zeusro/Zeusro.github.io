@@ -4,13 +4,13 @@ title:        "面向未成年人编程"
 subtitle:     ""
 date:         2020-09-10
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
 # 多语言
 multilingual: false
-published:    true
+published:    false
 tags:
     - 教育
 ---

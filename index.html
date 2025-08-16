@@ -1,6 +1,7 @@
 ---
 layout: page
-description: "Just for money"
+description: "Universe"
+header-img: "img/m.webp"
 ---
 
 {% for post in paginator.posts %}
@@ -13,9 +14,13 @@ description: "Just for money"
         <h3 class="post-subtitle">
             {{ post.subtitle }}
         </h3>
-        {% endif %}         
-        <div class="post-content-preview">                        
-            {{ post.content | strip_html | truncate:200 }}
+        {% endif %}
+        <div class="post-content-preview">
+            {% if post.lang == 'en' %}
+                {{ post.content | strip_html | truncate:300 }}
+            {% else %}
+                {{ post.content | strip_html | truncate:200 }}
+            {% endif %}
         </div>
     </a>
     <p class="post-meta">

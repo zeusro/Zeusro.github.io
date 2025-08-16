@@ -4,7 +4,7 @@ title:        "给kubernetes项目贡献代码"
 subtitle:     ""
 date:         2019-06-19
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
 catalog:      true
 tags:

@@ -4,9 +4,10 @@ title:        "nginx-brotli实验"
 subtitle:     ""
 date:         2018-07-05
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
+published:   false
 tags:
     - nginx
     - docker
@@ -21,7 +22,6 @@ tags:
 1. https证书
 1. 一个域名
 1. 源站服务器
-1. 
 
 只有以 https协议访问网站时,才会有`Accept-Encoding: gzip, deflate, br`,所以上述准备缺一不可.
 

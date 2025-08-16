@@ -4,13 +4,13 @@ title:        "数字化时代的写作"
 subtitle:     ""
 date:         2020-09-20
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2020/szw.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
 # 多语言
 multilingual: false
-published:    true
+published:    false
 tags:
     - 教育
 ---

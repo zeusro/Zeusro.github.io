@@ -4,11 +4,11 @@ title:        "Concourse-CI集成maven/gradle项目"
 subtitle:     "Concourse-CI从入门到摔桌"
 date:         2018-09-02
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
+published:   false
 tags:
-    - CI
     - DevOps
     - Java
     - Gradle

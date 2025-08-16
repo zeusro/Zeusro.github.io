@@ -4,8 +4,9 @@ title:        "在阿里云的swarm上面安装consul(3agent 1server)"
 subtitle:     ""
 date:         2018-06-28
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
+published:   false
 catalog:      true
 tags:
     - swarm

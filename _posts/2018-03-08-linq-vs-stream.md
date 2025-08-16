@@ -4,7 +4,7 @@ title:        "Java8的stream API与 C#的 LINQ 拓展方法对比"
 subtitle:     ""
 date:         2018-03-08
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
 catalog:      true
 tags:

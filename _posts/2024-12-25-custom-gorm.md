@@ -4,7 +4,7 @@ title:        "在 gorm 中使用自定义类型"
 subtitle:     ""
 date:         2024-12-25
 author:       "Zeusro"
-header-img:   "img/oYYBAFHlDveICOlTAAWdBpjTP2sAAAvzgB9mBEABZ0e231.jpg"
+header-img:   "img/b/2024/となりのトトロ -1840x1234.webp"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - gorm
+    - go
 ---
 
 对于简单类型，gorm 实现了从数据库类型到程序语言类型的转换，而对于自定义类型，需要实现序列化和反序列化方法。
