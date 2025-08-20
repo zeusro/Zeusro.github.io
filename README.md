@@ -1,4 +1,13 @@
-# www.zeusro.com
+# https://www.zeusro.com
+
+<details>
+<summary>展开查看</summary>
+<pre>
+<code>
+    I don't fucking care what others say.
+</code>
+</pre>
+</details>
 
 ## 新建博文
 
@@ -30,17 +39,6 @@ tags:
 ---
 
 ```
-
-## 说明
-
-<details>
-<summary>展开查看</summary>
-<pre>
-<code>
-    I don't fucking care what others say.
-</code>
-</pre>
-</details>
 
 ## 备注
 
