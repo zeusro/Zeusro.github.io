@@ -12,7 +12,7 @@
 ## 新建博文
 
 ```bash
-  make new post=DuckDuckGo Game date=2025-07-12
+  make new post='zero' date=2025-08-22
   # 或者简化版本
   make new post=critical-thinking
 ```

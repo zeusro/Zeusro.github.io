@@ -98,9 +98,10 @@ page-mathjax: false
 # Friends
 friends:
   [
+     {title: "上海美术电影制片厂",href: "https://www.ani-sh.com/",},  
     { title: "犬夜叉", href: "https://www.aniplex.co.jp/inuyasha/" },
     { title: "Naruto", href: "https://naruto.fandom.com/wiki/Narutopedia" },
-     {title: "绿夫山泉",href: "https://www.nongfuspring.com/",},
+     {title: "农夫山泉",href: "https://www.nongfuspring.com/",},
     { title: "McDonald", href: "https://mcdonalds.com.hk/" },
     { title: "广州地铁集团有限公司", href: "https://www.gzmtr.com" },
     { title: "girigirilove", href: "https://anime.girigirilove.com/" },
@@ -114,5 +115,4 @@ friends:
      {title: "中山大学",href: "https://www.sysu.edu.cn/",},
      {title: "萤火虫动漫",href: "https://www.fireflyacg.com/about.php",},
      {title: "保利物业",href: "https://www.polywuye.com",},
-     {title: "上海美术电影制片厂",href: "https://www.ani-sh.com/",},  
 ]
