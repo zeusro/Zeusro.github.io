@@ -1,9 +1,18 @@
-# www.zeusro.com
+# https://www.zeusro.com
+
+<details>
+<summary>展开查看</summary>
+<pre>
+<code>
+    I don't fucking care what others say.
+</code>
+</pre>
+</details>
 
 ## 新建博文
 
 ```bash
-  make new post=DuckDuckGo Game date=2025-07-12
+  make new post='zero' date=2025-08-22
   # 或者简化版本
   make new post=critical-thinking
 ```
@@ -30,17 +39,6 @@ tags:
 ---
 
 ```
-
-## 说明
-
-<details>
-<summary>展开查看</summary>
-<pre>
-<code>
-    I don't fucking care what others say.
-</code>
-</pre>
-</details>
 
 ## 备注
 
