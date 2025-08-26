@@ -12,9 +12,10 @@
 ## 新建博文
 
 ```bash
-  make new post='zero' date=2025-08-22
   # 或者简化版本
-  make new post=critical-thinking
+  make new post=bullshit-go
+  make new post='zero' date=2025-08-22
+
 ```
 
 然后复制这一部分（本来想加到Makefile里面，结果搞不定最多只能创建一个文件，没办法初始化内容模版）
