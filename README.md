@@ -13,7 +13,7 @@
 
 ```bash
   # 或者简化版本
-  make new post=bullshit-go
+  make new post=another-universe
   make new post='zero' date=2025-08-22
 
 ```
