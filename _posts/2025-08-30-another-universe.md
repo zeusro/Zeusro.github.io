@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:        "平行宇宙的程序化存在性证明"
+title:        "平行宇宙的存在性证明"
 subtitle:     ""
 date:         2025-08-30
 author:       "Zeusro"
