@@ -16,7 +16,7 @@ tags:
 ---
 
 
-在 September 6, 2025，我提出了“时间序列复杂度（Time Series Complexity）”的概念。在时间复杂度和空间复杂度的基础上，补齐了衡量函数计算效率的部分。
+在 September 6, 2025，我提出了“[时间序列复杂度](https://www.zeusro.com/2025/09/06/time-series-complexity/)（Time Series Complexity）”的概念。在时间复杂度和空间复杂度的基础上，补齐了衡量函数计算效率的部分。
 
 ## 前言
 
