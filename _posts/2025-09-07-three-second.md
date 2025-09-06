@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:          "时间序列复杂度的浮游解释"
+title:          "时间序列复杂度的蜉蝣解释"
 subtitle:     "蜉蝣之羽，衣裳楚楚。心之憂矣，於我歸楚"
 date:         2025-09-07
 author:       "Zeusro"
