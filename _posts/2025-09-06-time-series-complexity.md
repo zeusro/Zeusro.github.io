@@ -4,7 +4,7 @@ title:          "时间序列复杂度"
 subtitle:     "Time Series Complexity"
 date:         2025-09-06
 author:       "Zeusro"
-header-img:   "img/b/2025/ku.webp"
+header-img:   "img/b/2025/JumpOutTheSky.jpeg"
 header-mask:  0.3
 # 目录
 catalog:      true
