@@ -8,23 +8,6 @@ else
     date ?= $(shell date "+%Y-%m-%d")
 endif
 
-define NEW_POST=
----
-layout:       post 
-title:        "" 
-subtitle:     "" 
-date:         $(date) 
-author:       "Zeusro" 
-header-img:   "2025/13z.webp" 
-header-mask:  0.3 
-catalog:      true 
-multilingual: true 
-tags: 
-    -  
----
-
-endef
-
 auto_commit:
 	git add .
 	# 需要注意的是，每行命令在一个单独的shell中执行。这些Shell之间没有继承关系。
@@ -39,7 +22,8 @@ clean:
 	git push
 
 new:
-	cat >> _posts/$(date)-$(post).md<<"$(NEW_POST)"
+# 	cat >> _posts/$(date)-$(post).md
+	cp template.md _posts/$(date)-$(post).md
 
 
 up:

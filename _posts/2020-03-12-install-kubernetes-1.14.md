@@ -9,7 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
     - Kubernetes
-    - 从入门到放弃
+    - give up
 ---
 
 
