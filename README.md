@@ -13,7 +13,7 @@
 
 ```bash
   # 或者简化版本
-  make new post=time-series-complexity
+  make new post=three-second
   make new post='zero' date=2025-08-22
 ```
 
