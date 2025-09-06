@@ -9,7 +9,7 @@ header-mask:  0.3
 catalog:      true
 tags:
   - DevOps
-  - 从入门到放弃
+  - give up
 ---
 
 ## 不用helm的原因

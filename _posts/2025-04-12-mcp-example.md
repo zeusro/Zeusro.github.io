@@ -4,7 +4,7 @@ title:        "以一个例子说明mcp协议的具体应用以及交互原理"
 subtitle:     ""
 date:         2025-04-12
 author:       "Zeusro"
-header-img:   "img/ku.webp"
+header-img:   "img/b/2025/ku.webp"
 header-mask:  0.3
 # 目录
 catalog:      true

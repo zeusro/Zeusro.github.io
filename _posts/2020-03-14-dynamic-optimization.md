@@ -8,7 +8,7 @@ header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
 tags:
-    - 算法
+    - code
 ---
 
 > If you can't explain it simply, you don't understand it well enough.

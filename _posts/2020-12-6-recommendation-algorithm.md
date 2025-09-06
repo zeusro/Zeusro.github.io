@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - 算法
+    - code
 ---
 
 现在在很多领域都能看到推荐算法的痕迹，比如电商购物，新闻资讯，旅游娱乐，社交媒体。
