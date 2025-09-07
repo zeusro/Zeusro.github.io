@@ -569,8 +569,9 @@ font-family:
     "PingFang SC", "Hiragino Sans GB", /* macOS 中文字体 */
     "Noto Sans CJK SC", "Source Han Sans SC", /* Google / Adobe 中文字体 */
     sans-serif;
-  line-height: 1.7;
+  line-height: 1.6; /* 建议加上，优化全角/半角的混排可读性 */
   font-size: 16px;
+  font-feature-settings: "palt";
   color: #404040;
   overflow-x: hidden;
   text-rendering: auto;
