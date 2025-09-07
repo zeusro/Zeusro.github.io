@@ -13,10 +13,11 @@ multilingual: false
 published:    true
 tags:
     - time
+    - P
 ---
 
 
-在 September 6, 2025，我提出了“[时间序列复杂度](https://www.zeusro.com/2025/09/06/time-series-complexity/)（Time Series Complexity）”的概念。在时间复杂度和空间复杂度的基础上，补齐了衡量函数计算效率的部分。
+在 September 6, 2025，我提出了“[时间序列复杂度](https://www.zeusro.com/2025/09/06/time-series-complexity/)（Time Series Complexity）”的概念。在时间复杂度和空间复杂度的基础上，补齐了衡量函数计算效率的拼图。
 
 ## 前言
 
@@ -43,6 +44,12 @@ tags:
 假设它只有3秒就没了，那么这个函数的横轴区间就是[0,3]，0是相对的瞬时概念，表示“现在”。
 
 3秒后，`free -m` 就归零了，表示“一滴都不剩”了。
+
+单纯从时间角度分析，它们的交配过程可谓是相当效率。但如果把它换成我的好邻居，那我一般建议他们去看一下男科。
+
+如果他们对象不是很丑的话，我可以考虑顺便照顾一下。
+
+![image](/img/in-post/three-second/forgive.jpg)
 
 ## 结论
 
