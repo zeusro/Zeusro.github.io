@@ -4,7 +4,7 @@ title:          "时间序列复杂度的蜉蝣解释"
 subtitle:     "蜉蝣之羽，衣裳楚楚。心之憂矣，於我歸楚"
 date:         2025-09-07
 author:       "Zeusro"
-header-img:   "img/in-post/three-second/three. jpg"
+header-img:   "img/in-post/three-second/three.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
