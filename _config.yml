@@ -76,8 +76,8 @@ netease_comment: false
 
 # Google Analytics
 
-ga_track_id: "UA-136502877-1" # Format: UA-xxxxxx-xx
-ga_domain: www.zeusro.tech
+ga_track_id: "" # Format: UA-xxxxxx-xx
+ga_domain: ""
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
