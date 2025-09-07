@@ -562,8 +562,13 @@ body {
      *     TypeIsBeautiful,
      *     [This Post](http://zhuanlan.zhihu.com/ibuick/20186806) etc.
      */
-  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Arial", "PingFang SC", "Hiragino Sans GB", "STHeiti", "Microsoft YaHei", "Microsoft JhengHei", "Source Han Sans SC", "Noto Sans CJK SC", "Source Han Sans CN", "Noto Sans SC", "Source Han Sans TC", "Noto Sans CJK TC", "WenQuanYi Micro Hei", SimSun, sans-serif;
-  line-height: 1.7;
+ font-family:
+    -apple-system, BlinkMacSystemFont, /* macOS / iOS 默认 */
+    "Segoe UI", "Microsoft YaHei",     /* Windows 默认字体 */
+    "Helvetica Neue", Helvetica, Arial,/* 通用英文字体 */
+    "PingFang SC", "Hiragino Sans GB", /* macOS 中文字体 */
+    "Noto Sans CJK SC", "Source Han Sans SC", /* Google / Adobe 中文字体 */
+    sans-serif;  line-height: 1.7;
   font-size: 16px;
   color: #404040;
   overflow-x: hidden;
