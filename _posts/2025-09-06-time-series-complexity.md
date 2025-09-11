@@ -215,7 +215,7 @@ Z轴是`gpu_utilization`。
 
 或者把 `gpu_utilization` 换成 `gpu_memory_utilization`。
 
-## 3秒真男人
+## P学：3秒真男人
 
 ![image](/img/in-post/three-second/free-m.jpg)
 
