@@ -1,7 +1,7 @@
 ---
 layout:       post
 title:          "我与美团"
-subtitle:     ""
+subtitle:     "衣冠禽兽，妹子好逑"
 date:         2025-09-25
 author:       "Zeusro"
 header-img:   "img/in-post/m.jpeg"
@@ -12,7 +12,7 @@ catalog:      true
 multilingual: false
 published:    true
 tags:
-    - code
+    - P
 ---
 
 ```txt
@@ -66,7 +66,7 @@ They’d get bored as hell doing that after a while, and then I’d be through w
 
 我觉得很多餐饮店的思维方式很奇怪。他们总是埋怨外卖平台的抽成比例过高。你觉得高你可以退出的嘛，像我们这边一些十年老店，人家做外卖只是顾客需要而已，广告费一毛都不付的，照样有顾客。
 
-食物卖不动，价格提不上去，偷工减料预制菜，在汕头是要被枪毙的🤣。
+食材滞销，价格提不上去，靠偷工减料做预制菜，这种垃圾餐馆在汕头是要被枪毙的🤣。
 
 麦当劳作为中国预制菜的标杆，在我们这边也是夹缝中求存，靠空调和玩具拉点客户。
 
