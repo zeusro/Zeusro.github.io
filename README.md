@@ -13,7 +13,7 @@
 
 ```bash
   # 或者简化版本
-  make new post=prove-principle-of-superposition
+  make new post=yellow-meituan
   make new post='zero' date=2025-08-22
 ```
 
