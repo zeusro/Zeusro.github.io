@@ -76,6 +76,6 @@ They’d get bored as hell doing that after a while, and then I’d be through w
 
 在高中作为一个学渣，在“枪林炮火”中勉力维生，高考前我也是很焦虑的，打电话给我们的化学老师老蔡。
 
-蔡老师很无奈地说：“你要相信你自己（你一个测验考1分的人），你是没问题的。”
+蔡老师很无奈地说：“你要相信你自己 ~~（你一个测验考1分的人）~~，你是没问题的。”
 
 “[人生就像一场比赛，赛场上就要遵守比赛规则](https://www.zhihu.com/tardis/zm/art/520220963?source_id=1003)。”
