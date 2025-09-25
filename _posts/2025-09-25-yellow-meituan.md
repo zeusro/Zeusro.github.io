@@ -65,4 +65,4 @@ They’d get bored as hell doing that after a while, and then I’d be through w
 
 菜就多练。
 
-“[人生就像一场比赛，赛场上就要遵守比赛规则](https://www.zhihu.com/tardis/zm/art/520220963?source_id=1003)”
+“[人生就像一场比赛，赛场上就要遵守比赛规则](https://www.zhihu.com/tardis/zm/art/520220963?source_id=1003)。”
