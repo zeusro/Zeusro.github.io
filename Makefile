@@ -1,4 +1,5 @@
-now    := $(shell date)
+BUILD_TIME 			  := $(shell LC_TIME=zh_CN.UTF-8 date +"%Y-%m-%d %H:%M:%S %A")
+#BUILD_TIME            := $(shell date +%Y-%m-%dT%H:%M:%S%z 2>/dev/null || powershell -Command "Get-Date -Format o")
 post   ?= ""
 ifeq ($(OS),Windows_NT)
     # Windows 系统
@@ -11,7 +12,7 @@ endif
 auto_commit:
 	git add .
 	# 需要注意的是，每行命令在一个单独的shell中执行。这些Shell之间没有继承关系。
-	git commit -am "$(now)"
+	git commit -am "$(BUILD_TIME)"
 	git pull
 	git push
 
