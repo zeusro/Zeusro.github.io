@@ -15,7 +15,7 @@ tags:
     - P
 ---
 
-我们这位高级精通java和go的高级架构师John，提出了一种面向加班的设计架构。
+我们这位精通java和go的高级架构师John，提出了一种面向加班的设计架构。
 
 Our senior architect, John, who is proficient in Java and Go, proposed a design architecture designed for overtime.
 
