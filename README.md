@@ -13,7 +13,7 @@
 
 ```bash
   # 或者简化版本
-  make new post=best-cloud-naive
+  make new post=i-love-haohao
   make new post='zero' date=2025-08-22
 ```
 
