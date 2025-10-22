@@ -24,6 +24,8 @@ tags:
 1. 在源代码项目按照提示词新增 `.github/workflows/deploy.yml`
 1. 手动触发 Build & Deploy 的action即可
 
+调整之后虽然不用再导出静态HTML产物，而且DNS也不用修改（防止白嫖），但是目前来看每次都需要手动触发action，有点麻烦。
+
 [https://www.bullshitprogram.com/](https://github.com/p-program/p-program.github.io) 是当时代金券太多没地方花而买的域名。
 
 前期文章灵感取自王垠的个人经历。
