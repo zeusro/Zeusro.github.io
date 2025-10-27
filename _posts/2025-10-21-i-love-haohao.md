@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:          "让浩浩妈也能懂的Kubernetes"
+title:          "Kubernetesは浩浩のお母さんでも理解できる"
 subtitle:     "I am Haohao's stepfather"
 date:         2025-10-21
 author:       "Zeusro"
