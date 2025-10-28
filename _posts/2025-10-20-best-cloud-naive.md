@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:          "Kubernetes拓展开发最佳实践——每天坚持加班到23点"
+title:          "Kubernetes拓展开发最佳实践——work >15h/day"
 subtitle:     "Pプログラミングは仕事を続ける唯一の方法"
 date:         2025-10-20
 author:       "Zeusro"
