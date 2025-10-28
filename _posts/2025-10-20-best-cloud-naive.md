@@ -1,7 +1,7 @@
 ---
 layout:       post
-title:          "Kubernetes拓展开发最佳实践"
-subtitle:     "每天坚持加班到23点感动老板"
+title:          "Kubernetes拓展开发最佳实践——每天坚持加班到23点"
+subtitle:     "Pプログラミングは仕事を続ける唯一の方法"
 date:         2025-10-20
 author:       "Zeusro"
 header-img:   "img/b/2025/ku.webp"
