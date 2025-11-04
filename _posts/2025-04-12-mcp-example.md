@@ -1,7 +1,7 @@
 ---
 layout:       post
-title:        "以一个例子说明mcp协议的具体应用以及交互原理"
-subtitle:     ""
+title:        "以一个例子说明MCP协议的具体应用以及交互原理"
+subtitle:     "MCP example"
 date:         2025-04-12
 author:       "Zeusro"
 header-img:   "img/b/2025/ku.webp"
@@ -17,9 +17,12 @@ tags:
 
 普通AI是一个困在盒子里面的猛兽。权限的受限让它只能囿于一个对话框中，像个植物人一样躺在一个病床上呻吟。而MCP协议，就相当于AI的”血管“和”神经元“，是一种能实现AI指令的信号传导。
 
+这里我使用vscode配合`cline`客户端，搭配`Google gemini`作为底层大模型“内核”。
+配置过程就直接省略不表了。
+
 ## cline UI交互
 
-配置Google gemini，并集成file-system。
+配置 `Google gemini`之后，并集成 `file-system` mcp。
 
 
 ```json
@@ -204,7 +207,7 @@ MCP 客户端通过 JSON-RPC 向文件系统 MCP Server 发送 list_files 请求
 
 请求：
 
-```
+```http
 POST http://localhost:8080/mcp
 Content-Type: application/json
 
@@ -257,7 +260,7 @@ MCP 客户端解析 list_files 结果，筛选出截图文件（screenshot1.png 
 
 请求 1（删除 screenshot1.png）：
 
-```
+```http
 POST http://localhost:8080/mcp
 Content-Type: application/json
 
@@ -271,7 +274,7 @@ Content-Type: application/json
 }
 ```
 
-```
+```json
 {
   "jsonrpc": "2.0",
   "result": {
@@ -284,7 +287,7 @@ Content-Type: application/json
 
 请求 2（删除 screenshot2.jpg）：
 
-```
+```http
 POST http://localhost:8080/mcp
 Content-Type: application/json
 
@@ -300,7 +303,7 @@ Content-Type: application/json
 
 ```
 
-```
+```json
 {
   "jsonrpc": "2.0",
   "result": {
@@ -318,11 +321,11 @@ MCP 客户端依次调用 delete_file，每次删除一个截图文件。
 MCP Server 执行实际删除操作（基于 src/filesystem 的实现，可能是 Python 的 os.remove）。
 
 ### 6. MCP 客户端汇总结果并返回给 Gemini
+
 MCP 客户端收集所有 delete_file 的结果，构造响应并通过新的 Gemini API 请求发送回 Gemini。
 请求：
 
-```
-http
+```http
 
 POST https://us-central1-aiplatform.googleapis.com/v1/projects/your-project-id/locations/us-central1/publishers/google/models/gemini-1.5-flash-002:generateContent
 Authorization: Bearer your-access-token
@@ -422,12 +425,11 @@ Content-Type: application/json
 Gemini 将根据这些信息生成最终响应。
 
 ### 7. Gemini API 生成最终响应
+
 Gemini 接收所有工具调用的结果，生成用户友好的响应。
 响应：
 
 ```json
-
-
 {
   "candidates": [
     {
@@ -474,7 +476,7 @@ mcp server 通过
 
 MCP 客户端通过 ListToolsRequest 获取 TimeServer 的工具列表。
 
-```
+```http
 POST http://localhost:8081/mcp
 Content-Type: application/json
 
@@ -578,7 +580,7 @@ tools：包含 TimeServer 的工具 schema，由 MCP 客户端提供。
 
 ### 3. Gemini 匹配工具（语义匹配）
 
-```
+```json
 {
   "candidates": [
     {
@@ -601,7 +603,7 @@ tools：包含 TimeServer 的工具 schema，由 MCP 客户端提供。
 
 ### 4. MCP 客户端调用 TimeServer 工具
 
-```
+```http
 POST http://localhost:8081/mcp
 Content-Type: application/json
 
@@ -632,7 +634,12 @@ get_current_time 只是简化的一种需求，实际的执行流程，可能还
 
 看起来有点蠢，只能说是在当前历史局限性下的一种过渡方案。如果能制定一种通用知识库的标准，让离线的AI先行预热知识库数据，那么往后的调用会高效地多。
 
-
 ## 参考链接
+
+[1]
+Prompts
 https://modelcontextprotocol.io/docs/concepts/prompts#discovering-prompts
+
+[2]
+How does OpenAI Function Calling work?
 https://www.youtube.com/watch?v=Qor2VZoBib0&ab_channel=LearnDatawithMark
