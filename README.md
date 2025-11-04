@@ -13,7 +13,7 @@
 
 ```bash
   # 或者简化版本
-  make new post=goodbye-p-program
+  make new post=sync-tencent
   make new post='zero' date=2025-08-22
 ```
 
