@@ -22,6 +22,8 @@ clean:
 	git commit -am "auto clean"
 	git push
 
+#   make new post=p-program
+#   make new post='zero' date=2025-08-22
 new:
 # 	cat >> _posts/$(date)-$(post).md
 	cp template.md _posts/$(date)-$(post).md
