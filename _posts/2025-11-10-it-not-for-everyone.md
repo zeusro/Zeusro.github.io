@@ -28,9 +28,3 @@ tags:
     {{ about_en | markdownify }}
 </div>
 
-<!-- Japanese Version -->
-<div class="jp post-container">
-    {% capture about_jp %}{% include posts/2025-11-11-no-computer/no-computer_jp.md %}{% endcapture %}
-    {{ about_jp | markdownify }}
-</div>
-
