@@ -13,7 +13,7 @@ After 10 years in the industry, I actually spend more time daydreaming than work
 
 The domestic environment lacks basic respect for people, always emphasizing various "**control theories**" — as a minor, you are kidnapped through authority relationships (parents and teachers are always right, you must listen to me);
 after graduation, you are limited by your job;
-when you earn enough money, you can go through the “buy a house, get married, have children” full-package process. Buying one house is not enough; you have to buy one for the eldest son and another for the grandson.
+when you earn enough money, you can go through the “buy a bigger house, get married, have children” full-package process. Buying one house is not enough; you have to buy one for the eldest son and another for the grandson.
 
 However, material resources are limited, and internet jobs are also limited. Every year, there are millions of college entrance exam graduates; if they all covet the “high salary” of this industry and enter this track, then ineffective internal competition will force this industry to become low-paying.
 

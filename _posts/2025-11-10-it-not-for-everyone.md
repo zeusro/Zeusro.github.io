@@ -24,7 +24,7 @@ tags:
 
 <!-- English Version -->
 <div class="en post-container">
-    {% capture about_en %}{% include posts/2025-11-11-no-computer/computer_en.md %}{% endcapture %}
+    {% capture about_en %}{% include posts/2025-11-11-no-computer/no-computer_en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
 
