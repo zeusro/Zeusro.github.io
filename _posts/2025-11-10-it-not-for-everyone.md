@@ -15,22 +15,10 @@ tags:
     - code
 ---
 
-
-<!-- Chinese Version -->
-<div class="zh post-container">
-    {% capture about_zh %}{% include posts/2025-11-11-no-computer/no-computer_zh.md %}{% endcapture %}
-    {{ about_zh | markdownify }}
-</div>
-
-<!-- English Version -->
-<div class="en post-container">
-    {% capture about_en %}{% include posts/2025-11-11-no-computer/no-computer_en.md %}{% endcapture %}
-    {{ about_en | markdownify }}
-</div>
-
-<!-- Japanese Version -->
-<div class="jp post-container">
-    {% capture about_jp %}{% include posts/2025-11-11-no-computer/no-computer_jp.md %}{% endcapture %}
-    {{ about_jp | markdownify }}
-</div>
-
+{% if page.lang == "zh" %}
+  {% include posts/2025-11-11-no-computer/no-computer_zh.md %}
+{% elsif page.lang == "en" %}
+  {% include posts/2025-11-11-no-computer/no-computer_en.md %}
+{% elsif page.lang == "jp" %}
+  {% include posts/2025-11-11-no-computer/no-computer_jp.md %}
+{% endif %}
