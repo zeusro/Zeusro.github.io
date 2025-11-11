@@ -262,9 +262,13 @@
     function onLanChange(index) {
         if (index == 0) {
             _hash = "#zh"
-        } else {
+        } 
+        if (index == 1) {
             _hash = "#en"
-        }
+        } 
+        if (index == 2) {
+            _hash = "#jp"
+        } 
         _render(_hash)
     }
 
