@@ -1,4 +1,4 @@
-Recently, through DNS, I discovered that [this website](www.zeusro.com) has more overseas traffic than domestic traffic.
+Recently, through DNS, I discovered that [this website](https://www.zeusro.com) has more overseas traffic than domestic traffic.
 A while ago, when I went back to high school, I found that very few people were studying liberal arts. Most of them were crowding into science, especially computer science.
 
 ## Most People Should Not Blindly Study Computer Science
