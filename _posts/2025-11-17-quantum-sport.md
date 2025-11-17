@@ -34,4 +34,3 @@ tags:
     {{ about_jp | markdownify }}
 </div>
 
-↖️select the language of the article
