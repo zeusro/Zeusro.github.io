@@ -33,3 +33,5 @@ tags:
     {% capture about_jp %}{% include posts/2025-11-17-quantum-sport/quantum-sport_jp.md %}{% endcapture %}
     {{ about_jp | markdownify }}
 </div>
+
+↖️select the language of the article
