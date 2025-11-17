@@ -16,6 +16,8 @@
 
 N维空间：以时间作为第一轴的N维度空间。比如tx是（时序）二维空间，txy是（时序）三维空间，txyz是（时序）四维空间。
 
+<img src="/img/pay.png" alt="pay" style="width:40%; height:auto; display:block;">
+
 平行时空算法：通过分配多个内存空间，平行地构建多个N维空间，让每一个算子/量子在各自的N维空间中运动，最后以时间为键收敛，从而得到并发线程无锁地访问一次性资源的解法。
 这种解法我称为平行时空算法。
 
@@ -154,8 +156,6 @@ func (lock RWLock) GetCost() time.Duration {
  [v1](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v1)
 
 ## 单线程消息队列解法
-
-<img src="/img/pay.png" alt="pay" style="width:40%; height:auto; display:block;">
 
 如果把阿里云和支付宝看成一个整体（它们都归属于阿里巴巴集团），那么就可以将N个吃豆人转换为1个吃豆人问题，使用简单的异步消息队列解题：
 
