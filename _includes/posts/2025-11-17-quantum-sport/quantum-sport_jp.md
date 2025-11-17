@@ -1,4 +1,5 @@
 ## はじめに
+
 2025-05-03に深圳空港に到着した後、空港の廊橋から外まで、全てAlipayとAlibaba Cloudの広告で埋め尽くされていることに気づきました。
 これで思い出したのは、かつての「Pac-Man」ゲームです：xy空間で2人のプレイヤーが自分のPac-Manを操作し、xy空間中の全ての豆を食べ尽くす必要がありました。
 
@@ -27,7 +28,7 @@ N次元空間：時間を第1軸とするN次元空間。例えばtxは（時系
 点：`golang struct`を使って実装された直交座標系の2次元構造体。
 
 ```go
-// 定义点结构
+// Define point structure
 type Point struct {
     X float64
     Y float64
@@ -37,6 +38,7 @@ type Point struct {
 線分：`golang struct`を使って実装された構造体。
 
 ```go
+// Define line segment structure
 type Line struct {
     A Point
     B Point
@@ -46,17 +48,17 @@ type Line struct {
 線分の長さ：ランダムな時間をN次元線分の長さの唯一の基準とする。
 
 ```go
-// Distance 以随机时间作为衡量N维线段长度的唯一标准
+// Distance uses random time as the sole criterion for measuring the length of an N-dimensional line segment
 func (l Line) Distance() time.Duration {
-    // 计算欧几里得距离
+    // Calculate Euclidean distance
     dx := l.A.X - l.B.X
     dy := l.A.Y - l.B.Y
     dist := math.Sqrt(dx*dx + dy*dy)
 
-    // 将距离映射到 1ms~1000ms 之间（对数映射让增长更平滑）
-    ms := 1 + int64(999*math.Tanh(dist/10)) // 距离大时趋近于1000ms
+    // Map the distance to between 1ms~1000ms (logarithmic mapping for smoother growth)
+    ms := 1 + int64(999*math.Tanh(dist/10)) // For large distances, approaches 1000ms
 
-    // 加上 ±10% 的随机扰动
+    // Add ±10% random jitter
     jitter := rand.Float64()*0.2 - 0.1
     ms = int64(float64(ms) * (1 + jitter))
 
@@ -74,7 +76,7 @@ func (l Line) Distance() time.Duration {
 もしマップ上の全ての豆を排他的リソースとみなすなら、シリアル番号をキー、マップ上の点を値として、読み書きロックに基づく辞書を構築できます：
 
  ```go
- // Beans 结构：内置并发字典 key->Point
+ // Beans structure: built-in concurrent dictionary key->Point
 type Beans struct {
     mu    sync.RWMutex
     items map[int]model.Point
@@ -87,7 +89,7 @@ type Beans struct {
 type RWLock struct {
 }
 
-// GetCost 通过O(n)的读写锁解题
+// GetCost solves the problem using O(n) read-write lock
 func (lock RWLock) GetCost() time.Duration {
     start := time.Now()
     end := time.Now()
@@ -100,7 +102,7 @@ func (lock RWLock) GetCost() time.Duration {
         // fmt.Println(p)
     }
     beans := NewBeans(m)
-    //简化问题，把随机初始两点作为吃豆人起点
+    // Simplify the problem by using two random initial points as the starting points for Pac-Man
     a := make([]model.Point, 1)
     a[0] = m[0]
     beans.GetAndRemove(0)
@@ -165,8 +167,8 @@ type Information struct {
 }
 
 type AlibabaGroup struct {
-    N    int           //算法规模
-    Cost time.Duration //总耗时
+    N    int           // algorithm scale
+    Cost time.Duration // total time cost
     model.Alipay
     model.Aliyun
 }
@@ -178,7 +180,7 @@ func (a *AlibabaGroup) Actor(core string, inbox <-chan Information) {
     }
 }
 
-// EatBean 如果把问题转换为一个整体（阿里云和支付宝同属阿里巴巴集团的资产），那么问题就可以简化为一个简单的生产者消费者模型
+// EatBean If the problem is converted into a whole (Aliyun and Alipay are both assets of Alibaba Group), the problem can be simplified as a simple producer-consumer model
 func (ali *AlibabaGroup) EatBean(beans []model.Bean) map[time.Time]model.Point {
     var m map[time.Time]model.Point = make(map[time.Time]model.Point)
     now := time.Now()
@@ -186,7 +188,7 @@ func (ali *AlibabaGroup) EatBean(beans []model.Bean) map[time.Time]model.Point {
     // fmt.Println(start)
     n := len(beans)
     var wg sync.WaitGroup
-    memory := make(chan Information, 1) //限定为1，强转为同步队列结构
+    memory := make(chan Information, 1) // limit to 1, forcibly convert to synchronous queue structure
     wg.Add(1)
     go func() {
         defer wg.Done()
@@ -241,7 +243,7 @@ func (ali *AlibabaGroup) GetCost() time.Duration {
 この解法は「読み書きロックに基づく一回限りループ時間プリエンプション解法」と似ていますが、メタデータオブジェクトを再設計し、N次元線分の定義を拡張しています。
 
 ```go
-// NLine 基于时间的n维线段
+// NLine: n-dimensional line segment based on time
 type NLine struct {
     t       time.Time
     actorID string
@@ -249,16 +251,16 @@ type NLine struct {
 }
 
 type Journey struct {
-    Lines  []model.Line             //N维线段（为了简化运算不引入时间）的二维线段数组表示
-    NBeans map[model.Bean]time.Time //N维对象
+    Lines  []model.Line             // n-dimensional line segments (for simplicity, time is not introduced) as a 2D line segment array
+    NBeans map[model.Bean]time.Time // n-dimensional objects
 }
 ```
 
 `Beans`の中でN次元線分を保持します。
 
 ```go
-// Beans 结构：内置并发字典 key->Point
-// 为了0依赖直接拷贝v1版本，不使用继承
+// Beans structure: built-in concurrent dictionary key->Point
+// To avoid dependencies, directly copy from v1 version, do not use inheritance
 type Beans struct {
     Name    string
     mu      sync.RWMutex
@@ -267,12 +269,12 @@ type Beans struct {
 }
 
 func (beans *Beans) Thought(n int, date time.Time) *Journey {
-    //简化问题，把随机初始点作为吃豆人起点
+    // Simplify the problem by using a random initial point as the starting point for Pac-Man
     a := make([]model.Point, 1)
     first, _ := beans.GetAndRemove(0)
     journey := NewJourney(n - 1)
     a[0] = first
-    // n个点只能产生n-1个线段
+    // n points can only form n-1 line segments
     for i := 1; i < n; i++ {
         p, contains := beans.GetAndRemove(i)
         if !contains {
@@ -286,12 +288,12 @@ func (beans *Beans) Thought(n int, date time.Time) *Journey {
             line := model.NewLine(a[0], p)
             beans.FirstNL = NLine{t: date, actorID: beans.Name, Line: line}
         }
-        //重置条件，为下一轮做准备
+        // Reset condition for the next round
         a = append(a, p)
     }
     result, err := journey.Validate()
     if !result || err != nil {
-        fmt.Println("Journey 验证失败：", err)
+        fmt.Println("Journey validation failed:", err)
         return journey
     }
     return journey
@@ -308,7 +310,7 @@ func DoubleThought(n int) []NLine {
     }
     p1 := model.RandonPoint()
     p2 := model.RandonPoint()
-    //强制分配不同的起点
+    // Force assignment of different starting points
     for p1.Compare(p2) {
         p2 = model.RandonPoint()
     }
@@ -320,7 +322,7 @@ func DoubleThought(n int) []NLine {
     now := time.Now()
     journey1 := bean1.Thought(n, now)
     journey2 := bean2.Thought(n, now)
-    //归一化合并，去掉多余的点。
+    // Normalize and merge, remove redundant points.
     nLines := make(map[time.Time]NLine)
     nMap := NewNLineMap(0)
     for k, t1 := range journey1.NBeans {
@@ -328,7 +330,7 @@ func DoubleThought(n int) []NLine {
         if !ok {
             continue
         }
-        //落后就要挨打
+        // The one that falls behind gets eliminated
         if t1.After(t2) {
             delete(journey1.NBeans, k)
             line := NLine{t: t2, Line: k.Line, actorID: bean2.Name}
@@ -343,12 +345,12 @@ func DoubleThought(n int) []NLine {
             nMap = nMap.Add(t1, line)
             continue
         }
-        //由于字典会自动去重，因此碰撞可以忽略
-        fmt.Printf("%v:%v 两个吃豆人同时到达%v，发生碰撞\n", t1, t2, k.Line)
+        // Since the dictionary automatically deduplicates, collisions can be ignored
+        fmt.Printf("%v:%v Two Pac-Man arrive at %v simultaneously, collision occurred\n", t1, t2, k.Line)
     }
     nMap.AddZero(bean1.FirstNL)
     nMap.AddZero(bean2.FirstNL)
-    fmt.Printf("%v : n维线段总数：%d;吃豆人%v总数%v;吃豆人%v总数%v;\n", now,
+    fmt.Printf("%v : total n-dimensional line segments: %d; Pac-Man %v count %v; Pac-Man %v count %v;\n", now,
         len(nMap.items)+2, bean1.Name, len(journey1.NBeans), bean2.Name, len(journey2.NBeans))
     lines := nMap.All(false)
     fmt.Printf("len(lines):%v\n", len(lines))
@@ -365,7 +367,7 @@ func DoubleThought(n int) []NLine {
 ```go
 func TestDoubleThought(t *testing.T) {
     lines := DoubleThought(50)
-    t.Logf("len(lines)：%v", len(lines))
+    t.Logf("len(lines): %v", len(lines))
 }
 ```
 
@@ -435,7 +437,7 @@ len(lines):50
 ```go
 p1 := model.RandonPoint()
 p2 := model.RandonPoint()
-    //强制分配不同的起点
+    // Force assignment of different starting points
     for p1.Compare(p2) {
         p2 = model.RandonPoint()
     }
