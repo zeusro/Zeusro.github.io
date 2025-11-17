@@ -155,7 +155,7 @@ func (lock RWLock) GetCost() time.Duration {
 
 ## 单线程消息队列解法
 
-<img src="/img/USA.png" alt="pay" style="width:40%; height:auto; display:block;">
+<img src="/img/pay.png" alt="pay" style="width:40%; height:auto; display:block;">
 
 如果把阿里云和支付宝看成一个整体（它们都归属于阿里巴巴集团），那么就可以将N个吃豆人转换为1个吃豆人问题，使用简单的异步消息队列解题：
 
