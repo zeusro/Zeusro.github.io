@@ -25,7 +25,7 @@ clean:
 # make mul post=zz
 mul:
 	echo "post=$(date) $(post)"
-	cp multilingual.md.template _posts/$(date)-$(post).md
+	cp multilingual.md _posts/$(date)-$(post).md
 	sed -i '' "s/0000-00-00/$$(date +%Y-%m-%d)/g" _posts/$$(date +%Y-%m-%d)-$(post).md
 	sed -i '' "s/it-is-my-post/$(post)/g" _posts/$$(date +%Y-%m-%d)-$(post).md
 	mkdir -p _includes/posts/$(date)-$(post)/

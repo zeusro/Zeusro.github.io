@@ -33,6 +33,8 @@ exclude:
     "package.json",
     "README.md",
     "README.zh.md",
+    "multilingual.md",
+    "template.md",
   ]
 anchorjs: true # if you want to customize anchor. check out line:181 of `post.html`
 
