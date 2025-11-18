@@ -2,7 +2,7 @@
 layout:       post
 title:          ""
 subtitle:     ""
-date:         
+date:         0000-00-00
 author:       "Zeusro"
 header-img:   "img/b/2025/ku.webp"
 header-mask:  0.3
