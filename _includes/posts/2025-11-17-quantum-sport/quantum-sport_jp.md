@@ -48,26 +48,28 @@ type Line struct {
 線分の長さ：ランダムな時間をN次元線分の長さの唯一の基準とする。
 
 ```go
-// Distance uses random time as the sole criterion for measuring the length of an N-dimensional line segment
+// Distance 以随机时间作为衡量N维线段长度的唯一标准
 func (l Line) Distance() time.Duration {
-    // Calculate Euclidean distance
-    dx := l.A.X - l.B.X
-    dy := l.A.Y - l.B.Y
-    dist := math.Sqrt(dx*dx + dy*dy)
+	// 计算欧几里得距离
+	dx := l.A.X - l.B.X
+	dy := l.A.Y - l.B.Y
+	dist := math.Sqrt(dx*dx + dy*dy)
 
-    // Map the distance to between 1ms~1000ms (logarithmic mapping for smoother growth)
-    ms := 1 + int64(999*math.Tanh(dist/10)) // For large distances, approaches 1000ms
+	// 将距离映射到 1ns ~ 1_000_000ns（1ms）之间，使用平滑的双曲正切映射
+	ns := 1 + int64(999999*math.Tanh(dist/10))
 
-    // Add ±10% random jitter
-    jitter := rand.Float64()*0.2 - 0.1
-    ms = int64(float64(ms) * (1 + jitter))
+	// 加上 ±10% 的随机扰动
+	jitter := rand.Float64()*0.2 - 0.1
+	ns = int64(float64(ns) * (1 + jitter))
 
-    if ms < 1 {
-        ms = 1
-    } else if ms > 1000 {
-        ms = 1000
-    }
-    return time.Duration(ms) * time.Millisecond
+	// 限制范围
+	if ns < 1 {
+		ns = 1
+	} else if ns > 100_0000 {
+		//Go 允许在整数或浮点数字面量中加 _ 来分隔位数：
+		ns = 100_0000
+	}
+	return time.Duration(ns) * time.Nanosecond
 }
 ```
 
@@ -304,61 +306,60 @@ func (beans *Beans) Thought(n int, date time.Time) *Journey {
 
 ```go
 func DoubleThought(n int) []NLine {
-    m := make(map[int]model.Point, n)
-    for i := 1; i < n; i++ {
-        m[i] = model.RandonPoint()
-    }
-    p1 := model.RandonPoint()
-    p2 := model.RandonPoint()
-    // Force assignment of different starting points
-    for p1.Compare(p2) {
-        p2 = model.RandonPoint()
-    }
-    bean1 := NewBeansWithFirstPoint(p1, m)
-    bean1.Name = "aliyun"
-    bean2 := NewBeansWithFirstPoint(p2, m)
-    bean2.Name = "alipay"
+	m := make(map[int]model.Point, n)
+	for i := 1; i < n; i++ {
+		m[i] = model.RandonPoint()
+	}
+	p1 := model.RandonPoint()
+	p2 := model.RandonPoint()
+	//强制分配不同的起点
+	for p1.Compare(p2) {
+		p2 = model.RandonPoint()
+	}
+	bean1 := NewBeansWithFirstPoint(p1, m)
+	bean1.Name = "aliyun"
+	bean2 := NewBeansWithFirstPoint(p2, m)
+	bean2.Name = "alipay"
 
-    now := time.Now()
-    journey1 := bean1.Thought(n, now)
-    journey2 := bean2.Thought(n, now)
-    // Normalize and merge, remove redundant points.
-    nLines := make(map[time.Time]NLine)
-    nMap := NewNLineMap(0)
-    for k, t1 := range journey1.NBeans {
-        t2, ok := journey2.NBeans[k]
-        if !ok {
-            continue
-        }
-        // The one that falls behind gets eliminated
-        if t1.After(t2) {
-            delete(journey1.NBeans, k)
-            line := NLine{t: t2, Line: k.Line, actorID: bean2.Name}
-            nLines[t2] = line
-            nMap.Add(t2, line)
-            continue
-        }
-        if t2.After(t1) {
-            delete(journey2.NBeans, k)
-            line := NLine{t: t1, Line: k.Line, actorID: bean1.Name}
-            nLines[t1] = line
-            nMap = nMap.Add(t1, line)
-            continue
-        }
-        // Since the dictionary automatically deduplicates, collisions can be ignored
-        fmt.Printf("%v:%v Two Pac-Man arrive at %v simultaneously, collision occurred\n", t1, t2, k.Line)
-    }
-    nMap.AddZero(bean1.FirstNL)
-    nMap.AddZero(bean2.FirstNL)
-    fmt.Printf("%v : total n-dimensional line segments: %d; Pac-Man %v count %v; Pac-Man %v count %v;\n", now,
-        len(nMap.items)+2, bean1.Name, len(journey1.NBeans), bean2.Name, len(journey2.NBeans))
-    lines := nMap.All(false)
-    fmt.Printf("len(lines):%v\n", len(lines))
-    for k, v := range lines {
-        fmt.Printf("%v:%v\n", k, v.String())
-    }
-    fmt.Println(journey1.End())
-    return lines
+	start := time.Now()
+	journey1 := bean1.Thought(n, start)
+	journey2 := bean2.Thought(n, start)
+	//归一化合并，去掉多余的点。
+	nLines := make(map[time.Time]NLine)
+	nMap := NewNLineMap(0)
+	for k, t1 := range journey1.NBeans {
+		t2, ok := journey2.NBeans[k]
+		if !ok {
+			continue
+		}
+		//落后就要挨打
+		if t1.After(t2) {
+			delete(journey1.NBeans, k)
+			line := NLine{t: t2, Line: k.Line, actorID: bean2.Name}
+			nLines[t2] = line
+			nMap.Add(t2, line)
+			continue
+		}
+		if t2.Equal(t1) {
+			fmt.Printf("%v:%v 两个吃豆人同时到达%v，发生碰撞\n", t1, t2, k.Line)
+		}
+		delete(journey2.NBeans, k)
+		line := NLine{t: t1, Line: k.Line, actorID: bean1.Name}
+		nLines[t1] = line
+		nMap = nMap.Add(t1, line)
+		continue
+	}
+	nMap.AddZero(bean1.FirstNL)
+	nMap.AddZero(bean2.FirstNL)
+	fmt.Printf("%v : n维线段总数：%d;吃豆人%v总数%v;吃豆人%v总数%v;\n", start,
+		len(nMap.items)+2, bean1.Name, len(journey1.NBeans), bean2.Name, len(journey2.NBeans))
+	lines := nMap.All(false)
+	cost := nMap.GetCost(start)
+	fmt.Printf("len(lines):%v cost:%v\n", len(lines), cost)
+	for k, v := range lines {
+		fmt.Println(v.String(k))
+	}
+	return lines
 }
 ```
 

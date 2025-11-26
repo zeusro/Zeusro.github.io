@@ -54,19 +54,21 @@ func (l Line) Distance() time.Duration {
 	dy := l.A.Y - l.B.Y
 	dist := math.Sqrt(dx*dx + dy*dy)
 
-	// 将距离映射到 1ms~1000ms 之间（对数映射让增长更平滑）
-	ms := 1 + int64(999*math.Tanh(dist/10)) // 距离大时趋近于1000ms
+	// 将距离映射到 1ns ~ 1_000_000ns（1ms）之间，使用平滑的双曲正切映射
+	ns := 1 + int64(999999*math.Tanh(dist/10))
 
 	// 加上 ±10% 的随机扰动
 	jitter := rand.Float64()*0.2 - 0.1
-	ms = int64(float64(ms) * (1 + jitter))
+	ns = int64(float64(ns) * (1 + jitter))
 
-	if ms < 1 {
-		ms = 1
-	} else if ms > 1000 {
-		ms = 1000
+	// 限制范围
+	if ns < 1 {
+		ns = 1
+	} else if ns > 100_0000 {
+		//Go 允许在整数或浮点数字面量中加 _ 来分隔位数：
+		ns = 100_0000
 	}
-	return time.Duration(ms) * time.Millisecond
+	return time.Duration(ns) * time.Nanosecond
 }
 ```
 
