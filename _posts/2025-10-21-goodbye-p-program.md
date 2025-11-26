@@ -18,6 +18,8 @@ tags:
 今年生成式AI大爆发之后，分享技术已经没有太大动力。
 像这个 Github action 的配置，换做以前大概需要花费我2~3天时间。这次在OpenAI帮助下3个小时内就完成了。
 
+## Hello,Github action
+
 调整流程非常简单：
 1. [p-program.github.io](https://github.com/p-program/p-program.github.io) pages-GitHub Pages的设定改为默认值，Custom domain填空
 1. 解决源代码项目中的中的**Dependabot alerts**
@@ -35,6 +37,18 @@ tags:
 “原来编程概念是可以这样子的？！原来所谓的OOP不过如此！”
 
 后来这个网站主要是发表一些前沿的技术洞察，或者“皮学”。
+
+## 解决一些历史遗留问题
+
+```
+Dependabot encountered an error performing the update
+
+Error: The updater encountered one or more errors.
+
+For more information see: https://github.com/p-program/readme/network/updates/1130827200 (write access to the repository is required to view the log)
+```
+
+Dependabot 中的安全检查主要针对项目中的供应链体系——有些依赖没有升级到安全的版本。按照提示修复，或者手动升级即可。
 
 从事信息技术多年，我一直对这个行业持矛盾的意见。但总体上都是以反对态度为主。
 科技的发展并没有真正地解放生产力，而是让人成为被量化计算的工具。
