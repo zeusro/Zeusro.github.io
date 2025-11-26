@@ -4,7 +4,7 @@ title:          "角谷不动点的证明和一般性推广"
 subtitle:     "A Golang explanation of quantum motion"
 date:         2025-11-17
 author:       "Zeusro"
-header-img:   "img/b/2025/ku.webp"
+header-img:   "img/b/black/img_bg_introduce_2_a.e5a13cd8.png"
 header-mask:  0.3
 # 目录
 catalog:      true
