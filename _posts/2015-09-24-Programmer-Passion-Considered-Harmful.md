@@ -74,5 +74,6 @@ tags:
 译文链接：http://www.codeceo.com/article/programmer-passion-harmful.html
 
 英文原文：Programmer Passion Considered Harmful
+https://medium.com/on-coding/programmer-passion-considered-harmful-5c5d4e3a9b28
 
 翻译作者：码农网 – 小峰
