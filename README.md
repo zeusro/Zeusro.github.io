@@ -12,9 +12,11 @@
 ## 新建博文
 
 ```bash
-  # 或者简化版本
-  make new post=it-not-for-everyone
+  # 简化版本
+  make new post=Programmer2
   make new post='zero' date=2025-08-22
+  # 多国语言版本
+  make mul post=Programmer2 
 ```
 
 ## 备注
