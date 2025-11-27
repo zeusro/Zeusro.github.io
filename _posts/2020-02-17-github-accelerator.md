@@ -1,21 +1,19 @@
 ---
 layout:       post
 title:        "Github 加速"
-subtitle:     ""
+subtitle:     "还是整个香港永居身份吧"
 date:         2020-02-17
 author:       "Zeusro"
 header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
 catalog:      true
-published:    false
+published:    true
 tags:
     - GitHub
     - git
 ---
 
-最近因为疫情的问题，XXX 又拉起了遮羞布。
-
-访问GitHub的时候人物头像不显示就算了，执行 `raw.githubusercontent.com`( GitHub 静态文件托管域名) 上面的远程代码直接爆 443 。搞得大家工作都不太方便。
+最近因为疫情的问题，访问GitHub的时候人物头像不显示就算了，执行 `raw.githubusercontent.com`( GitHub 静态文件托管域名) 上面的远程代码直接爆 443 。搞得大家工作都不太方便。
 
 于是我收集整理了目前现行的解决方案，试图从源头解决问题。
 
@@ -175,6 +173,34 @@ git config --list --system
 
      git clone https://github.com/owner/git.git
 
+## ssh over flclash
+
+在你的 SSH 配置 (~/.ssh/config) 中写这样一段：
+
+```
+Host github.com
+    HostName ssh.github.com
+    Port 443
+    User git
+    # 如果你使用 socks5 代理
+    ProxyCommand nc -x 127.0.0.1:7890 %h %p
+```
+
+这里 ssh.github.com 是 GitHub 支持 SSH-over-443 的地址。  ￼
+
+nc -x 主机:端口 %h %p 是使用 nc (netcat) 通过 SOCKS5 代理转发 SSH。 -x 指定代理类型 (socks)，具体根据你 flclash 本地代理端口改。SSH Config 的 ProxyCommand 可以让 SSH 流量走代理。  ￼
+
+ServerAliveInterval 等参数也可以加，防止连接空闲被中断。
+
+```bash
+git config --global url."https://github.com/".insteadOf "git@github.com:"
+ssh ssh.github.com
+Please type 'yes', 'no' or the fingerprint: yes
+Warning: Permanently added '[ssh.github.com]:443' (ED25519) to the list of known hosts.
+```
+
+为了躲过封锁 SSH 22 端口，GitHub 额外提供一个 443 端口的 SSH 服务，因此它的公钥指纹也不一样。
+输入yes之后，git push就不会再出现断流了。
 
 ## 终极解决方案
 
