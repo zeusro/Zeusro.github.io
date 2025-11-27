@@ -70,14 +70,13 @@ J看起来很不服气,继续鞭尸一把: 切，你在一个都是用Java的群
 
 以上内容整理自`2015-04-27 23:48`在博客园发表的文章，从今天看来，博客园已经快倒闭了，而张善友先生创办了深圳友浩达，不变的是依旧当着微软MVP。从TIOBE 上看，C# 目前正在逐步蚕食 Java 的市场份额，而且现在 .net core 可以通过AOT 动态库编译成纯原生机器码，供以下语言使用：
 
-```bash
-	•	C/C++
-	•	Go
-	•	Rust
-	•	Python（通过FFI）
-	•	Unity Native Plugin
-	•	iOS / Android Native
-```
+- C/C++
+- Go
+- Rust
+- Python（通过FFI）
+- Unity Native Plugin
+- iOS / Android Native
+
 
 以C++来说，相当于我可以用 .NET core 写 C++代码，这属于是直接偷家了。微软不亏是编程语言界第一邪恶组织。
 
