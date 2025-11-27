@@ -77,14 +77,13 @@ J看起来很不服气,继续鞭尸一把: 切，你在一个都是用Java的群
 - Unity Native Plugin
 - iOS / Android Native
 
-
 以C++来说，相当于我可以用 .NET core 写 C++代码，这属于是直接偷家了。微软不亏是编程语言界第一邪恶组织。
 
-新的命名空间：
+最近又有了新的命名空间，真是可喜可贺：
 
 - IAsyncEnumerable 异步数据流处理
 - System.Threading.Channels “借鉴”golang 的channel
-- EFCore.BulkExtensions
+- EFCore.BulkExtensions ORM 批量写入
 
 ![image](/img/in-post/go-java-c/assembly-is-mvp.png)
 
