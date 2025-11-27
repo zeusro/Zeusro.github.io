@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:          "角谷不动点的证明和一般性推广"
+title:          "角谷不动点的golang演绎"
 subtitle:     "A Golang explanation of quantum motion"
 date:         2025-11-17
 author:       "Zeusro"
