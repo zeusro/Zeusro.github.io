@@ -2,7 +2,7 @@
 layout:       post
 title:          "[转载]程序员的激情其实是一种痛苦"
 subtitle:     "Programmer Passion Considered Harmful"
-date:         2025-11-27
+date:         2015-09-24
 author:       "Zeusro"
 header-img:   "img/b/black/blackmyth_wukong_screenshot_017.947f4ae0.jpg"
 header-mask:  0.3
