@@ -38,7 +38,8 @@ mul:
 new:
 # 	cat >> _posts/$(date)-$(post).md
 	cp template.md _posts/$(date)-$(post).md
-	sed -i '' "s/0000-00-00/$(date +%Y-%m-%d)/g" _posts/$(date)-$(post).md
+	sed -i '' "s/0000-00-00/$$(date +%Y-%m-%d)/g" _posts/$$(date +%Y-%m-%d)-$(post).md
+
 
 up:
 	git pull origin new

@@ -4,7 +4,7 @@ title:          ""
 subtitle:     ""
 date:         0000-00-00
 author:       "Zeusro"
-header-img:   "img/b/2025/ku.webp"
+header-img:   "img/b/black/blackmyth_wukong_screenshot_017.947f4ae0.jpg"
 header-mask:  0.3
 # 目录
 catalog:      true
@@ -14,3 +14,4 @@ published:    true
 tags:
     - 
 ---
+
