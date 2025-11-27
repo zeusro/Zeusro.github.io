@@ -21,6 +21,8 @@ JAVA (hereinafter referred to as J) thinks: Java is everywhere — Android, Kotl
 
 ## The Flame War
 
+![image](/img/in-post/go-java-c/go-java-c.png)
+
 The story began when the declining N wanted to learn Android. After some experience, he started complaining about Android Studio. Everyone knows how buggy it can be. Naturally, N also blamed Google and eventually complained about Java as well. For fairness, here are the complaints:
 
 1. Projects freeze without reason  
@@ -82,6 +84,8 @@ The above content is compiled from an article published on cnblogs on April 27, 
 ```
 
 For C++ developers, this means I can write C++-callable libraries using .NET Core — essentially infiltrating their home turf. Microsoft truly is the most “evil” organization in the programming language world.
+
+![image](/img/in-post/go-java-c/assembly-is-mvp.png)
 
 ## References
 
