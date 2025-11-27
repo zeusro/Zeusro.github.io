@@ -53,7 +53,7 @@ tags:
 
 ![image](/img/in-post/date-with-hr/php.jpg)
 
-- java
+- Java
 
 ![image](/img/in-post/date-with-hr/java.jpg)
 
