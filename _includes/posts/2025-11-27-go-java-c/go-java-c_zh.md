@@ -21,6 +21,8 @@
 
 ## 撕逼大战
 
+![image](/img/in-post/go-java-c/go-java-c.png)
+
 事情的发生是从落魄N想学安卓开始.他接触了一段时候后,吐槽Android studio开始的.大家知道这玩意很多坑的,随后N就随带的埋怨其老东家Google起来最后连java也一起喷了起来.为了公正我们把喷点罗列出来.
 
 1. 项目无故卡死
@@ -84,6 +86,8 @@ J看起来很不服气,继续鞭尸一把: 切，你在一个都是用Java的群
 - IAsyncEnumerable 异步数据流处理
 - System.Threading.Channels “借鉴”golang 的channel
 - EFCore.BulkExtensions
+
+![image](/img/in-post/go-java-c/assembly-is-mvp.png)
 
 ## 参考链接
 
