@@ -79,6 +79,12 @@ J看起来很不服气,继续鞭尸一把: 切，你在一个都是用Java的群
 
 以C++来说，相当于我可以用 .NET core 写 C++代码，这属于是直接偷家了。微软不亏是编程语言界第一邪恶组织。
 
+新的命名空间：
+
+- IAsyncEnumerable 异步数据流处理
+- System.Threading.Channels “借鉴”golang 的channel
+- EFCore.BulkExtensions
+
 ## 参考链接
 
 [1]
