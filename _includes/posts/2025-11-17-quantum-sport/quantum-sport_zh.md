@@ -237,9 +237,10 @@ func (ali *AlibabaGroup) GetCost() time.Duration {
 完整代码见
 [v2](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v2)
 
+
 ## 平行时空算法
 
-平行时空算法，简单地说是划分出n块相同的txy内存空间，让n个线程各自在自己的N维空间中运动，最后通过字典去重，归一化合并。
+平行时空算法，简单地说是划分出N块相同的txy内存空间，让n个线程各自在自己的N维空间中运动，最后通过字典去重，归一化合并。
 
 解法跟“基于读写锁的一次性循环时间抢占解法”有点类似，但对元数据对象进行了重新建模，扩充了N维线段的定义。
 
@@ -320,9 +321,9 @@ func DoubleThought(n int) []NLine {
 	bean2 := NewBeansWithFirstPoint(p2, m)
 	bean2.Name = "alipay"
 
-	now := time.Now()
-	journey1 := bean1.Thought(n, now)
-	journey2 := bean2.Thought(n, now)
+	start := time.Now()
+	journey1 := bean1.Thought(n, start)
+	journey2 := bean2.Thought(n, start)
 	//归一化合并，去掉多余的点。
 	nLines := make(map[time.Time]NLine)
 	nMap := NewNLineMap(0)
@@ -339,26 +340,25 @@ func DoubleThought(n int) []NLine {
 			nMap.Add(t2, line)
 			continue
 		}
-		if t2.After(t1) {
-			delete(journey2.NBeans, k)
-			line := NLine{t: t1, Line: k.Line, actorID: bean1.Name}
-			nLines[t1] = line
-			nMap = nMap.Add(t1, line)
-			continue
+		if t2.Equal(t1) {
+			fmt.Printf("%v:%v 两个吃豆人同时到达%v，发生碰撞\n", t1, t2, k.Line)
 		}
-		//由于字典会自动去重，因此碰撞可以忽略
-		fmt.Printf("%v:%v 两个吃豆人同时到达%v，发生碰撞\n", t1, t2, k.Line)
+		delete(journey2.NBeans, k)
+		line := NLine{t: t1, Line: k.Line, actorID: bean1.Name}
+		nLines[t1] = line
+		nMap = nMap.Add(t1, line)
+		continue
 	}
 	nMap.AddZero(bean1.FirstNL)
 	nMap.AddZero(bean2.FirstNL)
-	fmt.Printf("%v : n维线段总数：%d;吃豆人%v总数%v;吃豆人%v总数%v;\n", now,
+	fmt.Printf("%v : n维线段总数：%d;吃豆人%v总数%v;吃豆人%v总数%v;\n", start,
 		len(nMap.items)+2, bean1.Name, len(journey1.NBeans), bean2.Name, len(journey2.NBeans))
 	lines := nMap.All(false)
-	fmt.Printf("len(lines):%v\n", len(lines))
+	cost := nMap.GetCost(start)
+	fmt.Printf("len(lines):%v cost:%v\n", len(lines), cost)
 	for k, v := range lines {
-		fmt.Printf("%v:%v\n", k, v.String())
+		fmt.Println(v.String(k))
 	}
-	fmt.Println(journey1.End())
 	return lines
 }
 ```
@@ -444,7 +444,7 @@ p2 := model.RandonPoint()
 	}
 ```
 
-程序运行每一次出来的结果都是随机的，而且会有概率发生“算子碰撞“——即同一个时刻有n个算子同时访问相同的点。
+程序运行每一次出来的结果都是随机的，由于时间精度的问题，会有小概率发生“算子碰撞“——即同一个时刻有n个算子同时访问相同的点。
 
 但是第1|2|n段N维线段必定符合B点相同的特征：
 
@@ -456,18 +456,19 @@ p2 := model.RandonPoint()
 
  `(672.440000,359.620000)`这个点就是时序不动点。因为不管程序如何随机运行，不管有多少随机线程，这N个随机线程初次到达的必定是同一个点。
 
+ 这个点的位置虽然随着时间偏转而无限变化，但不动点是确实存在的。
+
 从当前的传统三维角度，这是一种矛盾。因为原题是计算机的“受限资源”，每次只能由一个线程访问。但从N维空间角度上看，这并不矛盾。
 
-因为按照量子纠缠态特征，同时观察无法确定是1个点，还是2个点，或者是n个点。
+因为按照量子纠缠态特征，同时观察由于时间精度问题无法确定是1个点，还是2个点，或者是n个点。
 
 这是以时间作为键，设计出来的一种无锁多线程解题方案，同时也是N维空间量子运动的程序化解释。
+并且这种算法，也解释了角谷不动点为什么是时序不动点的特殊情况。
 
 完整算法见：
-[v3](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx)
+[v3](v3/)
 
-## 结论
-
-殊途同歸終須別，時來運去皆無常
+## 殊途同歸終須別，時來運去皆無常
 
 ## 参考文献
 
