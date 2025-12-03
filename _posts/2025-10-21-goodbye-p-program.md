@@ -24,9 +24,17 @@ tags:
 1. [p-program.github.io](https://github.com/p-program/p-program.github.io) pages-GitHub Pages的设定改为默认值，Custom domain填空
 1. 解决源代码项目中的中的**Dependabot alerts**
 1. 在源代码项目按照提示词新增 `.github/workflows/deploy.yml`
-1. 手动触发 Build & Deploy 的action即可
 
-调整之后虽然不用再导出静态HTML产物，而且DNS也不用修改（防止白嫖），但是目前来看每次都需要手动触发action，有点麻烦。
+调整之后虽然不用再导出静态HTML产物，而且DNS也不用修改（防止白嫖），而且每次根据push事件自动更新，简直完美，值得一试。
+
+```yml
+on:
+  push:
+    branches:
+      - mster      # 如果你的主分支是 master / main / mster，调整为正确的分支名
+  # 保留手动触发
+  workflow_dispatch:
+```
 
 [https://www.bullshitprogram.com/](https://github.com/p-program/p-program.github.io) 是当时代金券太多没地方花而买的域名。
 
