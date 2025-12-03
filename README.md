@@ -13,7 +13,7 @@
 
 ```bash
   # 简化版本
-  make new post=go-java-c
+  make new post=win-on-arm
   make new post='zero' date=2025-08-22
   # 多国语言版本
   make mul post=go-java-c
