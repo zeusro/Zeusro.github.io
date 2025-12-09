@@ -227,49 +227,30 @@
     function _render(_hash) {
         var _hash = _hash || window.location.hash;
         // todo 新增语言要修改这里
-        if (_hash == "#en") {
-            $select.selectedIndex = 1;
-            $en.style.display = "block";
-            $en.classList.add("active");
-            $zh.style.display = "none";
-            $zh.classList.remove("active"); 
-            $jp.style.display = "none";
-            $jp.classList.remove("active");
-            $ru.style.display = "none";
-            $ru.classList.remove("active");
-        }else if (_hash == "#jp") {
-            $select.selectedIndex = 2;
-            $jp.style.display = "block";
-            $jp.classList.add("active");
-            $zh.style.display = "none";
-            $zh.classList.remove("active");
-            $en.style.display = "none";
-            $en.classList.remove("active");
-            $ru.style.display = "none";
-            $ru.classList.remove("active");
-        }else if (_hash == "#ru") {
-            $select.selectedIndex = 3;
-            $ru.style.display = "block";
-            $ru.classList.add("active");
-            $zh.style.display = "none";
-            $zh.classList.remove("active");
-            $en.style.display = "none";
-            $en.classList.remove("active");
-            $jp.style.display = "none";
-            $jp.classList.remove("active");
-        }else{
-            // zh by default
-            // not trigger onChange, otherwise cause a loop call.
-            $select.selectedIndex = 0;
-            $zh.style.display = "block";
-            $zh.classList.add("active");
-            $en.style.display = "none";
-            $en.classList.remove("active");
-            $jp.style.display = "none";
-            $jp.classList.remove("active");
-            $ru.style.display = "none";
-            $ru.classList.remove("active");
-        }
+
+        var mapping = {
+            "#zh": 0,
+            "#en": 1,
+            "#jp": 2,
+            "#ru": 3
+        };
+
+        // default to zh
+        if (!mapping[_hash]) _hash = "#zh";
+
+        var index = mapping[_hash];
+        $select.selectedIndex = index;
+
+        var langs = [$zh, $en, $jp, $ru];
+        langs.forEach(function (el, i) {
+            if (i === index) {
+                el.style.display = "block";
+                el.classList.add("active");
+            } else {
+                el.style.display = "none";
+                el.classList.remove("active");
+            }
+        });
       
         // interop with catalog 
         if ("{{ page.catalog }}") generateCatalog(".catalog-body");
@@ -277,15 +258,8 @@
 
     // handle select change
     function onLanChange(index) {
-        if (index == 0) {
-            _hash = "#zh"
-        } 
-        if (index == 1) {
-            _hash = "#en"
-        } 
-        if (index == 2) {
-            _hash = "#jp"
-        } 
+        var hashMap = ["#zh", "#en", "#jp", "#ru"];
+        _render(hashMap[index] || "#zh");
         _render(_hash)
     }
 
