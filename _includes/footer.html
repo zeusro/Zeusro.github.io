@@ -215,6 +215,7 @@
     var $zh = document.querySelector(".zh");
     var $en = document.querySelector(".en");
     var $jp = document.querySelector(".jp");
+    var $ru = document.querySelector(".ru");
     var $select = document.querySelector("select");
 
     // bind hashchange event
@@ -234,6 +235,8 @@
             $zh.classList.remove("active"); 
             $jp.style.display = "none";
             $jp.classList.remove("active");
+            $ru.style.display = "none";
+            $ru.classList.remove("active");
         }else if (_hash == "#jp") {
             $select.selectedIndex = 2;
             $jp.style.display = "block";
@@ -242,6 +245,18 @@
             $zh.classList.remove("active");
             $en.style.display = "none";
             $en.classList.remove("active");
+            $ru.style.display = "none";
+            $ru.classList.remove("active");
+        }else if (_hash == "#ru") {
+            $select.selectedIndex = 3;
+            $ru.style.display = "block";
+            $ru.classList.add("active");
+            $zh.style.display = "none";
+            $zh.classList.remove("active");
+            $en.style.display = "none";
+            $en.classList.remove("active");
+            $jp.style.display = "none";
+            $jp.classList.remove("active");
         }else{
             // zh by default
             // not trigger onChange, otherwise cause a loop call.
@@ -252,6 +267,8 @@
             $en.classList.remove("active");
             $jp.style.display = "none";
             $jp.classList.remove("active");
+            $ru.style.display = "none";
+            $ru.classList.remove("active");
         }
       
         // interop with catalog 
