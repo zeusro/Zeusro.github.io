@@ -140,5 +140,5 @@ A will of steel is forged through countless sleepless nights, hammered ruthlessl
 
 Only after abandoning distractions can one earn the title of **“Fullmetal Alchemist”**.
 
-A thousand strikes cannot break its strength — steel forged by a hundred refinements can cut through the wind
+A thousand strikes cannot break its strength — steel forged by a hundred refinements can fly with the wind
 ---
