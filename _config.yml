@@ -99,7 +99,7 @@ service-worker: true
 # MathJax rendering for layout:page (e.g. post preview)
 page-mathjax: false
 
-languages: ["zh", "en", "jp"]
+languages: ["zh", "en", "jp", "ru"]
 default_lang: "zh"
 
 # Friends
@@ -110,6 +110,7 @@ friends:
     { title: "Naruto", href: "https://naruto.fandom.com/wiki/Narutopedia" },
      {title: "农夫山泉",href: "https://www.nongfuspring.com/",},
     { title: "McDonald", href: "https://mcdonalds.com.hk/" },
+    { title: "鋼の錬金術師", href: "https://www.hagaren.jp/" },
     { title: "广州地铁集团有限公司", href: "https://www.gzmtr.com" },
     { title: "girigirilove", href: "https://anime.girigirilove.com/" },
     { title: "Oneplus", href: "https://www.oneplus.com" },
