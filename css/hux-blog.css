@@ -795,6 +795,7 @@ select {
 select.sel-lang {
   min-height: 28px;
   font-size: 14px;
+  margin-bottom: 10px;
 }
 
 table.table>tbody th,
