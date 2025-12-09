@@ -32,6 +32,7 @@ mul:
 	touch _includes/posts/$(date)-$(post)/$(post)_en.md
 	touch _includes/posts/$(date)-$(post)/$(post)_jp.md
 	touch _includes/posts/$(date)-$(post)/$(post)_zh.md
+	touch _includes/posts/$(date)-$(post)/$(post)_ru.md
 
 #   make new post=p-program
 #   make new post='zero' date=2025-08-22
