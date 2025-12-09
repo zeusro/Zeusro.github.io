@@ -58,6 +58,11 @@ Makefile 中修改 mul 目标：
 	touch _includes/posts/$(date)-$(post)/$(post)_ru.md
 ```
 
+_config.yml 修改 languages 字段
+
+
+还有其他设置 page.multilingual 的地方。
+
 ## 鸣谢
 
 感谢[Huxpro](https://github.com/Huxpro)开发的[huxpro.github.io](https://github.com/Huxpro/huxpro.github.io)模板
