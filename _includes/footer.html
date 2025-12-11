@@ -259,8 +259,8 @@
     // handle select change
     function onLanChange(index) {
         var hashMap = ["#zh", "#en", "#jp", "#ru"];
-        _render(hashMap[index] || "#zh");
-        _render(_hash)
+        var newHash = hashMap[index] || "#zh";
+        _render(newHash);
     }
 
     // init
