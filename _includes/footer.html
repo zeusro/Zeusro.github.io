@@ -251,13 +251,37 @@
                 el.classList.remove("active");
             }
         });
-      
+
         // interop with catalog 
         if ("{{ page.catalog }}") generateCatalog(".catalog-body");
     }
 
+    //     function onLanChange(index) {
+    //     if (index == 0) {
+    //         _hash = "#zh"
+    //     } 
+    //     if (index == 1) {
+    //         _hash = "#en"
+    //     } 
+    //     if (index == 2) {
+    //         _hash = "#jp"
+    //     } 
+    //     _render(_hash)
+    // }
+
     // handle select change
     function onLanChange(index) {
+        const langMap = ["zh", "en", "jp", "ru"];
+        const lang = langMap[index] || "zh";
+
+        // 获取当前 hash（文章锚点）
+        const anchor = window.location.hash || "";
+
+        // 构建新的 query + 保留锚点
+        const url = window.location.pathname + "?lang=" + lang + anchor;
+
+        window.location.href = url;
+
         var hashMap = ["#zh", "#en", "#jp", "#ru"];
         var newHash = hashMap[index] || "#zh";
         _render(newHash);
