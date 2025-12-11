@@ -16,8 +16,8 @@
   make new post=win-on-arm
   make new post='zero' date=2025-09-23
   # 多国语言版本
-  make mul post=iron
-  make mul post='iron' date=2025-09-23
+  make mul post=card
+  make mul post=iron date=2025-09-23
 ```
 
 ## 备注
@@ -59,7 +59,6 @@ Makefile 中修改 mul 目标：
 ```
 
 _config.yml 修改 languages 字段
-
 
 还有其他设置 page.multilingual 的地方。
 
