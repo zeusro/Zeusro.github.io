@@ -277,7 +277,13 @@
         const anchor = window.location.hash || "";
         // 构建新的 query + 保留锚点
         const url = window.location.pathname + "?lang=" + lang + anchor;
-        window.location.href = url;
+        // update URL query param without reloading the page to preserve anchors
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, '', url);//history.replaceState 可以只修改地址栏（添加 ?lang=xx）而不刷新页面
+        } else {
+            // fallback: avoid full navigation if history.replaceState unavailable
+            window.location.hash = anchor || window.location.hash || '';
+        }
 
         var hashMap = ["#zh", "#en", "#jp", "#ru"];
         var newHash = hashMap[index] || "#zh";
