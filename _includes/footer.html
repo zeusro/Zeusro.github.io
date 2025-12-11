@@ -273,13 +273,10 @@
     function onLanChange(index) {
         const langMap = ["zh", "en", "jp", "ru"];
         const lang = langMap[index] || "zh";
-
         // 获取当前 hash（文章锚点）
         const anchor = window.location.hash || "";
-
         // 构建新的 query + 保留锚点
         const url = window.location.pathname + "?lang=" + lang + anchor;
-
         window.location.href = url;
 
         var hashMap = ["#zh", "#en", "#jp", "#ru"];
