@@ -127,3 +127,5 @@
 
 千磨万击还坚劲，百炼成钢乘东风
 ---
+
+![image](/img/in-post/iron/33276ca9e077bd1e7479c70ce3675a67.jpg)
