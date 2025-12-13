@@ -156,7 +156,7 @@ func (lock RWLock) GetCost() time.Duration {
 这里的解法，是基于单线程的时间抢占，如果用 `go routine`，就要实现传统的读写锁式解法，这里不再赘述。
 
 完整解法见：
- [v1](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v1)
+ [https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v1](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v1)
 
 ## 单线程消息队列解法
 
@@ -236,8 +236,7 @@ func (ali *AlibabaGroup) GetCost() time.Duration {
 也可以称为`江崎プリン`解法。
 
 完整代码见
-[v2](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v2)
-
+[https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v2](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v2)
 
 ## 平行时空算法
 
@@ -462,12 +461,13 @@ p2 := model.RandonPoint()
 从当前的传统三维角度，这是一种矛盾。因为原题是计算机的“受限资源”，每次只能由一个线程访问。但从N维平行空间角度上看，这并不矛盾。
 
 因为按照量子纠缠态特征，同时观察由于时间精度问题无法确定是1个点，还是2个点，或者是n个点。
+而且在其他的“平行时空”里面，实际上也是同样的运动点位，只是在“观测”的时候，坍塌成一个结果。
 
 这是以时间作为键，设计出来的一种无锁多线程解题方案，同时也是N维空间量子运动的程序化解释。
 并且这种算法，也解释了角谷不动点为什么是时序不动点的特殊情况。
 
 完整算法见：
-[v3](v3/)
+[https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v3](https://github.com/zeusro/system/tree/main/function/local/n/china/shenzhen/szx/v3)
 
 ## 殊途同歸終須別，時來運去皆無常
 
