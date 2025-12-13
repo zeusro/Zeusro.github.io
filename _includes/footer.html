@@ -217,12 +217,15 @@
     var $jp = document.querySelector(".jp");
     var $ru = document.querySelector(".ru");
 
+    // language selector (exists only in post layout)
+    var $select = document.querySelector("select.sel-lang");
+
     // bind hashchange event
     // Changes at v1.7.2: change the language flag from hash-basing to in-memory basing
     // due to its confliction with catalog anchors.
     // window.addEventListener('hashchange', _render);
 
-    // handle render
+    // 切换语言时切换显示内容
     function _render(_hash) {
         var _hash = _hash || window.location.hash;
         // todo 新增语言要修改这里
@@ -238,7 +241,7 @@
         if (mapping[_hash] === undefined) _hash = "#zh";
 
         var index = mapping[_hash];
-        $select.selectedIndex = index;
+        if ($select) $select.selectedIndex = index;
 
         var langs = [$zh, $en, $jp, $ru];
         langs.forEach(function (el, i) {
