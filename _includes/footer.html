@@ -216,7 +216,6 @@
     var $en = document.querySelector(".en");
     var $jp = document.querySelector(".jp");
     var $ru = document.querySelector(".ru");
-    var $select = document.querySelector("select");
 
     // bind hashchange event
     // Changes at v1.7.2: change the language flag from hash-basing to in-memory basing
@@ -236,13 +235,14 @@
         };
 
         // default to zh
-        if (!mapping[_hash]) _hash = "#zh";
+        if (mapping[_hash] === undefined) _hash = "#zh";
 
         var index = mapping[_hash];
         $select.selectedIndex = index;
 
         var langs = [$zh, $en, $jp, $ru];
         langs.forEach(function (el, i) {
+            if (!el) return; // 某些语言块不存在时直接跳过
             if (i === index) {
                 el.style.display = "block";
                 el.classList.add("active");
