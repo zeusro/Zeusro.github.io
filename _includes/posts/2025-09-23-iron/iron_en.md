@@ -135,6 +135,8 @@ Making soup at home, saying: “This typhoon is truly a great autumn wind.”
 
 ## Conclusion
 
+![image](/img/in-post/iron/mv_sp.png)
+
 Steel is never made by simply refining iron.  
 A will of steel is forged through countless sleepless nights, hammered ruthlessly by fate —  **Never giving up yourself, always moving forward** .
 
