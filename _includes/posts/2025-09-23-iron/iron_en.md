@@ -142,3 +142,5 @@ Only after abandoning distractions can one earn the title of **“Fullmetal Alch
 
 A thousand strikes cannot break its strength — steel forged by a hundred refinements can fly with the wind
 ---
+
+![image](/img/in-post/iron/33276ca9e077bd1e7479c70ce3675a67.jpg)
