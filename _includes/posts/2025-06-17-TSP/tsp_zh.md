@@ -55,7 +55,7 @@ n < n+1  → P≠NP
 2:$\not\exists x^* \in S,\ \forall x \in S,\ f(x^*) \leq f(x)$
 ```
 
-完整数学论述见 [拓展博弈论](https://github.com/zeusro/math/tree/main/game)
+完整数学论述见 [广义博弈论](https://github.com/zeusro/math/tree/main/game)
 
 按照多维宇宙假说的“局部与全局的相对性原理”，我初步认为“不存在所谓的全局最优解”。
 让我们回到基本博弈论的定义，再找出其中的漏洞。
