@@ -130,7 +130,9 @@ Having scaled the Five Great Mountains, I still tread muddy paths at night;
 Majesty behind me, hardship beneath me — the journey is far from done.
 ```
 
-“Now I know grief’s taste too well — yet hesitate to speak.”  
+![image](/img/in-post/iron/39D1CB08221AB381F89910B962160622.jpg)
+
+“Now I know grief’s taste  — yet hesitate to speak.”  
 Making soup at home, saying: “This typhoon is truly a great autumn wind.”
 
 ## Conclusion
