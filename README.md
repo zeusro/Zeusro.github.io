@@ -62,6 +62,10 @@ _config.yml 修改 languages 字段
 
 还有其他设置 page.multilingual 的地方。
 
+## TODO
+
+bug:加了 service worker之后修改非中文内容全球化内容失效；部分页面锚点失效。
+
 ## 鸣谢
 
 感谢[Huxpro](https://github.com/Huxpro)开发的[huxpro.github.io](https://github.com/Huxpro/huxpro.github.io)模板
