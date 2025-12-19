@@ -119,21 +119,21 @@ One day after school, he locked both classroom doors and beat a student with a �
 ![image](/img/in-post/iron/Dog-beating.jpeg)
 
 He is merely a narcissist craving attention — sneaking phones to school only to get them stolen twice.  
-I wonder if his rusty gasoline motorcycle has been scrapped now.  
+I wonder if his rusty gasoline BMW has been scrapped now.  
 He made me feel like I was living in my grandfather’s era.
 
-Meaningful busyness is: doing sports, reading, gaming to connect with the world,  
+**Meaningful busyness** is: doing sports, reading, gaming to connect with the world,  
 and writing to refine thinking.  
+
+
+![image](/img/in-post/iron/39D1CB08221AB381F89910B962160622.jpg)
 
 ```poem
 Having scaled the Five Great Mountains, I still tread muddy paths at night;
 Majesty behind me, hardship beneath me — the journey is far from done.
+Now I know grief’s taste  — yet hesitate to speak.
+Making soup at home, saying: “This typhoon is truly a great autumn wind.
 ```
-
-![image](/img/in-post/iron/39D1CB08221AB381F89910B962160622.jpg)
-
-“Now I know grief’s taste  — yet hesitate to speak.”  
-Making soup at home, saying: “This typhoon is truly a great autumn wind.”
 
 ## Conclusion
 
