@@ -125,7 +125,6 @@ He made me feel like I was living in my grandfather’s era.
 **Meaningful busyness** is: doing sports, reading, gaming to connect with the world,  
 and writing to refine thinking.  
 
-
 ![image](/img/in-post/iron/39D1CB08221AB381F89910B962160622.jpg)
 
 ```poem
