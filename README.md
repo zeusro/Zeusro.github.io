@@ -64,7 +64,7 @@ _config.yml 修改 languages 字段
 
 ## TODO
 
-bug:加了 service worker之后修改非中文内容全球化内容失效；部分页面锚点失效。
+bug:加了 service worker之后修改非中文内容全球化内容失效，部分页面锚点失效。
 
 ## 鸣谢
 
