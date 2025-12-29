@@ -16,7 +16,7 @@
   make new post=win-on-arm
   make new post='zero' date=2025-09-23
   # 多国语言版本
-  make mul post=card
+  make mul post=no-it-in-china
   make mul post=iron date=2025-09-23
 ```
 
