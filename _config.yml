@@ -44,6 +44,7 @@ plugins:
   - jekyll-paginate
   - jekyll-seo-tag
   - jekyll-feed
+  - jekyll-sitemap
 # - hexo-generator-baidu-sitemap
 # - hexo-generator-sitemap
 
