@@ -39,7 +39,26 @@
     <link rel="伊利丹" href="{{ site.baseurl }}/favicon.ico">
     
     <!-- Canonical URL -->
-    <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+    {% if page.multilingual %}
+        {% assign base_path = page.url | replace:'index.html','' %}
+        {% assign site_url = site.url %}
+        {% unless site_url contains '://' %}
+            {% assign site_url = 'https://' | append: site_url %}
+        {% endunless %}
+        {% assign base_url = base_path | prepend: site.baseurl | prepend: site_url %}
+        {% assign current_lang = 'zh' %}
+        {% if page.lang %}{% assign current_lang = page.lang %}{% endif %}
+        <link rel="canonical" href="{{ base_url }}?lang={{ current_lang }}">
+        
+        <!-- Hreflang tags for SEO - tells Google about alternate language versions -->
+        <link rel="alternate" hreflang="zh" href="{{ base_url }}?lang=zh">
+        <link rel="alternate" hreflang="en" href="{{ base_url }}?lang=en">
+        <link rel="alternate" hreflang="ja" href="{{ base_url }}?lang=jp">
+        <link rel="alternate" hreflang="ru" href="{{ base_url }}?lang=ru">
+        <link rel="alternate" hreflang="x-default" href="{{ base_url }}?lang=zh">
+    {% else %}
+        <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
+    {% endif %}
 
     <!-- Bootstrap Core CSS -->
     <link rel="stylesheet" href="{{ "/css/bootstrap.min.css" | prepend: site.baseurl }}">

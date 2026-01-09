@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+{% if page.multilingual %}
+    {% assign default_lang = 'zh' %}
+    {% if page.lang %}{% assign default_lang = page.lang %}{% endif %}
+    {% if default_lang == 'jp' %}{% assign default_lang = 'ja' %}{% endif %}
+    <html lang="{{ default_lang }}">
+{% else %}
+    <html lang="zh">
+{% endif %}
 
 {% include head.html %}
 

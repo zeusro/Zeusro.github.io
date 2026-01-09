@@ -311,7 +311,16 @@
 
     // 切换语言时切换显示内容
     function _render(_hash) {
-        var _hash = _hash || window.location.hash;
+        // 如果没有传入_hash参数，优先从URL参数读取语言，其次从hash读取
+        if (!_hash) {
+            var urlParams = new URLSearchParams(window.location.search);
+            var langParam = urlParams.get('lang');
+            if (langParam) {
+                _hash = '#' + langParam;
+            } else {
+                _hash = window.location.hash;
+            }
+        }
         // todo 新增语言要修改这里
 
         var mapping = {
@@ -326,6 +335,11 @@
 
         var index = mapping[_hash];
         if ($select) $select.selectedIndex = index;
+        
+        // 更新html lang属性
+        var langMap = ["zh", "en", "ja", "ru"]; // jp -> ja for HTML lang attribute
+        var htmlLang = langMap[index] || "zh";
+        document.documentElement.lang = htmlLang;
 
         var langs = [$zh, $en, $jp, $ru];
         langs.forEach(function (el, i) {
