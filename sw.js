@@ -67,6 +67,7 @@ const DEPRECATED_CACHES = ['precache-v1', 'runtime', 'main-precache-v1', 'main-r
  * 作用：
  * 1. 修复 HTTP URL，使其与当前页面的协议保持一致（避免混合内容问题）
  * 2. 添加时间戳查询参数，绕过浏览器和 GitHub Pages 的缓存
+ * 3. 保留多语言参数（lang），确保不同语言版本被正确缓存
  * 
  * GitHub Pages 使用 Cache-Control: max-age=600，这可能导致内容更新延迟
  * 通过添加 cache-bust 参数，强制获取最新内容
@@ -84,9 +85,13 @@ const getCacheBustingUrl = (req) => {
   // fetch(httpURL) 属于混合内容，fetch(httpRequest) 目前还不支持
   url.protocol = self.location.protocol
 
-  // 2. 添加缓存破坏查询参数
+  // 2. 添加缓存破坏查询参数，但保留 lang 参数
   // 使用时间戳确保每次请求都是唯一的
-  url.search += (url.search ? '&' : '?') + 'cache-bust=' + now
+  // 重要：保留 lang 参数，确保不同语言版本被正确缓存和区分
+  const params = new URLSearchParams(url.search)
+  params.set('cache-bust', now.toString())
+  url.search = params.toString()
+  
   return url.href
 }
 
@@ -430,9 +435,11 @@ self.addEventListener('fetch', event => {
   )
 
   // 如果是 HTML 导航请求，检查内容是否有更新
-  if (isNavigationReq(event.request)) {
+  // 注意：只对同源请求进行内容验证，避免跨域问题
+  if (isNavigationReq(event.request) && HOSTNAME_WHITELIST.includes(hostname)) {
     // 注意：这个日志在导航发生前执行，需要开启 "preserve logs" 才能看到
     console.log(`[SW] Navigation request: ${requestUrl}`)
+    // 立即开始验证，不等待响应完成（使用 fetchedCopy 而不是等待 fetched）
     event.waitUntil(revalidateContent(cached, fetchedCopy))
   }
 })
@@ -470,6 +477,7 @@ function sendMessageToAllClients(msg) {
  * 说明：
  * - 使用 setTimeout 延迟发送，等待新客户端页面加载完成
  * - 这是因为在 fetch 事件期间，新打开的页面可能还没有完全初始化
+ * - 减少延迟时间以加快更新检测响应速度
  * 
  * @param {Object} msg - 要发送的消息对象
  * 
@@ -477,29 +485,29 @@ function sendMessageToAllClients(msg) {
  * @see https://jakearchibald.com/2016/service-worker-meeting-notes/#fetch-event-clients
  */
 function sendMessageToClientsAsync(msg) {
-  // 延迟 1 秒发送，确保新客户端页面已经加载完成
+  // 减少延迟到 100ms，加快更新检测响应速度
+  // 这个延迟足够让新客户端页面初始化，同时不会让用户感觉到明显的延迟
   setTimeout(() => {
     sendMessageToAllClients(msg)
-  }, 1000)
+  }, 100)
 }
 
 /**
  * 验证内容是否有更新
  * 
  * 功能：
- * - 比较缓存版本和网络版本的 Last-Modified 头
- * - 如果内容已更新，通知所有客户端页面刷新
+ * - 使用多种方式检测内容更新：ETag > Last-Modified > Content-Length
+ * - 如果内容已更新，立即通知所有客户端页面刷新
+ * - 优化检测速度，减少延迟
  * 
- * 注意：
- * - GitHub Pages 在每次发布时都会重建所有内容
- * - 可能需要使用 ETag 或其他机制来更准确地检测更新
- * - 目前使用 Last-Modified 头作为版本标识
+ * 检测策略：
+ * 1. 优先使用 ETag（更准确，GitHub Pages 通常提供）
+ * 2. 其次使用 Last-Modified（如果 ETag 不可用）
+ * 3. 最后使用 Content-Length（作为后备方案）
  * 
  * @param {Promise<Response>} cachedResp - 缓存响应的 Promise
  * @param {Promise<Response>} fetchedResp - 网络响应的 Promise
  * @returns {Promise<void>}
- * 
- * @todo 考虑使用 ETag 或与 Cloudflare 集成来更准确地检测更新
  */
 function revalidateContent(cachedResp, fetchedResp) {
   return Promise.all([cachedResp, fetchedResp])
@@ -510,22 +518,62 @@ function revalidateContent(cachedResp, fetchedResp) {
         return
       }
 
-      // 获取 Last-Modified 头作为版本标识
-      const cachedVer = cached.headers.get('last-modified')
-      const fetchedVer = fetched.headers.get('last-modified')
+      // 如果网络请求失败，不进行验证
+      if (!fetched || !fetched.ok) {
+        console.log('[SW] Network response not available for revalidation')
+        return
+      }
+
+      // 策略1: 使用 ETag 检测（最准确）
+      const cachedETag = cached.headers.get('etag')
+      const fetchedETag = fetched.headers.get('etag')
       
-      console.log(`[SW] Content revalidation: "${cachedVer}" vs. "${fetchedVer}"`)
+      if (cachedETag && fetchedETag) {
+        if (cachedETag !== fetchedETag) {
+          console.log(`[SW] Content updated (ETag changed): "${cachedETag}" -> "${fetchedETag}"`)
+          sendMessageToAllClients({
+            command: 'UPDATE_FOUND',
+            url: fetched.url
+          })
+          return
+        } else {
+          console.log('[SW] Content unchanged (ETag match)')
+          return
+        }
+      }
+
+      // 策略2: 使用 Last-Modified 检测
+      const cachedLastModified = cached.headers.get('last-modified')
+      const fetchedLastModified = fetched.headers.get('last-modified')
       
-      // 如果版本不同，说明内容已更新
-      if (cachedVer !== fetchedVer) {
-        console.log('[SW] Content updated, notifying clients...')
-        sendMessageToClientsAsync({
+      if (cachedLastModified && fetchedLastModified) {
+        if (cachedLastModified !== fetchedLastModified) {
+          console.log(`[SW] Content updated (Last-Modified changed): "${cachedLastModified}" -> "${fetchedLastModified}"`)
+          sendMessageToAllClients({
+            command: 'UPDATE_FOUND',
+            url: fetched.url
+          })
+          return
+        } else {
+          console.log('[SW] Content unchanged (Last-Modified match)')
+          return
+        }
+      }
+
+      // 策略3: 使用 Content-Length 作为后备（不够准确，但比没有好）
+      const cachedLength = cached.headers.get('content-length')
+      const fetchedLength = fetched.headers.get('content-length')
+      
+      if (cachedLength && fetchedLength && cachedLength !== fetchedLength) {
+        console.log(`[SW] Content may be updated (Content-Length changed): "${cachedLength}" -> "${fetchedLength}"`)
+        sendMessageToAllClients({
           command: 'UPDATE_FOUND',
           url: fetched.url
         })
-      } else {
-        console.log('[SW] Content unchanged')
+        return
       }
+
+      console.log('[SW] Content unchanged (no version headers available)')
     })
     .catch(err => {
       // 验证失败不影响主流程
