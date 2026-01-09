@@ -277,21 +277,26 @@
      * Doc: https://github.com/davist11/jQuery-One-Page-Nav
      * Fork by Hux to support padding
      */
-    async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
-        $('.catalog-body').onePageNav({
-            currentClass: "active",
-            changeHash: !1,
-            easing: "swing",
-            filter: "",
-            scrollSpeed: 700,
-            scrollOffset: 0,
-            scrollThreshold: .2,
-            begin: null,
-            end: null,
-            scrollChange: null,
-            padding: 80
+    var onePageNavInitialized = false;
+    function initOnePageNav() {
+        async("{{ '/js/jquery.nav.js' | prepend: site.baseurl }}", function () {
+            $('.catalog-body').onePageNav({
+                currentClass: "active",
+                changeHash: !1,
+                easing: "swing",
+                filter: "",
+                scrollSpeed: 700,
+                scrollOffset: 0,
+                scrollThreshold: .2,
+                begin: null,
+                end: null,
+                scrollChange: null,
+                padding: 80
+            });
+            onePageNavInitialized = true;
         });
-    });
+    }
+    initOnePageNav();
 </script>
 {% endif %}
 
@@ -354,7 +359,15 @@
         });
 
         // interop with catalog 
-        if ("{{ page.catalog }}") generateCatalog(".catalog-body");
+        if ("{{ page.catalog }}") {
+            generateCatalog(".catalog-body");
+            // 重新生成目录后，重新初始化 onePageNav
+            if (onePageNavInitialized) {
+                setTimeout(function() {
+                    initOnePageNav();
+                }, 100);
+            }
+        }
     }
 
     //     function onLanChange(index) {
