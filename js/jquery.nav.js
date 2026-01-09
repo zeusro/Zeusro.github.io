@@ -144,8 +144,11 @@
 			var $link = $(e.currentTarget);
 			var $parent = $link.parent();
 			var newLoc = '#' + self.getHash($link);
+			var isCurrentSection = $parent.hasClass(self.config.currentClass);
 
-			if(!$parent.hasClass(self.config.currentClass)) {
+			// 修复：即使点击的是当前已激活的锚点，也允许滚动
+			// 这样可以确保锚点点击始终有效
+			if(!isCurrentSection) {
 				//Start callback
 				if(self.config.begin) {
 					self.config.begin();
@@ -153,26 +156,27 @@
 
 				//Change the highlighted nav item
 				self.adjustNav(self, $parent);
-
-				//Removing the auto-adjust on scroll
-				self.unbindInterval();
-
-				//Scroll to the correct position
-				self.scrollTo(newLoc, function() {
-					//Do we need to change the hash?
-					if(self.config.changeHash) {
-						window.location.hash = newLoc;
-					}
-
-					//Add the auto-adjust on scroll back in
-					self.bindInterval();
-
-					//End callback
-					if(self.config.end) {
-						self.config.end();
-					}
-				});
 			}
+
+			//Removing the auto-adjust on scroll
+			self.unbindInterval();
+
+			//Scroll to the correct position (always scroll, even if it's the current section)
+			self.scrollTo(newLoc, function() {
+				//Do we need to change the hash?
+				if(self.config.changeHash) {
+					window.location.hash = newLoc;
+				}
+
+				//Add the auto-adjust on scroll back in
+				// 确保 bindInterval 总是被调用，防止事件监听器丢失
+				self.bindInterval();
+
+				//End callback
+				if(self.config.end && !isCurrentSection) {
+					self.config.end();
+				}
+			});
 
 			e.preventDefault();
 		},
