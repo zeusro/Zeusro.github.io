@@ -34,46 +34,69 @@
 <script src="{{ " /js/top.js " | prepend: site.baseurl }}"></script>
 <script>
     (function() {
-        var backToTopBtn = document.getElementById('back-to-top');
-        var scrollThreshold = 300; // 滚动超过 300px 后显示按钮
-        
-        if (!backToTopBtn) return;
-        
-        // 监听滚动事件
-        function handleScroll() {
-            var scrollTop = Math.max(
-                document.documentElement.scrollTop || 0,
-                document.body.scrollTop || 0,
-                window.scrollY || 0
-            );
+        // 等待 DOM 加载完成
+        function initBackToTop() {
+            var backToTopBtn = document.getElementById('back-to-top');
+            var scrollThreshold = 200; // 滚动超过 200px 后显示按钮
             
-            if (scrollTop > scrollThreshold) {
-                backToTopBtn.classList.add('show');
-            } else {
-                backToTopBtn.classList.remove('show');
+            if (!backToTopBtn) {
+                console.warn('Back to top button not found');
+                return;
             }
+            
+            // 监听滚动事件
+            function handleScroll() {
+                var scrollTop = Math.max(
+                    document.documentElement.scrollTop || 0,
+                    document.body.scrollTop || 0,
+                    window.scrollY || 0
+                );
+                
+                if (scrollTop > scrollThreshold) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            }
+            
+            // 绑定滚动事件（使用节流优化性能）
+            var ticking = false;
+            window.addEventListener('scroll', function() {
+                if (!ticking) {
+                    window.requestAnimationFrame(function() {
+                        handleScroll();
+                        ticking = false;
+                    });
+                    ticking = true;
+                }
+            }, { passive: true });
+            
+            // 绑定点击事件
+            backToTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof goTop === 'function') {
+                    goTop(0.1, 16); // 使用默认参数调用 goTop 函数
+                } else {
+                    // 如果 goTop 函数未加载，使用原生滚动
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+            
+            // 初始化检查
+            handleScroll();
         }
         
-        // 绑定滚动事件（使用节流优化性能）
-        var ticking = false;
-        window.addEventListener('scroll', function() {
-            if (!ticking) {
-                window.requestAnimationFrame(function() {
-                    handleScroll();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        });
-        
-        // 绑定点击事件
-        backToTopBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            goTop(0.1, 16); // 使用默认参数调用 goTop 函数
-        });
-        
-        // 初始化检查
-        handleScroll();
+        // 确保在 DOM 加载完成后执行
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initBackToTop);
+        } else {
+            // DOM 已经加载完成
+            initBackToTop();
+        }
     })();
 </script>
 
