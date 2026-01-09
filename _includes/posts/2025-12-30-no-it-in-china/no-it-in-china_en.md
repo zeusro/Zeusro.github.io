@@ -33,7 +33,7 @@ It’s like I brought a flyer advertising a beautiful masseuse, but was greeted 
 
 AI has found its way, Python ascends.
 
-## Language Design & Operating System Development
+## Language Design & Operating System
 
 Programming languages are a deep field of study. Control flow, machine code translation, abstract syntax trees, GC, threads, compiler theory—all these are so complex that I can barely solve 1+1.
 
@@ -64,7 +64,7 @@ The upstream of software development is integrated circuits. We do have a good f
 Software development and integrated circuits should be industries of steady accumulation and theory-practice integration. Instead, university research almost prides itself on scamming funds (e.g., calling advisors “bosses”);  
 private enterprises, under the guise of youthfulness, harvest middle-aged workers like crops, causing experienced senior developers to lose jobs, all while praising this as “delivering talent to society.”
 
-## The Sword and Qi Dispute
+## Two styles of swords
 
 This is like the dispute between the Sword Sect and Qi Sect of Mount Hua. After the Sword Sect (the younger faction) took power, they kicked out Qi Sect practitioners (senior developers). Because Sword Sect practices yield fast results, are sure to profit, and have cheap labor.
 
