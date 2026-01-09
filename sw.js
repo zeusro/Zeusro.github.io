@@ -1,17 +1,29 @@
 /* ===========================================================
- * sw.js
+ * sw.js - Service Worker 主文件
  * ===========================================================
  * Copyright 2016 @huxpro
  * Licensed under Apache 2.0
- * service worker scripting
+ * Service Worker 脚本 - 提供离线缓存和网络请求拦截功能
  * ========================================================== */
 
-// CACHE_NAMESPACE
-// CacheStorage is shared between all sites under same domain.
-// A namespace can prevent potential name conflicts and mis-deletion.
+/**
+ * 缓存命名空间
+ * CacheStorage 在同一域名下的所有站点之间共享
+ * 使用命名空间可以防止潜在的命名冲突和误删除
+ */
 const CACHE_NAMESPACE = 'main-'
 
-const CACHE = CACHE_NAMESPACE + 'precache-then-runtime';
+/**
+ * 当前使用的缓存名称
+ * 采用 "precache-then-runtime" 策略：预缓存 + 运行时缓存
+ */
+const CACHE = CACHE_NAMESPACE + 'precache-then-runtime'
+
+/**
+ * 预缓存列表
+ * 这些资源会在 Service Worker 安装时立即缓存
+ * 包括：首页、离线页面、核心 JS/CSS 文件、关键图片等
+ */
 const PRECACHE_LIST = [
   "./",
   "./offline.html",
@@ -29,240 +41,494 @@ const PRECACHE_LIST = [
   // "//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/fonts/fontawesome-webfont.woff2?v=4.6.3",
   // "//cdnjs.cloudflare.com/ajax/libs/fastclick/1.0.6/fastclick.min.js"
 ]
+
+/**
+ * 主机名白名单
+ * 只有来自这些域名的请求才会被 Service Worker 处理
+ * 用于跳过跨域请求（如 Google Analytics）
+ */
 const HOSTNAME_WHITELIST = [
   self.location.hostname,
   "huangxuan.me",
   "yanshuo.io",
   "cdnjs.cloudflare.com"
 ]
+
+/**
+ * 已废弃的缓存名称列表
+ * 在激活事件中会删除这些旧缓存，释放存储空间
+ */
 const DEPRECATED_CACHES = ['precache-v1', 'runtime', 'main-precache-v1', 'main-runtime']
 
 
-// The Util Function to hack URLs of intercepted requests
+/**
+ * 工具函数：为请求 URL 添加缓存破坏参数
+ * 
+ * 作用：
+ * 1. 修复 HTTP URL，使其与当前页面的协议保持一致（避免混合内容问题）
+ * 2. 添加时间戳查询参数，绕过浏览器和 GitHub Pages 的缓存
+ * 
+ * GitHub Pages 使用 Cache-Control: max-age=600，这可能导致内容更新延迟
+ * 通过添加 cache-bust 参数，强制获取最新内容
+ * 
+ * @param {Request} req - 原始请求对象
+ * @returns {string} 添加了缓存破坏参数的 URL
+ * 
+ * @see https://bugs.chromium.org/p/chromium/issues/detail?id=453190
+ */
 const getCacheBustingUrl = (req) => {
-  var now = Date.now();
-  url = new URL(req.url)
+  const now = Date.now()
+  const url = new URL(req.url)
 
-  // 1. fixed http URL
-  // Just keep syncing with location.protocol
-  // fetch(httpURL) belongs to active mixed content.
-  // And fetch(httpRequest) is not supported yet.
+  // 1. 修复协议：确保与当前页面协议一致
+  // fetch(httpURL) 属于混合内容，fetch(httpRequest) 目前还不支持
   url.protocol = self.location.protocol
 
-  // 2. add query for caching-busting.
-  // Github Pages served with Cache-Control: max-age=600
-  // max-age on mutable content is error-prone, with SW life of bugs can even extend.
-  // Until cache mode of Fetch API landed, we have to workaround cache-busting with query string.
-  // Cache-Control-Bug: https://bugs.chromium.org/p/chromium/issues/detail?id=453190
-  url.search += (url.search ? '&' : '?') + 'cache-bust=' + now;
+  // 2. 添加缓存破坏查询参数
+  // 使用时间戳确保每次请求都是唯一的
+  url.search += (url.search ? '&' : '?') + 'cache-bust=' + now
   return url.href
 }
 
-// The Util Function to detect and polyfill req.mode="navigate"
-// request.mode of 'navigate' is unfortunately not supported in Chrome
-// versions older than 49, so we need to include a less precise fallback,
-// which checks for a GET request with an Accept: text/html header.
-const isNavigationReq = (req) => (req.mode === 'navigate' || (req.method === 'GET' && req.headers.get('accept').includes('text/html')))
+/**
+ * 工具函数：检测是否为导航请求（页面请求）
+ * 
+ * 说明：
+ * - request.mode === 'navigate' 在 Chrome 49 以下版本不支持
+ * - 因此需要回退方案：检查是否为 GET 请求且 Accept 头包含 text/html
+ * 
+ * @param {Request} req - 请求对象
+ * @returns {boolean} 是否为导航请求
+ */
+const isNavigationReq = (req) => {
+  return req.mode === 'navigate' || 
+         (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'))
+}
 
-// The Util Function to detect if a req is end with extension
-// Accordin to Fetch API spec <https://fetch.spec.whatwg.org/#concept-request-destination>
-// Any HTML's navigation has consistently mode="navigate" type="" and destination="document"
-// including requesting an img (or any static resources) from URL Bar directly.
-// So It ends up with that regExp is still the king of URL routing ;)
-// P.S. An url.pathname has no '.' can not indicate it ends with extension (e.g. /api/version/1.2/)
-const endWithExtension = (req) => Boolean(new URL(req.url).pathname.match(/\.\w+$/))
+/**
+ * 工具函数：检测 URL 路径是否以文件扩展名结尾
+ * 
+ * 说明：
+ * - 根据 Fetch API 规范，HTML 导航请求的 mode="navigate", destination="document"
+ * - 即使是直接从地址栏请求图片等静态资源，也会被视为导航请求
+ * - 因此需要使用正则表达式来判断 URL 是否以扩展名结尾
+ * - 注意：路径中没有 '.' 不能说明没有扩展名（如 /api/version/1.2/）
+ * 
+ * @param {Request} req - 请求对象
+ * @returns {boolean} URL 路径是否以扩展名结尾
+ * 
+ * @see https://fetch.spec.whatwg.org/#concept-request-destination
+ */
+const endWithExtension = (req) => {
+  return Boolean(new URL(req.url).pathname.match(/\.\w+$/))
+}
 
-// Redirect in SW manually fixed github pages arbitray 404s on things?blah
-// what we want:
-//    repo?blah -> !(gh 404) -> sw 302 -> repo/?blah
-//    .ext?blah -> !(sw 302 -> .ext/?blah -> gh 404) -> .ext?blah
-// If It's a navigation req and it's url.pathname isn't end with '/' or '.ext'
-// it should be a dir/repo request and need to be fixed (a.k.a be redirected)
-// Tracking https://twitter.com/Huxpro/status/798816417097224193
-const shouldRedirect = (req) => (isNavigationReq(req) && new URL(req.url).pathname.substr(-1) !== "/" && !endWithExtension(req))
+/**
+ * 工具函数：判断是否需要重定向
+ * 
+ * 问题背景：
+ * GitHub Pages 在处理类似 "repo?blah" 的 URL 时会返回 404
+ * 
+ * 解决方案：
+ * - repo?blah -> SW 302 重定向 -> repo/?blah（正确）
+ * - .ext?blah -> 不应重定向（否则会导致 404）
+ * 
+ * 判断逻辑：
+ * - 是导航请求
+ * - 路径不以 '/' 结尾
+ * - 路径不以扩展名结尾
+ * 
+ * @param {Request} req - 请求对象
+ * @returns {boolean} 是否需要重定向
+ * 
+ * @see https://twitter.com/Huxpro/status/798816417097224193
+ */
+const shouldRedirect = (req) => {
+  const url = new URL(req.url)
+  return isNavigationReq(req) && 
+         url.pathname.substr(-1) !== "/" && 
+         !endWithExtension(req)
+}
 
-// The Util Function to get redirect URL
-// `${url}/` would mis-add "/" in the end of query, so we use URL object.
-// P.P.S. Always trust url.pathname instead of the whole url string.
+/**
+ * 工具函数：获取重定向后的 URL
+ * 
+ * 说明：
+ * - 不能直接使用 `${url}/`，这会在查询字符串末尾错误地添加 "/"
+ * - 应该使用 URL 对象操作 pathname，然后重新生成 href
+ * - 始终信任 url.pathname 而不是整个 URL 字符串
+ * 
+ * @param {Request} req - 请求对象
+ * @returns {string} 重定向后的 URL
+ */
 const getRedirectUrl = (req) => {
-  url = new URL(req.url)
+  const url = new URL(req.url)
   url.pathname += "/"
   return url.href
 }
 
 
 /**
- *  @Lifecycle Install
- *  Precache anything static to this version of your app.
- *  e.g. App Shell, 404, JS/CSS dependencies...
- *
- *  waitUntil() : installing ====> installed
- *  skipWaiting() : waiting(installed) ====> activating
+ * Service Worker 生命周期：安装事件
+ * 
+ * 功能：
+ * - 预缓存静态资源（App Shell、404 页面、JS/CSS 依赖等）
+ * - 立即激活新的 Service Worker，无需等待旧版本关闭
+ * 
+ * 生命周期流程：
+ * - waitUntil(): installing ====> installed
+ * - skipWaiting(): waiting(installed) ====> activating
+ * 
+ * @event install
  */
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE).then(cache => {
-      return cache.addAll(PRECACHE_LIST)
-        .then(self.skipWaiting())
-        .catch(err => console.log(err))
-    })
+self.addEventListener('install', event => {
+  console.log('[SW] Installing service worker...')
+  
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => {
+        console.log('[SW] Precaching static assets...')
+        return cache.addAll(PRECACHE_LIST)
+      })
+      .then(() => {
+        console.log('[SW] Static assets precached, skipping waiting...')
+        return self.skipWaiting() // 立即激活，不等待旧版本关闭
+      })
+      .catch(err => {
+        console.error('[SW] Installation failed:', err)
+        throw err // 重新抛出错误，让 waitUntil 知道安装失败
+      })
   )
-});
+})
 
 
 /**
- *  @Lifecycle Activate
- *  New one activated when old isnt being used.
- *
- *  waitUntil(): activating ====> activated
+ * Service Worker 生命周期：激活事件
+ * 
+ * 功能：
+ * - 删除已废弃的旧缓存，释放存储空间
+ * - 立即控制所有客户端页面（无需刷新）
+ * 
+ * 生命周期流程：
+ * - waitUntil(): activating ====> activated
+ * 
+ * @event activate
  */
 self.addEventListener('activate', event => {
-  // delete old deprecated caches.
-  caches.keys().then(cacheNames => Promise.all(
-    cacheNames
-      .filter(cacheName => DEPRECATED_CACHES.includes(cacheName))
-      .map(cacheName => caches.delete(cacheName))
-  ))
-  console.log('service worker activated.')
-  event.waitUntil(self.clients.claim());
-});
+  console.log('[SW] Activating service worker...')
+  
+  // 删除已废弃的缓存
+  const deleteOldCaches = caches.keys()
+    .then(cacheNames => {
+      const cachesToDelete = cacheNames.filter(cacheName => 
+        DEPRECATED_CACHES.includes(cacheName)
+      )
+      
+      if (cachesToDelete.length > 0) {
+        console.log('[SW] Deleting deprecated caches:', cachesToDelete)
+        return Promise.all(
+          cachesToDelete.map(cacheName => caches.delete(cacheName))
+        )
+      }
+    })
+    .catch(err => {
+      console.error('[SW] Failed to delete old caches:', err)
+    })
+  
+  // 立即控制所有客户端页面
+  const claimClients = self.clients.claim()
+    .then(() => {
+      console.log('[SW] Service worker activated and controlling clients')
+    })
+    .catch(err => {
+      console.error('[SW] Failed to claim clients:', err)
+    })
+  
+  event.waitUntil(
+    Promise.all([deleteOldCaches, claimClients])
+  )
+})
 
 
-var fetchHelper = {
+/**
+ * 网络请求辅助工具对象
+ * 提供常用的缓存策略实现
+ */
+const fetchHelper = {
+  /**
+   * 网络优先策略：先请求网络，然后缓存响应
+   * 
+   * 说明：
+   * - 使用 CORS 模式，不包含凭证（避免跨域问题）
+   * - 不透明的响应（Opaque Response）没有 headers，无法判断 ok 状态
+   * - 只有成功的响应（response.ok）才会被缓存
+   * 
+   * @param {Request|string} request - 请求对象或 URL
+   * @returns {Promise<Response>} 网络响应
+   */
+  fetchThenCache: function(request) {
+    // 配置请求选项
+    // - mode: "cors" - 允许跨域请求
+    // - credentials: "omit" - 不发送凭证（避免 CORS 预检）
+    const init = { 
+      mode: "cors", 
+      credentials: "omit" 
+    }
 
-  fetchThenCache: function(request){
-    // Requests with mode "no-cors" can result in Opaque Response,
-    // Requests to Allow-Control-Cross-Origin: * can't include credentials.
-    const init = { mode: "cors", credentials: "omit" } 
-
+    // 发起网络请求
     const fetched = fetch(request, init)
-    const fetchedCopy = fetched.then(resp => resp.clone());
-
-    // NOTE: Opaque Responses have no hedaders so [[ok]] make no sense to them
-    //       so Opaque Resp will not be cached in this case.
-    Promise.all([fetchedCopy, caches.open(CACHE)])
-      .then(([response, cache]) => response.ok && cache.put(request, response))
-      .catch(_ => {/* eat any errors */})
     
-    return fetched;
+    // 克隆响应（因为 Response 只能读取一次）
+    const fetchedCopy = fetched.then(resp => resp.clone())
+
+    // 后台更新缓存（不阻塞响应）
+    // 注意：不透明的响应没有 headers，response.ok 对它们没有意义
+    Promise.all([fetchedCopy, caches.open(CACHE)])
+      .then(([response, cache]) => {
+        // 只缓存成功的响应
+        if (response.ok) {
+          return cache.put(request, response)
+        }
+      })
+      .catch(err => {
+        // 静默处理错误，不影响主流程
+        console.warn('[SW] Failed to cache response:', err)
+      })
+    
+    return fetched
   },
 
-  cacheFirst: function(url){
-    return caches.match(url) 
-      .then(resp => resp || this.fetchThenCache(url))
-      .catch(_ => {/* eat any errors */})
+  /**
+   * 缓存优先策略：先查缓存，缓存未命中时再请求网络
+   * 
+   * 适用场景：
+   * - 静态资源（如图片、字体等）
+   * - 不经常更新的内容
+   * 
+   * @param {Request|string} url - 请求对象或 URL
+   * @returns {Promise<Response>} 缓存或网络响应
+   */
+  cacheFirst: function(url) {
+    return caches.match(url)
+      .then(resp => {
+        // 如果缓存中有，直接返回
+        if (resp) {
+          return resp
+        }
+        // 否则请求网络并缓存
+        return this.fetchThenCache(url)
+      })
+      .catch(err => {
+        console.warn('[SW] Cache-first strategy failed:', err)
+        // 如果都失败了，尝试直接请求网络
+        return fetch(url)
+      })
   }
 }
 
 
 /**
- *  @Functional Fetch
- *  All network requests are being intercepted here.
- *
- *  void respondWith(Promise<Response> r);
+ * Service Worker 功能：拦截网络请求
+ * 
+ * 所有网络请求都会被这里拦截，我们可以：
+ * - 从缓存返回响应（离线支持）
+ * - 修改请求（如添加缓存破坏参数）
+ * - 实现自定义缓存策略
+ * 
+ * 请求处理流程：
+ * 1. 检查主机名白名单（跳过跨域请求如 Google Analytics）
+ * 2. 处理 GitHub Pages 404 重定向问题
+ * 3. 对特定资源使用缓存优先策略
+ * 4. 对动态内容使用 stale-while-revalidate 策略
+ * 5. 对导航请求进行内容更新检查
+ * 
+ * @event fetch
+ * @see https://www.mnot.net/blog/2007/12/12/stale
+ * @see https://gist.github.com/surma/eb441223daaedf880801ad80006389f1
  */
 self.addEventListener('fetch', event => {
-  // logs for debugging
-  //console.log(`fetch ${event.request.url}`)
-  //console.log(` - type: ${event.request.type}; destination: ${event.request.destination}`)
-  //console.log(` - mode: ${event.request.mode}, accept: ${event.request.headers.get('accept')}`)
+  const requestUrl = event.request.url
+  const hostname = new URL(requestUrl).hostname
 
-  // Skip some of cross-origin requests, like those for Google Analytics.
-  if (HOSTNAME_WHITELIST.indexOf(new URL(event.request.url).hostname) > -1) {
+  // 调试日志（需要时可取消注释）
+  // console.log(`[SW] Fetch: ${requestUrl}`)
+  // console.log(`[SW] - type: ${event.request.type}; destination: ${event.request.destination}`)
+  // console.log(`[SW] - mode: ${event.request.mode}, accept: ${event.request.headers.get('accept')}`)
 
-    // Redirect in SW manually fixed github pages 404s on repo?blah
-    if (shouldRedirect(event.request)) {
-      event.respondWith(Response.redirect(getRedirectUrl(event.request)))
-      return;
-    }
-
-    // Cache-only Startgies for ys.static resources
-    if (event.request.url.indexOf('ys.static') > -1){
-      event.respondWith(fetchHelper.cacheFirst(event.request.url))
-      return;
-    }
-
-    // Stale-while-revalidate for possiblily dynamic content
-    // similar to HTTP's stale-while-revalidate: https://www.mnot.net/blog/2007/12/12/stale
-    // Upgrade from Jake's to Surma's: https://gist.github.com/surma/eb441223daaedf880801ad80006389f1
-    const cached = caches.match(event.request);
-    const fetched = fetch(getCacheBustingUrl(event.request), { cache: "no-store" });
-    const fetchedCopy = fetched.then(resp => resp.clone());
-    
-    // Call respondWith() with whatever we get first.
-    // Promise.race() resolves with first one settled (even rejected)
-    // If the fetch fails (e.g disconnected), wait for the cache.
-    // If there’s nothing in cache, wait for the fetch.
-    // If neither yields a response, return offline pages.
-    event.respondWith(
-      Promise.race([fetched.catch(_ => cached), cached])
-        .then(resp => resp || fetched)
-        .catch(_ => caches.match('offline.html'))
-    );
-
-    // Update the cache with the version we fetched (only for ok status)
-    event.waitUntil(
-      Promise.all([fetchedCopy, caches.open(CACHE)])
-        .then(([response, cache]) => response.ok && cache.put(event.request, response))
-        .catch(_ => {/* eat any errors */ })
-    );
-
-    // If one request is a HTML naviagtion, checking update!
-    if (isNavigationReq(event.request)) {
-      // you need "preserve logs" to see this log
-      // cuz it happened before navigating
-      console.log(`fetch ${event.request.url}`)
-      event.waitUntil(revalidateContent(cached, fetchedCopy))
-    }
+  // 只处理白名单中的域名请求，跳过其他跨域请求（如 Google Analytics）
+  if (!HOSTNAME_WHITELIST.includes(hostname)) {
+    return // 不处理，使用默认网络请求
   }
-});
+
+  // 处理 GitHub Pages 404 重定向问题
+  // 例如：repo?blah -> repo/?blah
+  if (shouldRedirect(event.request)) {
+    const redirectUrl = getRedirectUrl(event.request)
+    console.log(`[SW] Redirecting: ${requestUrl} -> ${redirectUrl}`)
+    event.respondWith(Response.redirect(redirectUrl))
+    return
+  }
+
+  // 对特定静态资源使用缓存优先策略
+  // 例如：ys.static 域名下的资源
+  if (requestUrl.indexOf('ys.static') > -1) {
+    event.respondWith(fetchHelper.cacheFirst(event.request))
+    return
+  }
+
+  // 对可能动态变化的内容使用 stale-while-revalidate 策略
+  // 策略说明：
+  // - 立即返回缓存中的旧内容（如果存在）
+  // - 同时在后台请求最新内容
+  // - 用新内容更新缓存，供下次使用
+  // - 如果网络请求失败，使用缓存；如果缓存也没有，返回离线页面
+  
+  const cached = caches.match(event.request)
+  
+  // 使用缓存破坏 URL 请求最新内容，并禁用浏览器缓存
+  const fetched = fetch(getCacheBustingUrl(event.request), { 
+    cache: "no-store" 
+  })
+  
+  // 克隆响应用于缓存更新（Response 只能读取一次）
+  const fetchedCopy = fetched.then(resp => resp.clone())
+  
+  // 响应策略：使用 Promise.race 返回最先完成的响应
+  // - 如果网络请求成功，立即返回（即使缓存更快）
+  // - 如果网络请求失败，等待缓存
+  // - 如果缓存也没有，等待网络请求
+  // - 如果都失败，返回离线页面
+  event.respondWith(
+    Promise.race([
+      fetched.catch(() => cached), // 网络失败时回退到缓存
+      cached // 缓存响应
+    ])
+      .then(resp => {
+        // 如果缓存和网络都返回了，优先使用网络响应
+        return resp || fetched
+      })
+      .catch(() => {
+        // 所有策略都失败，返回离线页面
+        console.warn(`[SW] All strategies failed for: ${requestUrl}, returning offline page`)
+        return caches.match('./offline.html')
+      })
+  )
+
+  // 后台更新缓存（不阻塞响应）
+  // 只缓存状态为 ok 的响应
+  event.waitUntil(
+    Promise.all([fetchedCopy, caches.open(CACHE)])
+      .then(([response, cache]) => {
+        if (response.ok) {
+          return cache.put(event.request, response)
+        }
+      })
+      .catch(err => {
+        // 静默处理错误，不影响主流程
+        console.warn('[SW] Failed to update cache:', err)
+      })
+  )
+
+  // 如果是 HTML 导航请求，检查内容是否有更新
+  if (isNavigationReq(event.request)) {
+    // 注意：这个日志在导航发生前执行，需要开启 "preserve logs" 才能看到
+    console.log(`[SW] Navigation request: ${requestUrl}`)
+    event.waitUntil(revalidateContent(cached, fetchedCopy))
+  }
+})
 
 
 /**
- * Broadcasting all clients with MessageChannel API
+ * 向所有客户端广播消息
+ * 
+ * 使用 MessageChannel API 向所有受控的客户端页面发送消息
+ * 用于通知页面内容更新、缓存状态变化等
+ * 
+ * @param {Object} msg - 要发送的消息对象
  */
 function sendMessageToAllClients(msg) {
-  self.clients.matchAll().then(clients => {
-    clients.forEach(client => {
-      console.log(client);
-      client.postMessage(msg)
+  self.clients.matchAll()
+    .then(clients => {
+      if (clients.length === 0) {
+        console.log('[SW] No clients to send message to')
+        return
+      }
+      
+      console.log(`[SW] Broadcasting message to ${clients.length} client(s):`, msg)
+      clients.forEach(client => {
+        client.postMessage(msg)
+      })
     })
-  })
+    .catch(err => {
+      console.error('[SW] Failed to send message to clients:', err)
+    })
 }
 
 /**
- * Broadcasting all clients async
+ * 异步向所有客户端广播消息
+ * 
+ * 说明：
+ * - 使用 setTimeout 延迟发送，等待新客户端页面加载完成
+ * - 这是因为在 fetch 事件期间，新打开的页面可能还没有完全初始化
+ * 
+ * @param {Object} msg - 要发送的消息对象
+ * 
+ * @see https://twitter.com/Huxpro/status/799265578443751424
+ * @see https://jakearchibald.com/2016/service-worker-meeting-notes/#fetch-event-clients
  */
 function sendMessageToClientsAsync(msg) {
-  // waiting for new client alive with "async" setTimeout hacking
-  // https://twitter.com/Huxpro/status/799265578443751424
-  // https://jakearchibald.com/2016/service-worker-meeting-notes/#fetch-event-clients
+  // 延迟 1 秒发送，确保新客户端页面已经加载完成
   setTimeout(() => {
     sendMessageToAllClients(msg)
   }, 1000)
 }
 
 /**
- * if content modified, we can notify clients to refresh
- * TODO: Gh-pages rebuild everything in each release. should find a workaround (e.g. ETag with cloudflare)
+ * 验证内容是否有更新
  * 
- * @param  {Promise<response>} cachedResp  [description]
- * @param  {Promise<response>} fetchedResp [description]
- * @return {Promise}
+ * 功能：
+ * - 比较缓存版本和网络版本的 Last-Modified 头
+ * - 如果内容已更新，通知所有客户端页面刷新
+ * 
+ * 注意：
+ * - GitHub Pages 在每次发布时都会重建所有内容
+ * - 可能需要使用 ETag 或其他机制来更准确地检测更新
+ * - 目前使用 Last-Modified 头作为版本标识
+ * 
+ * @param {Promise<Response>} cachedResp - 缓存响应的 Promise
+ * @param {Promise<Response>} fetchedResp - 网络响应的 Promise
+ * @returns {Promise<void>}
+ * 
+ * @todo 考虑使用 ETag 或与 Cloudflare 集成来更准确地检测更新
  */
 function revalidateContent(cachedResp, fetchedResp) {
-  // revalidate when both promise resolved
   return Promise.all([cachedResp, fetchedResp])
     .then(([cached, fetched]) => {
+      // 如果缓存中没有内容，不需要验证
+      if (!cached) {
+        console.log('[SW] No cached content to revalidate')
+        return
+      }
+
+      // 获取 Last-Modified 头作为版本标识
       const cachedVer = cached.headers.get('last-modified')
       const fetchedVer = fetched.headers.get('last-modified')
-      console.log(`"${cachedVer}" vs. "${fetchedVer}"`);
+      
+      console.log(`[SW] Content revalidation: "${cachedVer}" vs. "${fetchedVer}"`)
+      
+      // 如果版本不同，说明内容已更新
       if (cachedVer !== fetchedVer) {
+        console.log('[SW] Content updated, notifying clients...')
         sendMessageToClientsAsync({
-          'command': 'UPDATE_FOUND',
-          'url': fetched.url
+          command: 'UPDATE_FOUND',
+          url: fetched.url
         })
+      } else {
+        console.log('[SW] Content unchanged')
       }
     })
-    .catch(err => console.log(err))
+    .catch(err => {
+      // 验证失败不影响主流程
+      console.warn('[SW] Content revalidation failed:', err)
+    })
 }
