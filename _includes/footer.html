@@ -30,6 +30,53 @@
 <!-- Custom Theme JavaScript -->
 <script src="{{ " /js/hux-blog.min.js " | prepend: site.baseurl }}"></script>
 
+<!-- Back to Top JavaScript -->
+<script src="{{ " /js/top.js " | prepend: site.baseurl }}"></script>
+<script>
+    (function() {
+        var backToTopBtn = document.getElementById('back-to-top');
+        var scrollThreshold = 300; // 滚动超过 300px 后显示按钮
+        
+        if (!backToTopBtn) return;
+        
+        // 监听滚动事件
+        function handleScroll() {
+            var scrollTop = Math.max(
+                document.documentElement.scrollTop || 0,
+                document.body.scrollTop || 0,
+                window.scrollY || 0
+            );
+            
+            if (scrollTop > scrollThreshold) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        }
+        
+        // 绑定滚动事件（使用节流优化性能）
+        var ticking = false;
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                window.requestAnimationFrame(function() {
+                    handleScroll();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        });
+        
+        // 绑定点击事件
+        backToTopBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            goTop(0.1, 16); // 使用默认参数调用 goTop 函数
+        });
+        
+        // 初始化检查
+        handleScroll();
+    })();
+</script>
+
 <!-- Service Worker -->
 {% if site.service-worker %}
 <script src="{{ " /js/snackbar.js " | prepend: site.baseurl }}"></script>
