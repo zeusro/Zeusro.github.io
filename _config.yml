@@ -35,6 +35,8 @@ exclude:
     "README.zh.md",
     "multilingual.md",
     "template.md",
+    "oracle.md",
+    "change.md",
   ]
 anchorjs: true # if you want to customize anchor. check out line:181 of `post.html`
 
