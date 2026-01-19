@@ -6,35 +6,32 @@ date:         2018-07-20
 author:       "Zeusro"
 header-img:   "img/b/2018/psc.jpeg"
 header-mask:  0.3
+multilingual: true
 catalog:      true
 tags:
     - Java
 ---
 
-    这方面的资料不胜枚举,此文仅供本人备忘用.
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include posts/2018-07-20-java-exception/java-exception_zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
 
-```java
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include posts/2018-07-20-java-exception/java-exception_en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
 
-    static String a() {
-        try {
-            throw new RuntimeException("a");
-        } catch (RuntimeException e) {
-            return "d";
-        } catch (Exception e) {
-            return "b";
-        } finally {
-            return "c";
-        }
-//        return "d";
-    }
-```
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2018-07-20-java-exception/java-exception_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
 
-这段代码最终返回值是"c".因为 finally 总是会执行.那这就跟 C#有点不一样了.所以记住,finally 一般是做一些资源的清理,不要在这里面返回值.
-
-
-参考链接:
-1. [重新认识Java语言——异常（Exception）](https://blog.csdn.net/xialei199023/article/details/63251277)
-1. [深入理解java异常处理机制](https://blog.csdn.net/hguisu/article/details/6155636)
-1. [Java 异常处理及其应用](https://www.ibm.com/developerworks/cn/java/j-lo-exception/index.html)
-1. [Java 异常处理的误区和经验总结](https://www.ibm.com/developerworks/cn/java/j-lo-exception-misdirection/)
-1. []()
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2018-07-20-java-exception/java-exception_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

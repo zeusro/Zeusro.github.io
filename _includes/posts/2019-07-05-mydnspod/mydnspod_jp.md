@@ -1,0 +1,42 @@
+<!-- TODO: Translate to jp -->
+
+## 背景信息
+
+![img](/img/in-post/mydnspod/ticket.png)
+
+通过腾讯云向他们吐槽了不满,结果他们叫我按`ctrl + `缩放页面,作为一个资深键盘侠,孰能忍.
+
+dnspod这个770px宽度的域名配置页真的恶心到我了,我决定把他改长一点.
+
+一怒之下我决定自己动手,用油猴插件把整个页面拓宽点.
+
+## 熟悉油猴插件开发模式
+
+可以参考[这个](https://greasyfork.org/zh-CN/help/meta-keys)
+
+大致跟原生JavaScript没啥区别,只是多了一点点约束和语法
+
+## 分发
+
+[油猴脚本,适配1080p屏幕](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
+
+## 源代码
+
+[mydnspod](https://github.com/zeusro/mydnspod)
+
+欢迎PR
+
+## 后续恶搞
+
+在 dnspod 网站上面看到他们在[招工](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw) 我决定皮一波,发一封邮件给`hr@dnspod.com`🤡.
+
+![img](/img/in-post/mydnspod/email.png)
+
+`2019-10-17` 更新:最近他们换新版了,所以把项目冻结了
+
+## 参考链接
+
+1. [油猴脚本编写规则](https://blog.csdn.net/Senreme/article/details/79939249)
+2. [Tutorials](https://wiki.greasespot.net/Tutorials)
+3. [引入外部脚本](https://greasyfork.org/zh-CN/help/external-scripts)
+4. [深入浅出 Greasemonkey](http://www.ttlsa.com/docs/greasemonkey/)

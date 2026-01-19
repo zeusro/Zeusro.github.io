@@ -24,3 +24,15 @@ tags:
     {% capture about_en %}{% include posts/2020-03-17-p-oriented-programming/en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
+
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2020-03-17-p-oriented-programming/jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2020-03-17-p-oriented-programming/ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

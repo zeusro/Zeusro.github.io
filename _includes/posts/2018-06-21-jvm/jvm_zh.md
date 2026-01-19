@@ -1,0 +1,273 @@
+## 常用的垃圾收集器
+
+### ParNew 收集器
+
+-XX:ParallelGCThreads
+限制垃圾收集的线程数
+ 
+### Parallel Scavenge收集器
+ 
+最大垃圾收集停顿时间
+-XX:MaxGCPauseMillis
+吞吐量大小
+-XX:GCTimeRatio
+ 
+调低最大垃圾收集停顿时间以牺牲吞吐量和新生代空间作为代价,直接导致垃圾收集变得更加频繁
+ 
+新手向操作:
+-XX:UseAdaptiveSizePolicy
+GC 自适应调节策略
+ 
+### CMS 收集器
+
+ 以获取最短回收停顿时间为目标的收集器,基于"标记-清除"实现.
+核心优点:并发手机,低停顿
+ 
+
+* 阿里云监控的案例
+
+```
+/acs/user/monitoragent/jre/bin/java -server 
+-Xmx128m 
+-Xms128m 
+-Xmn70m 
+-XX:SurvivorRatio=10 
+-XX:PermSize=25m 
+-XX:MaxPermSize=30m 
+-XX:+DisableExplicitGC 
+-XX:+UseConcMarkSweepGC 
+-XX:+CMSParallelRemarkEnabled 
+-XX:+UseCMSCompactAtFullCollection 
+-XX:+CMSClassUnloadingEnabled 
+-XX:LargePageSizeInBytes=128m 
+-XX:+UseFastAccessorMethods 
+-XX:+UseCMSInitiatingOccupancyOnly 
+-XX:CMSInitiatingOccupancyFraction=70 
+-XX:+UseParNewGC 
+-verbose:gc 
+-Xloggc:/acs/monitor/system/monitoragent/logs/gc.log 
+-XX:+PrintGCDetails 
+-XX:+PrintGCDateStamps 
+-Duser.timezone=GMT+8 
+-Djava.endorsed.dirs= 
+-classpath /acs/user/monitoragent/lib:/acs/user/monitoragent/lib/aliyun-openservices-sls-v0.3-inner-0.1.0.jar:/acs/user/monitoragent/lib/aliyun-openservices-with-mqs.1.0.12.jar:/acs/user/monitoragent/lib/commons-beanutils-1.8.3.jar:/acs/user/monitoragent/lib/commons-codec-1.4.jar:/acs/user/monitoragent/lib/commons-collections-3.2.1.jar:/acs/user/monitoragent/lib/commons-digester-1.8.jar:/acs/user/monitoragent/lib/commons-httpclient-3.1.jar:/acs/user/monitoragent/lib/commons-lang-2.6.jar:/acs/user/monitoragent/lib/commons-lang3-3.1.jar:/acs/user/monitoragent/lib/commons-logging-1.0.4.jar:/acs/user/monitoragent/lib/commons-validator-1.4.0.jar:/acs/user/monitoragent/lib/diamond-client-3.6.7.jar:/acs/user/monitoragent/lib/diamond-utils-3.1.3.jar:/acs/user/monitoragent/lib/ezmorph-1.0.6.jar:/acs/user/monitoragent/lib/fastjson-1.2.41.jar:/acs/user/monitoragent/lib/hamcrest-core-1.1.jar:/acs/user/monitoragent/lib/httpclient-4.2.1.jar:/acs/user/monitoragent/lib/httpcore-4.2.1.jar:/acs/user/monitoragent/lib/jackson-core-lgpl-1.9.6.jar:/acs/user/monitoragent/lib/jackson-mapper-lgpl-1.9.6.jar:/acs/user/monitoragent/lib/jdom-1.1.jar:/acs/user/monitoragent/lib/json-lib-2.4-jdk15.jar:/acs/user/monitoragent/lib/junit-4.10.jar:/acs/user/monitoragent/lib/log4j-1.2.17.jar:/acs/user/monitoragent/lib/mysql-connector-java-5.1.25.jar:/acs/user/monitoragent/lib/netty-all-4.0.36.Final.jar:/acs/user/monitoragent/lib/nginx.agent.jar:/acs/user/monitoragent/lib/ons-api-1.1.5.jar:/acs/user/monitoragent/lib/ons-client-1.1.5.jar:/acs/user/monitoragent/lib/protobuf-java-2.4.1.jar:/acs/user/monitoragent/lib/rocketmq-client-3.6.4.jar:/acs/user/monitoragent/lib/rocketmq-common-3.6.4.jar:/acs/user/monitoragent/lib/rocketmq-remoting-3.6.4.jar:/acs/user/monitoragent/lib/slf4j-api-1.7.5.jar:/acs/user/monitoragent/lib/slf4j-log4j12-1.7.5.jar:/acs/user/monitoragent/lib/test.junit-4.8.1.jar:/acs/user/monitoragent/lib/test.junit.hamcrest-1.1.jar: -Dagent.home=/acs/user/monitoragent com.alibaba.ace.nginx.agent.Startup /acs/user/monitoragent/conf
+``` 
+
+### G1收集器
+
+https://t.hao0.me/jvm/2017/01/15/jvm-g1.html
+
+### ConcMarkSweepGC
+
+推荐使用的是-Xmn参数，原因是这个参数很简洁，相当于一次性设定NewSize和MaxNewSIze，而且两者相等。-Xmn配合-Xms堆起始大小和-Xmx堆最大大小，恰好把堆内存布局确定完了（估计设计者也是因为简洁的原因，弄出了三个简写参数）。另外，官文似乎说-Xmn是1.4才开始支持的，但是如今应该没有还在用1.4之前的JRE的吧。 
+
+* 使用例子
+
+```bash
+java -jar 
+-Xms10g 
+-Xmx15g 
+-XX:+UseConcMarkSweepGC 
+-XX:NewSize=6g 
+-XX:MaxNewSize=6g 
+-verbose:gc 
+-XX:+PrintGCDetails 
+-XX:+PrintGCTimeStamps  
+-Xloggc:./log/gc.log Slaver.jar
+```
+
+## jvm分析工具
+
+### jstat
+> jstat的好处是内置在jvm 中,使用简单粗暴
+
+
+    jstat -<option> [-t] [-h<lines>] <vmid> [<interval> [<count>]]
+    pid=1
+    jstat -gc $pid 3000 3000
+
+```
+–class 监视类装载、卸载数量、总空间及类装载所耗费的时间
+–gc 监视Java堆状况，包括Eden区、2个Survivor区、老年代、永久代等的容量
+–gccapacity 监视内容与-gc基本相同，但输出主要关注Java堆各个区域使用到的最大和最小空间
+–gcutil 监视内容与-gc基本相同，但输出主要关注已使用空间占总空间的百分比
+–gccause 与-gcutil功能一样，但是会额外输出导致上一次GC产生的原因
+–gcnew 监视新生代GC的状况
+–gcnewcapacity 监视内容与-gcnew基本相同，输出主要关注使用到的最大和最小空间
+–gcold 监视老年代GC的状况
+–gcoldcapacity 监视内容与——gcold基本相同，输出主要关注使用到的最大和最小空间
+–gcpermcapacity 输出永久代使用到的最大和最小空间
+–compiler 输出JIT编译器编译过的方法、耗时等信息
+–printcompilation 输出已经被JIT编译的方法
+```
+
+1、jstat –class<pid> : 显示加载class的数量，及所占空间等信息。
+```
+Loaded 装载的类的数量
+Bytes 装载类所占用的字节数
+Unloaded 卸载类的数量
+Bytes 卸载类的字节数
+Time 装载和卸载类所花费的时间
+```
+
+2、jstat -compiler <pid>显示VM实时编译的数量等信息。
+```
+Compiled 编译任务执行数量
+Failed 编译任务执行失败数量
+Invalid 编译任务执行失效数量
+Time 编译任务消耗时间
+FailedType 最后一个编译失败任务的类型
+FailedMethod 最后一个编译失败任务所在的类及方法
+```
+
+3、jstat -gc <pid>: 可以显示gc的信息，查看gc的次数，及时间。
+```
+S0C 年轻代中第一个survivor（幸存区）的容量 (字节)
+S1C 年轻代中第二个survivor（幸存区）的容量 (字节)
+S0U 年轻代中第一个survivor（幸存区）目前已使用空间 (字节)
+S1U 年轻代中第二个survivor（幸存区）目前已使用空间 (字节)
+EC 年轻代中Eden（伊甸园）的容量 (字节)
+EU 年轻代中Eden（伊甸园）目前已使用空间 (字节)
+OC Old代的容量 (字节)
+OU Old代目前已使用空间 (字节)
+PC Perm(持久代)的容量 (字节)
+PU Perm(持久代)目前已使用空间 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+YGCT 从应用程序启动到采样时年轻代中gc所用时间(s)
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+FGCT 从应用程序启动到采样时old代(全gc)gc所用时间(s)
+GCT 从应用程序启动到采样时gc用的总时间(s)
+```
+
+4、jstat -gccapacity <pid>:可以显示，VM内存中三代（young,old,perm）对象的使用和占用大小
+```
+NGCMN 年轻代(young)中初始化(最小)的大小(字节)
+NGCMX 年轻代(young)的最大容量 (字节)
+NGC 年轻代(young)中当前的容量 (字节)
+S0C 年轻代中第一个survivor（幸存区）的容量 (字节)
+S1C 年轻代中第二个survivor（幸存区）的容量 (字节)
+EC 年轻代中Eden（伊甸园）的容量 (字节)
+OGCMN old代中初始化(最小)的大小 (字节)
+OGCMX old代的最大容量(字节)
+OGC old代当前新生成的容量 (字节)
+OC Old代的容量 (字节)
+PGCMN perm代中初始化(最小)的大小 (字节)
+PGCMX perm代的最大容量 (字节)
+PGC perm代当前新生成的容量 (字节)
+PC Perm(持久代)的容量 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+```
+
+5、jstat -gcutil <pid>:统计gc信息
+```
+S0 年轻代中第一个survivor（幸存区）已使用的占当前容量百分比
+S1 年轻代中第二个survivor（幸存区）已使用的占当前容量百分比
+E 年轻代中Eden（伊甸园）已使用的占当前容量百分比
+O old代已使用的占当前容量百分比
+P perm代已使用的占当前容量百分比
+YGC 从应用程序启动到采样时年轻代中gc次数
+YGCT 从应用程序启动到采样时年轻代中gc所用时间(s)
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+FGCT 从应用程序启动到采样时old代(全gc)gc所用时间(s)
+GCT 从应用程序启动到采样时gc用的总时间(s)
+```
+
+6、jstat -gcnew <pid>:年轻代对象的信息。
+
+```
+S0C 年轻代中第一个survivor（幸存区）的容量 (字节)
+S1C 年轻代中第二个survivor（幸存区）的容量 (字节)
+S0U 年轻代中第一个survivor（幸存区）目前已使用空间 (字节)
+S1U 年轻代中第二个survivor（幸存区）目前已使用空间 (字节)
+TT 持有次数限制
+MTT 最大持有次数限制
+EC 年轻代中Eden（伊甸园）的容量 (字节)
+EU 年轻代中Eden（伊甸园）目前已使用空间 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+YGCT 从应用程序启动到采样时年轻代中gc所用时间(s)
+```
+
+7、jstat -gcnewcapacity<pid>: 年轻代对象的信息及其占用量。
+
+```
+NGCMN 年轻代(young)中初始化(最小)的大小(字节)
+NGCMX 年轻代(young)的最大容量 (字节)
+NGC 年轻代(young)中当前的容量 (字节)
+S0CMX 年轻代中第一个survivor（幸存区）的最大容量 (字节)
+S0C 年轻代中第一个survivor（幸存区）的容量 (字节)
+S1CMX 年轻代中第二个survivor（幸存区）的最大容量 (字节)
+S1C 年轻代中第二个survivor（幸存区）的容量 (字节)
+ECMX 年轻代中Eden（伊甸园）的最大容量 (字节)
+EC 年轻代中Eden（伊甸园）的容量 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+```
+8、jstat -gcold <pid>：old代对象的信息。
+```
+PC Perm(持久代)的容量 (字节)
+PU Perm(持久代)目前已使用空间 (字节)
+OC Old代的容量 (字节)
+OU Old代目前已使用空间 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+FGCT 从应用程序启动到采样时old代(全gc)gc所用时间(s)
+GCT 从应用程序启动到采样时gc用的总时间(s)
+```
+9、stat -gcoldcapacity <pid>: old代对象的信息及其占用量。
+```
+OGCMN old代中初始化(最小)的大小 (字节)
+OGCMX old代的最大容量(字节)
+OGC old代当前新生成的容量 (字节)
+OC Old代的容量 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+FGCT 从应用程序启动到采样时old代(全gc)gc所用时间(s)
+GCT 从应用程序启动到采样时gc用的总时间(s)
+```
+10、jstat -gcpermcapacity<pid>: perm对象的信息及其占用量。
+```
+PGCMN perm代中初始化(最小)的大小 (字节)
+PGCMX perm代的最大容量 (字节)
+PGC perm代当前新生成的容量 (字节)
+PC Perm(持久代)的容量 (字节)
+YGC 从应用程序启动到采样时年轻代中gc次数
+FGC 从应用程序启动到采样时old代(全gc)gc次数
+FGCT 从应用程序启动到采样时old代(全gc)gc所用时间(s)
+GCT 从应用程序启动到采样时gc用的总时间(s)
+```
+11、jstat -printcompilation <pid>：当前VM执行的信息。
+```
+Compiled 编译任务的数目
+Size 方法生成的字节码的大小
+Type 编译类型
+Method 类名和方法名用来标识编译的方法。类名使用/做为一个命名空间分隔符。方法名是给定类中的方法。上述格式是由-XX:+PrintComplation选项进行设置的
+```
+
+### MemoryAnalyzer
+
+## 参考链接
+1. [JVM调优：选择合适的GC collector （三）](https://blog.csdn.net/historyasamirror/article/details/6245157)
+1. [深入理解 Java G1 垃圾收集器](http://ghoulich.xninja.org/tag/g1/)
+1. [成为JavaGC专家（1）—深入浅出Java垃圾回收机制](http://www.importnew.com/1993.html)
+1. [成为JavaGC专家（2）—如何监控Java垃圾回收机制](http://www.importnew.com/2057.html)
+1. [成为Java GC专家（3）—如何优化Java垃圾回收机制](http://www.importnew.com/3146.html)
+1. [成为Java GC专家（4）—Apache的MaxClients参数详解及其在Tomcat执行FullGC时的影响](http://www.importnew.com/3151.html)
+1. [JVM系列三:JVM参数设置、分析](http://www.cnblogs.com/redcreen/archive/2011/05/04/2037057.html)
+1. [介绍Java GC种类，并更换 调优GC](https://blog.csdn.net/roland101/article/details/2203461)
+1. [Java 垃圾回收机制（以及怎么减少调用GC，提高性能）](https://blog.csdn.net/hyqsong/article/details/42006947)
+1. [What Is Garbage Collection?](https://plumbr.io/handbook/what-is-garbage-collection)
+1. [频繁GC (Allocation Failure)及young gc时间过长分析](https://juejin.im/post/5a9b811a6fb9a028e46e1c88)
+1. [JVM系列三:JVM参数设置、分析](http://www.cnblogs.com/redcreen/archive/2011/05/04/2037057.html)
+1. [javaGC调优](http://darktea.github.io/notes/2013/09/08/java-gc.html)
+1. [Java Hotspot G1 GC的一些关键技术](https://tech.meituan.com/g1.html)
+1. [JVM](https://crowhawk.github.io/tags/#JVM)
+1. [JVM（java 虚拟机）内存设置](https://www.cnblogs.com/jack204/archive/2012/07/02/2572932.html)
+1. [java jstat 用法](https://www.pocketdigi.com/20170522/1573.html)
+1. [jstat命令详解](https://blog.csdn.net/zhaozheng7758/article/details/8623549)
+1. [jstat使用详解（分析JVM的使用情况）](https://blog.csdn.net/ouyang111222/article/details/53688986)
+1. [java类的加载机制](http://www.cnblogs.com/ityouknow/p/5603287.html)
+1. [G1(Garbage First)的使用](http://bboniao.com/jvm/2014-03/g1garbage-first.html)
+1. [Java命令学习系列（4）：Jstat](http://www.importnew.com/18202.html)
+1. [JVM问题分析处理手册](https://yq.aliyun.com/articles/632125)
+1. [JVM调优总结 -Xms -Xmx -Xmn -Xss](https://yq.aliyun.com/articles/268842)
