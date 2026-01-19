@@ -1,23 +1,21 @@
-<!-- TODO: Translate to jp -->
-
-1. [前期准备](#前期准备)
-    * 定义实体
-    * 定义集合
-1. [stream的其他用法](#stream的其他用法)
-    - [用于校验集合](#用于校验集合(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
-    - [自己生成流](#自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/)))
+1. [準備](#準備)
+    * エンティティの定義
+    * コレクションの定義
+1. [streamのその他の用法](#streamのその他の用法)
+    - [コレクションの検証に使用](#コレクションの検証に使用引用元ibmhttpswwwibmcomdeveloperworkscnjavaj-lo-java8streamapi)
+    - [自分でストリームを生成](#自分でストリームを生成引用元ibmhttpswwwibmcomdeveloperworkscnjavaj-lo-java8streamapi)
     - Stream.iterate
-1. [stream的注意事项](#stream的注意事项)
-    * 流只能用一次,重复使用会导致以下异常
+1. [streamの注意事項](#streamの注意事項)
+    * ストリームは一度しか使用できず、再利用すると以下の例外が発生します
     * filter
-1. [完整代码](#完整代码)
-1. [参考链接](#参考链接)
+1. [完全なコード](#完全なコード)
+1. [参考リンク](#参考リンク)
 
 <script src="https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98.js"></script>
 
-## 前期准备
+## 準備
 
-* 定义实体
+* エンティティの定義
 
 ```java
 // {% raw %}
@@ -35,20 +33,20 @@ import java.util.List;
  */
 public class Person implements Cloneable {
 
-    // 身高
+    // 身長
     private int height;
-    //体重-
+    // 体重
     private int weight;
-    //身份证号
+    // 身分証明書番号
     private String identifier;
-    //地址
+    // 住所
     private String address;
-    //生日
+    // 誕生日
     private Date birthday;
-    //爱好
+    // 趣味
     private List<String> hobbies;
 
-    //性别
+    // 性別
     private Sex sex;
 
     @Override
@@ -122,16 +120,16 @@ public class Person implements Cloneable {
 package com.zeusro;
 
 public enum Sex {
-    //男
+    // 男性
     Male,
-    //女
+    // 女性
     Female,
-    //第三性 https://zh.wikipedia.org/wiki/%E7%AC%AC%E4%B8%89%E6%80%A7
+    // 第三の性 https://zh.wikipedia.org/wiki/%E7%AC%AC%E4%B8%89%E6%80%A7
     X,
 }
 ```
 
-* 定义集合
+* コレクションの定義
 
 ```java
 // {% raw %}
@@ -201,22 +199,22 @@ public enum Sex {
 //{% endraw %}
 ```
 
-## stream的其他用法
+## streamのその他の用法
 
-### 用于校验集合(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
+### コレクションの検証に使用(引用元[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
 
-> allMatch：Stream 中全部元素符合传入的 predicate，返回 true
+> allMatch：Stream内のすべての要素が渡されたpredicateに一致する場合、trueを返します
 > 
-> anyMatch：Stream 中只要有一个元素符合传入的 predicate，返回 true
+> anyMatch：Stream内のいずれかの要素が渡されたpredicateに一致する場合、trueを返します
 > 
-> noneMatch：Stream 中没有一个元素符合传入的 predicate，返回 true
+> noneMatch：Stream内のどの要素も渡されたpredicateに一致しない場合、trueを返します
   
 
-### 自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
+### 自分でストリームを生成(引用元[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
 
 * Stream.generate
 
-通过实现 Supplier 接口，你可以自己来控制流的生成。这种情形通常用于随机数、常量的 Stream，或者需要前后元素间维持着某种状态信息的 Stream。把 Supplier 实例传递给 Stream.generate() 生成的 Stream，默认是串行（相对 parallel 而言）但无序的（相对 ordered 而言）。由于它是无限的，在管道中，必须利用 limit 之类的操作限制 Stream 大小。
+Supplierインターフェースを実装することで、ストリームの生成を自分で制御できます。この方法は通常、乱数、定数のStream、または前後の要素間で何らかの状態情報を維持する必要があるStreamに使用されます。SupplierインスタンスをStream.generate()に渡して生成されたStreamは、デフォルトでシリアル（parallelに対して）ですが、順序なし（orderedに対して）です。無限であるため、パイプラインでは、limitなどの操作を使用してStreamのサイズを制限する必要があります。
 
 ```java
 Random seed = new Random();
@@ -227,7 +225,7 @@ IntStream.generate(() -> (int) (System.nanoTime() % 100)).
 limit(10).forEach(System.out::println);
 ```
 
-Stream.generate() 还接受自己实现的 Supplier。例如在构造海量测试数据的时候，用某种自动的规则给每一个变量赋值；或者依据公式计算 Stream 的每个元素值。这些都是维持状态信息的情形。
+Stream.generate()は、自分で実装したSupplierも受け入れます。たとえば、大量のテストデータを構築する際に、何らかの自動ルールを使用して各変数に値を割り当てる場合、または式に基づいてStreamの各要素値を計算する場合です。これらはすべて状態情報を維持するケースです。
 
 ```java
 Stream.generate(new PersonSupplier()).
@@ -244,7 +242,7 @@ private class PersonSupplier implements Supplier<Person> {
 ```
 
 ```
-# 输出结果：
+# 出力結果：
 StormTestUser1, 9
 StormTestUser2, 12
 StormTestUser3, 88
@@ -259,24 +257,24 @@ StormTestUser10, 76
 
 * Stream.iterate
 
-iterate 跟 reduce 操作很像，接受一个种子值，和一个 UnaryOperator（例如 f）。然后种子值成为 Stream 的第一个元素，f(seed) 为第二个，f(f(seed)) 第三个，以此类推。
+iterateはreduce操作と非常によく似ており、シード値とUnaryOperator（例：f）を受け入れます。その後、シード値がStreamの最初の要素になり、f(seed)が2番目、f(f(seed))が3番目、というように続きます。
 
 ```java
 Stream.iterate(0, n -> n + 3).limit(10). forEach(x -> System.out.print(x + " "));.
 ```
 
 ```
-# 输出结果：
+# 出力結果：
 0 3 6 9 12 15 18 21 24 27
 ```
 
-**与 Stream.generate 相仿，在 iterate 时候管道必须有 limit 这样的操作来限制 Stream 大小。**
+**Stream.generateと同様に、iterateを使用する際は、パイプラインにlimitなどの操作が必要で、Streamのサイズを制限する必要があります。**
 
 
 
-## stream的注意事项
+## streamの注意事項
 
-* 流只能用一次,重复使用会导致以下异常
+* ストリームは一度しか使用できず、再利用すると以下の例外が発生します
 
 ```java
 Stream<Person> list1Stream = list1.stream();
@@ -284,7 +282,7 @@ list1Stream.filter(o -> o.getBirthday().equals(time1)).count();
 list1Stream.filter(o -> !o.getBirthday().equals(time1)).count();//java.lang.IllegalStateException: stream has already been operated upon or closed
 ```
 
-所以我建议每次需要集合操作的时候都直接新建一个 stream, 而不是使用`Stream<Person> list1Stream = list1.stream();`去定义
+したがって、コレクション操作が必要な場合は、`Stream<Person> list1Stream = list1.stream();`を使用して定義するのではなく、毎回新しいstreamを直接作成することをお勧めします
 
 ```java
 list1.stream().filter(o -> o.getBirthday().equals(time1)).count();
@@ -293,10 +291,10 @@ list1.stream().filter(o -> !o.getBirthday().equals(time1)).count();
 
 * filter
 
-一般有filter 操作时，不用并行流parallelStream ,如果用的话可能会导致线程安全问题
+通常、filter操作がある場合、並列ストリームparallelStreamは使用しません。使用すると、スレッドセーフティの問題が発生する可能性があります
 
 
-## 完整代码
+## 完全なコード
 
 ```java
 // {% raw %}
@@ -394,7 +392,7 @@ public class Main {
                     add(male2);
                 }
             };
-            //流只能用一次,重复使用会导致以下异常
+            //ストリームは一度しか使用できず、再利用すると以下の例外が発生します
             //java.lang.IllegalStateException: stream has already been operated upon or closed
             Stream<Person> list1Stream = list1.stream();
             Date time1 = convertLocalDateToTimeZone(LocalDate.of(1990, 1, 1));
@@ -411,7 +409,7 @@ public class Main {
                 });
             }
 /*
-输出结果:
+出力結果:
 Male
 {"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
 Female
@@ -419,14 +417,14 @@ Female
 X
 {"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
  */
-            //stream没有RemoveAll的操作
+            //streamにはRemoveAll操作がありません
             Person after90 = list1.stream()
                     .filter(o -> o.getBirthday().after(convertLocalDateToTimeZone(LocalDate.of(1990, 1, 1))))
                     .findFirst()
                     .orElse(null);
             // null
             list1.stream().forEach(o -> {
-                //在ForEach當中可對集合進行操作
+                //ForEach内でコレクションを操作できます
                 o.setSex(Sex.X);
             });
             list1.forEach(o -> {
@@ -437,10 +435,10 @@ X
 {"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
 {"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
  */
-            //IntStream的max方法返回的是OptionalInt,要先判断有没有值再读取值.isPresent=false 时直接getAsInt会报错.mapToLong,mapToDouble同理
+            //IntStreamのmaxメソッドはOptionalIntを返します。値を読み取る前に値があるかどうかを確認する必要があります。isPresent=falseの場合、直接getAsIntを呼び出すとエラーが発生します。mapToLong、mapToDoubleも同様です
             OptionalInt maxHeightOption = list1.stream().mapToInt(Person::getHeight).max();
-            //字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。
-            //当集合为长度0的集合时会返回起始值Integer.MIN_VALUE,起始值也不能乱传,个中缘由我暂不清楚
+            //文字列連結、数値のsum、min、max、averageはすべて特殊なreduceです。
+            //コレクションが長さ0のコレクションの場合、初期値Integer.MIN_VALUEが返されます。初期値も任意に渡すことはできません。その理由はまだ明確ではありません
             int maxHeight = list1.stream().mapToInt(Person::getHeight).reduce(Integer.MIN_VALUE, Integer::max);
             out.println(maxHeight);
             //170
@@ -449,13 +447,13 @@ X
                 out.println(maxHeight);
                 //170
             }
-            //mapToInt参数的2种写法都一样,我比较喜欢以下写法,但是 idea 会报 warning
+            //mapToIntパラメータの2つの書き方は同じです。以下の書き方を好みますが、ideaはwarningを報告します
             OptionalInt minWeightOption = list1.stream().mapToInt(o -> o.getHeight()).min();
             int minWeight = list1.stream().mapToInt(o -> o.getHeight()).reduce(Integer.MAX_VALUE, Integer::min);
             list1.stream().map(Person::getIdentifier).distinct();
-            //skip和 limit参数都是long, 这个要注意
+            //skipとlimitパラメータは両方ともlongであることに注意してください
             list1.stream().skip(1L).limit(2L);
-            out.println("------------------------------------|升序|------------------------------------");
+            out.println("------------------------------------|昇順|------------------------------------");
             list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday)).collect(Collectors.toList());
             out.println(new Gson().toJson(list1));
             list1 = list1.stream().sorted((left, right) -> left.getBirthday().compareTo(right.getBirthday())).collect(Collectors.toList());
@@ -464,7 +462,7 @@ X
 [{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]
 [{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]            
              */
-            out.println("------------------------------------|降序|------------------------------------");
+            out.println("------------------------------------|降順|------------------------------------");
             list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday).reversed()).collect(Collectors.toList());
             out.println(new Gson().toJson(list1));
             list1 = list1.stream().sorted((left, right) -> right.getBirthday().compareTo(left.getBirthday())).collect(Collectors.toList());
@@ -473,26 +471,26 @@ X
 [{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
 [{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
  */
-            out.println("------------------------------------|交集 list1 ∩ list2|------------------------------------");
+            out.println("------------------------------------|積集合 list1 ∩ list2|------------------------------------");
             list1.stream().filter(o -> list2.contains(o)).collect(Collectors.toList());
-            out.println("------------------------------------|并集list1 ∪ list2 |------------------------------------");
+            out.println("------------------------------------|和集合list1 ∪ list2 |------------------------------------");
             list1.addAll(list2);
             list1.stream().distinct().collect(Collectors.toList());
-            out.println("------------------------------------|差集list1 - list2|------------------------------------");
+            out.println("------------------------------------|差集合list1 - list2|------------------------------------");
             list1.stream().filter(item1 -> !list2.contains(item1)).collect(Collectors.toList());
-            out.println("------------------------------------|数据结构转换|------------------------------------");
+            out.println("------------------------------------|データ構造変換|------------------------------------");
             List<Person> list3 = list1.stream().filter(o -> true).collect(Collectors.toList());
             ArrayList<Person> list4 = list1.stream().filter(o -> true).collect(Collectors.toCollection(ArrayList::new));
             Set<Person> list5 = list1.stream().filter(o -> true).collect(Collectors.toSet());
             Object[] list6 = list1.stream().toArray();
             Person[] list7 = list1.stream().toArray(Person[]::new);
-            out.println("------------------------------------|其他需要注意的地方|------------------------------------");
-            //2个数组合并用这种方法的话, list2会为空
+            out.println("------------------------------------|その他の注意点|------------------------------------");
+            //2つの配列をこの方法で結合すると、list2が空になります
             Stream.of(list1, list2).collect(Collectors.toList());
-            //以下才是正确用法
+            //以下が正しい使用方法です
             Stream.of(list1, list2).flatMap(List::stream).collect(Collectors.toList());
             out.println("------------------------------------|reduce|------------------------------------");
-            //字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。
+            //文字列連結、数値のsum、min、max、averageはすべて特殊なreduceです。
             maxHeight = list1.stream().mapToInt(Person::getHeight).reduce(Integer.MIN_VALUE, Integer::max);
             minWeight = list1.stream().mapToInt(o -> o.getHeight()).reduce(Integer.MAX_VALUE, Integer::min);
             int sumWeight = -1;
@@ -504,24 +502,24 @@ X
             sumWeight = list1.stream().mapToInt(Person::getHeight).reduce(0, Integer::sum);
 
             out.println("------------------------------------|peek ,forEach ,forEachOrdered |------------------------------------");
-            out.println("forEach后面无法继续执行方法");
+            out.println("forEachの後はメソッドを続けて実行できません");
             list1.stream().forEach(o -> {
                 out.println(new Gson().toJson(o));
             });
             /*
-forEach后面无法继续执行方法
+forEachの後はメソッドを続けて実行できません
 {"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
 {"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
 {"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
 {"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
 {"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}            
              */
-            out.println("先排序,然后遍历");
+            out.println("まずソートしてから、反復処理します");
             list1.stream().forEachOrdered(o -> {
                 out.println(new Gson().toJson(o));
             });
 /*
-先排序,然后遍历
+まずソートしてから、反復処理します
 {"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
 {"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
 {"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
@@ -529,13 +527,13 @@ forEach后面无法继续执行方法
 {"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
  */
             out.println("peek*2");
-            List<Integer> l = Stream.iterate(0, (Integer n) -> n + 1) //生成一个每次递增1的等差数列
+            List<Integer> l = Stream.iterate(0, (Integer n) -> n + 1) //毎回1ずつ増加する等差数列を生成
                     .peek(n -> out.println("number generated:" + n))
                     .filter(n -> (n % 2 == 0))
-                    .peek(n -> out.println("Even number filter passed for" + n)) //遇到偶数时继续输出
+                    .peek(n -> out.println("Even number filter passed for" + n)) //偶数に遭遇したときに続けて出力
                     .limit(5).collect(Collectors.toList());
             out.println(new Gson().toJson(l));
-            //可以看到在生成到9时,这个操作结束了,是因为设置了limit
+            //9を生成したときにこの操作が終了したことがわかります。これはlimitが設定されているためです
             /*
 peek*2
 number generated:0
@@ -565,11 +563,10 @@ Even number filter passed for8
 }
 
 // {% endraw %}
-
 ```
 
 
-## 参考链接:
+## 参考リンク:
 
 1. [Java 8 中的 Streams API 详解](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/)
 1. [Introduction to the Java 8 Date/Time API](http://www.baeldung.com/java-8-date-time-intro)
@@ -581,5 +578,5 @@ Even number filter passed for8
 1. [Collection to stream to a new collection
 ](https://stackoverflow.com/questions/21522341/collection-to-stream-to-a-new-collection)
 1. [Java parallel stream用法](http://www.cnblogs.com/huangzifu/p/7631164.html)
-1. [Java 8 – How to ‘peek’ into a running Stream| Stream.peek method tutorial with examples](https://www.javabrahman.com/java-8/java-8-how-to-peek-into-a-running-stream-peek-method-tutorial-with-examples/)
+1. [Java 8 – How to 'peek' into a running Stream| Stream.peek method tutorial with examples](https://www.javabrahman.com/java-8/java-8-how-to-peek-into-a-running-stream-peek-method-tutorial-with-examples/)
 1. [JDK8函数式接口Function、Consumer、Predicate、Supplier](https://blog.csdn.net/z834410038/article/details/77370785)

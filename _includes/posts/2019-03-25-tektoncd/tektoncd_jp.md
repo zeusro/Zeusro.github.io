@@ -1,16 +1,14 @@
-<!-- TODO: Translate to jp -->
+`tektoncd`は`kubernetes`向けの`pipeline`型CI/CD（kubectl apply）システムで、カスタム`kaniko`を使用して`docker`イメージをビルドします。
 
-`tektoncd`是面向`kubernetes`的`pipeline`型CI/CD(kubectl apply)系统,自定义`kaniko`构建`docker`镜像
+デプロイ方法は、いくつかのRBAC関連リソース（ClusterRole、ClusterRoleBinding）およびCustomResourceDefinitionを作成することです。
 
-部署方式是创建一些RBAC相关的资源（ClusterRole，ClusterRoleBinding)以及CustomResourceDefinition。
+常駐コンテナはtekton-pipelines-controllerとtekton-pipelines-webhookのみです。
 
-常驻的容器只有tekton-pipelines-controller，tekton-pipelines-webhook。
-
-首先声明,我没有实际安装使用过`tektoncd`,以下内容纯属扯淡.
+まず、私は実際に`tektoncd`をインストールまたは使用したことがないことを声明します。以下の内容は純粋なナンセンスです。
 ![image](/img/in-post/tektoncd/9150e4e5ly1fve14owghxj206o06omx8.jpg)
 
 
-## tektoncd的五类公民
+## tektoncdの5種類の市民
 
 1. Task
 1. TaskRun
@@ -20,15 +18,15 @@
 1. Pipeline
 1. PipelineRun
 
-tektoncd目前(0.1.0)有5类对象,核心理念是通过定义yaml定义构建过程.构建任务的状态存放在status字段中
+tektoncdは現在（0.1.0）5種類のオブジェクトを持っています。核心理念は、yaml定義を通じてビルドプロセスを定義することです。ビルドタスクのステータスはstatusフィールドに保存されます。
 
-Task是单个任务的构建过程,定义TaskRun任务才会运行.
+Taskは単一タスクのビルドプロセスです。タスクを実行するにはTaskRunを定義する必要があります。
 
-Pipeline包含多个Task,并在此基础上定义input和output,input和output以PipelineResource作为交付,PipelineResource的本质是PVC.
+Pipelineには複数のTaskが含まれ、この上でinputとoutputを定義します。inputとoutputはPipelineResourceとして配信されます。PipelineResourceの本質はPVCです。
 
-同样地,需要定义PipelineRun才会运行Pipeline
+同様に、Pipelineを実行するにはPipelineRunを定義する必要があります。
 
-官方Github这个例子能够让大家理清这几类对象之间的关系
+公式Githubのこの例は、これらのオブジェクトタイプ間の関係を理解するのに役立ちます。
 
 ```yaml
 ---
@@ -293,10 +291,10 @@ spec:
       name: skaffold-image-leeroy-app
 ```
 
-## 总结
+## まとめ
 
-通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.
+CRDを通じてCI/CDを再定義することは大きなハイライトですが、現在ビルドタスクはYAMLファイルを手動で作成することによってのみ作成できます。ビルドタスクが多い場合、クラスター内にCI関連のCRDが大量に蓄積され、かなり愚かに感じます。
 
 ![image](/img/in-post/tektoncd/1543218293905992.jpg)
 
-`serviceaccount`+`secret`配置SSH/auth实现对git仓库进行连接的,建议`Jenkins-X`好好学学.目前`Jenkins-X`还是无法在pipeline中定义`resource`,雪花配置荼毒不浅.
+`serviceaccount`+`secret`設定SSH/authでgitリポジトリに接続します。`Jenkins-X`がこれを学ぶことをお勧めします。現在、`Jenkins-X`はパイプラインで`resource`を定義することはまだできません。スノーフレーク設定はかなり有害です。

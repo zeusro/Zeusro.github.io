@@ -1,23 +1,21 @@
-<!-- TODO: Translate to ru -->
+## Происхождение
 
-## 缘起
+Происходит из [документации](https://help.aliyun.com/document_detail/125679.html) Alibaba Cloud
 
-起源来自阿里云的[文档](https://help.aliyun.com/document_detail/125679.html)
+После обнаружения, что kubernetes Event можно использовать для push-уведомлений, мне это очень понравилось. Но его собственный метод push DingTalk был неудобен в использовании, поэтому я решил изменить его самостоятельно.
 
-发现能对 kubernetes Event 进行消息推送之后，非常喜欢。但是其本身的钉钉推送方式不好用，所以决定亲自修改。
+## Решение о разработке
 
-## 决定开发
+Исходный код проекта находится в [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
+, и я также узнал о механизме Event kubernetes
 
-项目源代码位于 [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
-，顺便了解了一下kubernetes 的 Event 机制
-
-1. Controller Manager 会记录节点注册和销毁的事件、Deployment 扩容和升级的事件
-1. kubelet 会记录镜像回收事件、volume 无法挂载事件。基本上所有的事件都在`kubernetes/pkg/kubelet/events/event.go`l里面定义
+1. Controller Manager записывает события регистрации и уничтожения узлов, события масштабирования и обновления Deployment
+1. kubelet записывает события переработки образов, события неудачной монтировки volume. В основном все события определены в `kubernetes/pkg/kubelet/events/event.go`
 
 
-## Event 结构体
+## Структура Event
 
-Event 结构体定义在 `"k8s.io/api/core/v1"`里面
+Структура Event определена в `"k8s.io/api/core/v1"`
 
 ```go
 // Event is a report of an event somewhere in the cluster.
@@ -173,27 +171,27 @@ type ObjectReference struct {
 }
 ```
 
-## 设计细节
+## Детали дизайна
 
-程序的入口是
+Точка входа программы —
 [eventer.go](https://note.youdao.com/)
 
-`sink` 是程序的输出端，比如可以输出到钉钉，elasticsearch等等。
-这一块插件会在一开始通过
+`sink` — это выходной конец программы, например, может выводить в DingTalk, elasticsearch и т.д.
+Этот плагин запустит все `sink` параллельно в форме `go func()` в начале через
 
 ```go
 sinkManager, err := sinks.NewEventSinkManager(sinkList, sinks.DefaultSinkExportEventsTimeout, sinks.DefaultSinkStopTimeout)
 ```
 
-这个方法，以`go func()` 形式并行启动所有 `sink` 。
+Этот метод.
 
-真正的主角是 manager
+Настоящий главный герой — это manager
 
 ```go
 manager, err := manager.NewManager(sources[0], sinkManager, *argFrequency)
 ```
 
-它接受 `sinkManager` 和其他一系列参数，启动主函数。重复展开定义之后，会找到`Housekeep` 这个方法
+Он принимает `sinkManager` и ряд других параметров, запускает главную функцию. После многократного развертывания определений вы найдете метод `Housekeep`
 
 ```go
 func (rm *realManager) Housekeep() {
@@ -215,14 +213,14 @@ func (rm *realManager) Housekeep() {
 }
 ```
 
-这个方法写得非常简单明了，无限递归调用，除非接收到 `stopChan` 这个停止信号。
+Этот метод написан очень просто и ясно, бесконечные рекурсивные вызовы, если не получен сигнал остановки `stopChan`.
 
-除此以外，还默认监听了 `0.0.0.0:8084` 作为健康检查的端口。
+Кроме того, он также по умолчанию прослушивает `0.0.0.0:8084` как порт проверки работоспособности.
 
-Event 的获取也相当高效
+Получение Event также довольно эффективно
 
 ```go
-// NewKubernetesSource 事件来源
+// NewKubernetesSource Источник событий
 func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 	kubeConfig, err := kubeconfig.GetKubeClientConfig(uri)
 	if err != nil {
@@ -243,12 +241,12 @@ func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 }
 ```
 
-## 结语
+## Заключение
 
-这个项目的开发者语言表达非常精炼，这个项目很适用于学习 golang 并发。
+Языковое выражение разработчика в этом проекте очень лаконично. Этот проект очень подходит для изучения параллелизма golang.
 
 
-1. [Kubernetes Events介绍（上）](https://www.kubernetes.org.cn/1031.html)
-2. [Kubernetes Events介绍（中）](https://www.kubernetes.org.cn/1090.html)
-3. [Kubernetes Events介绍（下）](https://www.kubernetes.org.cn/1195.html)
-4. [kubelet 源码分析： 事件处理](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)
+1. [Введение в Kubernetes Events (Часть 1)](https://www.kubernetes.org.cn/1031.html)
+2. [Введение в Kubernetes Events (Часть 2)](https://www.kubernetes.org.cn/1090.html)
+3. [Введение в Kubernetes Events (Часть 3)](https://www.kubernetes.org.cn/1195.html)
+4. [Анализ исходного кода kubelet: Обработка событий](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)

@@ -1,23 +1,21 @@
-<!-- TODO: Translate to en -->
+## Origin
 
-## 缘起
+Originated from Alibaba Cloud's [documentation](https://help.aliyun.com/document_detail/125679.html)
 
-起源来自阿里云的[文档](https://help.aliyun.com/document_detail/125679.html)
+After discovering that kubernetes Event can be used for message push, I really liked it. But its own DingTalk push method wasn't good to use, so I decided to modify it myself.
 
-发现能对 kubernetes Event 进行消息推送之后，非常喜欢。但是其本身的钉钉推送方式不好用，所以决定亲自修改。
+## Decision to Develop
 
-## 决定开发
+Project source code is located at [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
+, and I also learned about kubernetes' Event mechanism
 
-项目源代码位于 [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
-，顺便了解了一下kubernetes 的 Event 机制
-
-1. Controller Manager 会记录节点注册和销毁的事件、Deployment 扩容和升级的事件
-1. kubelet 会记录镜像回收事件、volume 无法挂载事件。基本上所有的事件都在`kubernetes/pkg/kubelet/events/event.go`l里面定义
+1. Controller Manager records events of node registration and destruction, Deployment scaling and upgrade events
+1. kubelet records image recycling events, volume mount failure events. Basically all events are defined in `kubernetes/pkg/kubelet/events/event.go`
 
 
-## Event 结构体
+## Event Structure
 
-Event 结构体定义在 `"k8s.io/api/core/v1"`里面
+Event structure is defined in `"k8s.io/api/core/v1"`
 
 ```go
 // Event is a report of an event somewhere in the cluster.
@@ -173,27 +171,27 @@ type ObjectReference struct {
 }
 ```
 
-## 设计细节
+## Design Details
 
-程序的入口是
+The program's entry point is
 [eventer.go](https://note.youdao.com/)
 
-`sink` 是程序的输出端，比如可以输出到钉钉，elasticsearch等等。
-这一块插件会在一开始通过
+`sink` is the program's output end, for example, it can output to DingTalk, elasticsearch, etc.
+This plugin will start all `sink` in parallel in the form of `go func()` at the beginning through
 
 ```go
 sinkManager, err := sinks.NewEventSinkManager(sinkList, sinks.DefaultSinkExportEventsTimeout, sinks.DefaultSinkStopTimeout)
 ```
 
-这个方法，以`go func()` 形式并行启动所有 `sink` 。
+This method.
 
-真正的主角是 manager
+The real protagonist is manager
 
 ```go
 manager, err := manager.NewManager(sources[0], sinkManager, *argFrequency)
 ```
 
-它接受 `sinkManager` 和其他一系列参数，启动主函数。重复展开定义之后，会找到`Housekeep` 这个方法
+It accepts `sinkManager` and a series of other parameters, starts the main function. After repeatedly expanding definitions, you'll find the `Housekeep` method
 
 ```go
 func (rm *realManager) Housekeep() {
@@ -215,14 +213,14 @@ func (rm *realManager) Housekeep() {
 }
 ```
 
-这个方法写得非常简单明了，无限递归调用，除非接收到 `stopChan` 这个停止信号。
+This method is written very simply and clearly, infinite recursive calls, unless it receives the `stopChan` stop signal.
 
-除此以外，还默认监听了 `0.0.0.0:8084` 作为健康检查的端口。
+In addition, it also listens to `0.0.0.0:8084` by default as the health check port.
 
-Event 的获取也相当高效
+Event retrieval is also quite efficient
 
 ```go
-// NewKubernetesSource 事件来源
+// NewKubernetesSource Event source
 func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 	kubeConfig, err := kubeconfig.GetKubeClientConfig(uri)
 	if err != nil {
@@ -243,12 +241,12 @@ func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 }
 ```
 
-## 结语
+## Conclusion
 
-这个项目的开发者语言表达非常精炼，这个项目很适用于学习 golang 并发。
+The developer's language expression in this project is very concise. This project is very suitable for learning golang concurrency.
 
 
-1. [Kubernetes Events介绍（上）](https://www.kubernetes.org.cn/1031.html)
-2. [Kubernetes Events介绍（中）](https://www.kubernetes.org.cn/1090.html)
-3. [Kubernetes Events介绍（下）](https://www.kubernetes.org.cn/1195.html)
-4. [kubelet 源码分析： 事件处理](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)
+1. [Kubernetes Events Introduction (Part 1)](https://www.kubernetes.org.cn/1031.html)
+2. [Kubernetes Events Introduction (Part 2)](https://www.kubernetes.org.cn/1090.html)
+3. [Kubernetes Events Introduction (Part 3)](https://www.kubernetes.org.cn/1195.html)
+4. [kubelet Source Code Analysis: Event Handling](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)

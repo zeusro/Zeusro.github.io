@@ -1,5 +1,3 @@
-<!-- TODO: Translate to ru -->
-
 ```
 graph TB
 A(CompletionService<V>)-->B(ExecutorCompletionService)
@@ -9,41 +7,41 @@ A(CompletionService<V>)-->B(ExecutorCompletionService)
 
 ### CompletionService<V>
 
-可自行实现该接口.这是一个任务队列.
+Вы можете реализовать этот интерфейс самостоятельно. Это очередь задач.
 
-取出队列元素的poll和take方法
+Методы poll и take для извлечения элементов очереди.
 
-take会阻塞知道队列出现结果
+take будет блокировать до появления результата в очереди.
 
-poll使用的前提是确保队列已经有结果,不然贸贸然使用会出现空指针.可以指定一个超时等待时间,避免长时间卡死.
+poll следует использовать при условии, что очередь уже имеет результаты, иначе опрометчивое использование вызовет нулевой указатель. Вы можете указать время ожидания таймаута, чтобы избежать длительной блокировки.
 
 
 ### ExecutorCompletionService
 
-一般都是声明`CompletionService<V>`,实例化ExecutorCompletionService
+Обычно объявляют `CompletionService<V>`, создают экземпляр ExecutorCompletionService.
 
 ```java
     int TOTAL_TASK = 2;
 
     public void run() throws InterruptedException, ExecutionException {
-        // 创建线程池
+        // Создать пул потоков
         ExecutorService pool = Executors.newFixedThreadPool(TOTAL_TASK);
         CompletionService<Integer> cService = new ExecutorCompletionService<>(pool);
 
-        // 向里面扔任务
+        // Бросить задачи в него
         for (int i = 0; i < TOTAL_TASK; i++) {
             cService.submit(new CallableExample());
-            //重载的这个submit(Runnable task, V result)方法,是自行把结果传入
+            //Этот перегруженный метод submit(Runnable task, V result) передает результат сам
         }
-        // 检查线程池任务执行结果
+        // Проверить результаты выполнения задач пула потоков
         for (int i = 0; i < TOTAL_TASK; i++) {
             Future<Integer> future = cService.take();
             System.out.println("method:" + future.get());
         }
-        // 关闭线程池
+        // Завершить работу пула потоков
         pool.shutdown();
     }
 ```    
 
 
-[其他例子](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)
+[Другие примеры](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)

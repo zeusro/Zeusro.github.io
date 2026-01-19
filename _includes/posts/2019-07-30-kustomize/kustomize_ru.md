@@ -1,33 +1,31 @@
-<!-- TODO: Translate to ru -->
+## Причины не использовать helm
 
-## 不用helm的原因
+[Эта статья](https://medium.com/virtuslab/think-twice-before-using-helm-25fbb18bc822) объясняет это подробно.
 
-[这篇文章](https://medium.com/virtuslab/think-twice-before-using-helm-25fbb18bc822) 介绍得比较详细
+helm2 похож на гигантского младенца. Лично я не могу его полюбить.
 
-helm2 像个巨婴。我个人无法喜欢。
+Я предпочитаю неинвазивный, легковесный режим генерации kustomize.
 
-我比较喜欢kustomize这种无侵入，轻量级的生成模式。
+(Постскриптум: После использования Helm3 некоторое время я обнаружил, что helm3 в основном удовлетворяет требованиям, и helm 3 удалил серверную сторону)
 
-(后记:用了Helm3 一段时候后,发现helm3 基本能满足需求,而且helm 3 取消了服务端)
+## Основные концепции
 
-## 基本概念
+base: Каталог, содержащий файл kustomization.yaml, который может быть ссылкой из других файлов kustomization.yaml.
+resource: Путь к файлу, указывающий на YAML-файл, который объявляет объект API kubernetes.
 
-base：含有一个kustomization.yaml文件的目录，可以被其他的kustomization.yaml来引用
-resource：文件路径，指向一个声明了kubernetes API对象的YAML文件
+patch: Путь к файлу, указывающий на YAML-файл, который объявляет патч API kubernetes.
 
-patch: 文件路径，指向一个声明了kubernetes API patch的YAML文件
-
-variant: 含有同一组bases的不同kustomization
+variant: Различные kustomizations, содержащие один и тот же набор баз.
 
 
-[术语](https://github.com/kubernetes-sigs/kustomize/blob/master/docs/glossary.md)
+[Терминология](https://github.com/kubernetes-sigs/kustomize/blob/master/docs/glossary.md)
 
-## 准备工作
+## Подготовка
 
-1. 升级kubectl到1.14版本
-1. [下载](https://github.com/kubernetes-sigs/kustomize/releases)安装kustomize，并添加到$path
+1. Обновить kubectl до версии 1.14
+1. [Скачать](https://github.com/kubernetes-sigs/kustomize/releases) и установить kustomize, и добавить в $path
 
-## 基本目录结构
+## Базовая структура каталога
 
 ```
 ├── base
@@ -46,12 +44,12 @@ variant: 含有同一组bases的不同kustomization
         └── patch.yaml
 ```
 
-## 实际运用
+## Практическое применение
 
-[我写的例子](https://github.com/zeusro/kustomize-example)
+[Пример, который я написал](https://github.com/zeusro/kustomize-example)
 
 
-## 参考链接：
+## Ссылки:
 
 1. https://zhuanlan.zhihu.com/p/38424955
 1. https://aisensiy.github.io/2018/11/27/helm-and-kustomize/

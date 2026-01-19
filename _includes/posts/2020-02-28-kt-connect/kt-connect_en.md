@@ -1,6 +1,4 @@
-<!-- TODO: Translate to en -->
-
-## 项目架构
+## Project Architecture
 
 ```
 .

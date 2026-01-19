@@ -1,26 +1,23 @@
-<!-- TODO: Translate to ru -->
+## Причина
 
-## 缘由
+Alibaba Cloud запустил [Конкурс облачных нативных приложений](https://developer.aliyun.com/special/apphubchallenge), требующий отправки кода с использованием Helm v3. Я воспользовался возможностью отправить несколько Helm charts и одновременно изучить синтаксис Helm.
 
-阿里云搞了个 [云原生应用大赛](https://developer.aliyun.com/special/apphubchallenge) ,要求用 helm v3 提交代码,我就顺便提交几个 helm chart ,同时学学的 helm 的语法
+## Синтаксис
 
-## 语法
+В настоящее время (2019-07-26) v3 еще не был официально выпущен, и документации мало. При изучении вы можете только сравнивать со старой документацией и наступать на подводные камни.
 
-目前(2019-07-26) v3还没正式 release,文档很少,学习的时候只能拿旧的文档对照踩坑.
+Различия между v2 и v3 значительны:
 
-v2 跟 v3 的差别不小:
+1. Серверный компонент удален;
+2. helm list теперь использует секреты;
+3. Многие команды больше не совместимы и изменились.
 
-1. 取消了服务端;
-2. helm list 改用secret;
-3. 很多命令已经不兼容,发生变化
-
-
-学习 helm 的蛋疼之处在于要弄明白他们的模板语法,模板语法包含一些内置函数,还有 `go template` 相关的一类东西.
+Боль при изучении Helm заключается в понимании их синтаксиса шаблонов. Синтаксис шаблонов включает некоторые встроенные функции и вещи, связанные с `go template`.
 
 [Variables](https://v3.helm.sh/docs/topics/chart_template_guide/variables/)
 [Chart Development Tips and Tricks](https://helm.sh/docs/charts_tips_and_tricks/#using-the-include-function)
 
-## 提交的几个 chart
+## Отправленные Charts
 
 [jekyll](https://github.com/cloudnativeapp/charts/pull/34)
 
@@ -28,15 +25,14 @@ v2 跟 v3 的差别不小:
 
 [codis](https://github.com/cloudnativeapp/charts/pull/39)
 
-codis 花了比较多心血,大家给个辛苦费帮我在pr页面点赞吧~
+Я вложил много усилий в codis. Пожалуйста, дайте мне чаевые и помогите мне поставить лайк на странице PR~
 
+## Отличия от [kustomize](https://kustomize.io/)
 
-## 与[kustomize](https://kustomize.io/) 的不同
+kustomize был разработан с самого начала как легковесный генератор YAML, поэтому нет серверного компонента;
 
-kustomize 一开始就是做成轻量级的 yaml 生成器,所以不存在服务端;
+Замена переменных в kustomize более хлопотная и требует использования JSON patch.
 
-kustomize 的变量替换比较麻烦,需要用 json patch.
+kustomize не имеет потока управления, что затрудняет высокую настройку.
 
-kustomize 没有控制流程,要高度定制比较麻烦.
-
-`Helm 3` 把已安装的 chart 信息存作 `type:helm.sh/release` 的 secret ,于是乎, `Helm 3` 支持在多个 namespace 安装相同名称的 release
+`Helm 3` хранит информацию об установленных charts как секреты типа `type:helm.sh/release`, поэтому `Helm 3` поддерживает установку релизов с одинаковым именем в нескольких пространствах имен.

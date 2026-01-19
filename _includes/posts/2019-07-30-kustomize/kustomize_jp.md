@@ -1,33 +1,31 @@
-<!-- TODO: Translate to jp -->
+## helmを使用しない理由
 
-## 不用helm的原因
+[この記事](https://medium.com/virtuslab/think-twice-before-using-helm-25fbb18bc822)で詳しく説明されています。
 
-[这篇文章](https://medium.com/virtuslab/think-twice-before-using-helm-25fbb18bc822) 介绍得比较详细
+helm2は巨大な赤ちゃんのようです。個人的には好きになれません。
 
-helm2 像个巨婴。我个人无法喜欢。
+kustomizeの非侵入的で軽量な生成モードを好みます。
 
-我比较喜欢kustomize这种无侵入，轻量级的生成模式。
-
-(后记:用了Helm3 一段时候后,发现helm3 基本能满足需求,而且helm 3 取消了服务端)
+（後記：Helm3をしばらく使用した後、helm3が基本的に要件を満たしていることがわかり、helm 3はサーバー側を削除しました）
 
 ## 基本概念
 
-base：含有一个kustomization.yaml文件的目录，可以被其他的kustomization.yaml来引用
-resource：文件路径，指向一个声明了kubernetes API对象的YAML文件
+base：他のkustomization.yamlファイルによって参照できるkustomization.yamlファイルを含むディレクトリ。
+resource：kubernetes APIオブジェクトを宣言するYAMLファイルを指すファイルパス。
 
-patch: 文件路径，指向一个声明了kubernetes API patch的YAML文件
+patch：kubernetes APIパッチを宣言するYAMLファイルを指すファイルパス。
 
-variant: 含有同一组bases的不同kustomization
+variant：同じベースのセットを含む異なるkustomization。
 
 
-[术语](https://github.com/kubernetes-sigs/kustomize/blob/master/docs/glossary.md)
+[用語](https://github.com/kubernetes-sigs/kustomize/blob/master/docs/glossary.md)
 
-## 准备工作
+## 準備
 
-1. 升级kubectl到1.14版本
-1. [下载](https://github.com/kubernetes-sigs/kustomize/releases)安装kustomize，并添加到$path
+1. kubectlをバージョン1.14にアップグレード
+1. [ダウンロード](https://github.com/kubernetes-sigs/kustomize/releases)してkustomizeをインストールし、$pathに追加
 
-## 基本目录结构
+## 基本ディレクトリ構造
 
 ```
 ├── base
@@ -46,12 +44,12 @@ variant: 含有同一组bases的不同kustomization
         └── patch.yaml
 ```
 
-## 实际运用
+## 実際の運用
 
-[我写的例子](https://github.com/zeusro/kustomize-example)
+[私が書いた例](https://github.com/zeusro/kustomize-example)
 
 
-## 参考链接：
+## 参考リンク：
 
 1. https://zhuanlan.zhihu.com/p/38424955
 1. https://aisensiy.github.io/2018/11/27/helm-and-kustomize/

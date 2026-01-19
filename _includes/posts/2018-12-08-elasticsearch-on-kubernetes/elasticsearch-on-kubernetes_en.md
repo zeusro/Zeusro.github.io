@@ -1,33 +1,31 @@
-<!-- TODO: Translate to en -->
+## Installation and Configuration
 
-## 安装和配置
-
-### 自制带插件的ES镜像
+### Custom ES Image with Plugins
 
 ```dockerfile
 FROM elasticsearch:6.5.0
-#或者手动下载后然后安装也行
+# Or manually download and install
 # COPY elasticsearch-analysis-ik-6.5.0.zip /
 # elasticsearch-plugin install --batch file:///elasticsearch-analysis-ik-6.5.0.zip
-    #IK Analyzer是一个开源的，基于java语言开发的中文分词工具包。是开源社区中处理中分分词非常热门的插件。 
+    # IK Analyzer is an open-source Chinese word segmentation toolkit developed in Java. It's a very popular plugin in the open-source community for handling Chinese word segmentation.
 RUN elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.0/elasticsearch-analysis-ik-6.5.0.zip && \
-    # 拼音分词器
+    # Pinyin analyzer
     elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v6.5.0/elasticsearch-analysis-pinyin-6.5.0.zip && \    
     # Smart Chinese Analysis Plugin
     elasticsearch-plugin install analysis-icu && \
-    # 日文分词器
+    # Japanese analyzer
     elasticsearch-plugin install analysis-kuromoji && \
-    # 语音分析
+    # Phonetic analysis
     elasticsearch-plugin install analysis-phonetic && \
-    # 计算字符哈希
+    # Calculate character hash
     elasticsearch-plugin install  mapper-murmur3 && \
-    # 在_source中提供size字段
+    # Provide size field in _source
     elasticsearch-plugin install mapper-size
 ```
 
-### 编排文件
+### Orchestration Files
 
-- RBAC 相关内容
+- RBAC Related Content
 
 ```
 apiVersion: v1
@@ -56,10 +54,10 @@ roleRef:
   apiGroup: ""
 ```
 
-- 主体程序
+- Main Program
 
 
-存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
+Storage uses hostpath. You need to create the directory on the host first and assign appropriate permissions, otherwise it will error.
 
 ```bash
 cd /root/kubernetes/$(namespace)/elasticsearch/data
@@ -184,7 +182,7 @@ spec:
           value: "2"
         - name: "discovery.zen.ping_timeout"
           value: "5s"
-          #因为是测试,所以master,data,ingest都混用          
+          # Because it's for testing, master, data, and ingest are all mixed
         - name: "node.master"
           value: "true"
         - name: "node.data"
@@ -229,10 +227,9 @@ spec:
   type: NodePort
 ```
 
-这个编排精髓的一点在于用了节点`affinity`使每一个节点最多会运行一个容器,确保了高可用.
+The essence of this orchestration is using node `affinity` so that each node runs at most one container, ensuring high availability.
 
-如果要把节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
-
+If you want to extract the node roles further, you can extract a service for mutual discovery.
 
 ```yaml
 kind: Service
@@ -251,28 +248,28 @@ spec:
 ```
 
 
-1. [在Kubernetes上部署Elasticsearch集群](https://blog.csdn.net/chenleiking/article/details/79453460)
-1. [重要配置的修改](https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html)
+1. [Deploying Elasticsearch Cluster on Kubernetes](https://blog.csdn.net/chenleiking/article/details/79453460)
+1. [Important Configuration Changes](https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html)
 1. [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/6.x/docker.html)
-1. [学习Elasticsearch之4：配置一个3节点Elasticsearch集群(不区分主节点和数据节点)](http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/)
-1. [谈一谈Elasticsearch的集群部署](https://blog.csdn.net/zwgdft/article/details/54585644)
-1. [官方docker镜像构建项目](https://github.com/elastic/elasticsearch-docker/tree/master/templates)
-1. [Elasticsearch模块功能之-自动发现（Discovery）](https://blog.csdn.net/changong28/article/details/38377863)
-1. [订阅费用](https://www.elastic.co/subscriptions)
-2. [故障转移](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
-3. [节点配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
-4. [Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
+1. [Learning Elasticsearch 4: Configuring a 3-Node Elasticsearch Cluster (No Distinction Between Master and Data Nodes)](http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/)
+1. [Talking About Elasticsearch Cluster Deployment](https://blog.csdn.net/zwgdft/article/details/54585644)
+1. [Official Docker Image Build Project](https://github.com/elastic/elasticsearch-docker/tree/master/templates)
+1. [Elasticsearch Module Function - Auto Discovery (Discovery)](https://blog.csdn.net/changong28/article/details/38377863)
+1. [Subscription Fees](https://www.elastic.co/subscriptions)
+2. [Failover](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
+3. [Node Configuration](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
+4. [Elasticsearch 5.X Cluster Multi-Node Role Configuration In-Depth Explanation](https://blog.csdn.net/laoyang360/article/details/78290484)
 1. [elasticsearch-cloud-kubernetes](https://github.com/fabric8io/elasticsearch-cloud-kubernetes)
-1. [吃透Elasticsearch 堆内存](https://blog.csdn.net/laoyang360/article/details/79998974)
+1. [Understanding Elasticsearch Heap Memory](https://blog.csdn.net/laoyang360/article/details/79998974)
 
-### 安装插件
+### Installing Plugins
 
 [elasticsearch-docker-plugin-management](https://www.elastic.co/blog/elasticsearch-docker-plugin-management)
 
 GET /_cat/plugins?v&s=component&h=name,component,version,description
 
 
-## 压力测试
+## Stress Testing
 
 ```
 esrally configure
@@ -288,13 +285,13 @@ datastore.secure = False
 ```
 
 
-通过 Elasticsearch 官方提供的 benchmark 脚本 rally
+Through the official Elasticsearch benchmark script rally
 
 
-## ElasticSearch集群的维护
+## ElasticSearch Cluster Maintenance
 
 
-更新的时候务必使用灰度更新,从序号最大的镜像开始更新,不然分片丢失了,相信我,你会死的很惨
+When updating, be sure to use grayscale updates, starting from the image with the largest sequence number. Otherwise, if shards are lost, believe me, you'll be in big trouble.
 
 ```bash
 kubectl patch statefulset elasticsearch -p \

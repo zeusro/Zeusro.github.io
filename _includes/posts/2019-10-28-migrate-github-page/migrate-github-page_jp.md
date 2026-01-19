@@ -1,10 +1,8 @@
-<!-- TODO: Translate to jp -->
+衝動的に[新しいドメイン](www.zeusro.com)を購入したので、ブログの設定も変更する必要がありました。以前は阿里雲DNSを使用していたため、Cloudflareに移行しています。
 
-手贱买了个[新域名](www.zeusro.com),于是博客也要改下设置.由于之前一直用阿里云解析,现在顺带转移给 cloudflare.
-
-1. 修改GitHub page 的setting,custom domain 改成新域名,并取消掉 enforce https (cloudflare自带证书)
-1. 找个服务器监听80端口,把旧域名的流量全部301到新域名,这里我用了docker nginx 来做
-1. 设置搜索引擎,迁移站点.如果之前还监听了HTTPS,HTTPS也要301跳转
+1. GitHub Pagesの設定を変更し、カスタムドメインを新しいドメインに変更し、enforce HTTPSを無効にします（Cloudflareには独自の証明書があります）
+1. ポート80でリッスンするサーバーを見つけ、古いドメインからのすべてのトラフィックを新しいドメインに301リダイレクトします。これにはDocker Nginxを使用しました。
+1. 検索エンジンを設定し、サイトを移行します。以前にHTTPSもリッスンしていた場合、HTTPSも301リダイレクトが必要です。
 
 ```yaml
 version: '2.2'

@@ -1,5 +1,3 @@
-<!-- TODO: Translate to ru -->
-
 ```
 graph TB
 e(Executor<V>)-->es(ExecutorService)
@@ -15,15 +13,15 @@ se-->ste
 
 ### ExecutorService
 
-一个运行新任务的简单接口。
+Простой интерфейс для запуска новых задач.
 
-ExecutorService，扩展了Executor接口。添加了一些用来管理执行器生命周期和任务生命周期的方法。
+ExecutorService расширяет интерфейс Executor. Добавляет некоторые методы для управления жизненным циклом исполнителя и жизненным циклом задач.
 
-可以通过`java.util.concurrent.Executors`类,提供了多个实例化线程的简易静态工厂方法,来创造ExecutorService的子类(一般是创建ThreadPoolExecutor/ScheduledExecutorService/ScheduledThreadPoolExecutor)
+Вы можете использовать класс `java.util.concurrent.Executors`, который предоставляет несколько простых статических фабричных методов для создания экземпляров потоков, для создания подклассов ExecutorService (обычно создание ThreadPoolExecutor/ScheduledExecutorService/ScheduledThreadPoolExecutor).
 
 ### ScheduledExecutorService
 
-继承了ExecutorService和Executor。支持Future和定期执行任务。
+Наследует ExecutorService и Executor. Поддерживает Future и периодическое выполнение задач.
 
 ### AbstractExecutorService
 
@@ -32,7 +30,7 @@ ExecutorService，扩展了Executor接口。添加了一些用来管理执行器
 
 ### ThreadPoolExecutor
 
-实现了ExecutorService,所以才能够这么玩
+Реализует ExecutorService, поэтому может использоваться таким образом.
 
 ```java
         //guava
@@ -47,7 +45,7 @@ ExecutorService，扩展了Executor接口。添加了一些用来管理执行器
 
 ### ScheduledThreadPoolExecutor
 
-从上图的继承树就可以看出,ScheduledThreadPoolExecutor通过继承`ScheduledExecutorService`接口实现了其特性,多出了一个`awaitTermination`方法
+Из дерева наследования на диаграмме выше видно, что ScheduledThreadPoolExecutor реализует свои функции, наследуя интерфейс `ScheduledExecutorService`, добавляя метод `awaitTermination`.
 
 ```java
         Runnable runnabledelayedTask = new Runnable() {

@@ -1,29 +1,27 @@
-<!-- TODO: Translate to ru -->
+## Предисловие
 
-## 前言
+Ранее представлено
+[Concourse-CI от начала до отказа](https://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
+Сегодня поговорим о эпохальной версии `Jenkins`--**JenkinsX**!
 
-之前介绍了
-[Concourse-CI从入门到放弃](https://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
-今天来讲讲`Jenkins`的划时代版本--**JenkinsX**!
+`JenkinsX` — это подпроект Jenkins, специально разработанный для работы на K8S.
 
-`JenkinsX`是一个Jenkins的子项目,专门运行在K8S上面.
-
-文章分2部分,第一部分介绍安装,第二部分讲解应用实践.
+Статья разделена на 2 части. Часть 1 знакомит с установкой, Часть 2 объясняет практики применения.
 
 
-## 前期准备
+## Предварительные требования
 
 ### helm
 
-包括客户端和服务端.[语法](https://helm.sh/docs/chart_template_guide/#getting-started-with-a-chart-template)也要了解
+Включая клиент и сервер. Также нужно понять [синтаксис](https://helm.sh/docs/chart_template_guide/#getting-started-with-a-chart-template).
 
-运行`helm version`确保客户端和服务端都没有问题
+Запустите `helm version`, чтобы убедиться, что и клиент, и сервер в порядке.
 
-### 本地
+### Локально
 
 #### jx
 
-跟`Concourse-CI`差不多,一开始也要安装本地CLI
+Подобно `Concourse-CI`, в начале также нужно установить локальный CLI.
 
 
 ```bash
@@ -44,21 +42,21 @@ git                git version 2.14.3 (Apple Git-98)
 Operating System   Mac OS X 10.13.6 build 17G65
 ```
 
-最佳实践是创建自己的`myvalue.yaml`,修改里面的镜像,一步到位,这样就不需要后期修改了
+Лучшая практика — создать свой собственный `myvalue.yaml`, изменить образы внутри, сделать все сразу, чтобы не нужно было изменять позже.
 
 https://jenkins-x.io/getting-started/config/
 
 
-### 服务器
+### Сервер
 
-使用国内阿里云ECS作为服务器.
+Использование внутреннего Alibaba Cloud ECS в качестве сервера.
 
-已经创建了ingress的服务和pod
+Уже созданы сервис и под ingress.
 
-### 验证安装
+### Проверка установки
 
-`jx compliance run`会启动一个新的ns和一系列资源去检查整个集群.但由于镜像都是
-gcr.io的,所以我启动失败了.有信心的直接跳过这一步吧.
+`jx compliance run` запустит новый ns и серию ресурсов для проверки всего кластера. Но поскольку образы все из
+gcr.io, мой запуск не удался. Если вы уверены, просто пропустите этот шаг.
 
 ```
 jx compliance run
@@ -68,19 +66,19 @@ jx compliance delete
 
 ```
 
-## 安装步骤
+## Шаги установки
 
 ### jx install
 
-`jx install` 是对helm的再度封装.参数分为几部分
+`jx install` — это дальнейшая обертка вокруг helm. Параметры разделены на несколько частей.
 
-`default-admin-password` 是`Jenkins`,`grafana`,`nexus`,`chartmuseum`的默认密码,建议设复杂点,不然后期又要修改
+`default-admin-password` — это пароль по умолчанию для `Jenkins`, `grafana`, `nexus`, `chartmuseum`. Рекомендуется установить его сложным, иначе придется изменять позже.
 
-`--namespace`是安装的目标ns.默认是`kube-system`;
+`--namespace` — целевой ns для установки. По умолчанию `kube-system`;
 
-`--ingress`指定当前的ingress实例,不指定的话会报错,提示找不到jx-ingress
+`--ingress` указывает текущий экземпляр ingress. Если не указан, будет ошибка, подсказка, что jx-ingress не найден.
 
-`--domain`是最终Jenkins-X的对外域名
+`--domain` — это окончательное внешнее доменное имя для Jenkins-X.
 
 
 ```
@@ -96,36 +94,36 @@ install \
 --domain=$(domain)
 ```
 
-里面有几个重要的选项,我先后选了
+Внутри есть несколько важных опций. Я выбрал по порядку:
 
 > Static Master Jenkins
 
 > Kubernetes Workloads: Automated CI+CD with GitOps Promotion
 
-之后会命令行会进入这个等待的状态
+После этого командная строка войдет в это состояние ожидания:
 
 waiting for install to be ready, if this is the first time then it will take a while to download images
 
-部署docker镜像,相比一定会碰到不可描述类问题.这时
+При развертывании docker-образов вы обязательно столкнетесь с неописуемыми проблемами. В это время:
 
 ```bash
 kgpo -l release=jenkins-x
 ```
 
-果然发现部分pod启动失败,这时需要把镜像搬回国内,并修改对应的`deploy`/`ds`
+Как и ожидалось, некоторые поды не запустились. В это время нужно перенести образы обратно в страну и изменить соответствующие `deploy`/`ds`.
 
-### 配置volume
+### Настройка volume
 
 #### mongodb
 
-先把`jenkins-x-mongodb`关联的镜像转移到国内,再配置PVC
+Сначала перенесите образ, связанный с `jenkins-x-mongodb`, в страну, затем настройте PVC.
 
 ```
 jenkins-x-mongodb
 docker.io/bitnami/mongodb:3.6.6-debian-9
 ```
 
-修改这部分
+Измените эту часть:
 
 ```yaml
       volumes:
@@ -136,7 +134,7 @@ docker.io/bitnami/mongodb:3.6.6-debian-9
 
 #### jenkins-x-chartmuseum
 
-同样是修改volumes这部分
+Также измените часть volumes:
 
 ```yaml
       volumes:
@@ -162,19 +160,19 @@ docker.io/bitnami/mongodb:3.6.6-debian-9
             claimName: jenkins
 ```
 
-推荐使用阿里云NAS
+Рекомендуется Alibaba Cloud NAS.
 
-### 转移k8s.gcr.io镜像到国内
+### Перенос образов k8s.gcr.io в страну
 
-Jenkins-X配置了deploy,CronJob,镜像很多都是`gcr.io`的,两部分都需要修改
+Jenkins-X настраивает deploy, CronJob. Многие образы из `gcr.io`. Обе части нужно изменить.
 
 #### deploy
 
-- `jenkins-x-controllerteam`,`jenkins-x-controllerbuild`
+- `jenkins-x-controllerteam`, `jenkins-x-controllerbuild`
 
 ```
 gcr.io/jenkinsxio/builder-go:0.1.281
-这镜像3.72G左右
+Этот образ около 3.72G
 ```
 
 - `jenkins-x-heapster`
@@ -189,12 +187,12 @@ docker pull k8s.gcr.io/addon-resizer:1.7
 
 - jenkins-x-gcpreviews
 
-转移完成后,pod基本上就全起来了
+После завершения переноса поды в основном все поднимаются.
 
 
-## 最后成果
+## Финальные результаты
 
-`jenkins`,`monocular`和`nexus`可以直接访问,其他的暂时不用管
+`jenkins`, `monocular` и `nexus` можно получить прямой доступ. Остальные пока можно игнорировать.
 
 ```bash
 # $(app).$(namespace).$(domain)
@@ -275,11 +273,11 @@ cronjob.batch/jenkins-x-gcpods         0/30 */3 * * *   False     0        10m  
 cronjob.batch/jenkins-x-gcpreviews     0 */3 * * *      False     1        15h             17h
 ```
 
-## 设置优化
+## Оптимизация настроек
 
-### 修改`jx get urls`的结果
+### Изменить результаты `jx get urls`
 
-需要修改SVC里面的
+Нужно изменить в SVC:
 
 ```yaml
 metadata:
@@ -294,14 +292,14 @@ metadata:
 1. jenkins
 1. nexus
 
-### 修改插件更新中心
+### Изменить центр обновления плагинов
 
-访问`/pluginManager/advanced`,Update Site填上
+Доступ к `/pluginManager/advanced`, заполните Update Site:
 
   https://mirrors.tuna.tsinghua.edu.cn/jenkins/updates/current/update-center.json
 
 
-### [自定义git server](https://jenkins-x.io/developing/git/)
+### [Пользовательский git-сервер](https://jenkins-x.io/developing/git/)
 
 todo:
 
@@ -310,33 +308,33 @@ jx edit addon gitea -e true
 jx get addons
 ```
 
-## 其他有用命令
+## Другие полезные команды
 
-### 更新整个Jenkins-X平台
+### Обновить всю платформу Jenkins-X
 
 ```bash
 jx upgrade platform
 ```
 
-### 切换环境
+### Переключить окружение
 
 ```bash
 jx context
 jx environment
 ```
 
-### 更新密码
+### Обновить пароль
 
 TODO:
 
-参考链接:
+Ссылки:
 
-1. [京东工程效率专家 石雪峰 JenkinsX：基于Kubernetes的新一代CI/CD平台](http://www.caict.ac.cn/pphd/zb/2018kxy/15pm/5/201808/t20180813_181702.htm)
+1. [Эксперт по инженерной эффективности JD Ши Сюэфэн JenkinsX: Платформа CI/CD следующего поколения на основе Kubernetes](http://www.caict.ac.cn/pphd/zb/2018kxy/15pm/5/201808/t20180813_181702.htm)
 1. [JenkinsX Essentials](https://www.youtube.com/watch?v=LPEIfvkJpw0)
-2. [安装Jenkins X](https://kubernetes.feisky.xyz/fu-wu-zhi-li/devops/jenkinsx)
-3. [安装和使用Jenkins X：Kubernetes的自动化CI / CD的命令行工具](https://www.ctolib.com/jenkins-x-jx.html)
-4. [5分钟在阿里云Kubernetes服务上搭建jenkins环境并完成应用构建到部署的流水线作业](https://yq.aliyun.com/articles/683440)
-1. [Install on Kubernetes](https://jenkins-x.io/getting-started/install-on-cluster/)
+2. [Установка Jenkins X](https://kubernetes.feisky.xyz/fu-wu-zhi-li/devops/jenkinsx)
+3. [Установка и использование Jenkins X: Инструмент командной строки для автоматизированного CI/CD на Kubernetes](https://www.ctolib.com/jenkins-x-jx.html)
+4. [5 минут для настройки среды jenkins на службе Alibaba Cloud Kubernetes и завершения конвейера от сборки приложения до развертывания](https://yq.aliyun.com/articles/683440)
+1. [Установка на Kubernetes](https://jenkins-x.io/getting-started/install-on-cluster/)
 1. [jx](https://jenkins-x.io/commands/jx/)
-1. [阿里云容器服务Kubernetes之JenkinsX（1）-安装部署实践篇](https://yq.aliyun.com/articles/657149)
-1. [阿里云示例](https://cs.console.aliyun.com/#/k8s/catalog/detail/incubator_jenkins-x-platform)
+1. [JenkinsX Alibaba Cloud Container Service Kubernetes (1) - Практика установки и развертывания](https://yq.aliyun.com/articles/657149)
+1. [Пример Alibaba Cloud](https://cs.console.aliyun.com/#/k8s/catalog/detail/incubator_jenkins-x-platform)

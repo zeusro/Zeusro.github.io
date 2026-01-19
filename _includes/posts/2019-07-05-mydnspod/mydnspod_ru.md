@@ -1,42 +1,40 @@
-<!-- TODO: Translate to ru -->
-
-## 背景信息
+## Фоновая информация
 
 ![img](/img/in-post/mydnspod/ticket.png)
 
-通过腾讯云向他们吐槽了不满,结果他们叫我按`ctrl + `缩放页面,作为一个资深键盘侠,孰能忍.
+Я пожаловался им через Tencent Cloud о своем недовольстве, и они сказали мне нажать `ctrl + ` для масштабирования страницы. Как ветеран клавиатурного воина, кто может это терпеть?
 
-dnspod这个770px宽度的域名配置页真的恶心到我了,我决定把他改长一点.
+Страница конфигурации домена DNSPod шириной 770px действительно меня раздражала. Я решил сделать ее длиннее.
 
-一怒之下我决定自己动手,用油猴插件把整个页面拓宽点.
+В приступе гнева я решил сделать это сам, используя плагин Tampermonkey, чтобы расширить всю страницу.
 
-## 熟悉油猴插件开发模式
+## Ознакомление с разработкой плагина Tampermonkey
 
-可以参考[这个](https://greasyfork.org/zh-CN/help/meta-keys)
+Вы можете обратиться к [этому](https://greasyfork.org/zh-CN/help/meta-keys)
 
-大致跟原生JavaScript没啥区别,只是多了一点点约束和语法
+Это примерно то же самое, что и нативный JavaScript, просто с несколькими дополнительными ограничениями и синтаксисом
 
-## 分发
+## Распространение
 
-[油猴脚本,适配1080p屏幕](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
+[Скрипт Tampermonkey, адаптированный для экранов 1080p](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
 
-## 源代码
+## Исходный код
 
 [mydnspod](https://github.com/zeusro/mydnspod)
 
-欢迎PR
+PR приветствуются
 
-## 后续恶搞
+## Последующая шутка
 
-在 dnspod 网站上面看到他们在[招工](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw) 我决定皮一波,发一封邮件给`hr@dnspod.com`🤡.
+Я увидел на веб-сайте DNSPod, что они [набирают сотрудников](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw). Я решил пошалить и отправить письмо на `hr@dnspod.com`🤡.
 
 ![img](/img/in-post/mydnspod/email.png)
 
-`2019-10-17` 更新:最近他们换新版了,所以把项目冻结了
+`2019-10-17` Обновление: Они недавно переключились на новую версию, поэтому проект был заморожен.
 
-## 参考链接
+## Ссылки
 
-1. [油猴脚本编写规则](https://blog.csdn.net/Senreme/article/details/79939249)
-2. [Tutorials](https://wiki.greasespot.net/Tutorials)
-3. [引入外部脚本](https://greasyfork.org/zh-CN/help/external-scripts)
-4. [深入浅出 Greasemonkey](http://www.ttlsa.com/docs/greasemonkey/)
+1. [Правила написания скриптов Tampermonkey](https://blog.csdn.net/Senreme/article/details/79939249)
+2. [Учебные пособия](https://wiki.greasespot.net/Tutorials)
+3. [Введение внешних скриптов](https://greasyfork.org/zh-CN/help/external-scripts)
+4. [Greasemonkey Подробно](http://www.ttlsa.com/docs/greasemonkey/)

@@ -1,12 +1,10 @@
-<!-- TODO: Translate to en -->
+All communication between containers in `kubernetes` needs to go through the `api-server`. External access to manage the cluster through `kubectl` is essentially also accessing the `api-server`. The `api-server` is the command center of the entire cluster.
 
-`kubernetes`内部容器通讯都需要通过`api-server`进行通讯.外部通过`kubectl`访问管理集群,本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢.
+But when you're in the world, you can't avoid getting hurt. How to prevent troublemakers inside and outside the cluster from causing damage? `RBAC` (Role-based access control) was born.
 
-但是人在江湖漂,哪能不挨刀呢?要怎么防止集群内外瞎搞事的破坏分子呢?`RBAC`(Role-based access control )顺势而生.
+In one sentence, the relationship between `ServiceAccount`, `Role`, `RoleBinding`, `ClusterRole`, and `ClusterRoleBinding` is:
 
-一句话总结`ServiceAccount`,`Role`,`RoleBinding`,`ClusterRole`,`ClusterRoleBinding`的关系就是,
-
-**`ClusterRoleBinding`,`RoleBinding`是一种任命,认命被授权的对象(users, groups, or service accounts)能够有什么样的权限(Role,ClusterRole)**
+**`ClusterRoleBinding` and `RoleBinding` are appointments, authorizing what permissions (Role, ClusterRole) the authorized objects (users, groups, or service accounts) can have.**
 
 ## ServiceAccount
 
@@ -27,26 +25,26 @@ secrets:
 - name: flannel-token-f7d4d
 ```
 
-上面说了,`ServiceAccount`只是一个虚名,本身没有任何的权限说明.
+As mentioned above, `ServiceAccount` is just a name, with no permission description itself.
 
 ## service-account-token
 
-service-account-token的API type是`kubernetes.io/service-account-token`
+The API type of service-account-token is `kubernetes.io/service-account-token`
 
-变动`ServiceAccount`时,Token Controller(controller-manager的一部分)
-会自动维护`service-account-token`,根据实际情况增加/修改/删除,`service-account-token`的本质类型是`secret`.所以`service-account-token`是1对1跟`ServiceAccount`随生随死的.
+When `ServiceAccount` changes, the Token Controller (part of controller-manager)
+automatically maintains `service-account-token`, adding/modifying/deleting as needed. The essence type of `service-account-token` is `secret`. So `service-account-token` is 1-to-1 with `ServiceAccount`, living and dying together.
 
-而定义的资源如果指定了`ServiceAccount`,`Admission Controllers`(api-server的一部分)就会把这个`ServiceAccount`相应的`service-account-token`以文件的形式挂载到容器内部的`/var/run/secrets/kubernetes.io/serviceaccount`目录下.
+If a defined resource specifies a `ServiceAccount`, `Admission Controllers` (part of api-server) will mount the corresponding `service-account-token` of this `ServiceAccount` as files into the container at the `/var/run/secrets/kubernetes.io/serviceaccount` directory.
 
-该目录一般会有3个文件
+This directory generally has 3 files:
 
 1. ca.crt	
 1. namespace  
 1. token
 
-参考链接:
+Reference Links:
 
-1. [管理Service Accounts](https://kubernetes.io/zh/docs/admin/service-accounts-admin/)
+1. [Managing Service Accounts](https://kubernetes.io/zh/docs/admin/service-accounts-admin/)
 1. [Configure Service Accounts for Pods](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/)
 
 ## Role
@@ -63,9 +61,9 @@ rules:
   verbs: ["get", "watch", "list"]
 ```
 
-Role 只能用于授予对单个命名空间中的资源访问权限
+Role can only be used to grant access permissions to resources in a single namespace.
 
-定义了具体的url
+Defines specific URLs.
 
 ## RoleBinding
 
@@ -86,7 +84,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-RoleBinding 适用于某个命名空间内授权,RoloBinding 可以将角色中定义的权限授予用户或用户组
+RoleBinding is used for authorization within a namespace. RoleBinding can grant permissions defined in a role to users or user groups.
 
 ## ClusterRole 
 
@@ -102,9 +100,9 @@ rules:
   verbs: ["get", "watch", "list"]
 ```  
 
-1. 集群级别的资源控制(例如 node 访问权限)
-1. 非资源型 endpoints(例如 /healthz 访问)
-1. 所有命名空间资源控制(例如 pods)
+1. Cluster-level resource control (e.g., node access permissions)
+1. Non-resource endpoints (e.g., /healthz access)
+1. All namespace resource control (e.g., pods)
 
 ## ClusterRoleBinding
 
@@ -139,25 +137,25 @@ subjects:
   namespace: monitoring
 ```
 
-ClusterRoleBinding 适用于集群范围内的授权。
+ClusterRoleBinding is used for cluster-wide authorization.
 
-最后用一个表格整理一下
+Finally, let's organize it in a table:
 
-|资源类型| 说明|
+| Resource Type | Description |
 |---|---|
-|ServiceAccount |一个虚名|
-|service-account-token|ServiceAccount的身份象征 | 
-|Role| 授予对单个命名空间中的资源访问权限| 
-|RoleBinding|将赋予被授权对象和Role| 
-|ClusterRole |可视为Role的超集,是从集群角度做的一种授权| 
-|ClusterRoleBinding|将赋予被授权对象和ClusterRole| 
+| ServiceAccount | Just a name |
+| service-account-token | Identity symbol of ServiceAccount | 
+| Role | Grants access permissions to resources in a single namespace | 
+| RoleBinding | Grants authorized objects and Role | 
+| ClusterRole | Can be considered a superset of Role, authorization from a cluster perspective | 
+| ClusterRoleBinding | Grants authorized objects and ClusterRole | 
 
-理解`kubernetes`RBAC的最简单办法,就是进入kube-system内部,看看各类集群资源是怎么定义的.
+The simplest way to understand `kubernetes` RBAC is to go inside kube-system and see how various cluster resources are defined.
 
-参考链接:
+Reference Links:
 
-1. [Kubernetes TLS bootstrapping 那点事](https://mritd.me/2018/01/07/kubernetes-tls-bootstrapping-note/)
-1. [使用 RBAC 控制 kubectl 权限](https://mritd.me/2018/03/20/use-rbac-to-control-kubectl-permissions/)
+1. [Kubernetes TLS bootstrapping Notes](https://mritd.me/2018/01/07/kubernetes-tls-bootstrapping-note/)
+1. [Using RBAC to Control kubectl Permissions](https://mritd.me/2018/03/20/use-rbac-to-control-kubectl-permissions/)
 2. [Kubernetes RBAC](https://mritd.me/2017/07/17/kubernetes-rbac-chinese-translation/)
 1. [Using RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#rolebinding-and-clusterrolebinding)
 1. [Authenticating with Bootstrap Tokens](https://kubernetes.io/docs/reference/access-authn-authz/bootstrap-tokens/)

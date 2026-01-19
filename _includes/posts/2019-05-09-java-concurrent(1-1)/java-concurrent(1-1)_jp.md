@@ -1,5 +1,3 @@
-<!-- TODO: Translate to jp -->
-
 ```
 graph TB
 A(Callable<V>)-->B(DocumentationTool.DocumentationTask)
@@ -8,7 +6,7 @@ A-->C(JavaCompiler.CompilationTask)
 
 ![image](/img/in-post/java-concurrent/Callable.png)
 
-一般情况下是配合ExecutorService来使用的，在ExecutorService接口中声明了若干个submit方法的重载版本：
+一般的にExecutorServiceと組み合わせて使用されます。ExecutorServiceインターフェースは、submitメソッドのいくつかのオーバーロードバージョンを宣言しています：
 
 ```java
 <T> Future<T> submit(Callable<T> task);

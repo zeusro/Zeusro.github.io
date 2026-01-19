@@ -1,28 +1,26 @@
-<!-- TODO: Translate to en -->
+## Problem
 
-## 问题
-
-2020-03-05 星期四,下午一点.百度流量异常地高,超过了200Mbps.
+Thursday, March 5, 2020, 1:00 PM. Baidu traffic was abnormally high, exceeding 200Mbps.
 
 ![](/img/in-post/baidu/cloudmonitor.jpg)
 
-联系了网宿那边的技术,说是百度的爬虫在捣鬼.
+Contacted the technical staff at Wangsu, who said Baidu's crawlers were causing trouble.
 
 ![](/img/in-post/baidu/rip.png)
 
-让他们导出了一系列IP
+Had them export a series of IPs.
 
-切换到阿里云之后,发现百度竟然还把我网宿的IP给记住了,真是666.
+After switching to Alibaba Cloud, I found that Baidu had actually remembered my Wangsu IP, really impressive.
 
 ![](/img/in-post/baidu/17B782EA19C50DCFD14A4493ABEF6E5A.png)
 
-然后我查看了站长后台,抓取的频次确实高了些.
+Then I checked the webmaster backend, and the crawl frequency was indeed a bit high.
 
 ![](/img/in-post/baidu/baidu-spider.png)
 
-## 结论
+## Conclusion
 
 1. 123.125 xxx xxx
 1. 220.181 xxx xxx
 
-这2个网段都是百度那边的IP,原则上要放行.而且他们喜欢在周四更新.
+These two IP ranges are both from Baidu's side. In principle, they should be allowed. And they like to update on Thursdays.

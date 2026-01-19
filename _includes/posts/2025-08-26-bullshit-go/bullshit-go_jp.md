@@ -1,6 +1,6 @@
-The point is to break the rule everyday.
+毎日ルールを破ることがポイントです。
 
-## Where is my last son ?
+## 私の最後の息子はどこにいる？
 
 ```go
 package main
@@ -28,14 +28,14 @@ func reverse(s []int) {
 }
 ```
 
-result:
+結果：
 
 ```go
 [999 3 2 1]
 [999 3 2]
 ```
 
-## I wanna break out of my parents's control
+## 親のコントロールから抜け出したい
 
 ```go
 func myParent(chExit chan bool) {
@@ -54,7 +54,7 @@ func myParent(chExit chan bool) {
 }
 ```
 
-result:
+結果：
 
 ```go
 import (
@@ -71,7 +71,7 @@ func main() {
 }
 ```
 
-## Magic range
+## マジックレンジ
 
 ```go
 package main
@@ -95,7 +95,7 @@ func prtMap(myMap map[int]*int) {
 }
 ```
 
-result：
+結果：
 
 ```go
 map[2]=3
@@ -123,7 +123,7 @@ func main()  {
 }
 ```
 
-result：
+結果：
 
 ```go
 Sergey
@@ -131,7 +131,7 @@ Sergey
 Sergey
 ```
 
-Go スライスの落とし穴ガイド
+Goスライスの落とし穴ガイド
 <https://www.lagou.com/lgeduarticle/66511.html>
 
 Go言語のfor rangeの落とし穴

@@ -314,16 +314,92 @@
     // language selector (exists only in post layout)
     var $select = document.querySelector("select.sel-lang");
 
+    // 根据浏览器语言和地区自动检测语言
+    function detectLanguageFromBrowser() {
+        // 获取浏览器语言偏好列表
+        var browserLangs = navigator.languages || [navigator.language || navigator.userLanguage];
+        
+        // 支持的语言映射
+        var supportedLangs = {
+            'zh': 'zh',      // 中文（包括 zh-CN, zh-TW, zh-HK, zh-MO, zh-SG 等）
+            'en': 'en',      // 英文
+            'ja': 'jp',      // 日语（浏览器使用 ja，我们内部使用 jp）
+            'ru': 'ru'       // 俄语
+        };
+        
+        // 首先尝试精确匹配
+        for (var i = 0; i < browserLangs.length; i++) {
+            var lang = browserLangs[i].toLowerCase();
+            // 精确匹配（如 en-US, zh-CN）
+            if (supportedLangs[lang]) {
+                return supportedLangs[lang];
+            }
+            // 匹配语言代码前缀（如 zh-CN -> zh, ja-JP -> ja）
+            var langPrefix = lang.split('-')[0];
+            if (supportedLangs[langPrefix]) {
+                return supportedLangs[langPrefix];
+            }
+        }
+        
+        // 如果没有匹配到支持的语言，根据地区判断
+        // 华文地区：中国大陆、台湾、香港、澳门、新加坡等
+        var isChineseRegion = false;
+        
+        // 方法1: 通过时区判断（更可靠）
+        try {
+            var timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            // 华文地区时区
+            var chineseTimezones = [
+                'Asia/Shanghai',      // 中国大陆
+                'Asia/Taipei',        // 台湾
+                'Asia/Hong_Kong',     // 香港
+                'Asia/Macau',         // 澳门
+                'Asia/Singapore'      // 新加坡
+            ];
+            if (chineseTimezones.indexOf(timezone) !== -1) {
+                isChineseRegion = true;
+            }
+        } catch (e) {
+            // 时区检测失败，使用备用方法
+        }
+        
+        // 方法2: 通过浏览器语言前缀判断（备用）
+        if (!isChineseRegion && browserLangs.length > 0) {
+            var firstLang = browserLangs[0].toLowerCase();
+            // 如果浏览器语言以 zh 开头，认为是华文地区
+            if (firstLang.indexOf('zh') === 0) {
+                isChineseRegion = true;
+            }
+        }
+        
+        // 根据地区返回默认语言
+        return isChineseRegion ? 'zh' : 'en';
+    }
+
     // 切换语言时切换显示内容
     function _render(_hash) {
-        // 如果没有传入_hash参数，优先从URL参数读取语言，其次从hash读取
+        // 如果没有传入_hash参数，优先从URL参数读取语言，其次从hash读取，最后从浏览器语言检测
         if (!_hash) {
             var urlParams = new URLSearchParams(window.location.search);
             var langParam = urlParams.get('lang');
             if (langParam) {
                 _hash = '#' + langParam;
             } else {
-                _hash = window.location.hash;
+                var hashLang = window.location.hash;
+                // 如果hash是有效的语言代码，使用hash
+                var mapping = {
+                    "#zh": 0,
+                    "#en": 1,
+                    "#jp": 2,
+                    "#ru": 3
+                };
+                if (mapping[hashLang] !== undefined) {
+                    _hash = hashLang;
+                } else {
+                    // 从浏览器语言自动检测
+                    var detectedLang = detectLanguageFromBrowser();
+                    _hash = '#' + detectedLang;
+                }
             }
         }
         // todo 新增语言要修改这里
@@ -405,7 +481,60 @@
         _render(newHash);
     }
 
+    // 初始化：检测语言并更新URL（如果需要）
+    function initLanguage() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var langParam = urlParams.get('lang');
+        var hashLang = window.location.hash;
+        
+        var mapping = {
+            "#zh": "zh",
+            "#en": "en",
+            "#jp": "jp",
+            "#ru": "ru"
+        };
+        
+        var selectedLang = null;
+        var needsUrlUpdate = false;
+        
+        // 优先使用URL参数
+        if (langParam) {
+            selectedLang = langParam;
+        } 
+        // 其次使用hash中的语言代码（需要转换为URL参数）
+        else if (mapping[hashLang] !== undefined) {
+            selectedLang = mapping[hashLang];
+            needsUrlUpdate = true; // hash中的语言代码需要转换为URL参数
+        }
+        // 最后自动检测浏览器语言
+        else {
+            selectedLang = detectLanguageFromBrowser();
+            needsUrlUpdate = true;
+        }
+        
+        // 如果需要更新URL（自动检测或hash转换）
+        if (needsUrlUpdate) {
+            var currentPath = window.location.pathname;
+            var anchor = window.location.hash;
+            
+            // 如果hash是语言代码，移除它（因为已经转换为URL参数）
+            // 如果hash是其他锚点，保留它
+            var isLangHash = mapping[anchor] !== undefined;
+            var finalAnchor = isLangHash ? "" : anchor;
+            
+            var newUrl = currentPath + "?lang=" + selectedLang + finalAnchor;
+            
+            // 使用 replaceState 更新URL，不刷新页面
+            if (window.history && window.history.replaceState) {
+                window.history.replaceState(null, '', newUrl);
+            }
+        }
+        
+        // 渲染语言
+        _render('#' + selectedLang);
+    }
+
     // init
-    _render();
+    initLanguage();
 </script>
 {% endif %}

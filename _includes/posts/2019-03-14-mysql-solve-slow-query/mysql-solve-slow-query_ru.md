@@ -1,43 +1,41 @@
-<!-- TODO: Translate to ru -->
+## Основной подход
 
-## 主要思路
+Анализ в реальном времени (`show full processlist;`) в сочетании с отложенным анализом (`mysql.slow_log`) для оптимизации SQL-запросов.
 
-实时分析(`show full processlist;`)结合延后分析(`mysql.slow_log`),对SQL语句进行优化
+## Анализ в реальном времени
 
-## 实时分析
-
-### 查看有哪些线程正在执行
+### Просмотр выполняющихся потоков
 
     show processlist;
     show full processlist;
 
-相比`show processlist;`我比较喜欢用.因为这个查询可以用where条件
+По сравнению с `show processlist;`, я предпочитаю использовать это, потому что этот запрос может использовать условия where.
 
 ```SQL
 SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where state !='' order by state,time desc,command ;
--- 按照客户端IP对当前连接用户进行分组
+-- Группировка текущих подключенных пользователей по IP клиента
 SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by h  order by c desc,user;
--- 按用户名对当前连接用户进行分组
+-- Группировка текущих подключенных пользователей по имени пользователя
 SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by user  order by c desc,user;
 ```
 
-### 各种耗时SQL对应的特征
+### Характеристики, соответствующие различным затратным по времени SQL
 
-1. 改表
+1. Изменение таблицы
 1. Copying to tmp table
 1. Copying to tmp table on disk
 1. Reading from net
 1. Sending data
-1. 没有索引
+1. Нет индекса
 1. Sorting result
 1. Creating sort index
 1. Sorting result
 
-重点关注这些状态,参考《[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)》进行优化
+Сосредоточьтесь на этих состояниях, обратитесь к "[Какие состояния в processlist должны вызывать внимание](https://www.kancloud.cn/thinkphp/mysql-faq/47446)" для оптимизации.
 
-## 延后分析
+## Отложенный анализ
 
-### 设置慢查询参数
+### Настройка параметров медленного запроса
 
 ```
 slow_query_log 1
@@ -47,7 +45,7 @@ slow_query_log 1
 ```
 
 ```SQL
-# 建数据库
+# Создать базу данных
 CREATE TABLE `slow_log_2019-05-30` (
   `start_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   `user_host` mediumtext NOT NULL,
@@ -73,17 +71,17 @@ where sql_text not like 'xxx`%'
 order by  query_time desc,query_time desc;
 ```
 
-按优先级排列,需要关注的列是`lock_time`,`query_time`,`rows_examined`.分析的时候应用二八法则,先找出最坑爹的那部分SQL,率先优化掉,然后不断not like或者删除掉排除掉已经优化好的低效SQL.
+В порядке приоритета, столбцы, на которые нужно обратить внимание: `lock_time`, `query_time`, `rows_examined`. При анализе применяйте правило 80/20. Сначала найдите самую проблемную SQL, оптимизируйте ее первой, затем постоянно используйте not like или удаляйте, чтобы исключить уже оптимизированные неэффективные SQL.
 
-## 低效SQL的优化思路
+## Идеи оптимизации для неэффективных SQL
 
-对于每一个查询,先用 `explain SQL` 分析一遍,是比较明智的做法.
+Для каждого запроса разумно сначала проанализировать его с помощью `explain SQL`.
 
-一般而言,rows越少越好,提防Extra:`Using where`这种情况,这种情况一般是扫全表,在数据量大(>10万)的时候考虑增加索引.
+Как правило, чем меньше строк, тем лучше. Остерегайтесь ситуаций Extra: `Using where`. Это обычно означает полное сканирование таблицы. Когда объем данных большой (>100k), рассмотрите добавление индексов.
 
-### 慎用子查询
+### Используйте подзапросы осторожно
 
-尽力避免嵌套子查询，使用索引来优化它们。
+Старайтесь избегать вложенных подзапросов, используйте индексы для их оптимизации.
 
 ```SQL
 EXPLAIN SELECT *
@@ -96,49 +94,49 @@ FROM (
 ORDER BY a.modified DESC
 ```
 
-比如说这种的,根本毫无必要.表面上看,比去掉子查询更快一点,实际上是因为mysql 5.7对子查询进行了优化,生成了[Derived table](http://mysql.taobao.org/monthly/2017/03/05/),把结果集做了一层缓存.
+Например, такой вид совершенно не нужен. На поверхности кажется быстрее, чем удаление подзапроса, но на самом деле это потому, что MySQL 5.7 оптимизировал подзапросы, создав [Derived table](http://mysql.taobao.org/monthly/2017/03/05/), который кэшировал набор результатов.
 
-按照实际的场景分析发现,`status`这个字段没有做索引,导致查询变成了全表扫描(using where),加了索引后,问题解决.
+Согласно анализу реального сценария, поле `status` не имело индекса, что привело к полному сканированию таблицы (using where). После добавления индекса проблема была решена.
 
-### json类型
+### json тип
 
-json数据类型,如果存入的JSON很长,读取出来自然越慢.在实际场景中,首先要确定是否有使用这一类型的必要,其次,尽量只取所需字段.
+Для типов данных json, если сохраненный JSON очень длинный, чтение будет естественно медленнее. В реальных сценариях сначала определите, необходимо ли использовать этот тип. Во-вторых, старайтесь получать только нужные поля.
 
-见过这样写的
+Я видел, что это написано так:
 
 ```SQL
 WHERE j_a like '%"sid":514572%'
 ```
 
-这种行为明显是对mysql不熟悉,MYSQL是有JSON提取函数的.
+Такое поведение явно показывает незнание MySQL. MySQL имеет функции извлечения JSON.
 
 ```SQL
 WHERE JSON_EXTRACT(j_a, "$[0].sid")=514572;
 ```
 
-虽然也是全表扫描,但怎么说也比like全模糊查询好吧?
+Хотя это также полное сканирование таблицы, это все же лучше, чем полный нечеткий запрос like, верно?
 
-更好的做法,是通过虚拟字段建索引
+Лучший подход — создать индекс через виртуальное поле.
 
-[MySQL · 最佳实践 · 如何索引JSON字段](http://mysql.taobao.org/monthly/2017/12/09/)
+[MySQL · Лучшие практики · Как индексировать JSON поля](http://mysql.taobao.org/monthly/2017/12/09/)
 
-但是现阶段MYSQL对json的索引做的是不够的,如果json数据列过大,建议还是存`MongoDB`(见过把12万json存mysql的,那读取速度简直无语).
+Но в настоящее время индексирование MySQL для json недостаточно. Если столбцы данных json слишком большие, рекомендуется хранить в `MongoDB` (я видел 120k json, хранящихся в MySQL, скорость чтения была просто невыразимой).
 
-### 字符串类型
+### Строковый тип
 
 ```SQL
 WHERE a=1
 ```
 
-用数字给字符串类型的字段赋值会导致该字段上的索引失效.
+Использование чисел для присвоения значений полям строкового типа приведет к тому, что индексы на этом поле станут недействительными.
 
 ```SQL
 WHERE a='1'
 ```
 
-### 分组查询
+### Группирующие запросы
 
-`group by`,`count(x)`,`sum(x)`,慎用.非常消耗CPU
+`group by`, `count(x)`, `sum(x)`, используйте с осторожностью. Очень ресурсоемко по CPU.
 
 #### `group by`
 
@@ -146,23 +144,23 @@ WHERE a='1'
 select col_1 from table_a where (col_2 > 7 or mtsp_col_2 > 0) and col_3 = 1 group by col_1
 ```
 
-这种不涉及聚合查询(`count(x)`,`sum(x)`)的`group by`明显就是不合理的,去重复查询效果更高点
+Такой вид `group by`, не связанный с агрегатными запросами (`count(x)`, `sum(x)`), явно неразумен. Использование distinct запросов более эффективно.
 
 ```SQL
 select distinct(col_1) from table_a where (col_2 > 7 or mtsp_col_2 > 0) and col_3 = 1 limit xxx;
 ```
 
-### `count(x)`,`sum(x)`
+### `count(x)`, `sum(x)`
 
-x 这个字段最好带索引,不然就算筛选条件有索引也会很慢
+Поле x должно предпочтительно иметь индекс, иначе даже если условия фильтрации имеют индексы, это будет очень медленно.
 
 ### order by x
 
-x这字段最好带上索引,不然 `show processlist;` 里面可能会出现大量 `Creating sort index` 的结果
+Поле x должно предпочтительно иметь индекс, иначе `show processlist;` может показать много результатов `Creating sort index`.
 
-### 组合索引失效
+### Недействительность составного индекса
 
-组合索引有个最左匹配原则
+Составные индексы имеют принцип левого совпадения.
 
 ```SQL
 KEY 'idx_a' (a,b,c)
@@ -172,9 +170,9 @@ KEY 'idx_a' (a,b,c)
 WHERE b='' and c =''
 ```
 
-这时组合索引是无效的.
+В это время составной индекс недействителен.
 
-## 其他
+## Другое
 
 ```SQL
 EXPLAIN SQL
@@ -182,15 +180,15 @@ DESC SQL
 ```
 
 ```SQL
-# INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
+# Таблица INNODB_TRX в основном содержит информацию о всех транзакциях, выполняющихся в движке InnoDB, включая транзакции, ожидающие блокировки, и выполняющиеся транзакции
 SELECT * FROM information_schema.INNODB_TRX;
 SELECT * FROM information_schema.innodb_locks;
 SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 ```
 
-## 参考链接
+## Ссылки
 
-1. [MySQL慢查询日志总结](https://www.cnblogs.com/kerrycode/p/5593204.html)
-1. [MySQL CPU 使用率高的原因和解决方法](https://help.aliyun.com/knowledge_detail/51587.html)
-1. [mysql优化，导致查询不走索引的原因总结](https://blog.csdn.net/m0_37808356/article/details/72526687)
-1. [information_schema中Innodb相关表用于分析sql查询锁的使用情况介绍](https://blog.csdn.net/and1kaney/article/details/51213979)
+1. [Сводка журнала медленных запросов MySQL](https://www.cnblogs.com/kerrycode/p/5593204.html)
+1. [Причины и решения высокой загрузки CPU MySQL](https://help.aliyun.com/knowledge_detail/51587.html)
+1. [Оптимизация MySQL, сводка причин, по которым запросы не используют индексы](https://blog.csdn.net/m0_37808356/article/details/72526687)
+1. [Введение в использование таблиц, связанных с Innodb в information_schema для анализа использования блокировок SQL-запросов](https://blog.csdn.net/and1kaney/article/details/51213979)

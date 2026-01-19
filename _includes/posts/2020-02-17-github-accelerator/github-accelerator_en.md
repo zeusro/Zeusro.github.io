@@ -1,14 +1,12 @@
-<!-- TODO: Translate to en -->
+Recently due to the epidemic, when accessing GitHub, not only are user avatars not displaying, but executing code from `raw.githubusercontent.com` (GitHub static file hosting domain) directly explodes with 443. This makes everyone's work quite inconvenient.
 
-最近因为疫情的问题，访问GitHub的时候人物头像不显示就算了，执行 `raw.githubusercontent.com`( GitHub 静态文件托管域名) 上面的远程代码直接爆 443 。搞得大家工作都不太方便。
+So I collected and organized the current solutions, trying to solve the problem from the source.
 
-于是我收集整理了目前现行的解决方案，试图从源头解决问题。
+## Understanding the Problem
 
-## 认识问题
+### GitHub-Related Domains
 
-### GitHub相关域名
-
-**HOST 里的 IP 是错的，请勿直接复制粘贴！**
+**The IPs in HOST are wrong, please do not copy and paste directly!**
 
 ```host
 # GitHub Start
@@ -32,9 +30,9 @@
 # GitHub End
 ```
 
-### 问题根源
+### Root Cause
 
-大规模 DNS挟持污染，解析到的日本IP 151.101.228.133 丢包严重
+Large-scale DNS hijacking pollution, the resolved Japanese IP 151.101.228.133 has severe packet loss.
 
 ```bash
 ping 151.101.228.133
@@ -44,13 +42,13 @@ ping 151.101.228.133
 round-trip min/avg/max/stddev = 69.550/117.602/230.267/21.696 ms
 ```
 
-## 代理方案
+## Proxy Solutions
 
-### 自行修改 pac 文件
+### Modify PAC File Yourself
 
-#### 修改本地pac
+#### Modify Local PAC
 
-由上可得出，GitHub 相关的域名有
+From the above, GitHub-related domains are:
 
 ```
 github.com
@@ -58,102 +56,102 @@ github.com
 *.githubusercontent.com
 ```
 
-Windows 端的纸飞机 pac 是个本地文件；
+Windows-side Paper Airplane PAC is a local file;
 
-mac 端的纸飞机 可以直接编辑，一行一个域名，原理都类似，不懂就复制粘贴 ~
+mac-side Paper Airplane can be directly edited, one domain per line, the principle is similar, if you don't understand just copy and paste ~
 
-[V2rayU](https://github.com/yanue/V2rayU) 同理
+[V2rayU](https://github.com/yanue/V2rayU) is the same
 
-#### 更新本地 DNS 解析
+#### Update Local DNS Resolution
 
 ```bash
-#  MAC （OS X 10.11+ ）
+# MAC (OS X 10.11+ )
 sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 # window
 ipconfig /flushdns
 ```
 
-### SwitchyOmega 自动切换模式 (适用于V2rayU)
+### SwitchyOmega Auto Switch Mode (Applicable to V2rayU)
 
-用"PAC情景模式" 设置一个v2的情景模式
+Use "PAC scenario mode" to set up a v2 scenario mode.
 
-之后再设置自动切换模式并使用就好了
+Then set auto switch mode and use it.
 
 ![img](/img/in-post/github/SwitchyOmega.png)
 
 
-换用
+If you switch to
 [V2RayX](https://github.com/Cenmrev/V2RayX/releases)
-的话就不用这么麻烦了，可以直接编辑pac，不过作者最近不怎么更新了。
+, you don't need to be so troublesome, you can directly edit the pac, but the author hasn't updated much recently.
 
 
-## 无代理方案
+## No-Proxy Solutions
 
-### 修改 host
+### Modify host
 
-在
+At
 https://www.ipaddress.com/
-找到 github.com 等域名的美国的IP，然后绑定HOST就行。
-**这是一个体力活**。
+find the US IPs for github.com and other domains, then bind them to HOST.
+**This is manual labor**.
 
-国内的不一定准，但可供参考
+Domestic ones may not be accurate, but can be used as reference:
 1. https://tool.lu/dns/index.html
 1. http://tool.chinaz.com/dns/
 
-window 系统文件位置在 `C:/windows/system32/drivers/etc/hosts`
+Windows system file location is `C:/windows/system32/drivers/etc/hosts`
 
-mac 系统文件位于 /etc/hosts
+mac system file is located at /etc/hosts
 
-建议用 [SwitchHosts](https://github.com/oldj/SwitchHosts/releases)
-管理 host 文件
+It's recommended to use [SwitchHosts](https://github.com/oldj/SwitchHosts/releases)
+to manage host files
 
-进阶方案是写程序用调用web接口动态更新HOST
+Advanced solution is to write a program to dynamically update HOST by calling web interfaces.
 
 ```host
-# raw.githubusercontent.com 是 GitHub 的静态文件托管域名
+# raw.githubusercontent.com is GitHub's static file hosting domain
 199.232.28.133 raw.githubusercontent.com
 ```
 
-我当时是急着用`raw.githubusercontent.com`上面的代码，所以我改成一个美国的IP，然后通过代理访问上了。
+I was in a hurry to use code from `raw.githubusercontent.com`, so I changed it to a US IP, then accessed it through a proxy.
 
-### Chrome浏览器插件
+### Chrome Browser Extension
 
-搜索安装 **GitHub加速** 即可，他们用一个中转的国内域名来 clone ，规避了 DNS解析的问题。
+Search and install **GitHub Accelerator** and you're done. They use a relayed domestic domain to clone, avoiding the DNS resolution problem.
 
-## git 加速
+## git Acceleration
 
-参考自[chuyik](https://gist.github.com/chuyik)的解决方案
+Referenced from [chuyik](https://gist.github.com/chuyik)'s solution
 
 
-### SSH协议使用 SSH 隧道进行代理（mac，Linux）
+### SSH Protocol Using SSH Tunnel for Proxy (mac, Linux)
 
-把自己的 ssh 加到海外的机器，xx.xx.xx.xx为机器的公网IP
+Add your ssh to an overseas machine, xx.xx.xx.xx is the machine's public IP.
 
-然后把该机器的IP加到ssh配置 `~/.ssh/config` 里面
+Then add the machine's IP to ssh config `~/.ssh/config`:
 
 ```
 Host github.com raw.githubusercontent.com
     ProxyCommand  ssh root@xx.xx.xx.xx nc %h %p
 ```
 
-之后把自己客户端的公钥加到远程GitHub，克隆仓库时用ssh协议才会生效
+After that, add your client's public key to remote GitHub. It will only take effect when cloning repositories using ssh protocol.
 
     git clone git@github.com:owner/git.git
 
-### http(s)协议时用本地代理 + git config
+### http(s) Protocol Using Local Proxy + git config
 
 ```bash
-#  走 HTTP 代理
+# Use HTTP proxy
 git config --global http.proxy "http://127.0.0.1:8080"
 git config --global https.proxy "http://127.0.0.1:8080"
-# 走 socks5 代理（如 Shadowsocks）
+# Use socks5 proxy (like Shadowsocks)
 git config --global http.proxy "socks5://127.0.0.1:1080"
 git config --global https.proxy "socks5://127.0.0.1:1080"
-# 取消设置
+# Cancel settings
 git config --global --unset http.proxy
 git config --global --unset https.proxy
-# 最后检查下配置
+# Finally check the configuration
 git config --list --global
 git config --list --system
 ```
@@ -162,22 +160,22 @@ git config --list --system
 
 ## ssh over flclash
 
-在你的 SSH 配置 (~/.ssh/config) 中写这样一段：
+Write this in your SSH config (~/.ssh/config):
 
 ```
 Host github.com
     HostName ssh.github.com
     Port 443
     User git
-    # 如果你使用 socks5 代理
+    # If you use socks5 proxy
     ProxyCommand nc -x 127.0.0.1:7890 %h %p
 ```
 
-这里 ssh.github.com 是 GitHub 支持 SSH-over-443 的地址。  ￼
+Here ssh.github.com is GitHub's SSH-over-443 address.  ￼
 
-nc -x 主机:端口 %h %p 是使用 nc (netcat) 通过 SOCKS5 代理转发 SSH。 -x 指定代理类型 (socks)，具体根据你 flclash 本地代理端口改。SSH Config 的 ProxyCommand 可以让 SSH 流量走代理。  ￼
+nc -x host:port %h %p uses nc (netcat) to forward SSH through SOCKS5 proxy. -x specifies proxy type (socks), change according to your flclash local proxy port. SSH Config's ProxyCommand can make SSH traffic go through proxy.  ￼
 
-ServerAliveInterval 等参数也可以加，防止连接空闲被中断。
+ServerAliveInterval and other parameters can also be added to prevent connection idle interruption.
 
 ```bash
 git config --global url."https://github.com/".insteadOf "git@github.com:"
@@ -186,21 +184,21 @@ Please type 'yes', 'no' or the fingerprint: yes
 Warning: Permanently added '[ssh.github.com]:443' (ED25519) to the list of known hosts.
 ```
 
-为了躲过封锁 SSH 22 端口，GitHub 额外提供一个 443 端口的 SSH 服务，因此它的公钥指纹也不一样。
-输入yes之后，git push就不会再出现断流了。
+To avoid blocking SSH port 22, GitHub additionally provides an SSH service on port 443, so its public key fingerprint is also different.
+After entering yes, git push will no longer have disconnection issues.
 
-## 终极解决方案
+## Ultimate Solution
 
-美国绿卡
+US Green Card
 
 ![img](/img/逃.jpg)
 
-最后多说一句，
-[最近有人还原了ss协议客户端的整个攻击过程](https://www.leadroyal.cn/?p=1036)
+One last word,
+[Recently someone restored the entire attack process of ss protocol client](https://www.leadroyal.cn/?p=1036)
 
-## 参考链接
+## Reference Links
 
-1. [修改Hosts临时解决GitHub的raw.githubusercontent.com无法链接的问题](https://www.ioiox.com/archives/62.html)
-1. [解决Github国内访问出现的问题](http://rovo98.coding.me/posts/7e3029b3/)
-1. [如何为 Git 设置代理？](https://segmentfault.com/q/1010000000118837)
-1. [macOS 给 Git(Github) 设置代理（HTTP/SSH）](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)
+1. [Modify Hosts to Temporarily Solve GitHub's raw.githubusercontent.com Connection Problem](https://www.ioiox.com/archives/62.html)
+1. [Solving Problems with GitHub Access in China](http://rovo98.coding.me/posts/7e3029b3/)
+1. [How to Set Proxy for Git?](https://segmentfault.com/q/1010000000118837)
+1. [macOS Set Proxy (HTTP/SSH) for Git(Github)](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)

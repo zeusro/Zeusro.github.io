@@ -1,18 +1,16 @@
-<!-- TODO: Translate to jp -->
-
-## 推荐工具
+## 推奨ツール
 
 ### [kubectx](https://github.com/ahmetb/kubectx)
 
-kubectx:用来切换集群的访问
+kubectx：クラスターアクセスの切り替えに使用
 
-kubens:用来切换默认的namespace
+kubens：デフォルトのnamespaceの切り替えに使用
 
 ### [kubectl-aliases](https://github.com/ahmetb/kubectl-aliases)
 
-`kubectl`命令别名
+`kubectl`コマンドのエイリアス
 
-### 自动完成
+### 自動補完
 
 zsh
 
@@ -21,28 +19,28 @@ source <(kubectl completion zsh)  # setup autocomplete in zsh into the current s
 echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc # add autocomplete permanently to your zsh shell
 ```
 
-其他的方式见[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+他の方法については、[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)を参照してください。
 
-## kubectl常用命令
+## kubectlのよく使うコマンド
 
 ```bash
 
     kubectl api-resources --namespaced=false
     kubectl api-resources --namespaced=true
-    # -R表示递归目录下所有配置
+    # -Rはディレクトリ内のすべての設定を再帰的に適用することを意味します
     kubectl apply -R -f configs/
 
 
     kubectl get cs
     kubectl get svc --sort-by=.metadata.creationTimestamp
-    # 查看节点
+    # ノードを表示
     kubectl get no --sort-by=.metadata.creationTimestamp
     kubectl drain <node-name>
     kubectl taint nodes node1 key=value:NoSchedule
 
 
     kubectl get ing pdd --n java
-    # 不调度
+    # スケジュールしない
     kubectl cluster-info dump
 
 
@@ -53,13 +51,13 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
     kubectl get po -l app=nginx -w
     kubectl delete po -l app=onekey-ali-web -n=$(namespace)
     kubectl get po --all-namespaces
-    # 查看异常pod
+    # 異常なpodを表示
     kubectl get po --all-namespaces --field-selector 'status.phase!=Running'
 ```
 
-## 集群管理相关命令
+## クラスター管理関連のコマンド
 
-### 应用管理相关
+### アプリケーション管理関連
 
 ```bash
     kubectl top pod
@@ -68,29 +66,29 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
     kubectl get svc --all-namespaces=true
     kubectl rollout undo deployment/nginx-deployment --to-revision=2
     kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
-    #来watch ReplicaSet的变化。
+    # ReplicaSetの変化を監視するために。
     kubectl get rs -w
     kubectl set image deployment/nginx-deployment nginx=nginx:1.9.1
     # deployment "nginx-deployment" image updated
     kubectl set image deploy monitorapi-deployment  monitorapi=registry-vpc.cn-shenzhen.aliyuncs.com/amiba/monitorapi:1.2.4 -n=java
 ```
 
-### 强制删除
+### 強制削除
 
-有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
+pv/pvcを削除する際に問題が発生することがあります。この場合、2つのコマンドパラメータ`--grace-period=0 --force `を追加する必要があります。
 
-### 删除所有失败的pod
+### すべての失敗したPodを削除
 
 ```bash
   kubectl get po --all-namespaces --field-selector 'status.phase==Failed'
   kubectl delete po  --field-selector 'status.phase==Failed'
-  #模糊删除pod
+  # あいまいな削除pod
   key=
   kgpo -n default | grep $key | awk '{print $1}' | xargs kubectl delete po -n1 -n default
   
 ```
 
-### 事件
+### イベント
 
 ```bash
     kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
@@ -98,5 +96,5 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
 ```
 
 
-参考链接:
-1. [kubernetes 节点维护 cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)
+参考リンク：
+1. [kubernetes ノードメンテナンス cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)

@@ -1,29 +1,26 @@
-<!-- TODO: Translate to en -->
+Basic operations like fork+pull request don't need to be mentioned.
 
-fork+pull request 这种基础操作就不用提了吧。
+## Integrity
 
+But generally large projects will introduce an integrity mechanism. For Kubernetes-like projects, on the basis of following code submission standards, you need to agree to the CLA first before the PR has a chance to be merged.
 
-## 节操
+If you directly submit a PR without doing this, the `k8s-ci-robot` bot account will directly tag it with `cncf-cla: no`.
 
-但一般大型项目都会引入一个节操的机制，就Kubernetes类项目来说，在遵守代码提交规范的基础上，需要先同意CLA之后，pr才有被合并的机会。
+So how do you agree to the CLA?
 
-如果贸贸然直接pr，就会被`k8s-ci-robot`这个机器人账户直接打上`cncf-cla: no`.
+## Registration
 
-那么要怎么同意CLA呢？
-
-## 注册
-
-根据这个指示，按个人或者组织申请账户，关联起来就行。我当时直接选择用GitHub账户关联 Linux 基金会。
+According to these instructions, apply for an account as an individual or organization and link it. I directly chose to link my GitHub account with the Linux Foundation.
 
 https://github.com/kubernetes/community/blob/master/CLA.md#the-contributor-license-agreement
 
-1. 验证邮箱（该邮箱要跟GitHub账户邮箱一致）
-1. 重设密码
-1. 电子签署SLA文件
+1. Verify email (this email must match the GitHub account email)
+1. Reset password
+1. Electronically sign the SLA document
 
-## 修正提交信息
+## Fix Commit Information
 
-之前用电脑提交代码的时候，都是不填email的，结果导致提交上去的个人信息是一个空的头像，于是我只得设置一下email，跟GitHub账户保持一致。
+When I submitted code on the computer before, I didn't fill in the email, which resulted in the submitted personal information being an empty avatar. So I had to set the email to match the GitHub account.
 
 ```bash
 git config --global user.email "email@example.com"
@@ -31,12 +28,12 @@ git commit --amend --reset-author
 git push --force
 ```
 
-这通操作之后，提交信息跟 GitHub/Linux 基金会注册信息保持一致啦。但是`cncf-cla: no`这个标签还在。
+After these operations, the commit information matches the GitHub/Linux Foundation registration information. But the `cncf-cla: no` tag is still there.
 
-于是我向天空大喊一声“I signed it”
+So I shouted to the sky "I signed it"
 
-`k8s-ci-robot`出来给我重新验证了cla，并打上`cncf-cla: yes`标签，合并的流程进入到review阶段
+`k8s-ci-robot` came out to re-verify my CLA and tagged it with `cncf-cla: yes`, and the merge process entered the review stage.
 
-## 友好交流（撕逼）
+## Friendly Communication (Debate)
 
 https://github.com/kubernetes-sigs/kustomize/pull/1204

@@ -1,21 +1,19 @@
-<!-- TODO: Translate to en -->
+## The Biggest Pitfall is Deprecated apiVersion
 
-## 最大的坑是 deprecated apiVersion
+`Kubernetes`'s `apiVersion` can expire.
 
-`Kubernetes` 的 `apiVersion` 是会过期的
+For 1.16, `DaemonSet`, `Deployment`, `StatefulSet`, `ReplicaSet` all uniformly use `apps/v1`
 
-以 1.16来说,`DaemonSet`, `Deployment`, `StatefulSet`, `ReplicaSet` 全部统一使用 `apps/v1`
+`NetworkPolicy` uses `networking.k8s.io/v1`
 
-`NetworkPolicy`  使用 `networking.k8s.io/v1`
+`PodSecurityPolicy` uses `networking.k8s.io/v1`
 
-`PodSecurityPolicy` 使用 `networking.k8s.io/v1`
+So, using deprecated APIs like `apps/v1beta2`, `extensions/v1beta1` in `1.16` will error.
 
-所以,在 `1.16` 中使用 `apps/v1beta2`, `extensions/v1beta1` 等废弃API都会出错
-
-## 拥抱变化
+## Embrace Change
 
 
-### 检查受影响资源
+### Check Affected Resources
 
 ```bash
 kubectl get NetworkPolicy,PodSecurityPolicy,DaemonSet,Deployment,ReplicaSet \
@@ -34,20 +32,20 @@ kubectl get --raw="/metrics" | grep apiserver_request_count | grep 'group="apps"
 
 ### recreate
 
-是的，你没有听错，只能删除后重建。
+Yes, you heard right, you can only delete and recreate.
 
-我的建议是，在业务低峰期，建同label deploy 覆盖旧的`resource`，旧的`resource`缩容至0,并加上`deprecated:true`的`label`观察一段时间后,再彻底删除.
+My suggestion is, during business low peak, create a deploy with the same label to cover the old `resource`, scale the old `resource` to 0, and add a `deprecated:true` `label`, observe for a period, then completely delete.
 
-## 后记
+## Postscript
 
-apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容器调度方面的霸权——毕竟，如果你跟女朋友分手了，也不会想给她买新衣服，对吧？
+The frequency of apiVersion changes, to some extent, can also prove `Kubernetes`'s hegemony in container scheduling—after all, if you break up with your girlfriend, you wouldn't want to buy her new clothes, right?
 
 ![](/img/sticker/云原生开发.gif)
 
-## 参考链接
+## Reference Links
 
 1. [error: At least one of apiVersion, kind and name was changed](https://stackoverflow.com/questions/56386647/error-at-least-one-of-apiversion-kind-and-name-was-changed)
 1. [Kubernetes Version 1.16 Removes Deprecated APIs](https://www.ibm.com/cloud/blog/announcements/kubernetes-version-1-16-removes-deprecated-apis)
-1. [Kubernetes v1.17 版本解读](https://yq.aliyun.com/articles/739120)
+1. [Kubernetes v1.17 Version Interpretation](https://yq.aliyun.com/articles/739120)
 1. [API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md)
 1. [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)

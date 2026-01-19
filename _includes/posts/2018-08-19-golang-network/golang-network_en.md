@@ -1,51 +1,49 @@
-<!-- TODO: Translate to en -->
+## Preface
 
-## 前言
+The original article was well written, so I decided to excerpt a portion of it.
 
-原文写的挺好的,我决定节选一部分过来
+Excerpted from [Golang Server Network Layer Implementation](https://segmentfault.com/a/1190000005132717#articleHeader0)
 
-节选自[Golang服务器的网络层实现](https://segmentfault.com/a/1190000005132717#articleHeader0)
+## Traditional Language Network Layer Processing
 
-## 传统语言的网络层处理
-服务需要同时服务N个客户端，所以传统的编程方式是采用IO复用，这样在一个线程中对N个套接字进行事件捕获，当读写事件产生后再真正`read()`或者`write()`，这样才能提高吞吐：
+Services need to serve N clients simultaneously, so the traditional programming approach is to use IO multiplexing, which captures events for N sockets in a single thread, and then actually `read()` or `write()` when read/write events occur, in order to improve throughput:
 
 ![image](/img/in-post/golang-network/2016-05-16-golang-network-00.jpg)
 
-上图中：
+In the above diagram:
 
-绿色线程为接受客户端TCP链接的线程，使用阻塞的调用`socket.accept()`，当有新的连接到来后，将`socket`对象conn加入IO复用队列。
+The green thread is the thread that accepts client TCP connections, using blocking calls to `socket.accept()`. When a new connection arrives, the `socket` object conn is added to the IO multiplexing queue.
 
-紫色线程为IO复用的阻塞调用，通常采用`epoll`等系统调用实现IO复用。当IO复用队列中的任意`socket`有数据到来，或者写缓冲区空闲时可触发`epoll`调用的返回，否则阻塞`epoll`调用。数据的实际发送和接收都在紫色线程中完成。所以为了提高吞吐，对某个`socket`的`read`和`write`都应该使用非阻塞的模式，这样才能最大限度的提高系统吞吐。例如，假设正在对某个`socket`调用阻塞的`write`，当数据没有完全发送完成前，`write`将无法返回，从而阻止了整个`epoll`进入下一个循环，如果这个时候其他的`socket`有读就绪的话，将无法第一时间响应。所以非阻塞的读写将在某个fd读写较慢的时候，立刻返回，而不会一直等到读写结束。这样才能提高吞吐。然而，采用非阻读写将大大提高编程难度。
+The purple thread is the blocking call for IO multiplexing, usually implemented using system calls like `epoll`. When any `socket` in the IO multiplexing queue has data arriving, or when the write buffer becomes free, the `epoll` call can return, otherwise the `epoll` call blocks. The actual sending and receiving of data are completed in the purple thread. So to improve throughput, `read` and `write` for a `socket` should use non-blocking mode, which maximizes system throughput. For example, suppose you're calling a blocking `write` on a `socket`. Before the data is completely sent, `write` cannot return, which prevents the entire `epoll` from entering the next loop. If other `sockets` have read-ready at this time, they cannot respond immediately. So non-blocking read/write will return immediately when a fd is slow to read/write, rather than waiting until the read/write is complete. This improves throughput. However, using non-blocking read/write greatly increases programming difficulty.
 
-紫色线程负责将数据进行解码并放入队列中，等待工作线程处理；工作线程有数据要发送时，也将数据放入发送队列，并通过某种机制通知紫色线程对应的`socket`有数据要写，进而使得数据在紫色线程中写入`socket`。
+The purple thread is responsible for decoding data and putting it into a queue, waiting for worker threads to process. When worker threads have data to send, they also put the data into a send queue and notify the purple thread through some mechanism that the corresponding `socket` has data to write, so that data is written to the `socket` in the purple thread.
 
-这种模型的编程难度主要体现在：
+The programming difficulty of this model is mainly reflected in:
 
-1. 线程少（也不能太多），导致一个线程需要处理多个描述符，从而存在对描述符状态的维护问题。甚至，业务层面的会话等都需要小心维护
-1. 非阻塞IO调用，使描述符的状态更为复杂
-1. 队列的同步处理
+1. Few threads (and not too many), causing one thread to need to handle multiple descriptors, thus there are issues with maintaining descriptor state. Even business-level sessions need to be carefully maintained.
+1. Non-blocking IO calls make descriptor state more complex
+1. Synchronous processing of queues
 
-## Golang如何实现网络层
+## How Golang Implements the Network Layer
 
-通过参考多个Golang的开源程序，笔者得出的结论是：肆无忌惮的用goroutine吧。于是一个Golang版的网络模型大致是这样的：
-
+By referring to multiple Golang open source programs, the author's conclusion is: use goroutines recklessly. So a Golang version of the network model is roughly like this:
 
 ![image](/img/in-post/golang-network/2016-05-16-golang-network-01.jpg)
 
-上图是单个客户端连接的服务器模块结构，同样的一个颜色代表一个协程：
+The above diagram shows the server module structure for a single client connection, with the same color representing a coroutine:
 
-绿色goroutine依然是接受TCP链接
+The green goroutine still accepts TCP connections
 
-当完成握手`accept`返回`conn对象`后，使用一个单独的`goroutine`来阻塞读（紫色），使用一个单独的goroutine来阻塞写（红色）
+After the handshake completes and `accept` returns a `conn object`, use a separate `goroutine` to block read (purple), and use a separate goroutine to block write (red)
 
-读到的数据通过解码后放入读`channel`，并由蓝色的`goroutine`来处理
+Read data is decoded and put into a read `channel`, and processed by the blue `goroutine`
 
-需要写数据时，蓝色的goroutine将数据写入写`channel`，从而触发红色的`goroutine`编码并写入`conn`
+When data needs to be written, the blue goroutine writes data to the write `channel`, which triggers the red `goroutine` to encode and write to `conn`
 
-可以看到，针对一个客户端，服务端至少有3个`goroutine`在单独为这个客户端服务。如果从线程的角度来看，简直是浪费啊，然而这就是协程的好处。这个模型很容易理解，因为跟人们的正常思维方式是一致的。并且都是阻塞的调用，所以无需维护状态。
+It can be seen that for a single client, the server has at least 3 `goroutines` serving this client alone. If viewed from a thread perspective, this is a waste, but this is the benefit of coroutines. This model is easy to understand because it's consistent with normal thinking. And all calls are blocking, so there's no need to maintain state.
 
-再来看看多个客户端的情况：
+Let's look at the case of multiple clients:
 
 ![image](/img/in-post/golang-network/2016-05-16-golang-network-02.jpg)
 
-在多个客户端之间，虽然用了相同的颜色表示goroutine，但实际上他们都是独立的goroutine，可以想象goroutine的数量将是惊人的。然而，根本不用担心！这样的应用程序可能真正的线程只有几个而已。
+Among multiple clients, although the same color is used to represent goroutines, they are actually independent goroutines. You can imagine the number of goroutines will be astonishing. However, there's no need to worry! Such an application may only have a few actual threads.

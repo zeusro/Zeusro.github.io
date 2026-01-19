@@ -1,39 +1,35 @@
-<!-- TODO: Translate to ru -->
-
-##  Bean Validation 规范内嵌的约束注解定义
+## Встроенные определения аннотаций ограничений в спецификации Bean Validation
 ```
-约束注解名称	约束注解说明
-@Null	验证对象是否为空
-@NotNull	验证对象是否为非空
-@AssertTrue	验证 Boolean 对象是否为 true
-@AssertFalse	验证 Boolean 对象是否为 false
-@Min	验证 Number 和 String 对象是否大等于指定的值
-@Max	验证 Number 和 String 对象是否小等于指定的值
-@DecimalMin	验证 Number 和 String 对象是否大等于指定的值，小数存在精度
-@DecimalMax	验证 Number 和 String 对象是否小等于指定的值，小数存在精度
-@Size	验证对象（Array,Collection,Map,String）长度是否在给定的范围之内
-@Digits	验证 Number 和 String 的构成是否合法
-@Past	验证 Date 和 Calendar 对象是否在当前时间之前
-@Future	验证 Date 和 Calendar 对象是否在当前时间之后
-@Pattern	验证 String 对象是否符合正则表达式的规则
+Имя аннотации ограничения	Описание аннотации ограничения
+@Null	Проверяет, является ли объект null
+@NotNull	Проверяет, является ли объект не null
+@AssertTrue	Проверяет, является ли Boolean объект true
+@AssertFalse	Проверяет, является ли Boolean объект false
+@Min	Проверяет, больше или равно ли Number и String объекты указанному значению
+@Max	Проверяет, меньше или равно ли Number и String объекты указанному значению
+@DecimalMin	Проверяет, больше или равно ли Number и String объекты указанному значению, с десятичной точностью
+@DecimalMax	Проверяет, меньше или равно ли Number и String объекты указанному значению, с десятичной точностью
+@Size	Проверяет, находится ли длина объекта (Array, Collection, Map, String) в заданном диапазоне
+@Digits	Проверяет, является ли состав Number и String допустимым
+@Past	Проверяет, находятся ли Date и Calendar объекты до текущего времени
+@Future	Проверяет, находятся ли Date и Calendar объекты после текущего времени
+@Pattern	Проверяет, соответствует ли String объект правилам регулярного выражения
 ```
 
-## querystring接收参数/ POST Form接收参数
-这两种合在一起写是因为他们接收的方式都是一样的,可以用多个字段分开接收
+## Получение параметров через QueryString / POST Form
+Эти два написаны вместе, потому что они получают параметры одинаковым способом и могут получать несколько полей отдельно.
 
-
-
-* 典型的POST Multi Form 示例
+* Типичный пример POST Multi Form
 
 ```JAVA
 @Validated
 @RestController
 public class PictureAPIs {
     public ApiResult add(@RequestParam("file") MultipartFile file,
-                         @NotNull(message = "xxx不得为空!")
-                         @Size(min = 32, max = 32, message = "必须是32位的字符串")
+                         @NotNull(message = "xxx не может быть пустым!")
+                         @Size(min = 32, max = 32, message = "Должна быть 32-символьная строка")
                          @RequestParam String gidUnique,                         
-                         @Pattern(regexp = "^(taobao_picture_upload|taobao_product_img_upload|taobao_item_img_upload|taobao_product_add)$",message = "type可选值:XXX")
+                         @Pattern(regexp = "^(taobao_picture_upload|taobao_product_img_upload|taobao_item_img_upload|taobao_product_add)$",message = "type опциональные значения:XXX")
                          @RequestParam("type") String type,                         
                          @RequestParam("i") String i) {
                          }
@@ -41,22 +37,21 @@ public class PictureAPIs {
 ```
 
 * @Validated
-@Validated是最重要的,在每个需要验证控制器参数的 API 上面都需要加上这个注解
+@Validated является наиболее важным. Эта аннотация должна быть добавлена к каждому API, которое требует проверки параметров контроллера.
 
 * @RequestParam
-这个是很重要的,每个提交的参数都需要加上这个标签`@RequestParam("file")`表示接收 name=file 的参数提交.
+Это очень важно. Каждый отправленный параметр должен иметь этот тег. `@RequestParam("file")` означает получение отправки параметра с name=file.
 
 * @NotNull
-非空验证,这个很常见
+Проверка на не-null, это очень распространено
 
 * @Size
-字符串长度上下限
+Верхний и нижний пределы длины строки
 
 * @Pattern
-正则
+Регулярное выражение
 
-
-## 接收JSON参数
+## Получение JSON параметров
 
 ```java
 @RequestMapping(value = "/api/picture/add/base64",method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
@@ -71,7 +66,7 @@ public class PictureAPIs {
 public class PictureAddBase64RequestBody extends PictureAddBaseRequestBody {
 
     private static final long serialVersionUID = 6185318090948651724L;
-    @NotNull(message = "base64不得为空!")
+    @NotNull(message = "base64 не может быть пустым!")
     String base64;
 
     public String getBase64() {
@@ -84,24 +79,23 @@ public class PictureAddBase64RequestBody extends PictureAddBaseRequestBody {
 
 }
 ```
-以这个为例,参数的校验标签放在PictureAddBase64RequestBody的字段上面
+Используя это в качестве примера, теги проверки параметров размещаются на полях PictureAddBase64RequestBody.
 
+## Другое
 
-## 其他
-
-* 验证方法
+* Метод проверки
 
 ```java
- //验证 
+ //Проверка 
  public static<T> void validate(T t){ 
      Validator validator = factory.getValidator();
       Set<ConstraintViolation<T>> constraintViolations = validator.validate(t); 
       for(ConstraintViolation<T> constraintViolation : constraintViolations) { System.out.println(constraintViolation.getMessage()); } }
 ```
 
-参考链接:
-1. [自定义注解与参数验证](https://www.jianshu.com/p/2e71656aa88c)
-1. [Java注解 + 基于注解 & 拦截器实现登录验证 / 权限控制](https://www.jianshu.com/p/f9f9490a0924)
+Ссылки:
+1. [Пользовательские аннотации и проверка параметров](https://www.jianshu.com/p/2e71656aa88c)
+1. [Java аннотации + Проверка входа / Управление разрешениями на основе аннотаций и перехватчиков](https://www.jianshu.com/p/f9f9490a0924)
 1. [Bean Validation constraints](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#validator-defineconstraints-spec)
-1. [Bean Validation 技术规范特性概述](https://www.ibm.com/developerworks/cn/java/j-lo-beanvalid/)
-1. [SpringMVC数据验证——第七章 注解式控制器的数据验证、类型转换及格式化——跟着开涛学SpringMVC](http://jinnianshilongnian.iteye.com/blog/1733708)
+1. [Обзор функций технической спецификации Bean Validation](https://www.ibm.com/developerworks/cn/java/j-lo-beanvalid/)
+1. [Проверка данных SpringMVC - Глава 7 Проверка данных контроллера на основе аннотаций, преобразование типов и форматирование - Изучение SpringMVC с Kaitao](http://jinnianshilongnian.iteye.com/blog/1733708)

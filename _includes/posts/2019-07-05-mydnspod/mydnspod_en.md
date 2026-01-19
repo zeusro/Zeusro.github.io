@@ -1,42 +1,40 @@
-<!-- TODO: Translate to en -->
-
-## 背景信息
+## Background Information
 
 ![img](/img/in-post/mydnspod/ticket.png)
 
-通过腾讯云向他们吐槽了不满,结果他们叫我按`ctrl + `缩放页面,作为一个资深键盘侠,孰能忍.
+I complained to them through Tencent Cloud about my dissatisfaction, and they told me to press `ctrl + ` to zoom the page. As a veteran keyboard warrior, who can tolerate this?
 
-dnspod这个770px宽度的域名配置页真的恶心到我了,我决定把他改长一点.
+DNSPod's 770px wide domain configuration page really disgusted me. I decided to make it longer.
 
-一怒之下我决定自己动手,用油猴插件把整个页面拓宽点.
+In a fit of anger, I decided to do it myself, using the Tampermonkey plugin to widen the entire page.
 
-## 熟悉油猴插件开发模式
+## Familiarize with Tampermonkey Plugin Development
 
-可以参考[这个](https://greasyfork.org/zh-CN/help/meta-keys)
+You can refer to [this](https://greasyfork.org/zh-CN/help/meta-keys)
 
-大致跟原生JavaScript没啥区别,只是多了一点点约束和语法
+It's roughly the same as native JavaScript, just with a few more constraints and syntax
 
-## 分发
+## Distribution
 
-[油猴脚本,适配1080p屏幕](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
+[Tampermonkey script, adapted for 1080p screens](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
 
-## 源代码
+## Source Code
 
 [mydnspod](https://github.com/zeusro/mydnspod)
 
-欢迎PR
+PRs welcome
 
-## 后续恶搞
+## Follow-up Prank
 
-在 dnspod 网站上面看到他们在[招工](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw) 我决定皮一波,发一封邮件给`hr@dnspod.com`🤡.
+I saw on the DNSPod website that they were [recruiting](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw). I decided to be mischievous and send an email to `hr@dnspod.com`🤡.
 
 ![img](/img/in-post/mydnspod/email.png)
 
-`2019-10-17` 更新:最近他们换新版了,所以把项目冻结了
+`2019-10-17` Update: They recently switched to a new version, so the project has been frozen.
 
-## 参考链接
+## Reference Links
 
-1. [油猴脚本编写规则](https://blog.csdn.net/Senreme/article/details/79939249)
+1. [Tampermonkey Script Writing Rules](https://blog.csdn.net/Senreme/article/details/79939249)
 2. [Tutorials](https://wiki.greasespot.net/Tutorials)
-3. [引入外部脚本](https://greasyfork.org/zh-CN/help/external-scripts)
-4. [深入浅出 Greasemonkey](http://www.ttlsa.com/docs/greasemonkey/)
+3. [Introducing External Scripts](https://greasyfork.org/zh-CN/help/external-scripts)
+4. [Greasemonkey In-Depth](http://www.ttlsa.com/docs/greasemonkey/)

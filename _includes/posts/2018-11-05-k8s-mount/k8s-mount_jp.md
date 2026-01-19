@@ -1,14 +1,12 @@
-<!-- TODO: Translate to jp -->
+最近少し手を抜いていました。記事は書いていましたが、完成していないので公開していませんでした。
 
-最近有点划水,文章还是有写的,只是没成型,所以没发出来.
+今日はk8sでよく使われるリソースをマウントする方法を紹介します。
 
-今天介绍下用k8s挂载一些常用的资源
-
-当前版本Kubernetes版本:1.12.2
+現在のKubernetesバージョン：1.12.2
 
 ## env
 
-###  env
+### env
 
 ```
           env:
@@ -16,7 +14,7 @@
               value: 'ssh://git@127.0.0.1:22/a/b.git'
 ```
 
-### 嵌套env
+### ネストされたenv
 
 ```
           env:
@@ -32,7 +30,7 @@
 
 ### configMap
 
-**注意一下,修改configmap不会导致容器里的挂载的configmap文件/环境变量发生改变;删除configmap也不会影响到容器内部的环境变量/文件,但是删除configmap之后,被挂载的pod上面会出现一个warnning的事件**
+**注意：configmapを変更しても、コンテナ内のマウントされたconfigmapファイル/環境変数は変更されません。configmapを削除しても、コンテナ内の環境変数/ファイルには影響しませんが、configmapを削除した後、マウントされたpodに警告イベントが表示されます**
 
 ```
 Events:
@@ -41,11 +39,11 @@ Events:
   Warning  FailedMount  64s (x13 over 11m)  kubelet, cn-shenzhen.i-wz9498k1n1l7sx8bkc50  MountVolume.SetUp failed for volume "nginx" : configmaps "nginx" not found
 ```
 
-[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)写的很清楚了,这里恬不知耻得copy一下
+[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)のドキュメントは非常に明確なので、ここで恥知らずにコピーします。
 
-**注意,configmap有1M的限制,一般用来挂载小型配置,大量配置建议上配置中心**
+**注意：configmapには1Mの制限があり、通常は小さな設定をマウントするために使用されます。大量の設定の場合は、設定センターを使用することをお勧めします。**
 
-### 挂载单一项
+### 単一項目のマウント
 ```
 apiVersion: v1
 kind: Pod
@@ -57,21 +55,20 @@ spec:
       image: k8s.gcr.io/busybox
       command: [ "/bin/sh", "-c", "env" ]
       env:
-        # Define the environment variable
+        # 環境変数を定義
         - name: SPECIAL_LEVEL_KEY
           valueFrom:
             configMapKeyRef:
-              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              # SPECIAL_LEVEL_KEYに割り当てたい値を含むConfigMap
               name: special-config
-              # Specify the key associated with the value
+              # 値に関連付けられたキーを指定
               key: special.how
   restartPolicy: Never
 ```
 
-表示挂载`special-config`这个configmap的`special.how`项
+これは`special-config`というconfigmapの`special.how`項目をマウントします。
 
-
-### 挂载整个configmap
+### 完全なconfigmapのマウント
 
 ```
 apiVersion: v1
@@ -89,14 +86,14 @@ spec:
   restartPolicy: Never
 ```
 
-参考:
+参考：
 
 1. [Add nginx.conf to Kubernetes cluster](https://stackoverflow.com/questions/42078080/add-nginx-conf-to-kubernetes-cluster)
 2. [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)
 
-###  fieldRef
+### fieldRef
 
-可以挂载pod的一些属性
+podの一部のプロパティをマウントできます
 
 ```
           env:
@@ -107,16 +104,16 @@ spec:
 
 ```
 
-Selects a field of the pod: supports metadata.name, metadata.namespace, metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP.
+podのフィールドを選択：metadata.name、metadata.namespace、metadata.labels、metadata.annotations、spec.nodeName、spec.serviceAccountName、status.hostIP、status.podIPをサポートします。
 
 
 ### resourceFieldRef
 
-Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+コンテナのリソースを選択：現在サポートされているのは、リソースの制限とリクエスト（limits.cpu、limits.memory、limits.ephemeral-storage、requests.cpu、requests.memory、requests.ephemeral-storage）のみです。
 
-英文介绍得很明白,用来挂载当前yaml里面container的资源(CPU/内存)限制,用得比较少啦其实.此外还可以结合`downloadAPI`
+英語のドキュメントでは明確に説明されています - 現在のyaml内のコンテナのリソース（CPU/メモリ）制限をマウントするために使用されます。実際にはあまり使用されません。さらに、`downloadAPI`と組み合わせることができます。
 
-注意`containerName`不能配错,不然pod状态会变成`CreateContainerConfigError`
+`containerName`を誤って設定すると、podの状態が`CreateContainerConfigError`になることに注意してください。
 
 ```
           env:  
@@ -131,7 +128,7 @@ Selects a resource of the container: only resources limits and requests (limits.
 
 ### secretKeyRef
 
-Selects a key of a secret in the pod's namespace
+podの名前空間内のシークレットのキーを選択
 
 ```
         env:
@@ -147,27 +144,27 @@ Selects a key of a secret in the pod's namespace
               key: password
 ```
 
-参考:
-1. [Kubernetes中Secret使用详解](https://blog.csdn.net/yan234280533/article/details/77018640)
+参考：
+1. [KubernetesでのSecret使用の詳細説明](https://blog.csdn.net/yan234280533/article/details/77018640)
 2. https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#envvarsource-v1-core
 
 
-## 目录/文件类挂载
+## ディレクトリ/ファイルのマウント
 
-k8s可以挂载的资源实在是太多,这里挑一些比较有代表性的来讲一下
+k8sがマウントできるリソースは多すぎるので、代表的なものをいくつか選んで説明します。
 
-这一类资源一般要先在spec层级定义`volumes`,然后在`containers`定义`volumeMounts`,有种先声明,再使用的意思
+このタイプのリソースは、通常、まずspecレベルで`volumes`を定義し、次に`containers`で`volumeMounts`を定義する必要があります。これは、まず宣言してから使用するという意味です。
 
-### hostPath(宿主机目录/文件)
+### hostPath（ホストディレクトリ/ファイル）
 
-1. 既有目录/文件用`Directory`/`File`+nodeSelector
-  但是用了`nodeSelector`之后,以后的伸缩都会在匹配的节点上,如果节点只有1个,副本集设置得超出实际节点可承受空间,最终将导致单点问题,这个要注意下
-1. 应用启用时读写空文件用`DirectoryOrCreate`或者`FileOrCreate`
+1. 既存のディレクトリ/ファイルには、`Directory`/`File` + nodeSelectorを使用
+  ただし、`nodeSelector`を使用すると、今後のスケーリングは一致するノードで行われます。ノードが1つしかなく、レプリカセットが実際のノードが処理できる範囲を超えると、最終的に単一障害点の問題が発生します。これには注意が必要です。
+1. 起動時に空のファイルを読み書きするアプリケーションには、`DirectoryOrCreate`または`FileOrCreate`を使用
 
-以下演示第一种方案
+以下は最初のアプローチを示しています。
 
 
-    #给节点打上标签(这里省略)
+    # ノードにラベルを付ける（ここでは省略）
     kubectl get node --show-labels
 
 ```
@@ -227,9 +224,9 @@ spec:
 ### configMap
 
 
-#### 单项挂载(第1种)
+#### 単一項目のマウント（方法1）
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+このマウントはホットアップデートをサポートします。変更後約10秒で変更が表示されます。
 
 ```
       volumeMounts:
@@ -244,9 +241,9 @@ spec:
             path: log_level
 ```
 
-#### 单项挂载(第2种)
+#### 単一項目のマウント（方法2）
 
-这种挂载方式不会热更新
+このマウント方法はホットアップデートをサポートしません。
 
 ```
           volumeMounts:                  
@@ -259,9 +256,9 @@ spec:
               name: amiba-nginx 
 ```
 
-#### 完全挂载
+#### 完全マウント
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+このマウントはホットアップデートをサポートします。変更後約10秒で変更が表示されます。
 
 ```
       volumeMounts:
@@ -275,7 +272,7 @@ spec:
 
 ### secret
 
-#### 单项挂载
+#### 単一項目のマウント
 
 ```
   volumes:
@@ -292,9 +289,9 @@ spec:
 ```
 
 
-#### 完全挂载
+#### 完全マウント
 
-这里用了特定权限去挂载文件,默认好像是777
+ここでは特定の権限を使用してファイルをマウントします。デフォルトは777のようです。
 
 ```
           volumeMounts:
@@ -313,11 +310,11 @@ spec:
 --from-file=id_rsa.pub=/Volumes/D/temp/id_rsa.pub  \
 --from-file=known_hosts=/Volumes/D/temp/known_hosts \
 ```
-比如这个模式创建出来的secret,容器里面/root/.ssh目录就会有`id_rsa`,`id_rsa.pub`,`known_hosts`3个文件
+たとえば、このパターンで作成されたシークレットは、コンテナ内の`/root/.ssh`ディレクトリに`id_rsa`、`id_rsa.pub`、`known_hosts`の3つのファイルがあります。
 
 ### downwardAPI
 
 
-参考链接:
+参考リンク：
 1. [volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
 1. [kubernetes-api/v1.12](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#hostpathvolumesource-v1-core)

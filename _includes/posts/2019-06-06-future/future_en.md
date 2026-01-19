@@ -1,5 +1,3 @@
-<!-- TODO: Translate to en -->
-
 ```
 graph TB
 g(Comparable<Delayed>)-->A
@@ -23,35 +21,35 @@ fjt-->rtt(RecursiveTask<V>)
 
 ### Future<V>
 
-上图可以看出`Future<V>`地位超凡,基本上很多成员都是他"儿子"
+From the diagram above, we can see that `Future<V>` has an extraordinary status, basically many members are its "children".
 
-Future<V>表示异步运算的结果
+Future<V> represents the result of an asynchronous computation.
 
 ### ScheduledFuture<V>
 
-代表了一种预期的任务,比如可以用`ScheduledFuture`配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate),延迟作业(scheduleWithFixedDelay)
+Represents a scheduled task. For example, `ScheduledFuture` can be used with ScheduledExecutorService to do periodic repeated jobs (scheduleAtFixedRate), delayed jobs (scheduleWithFixedDelay).
 
 ### RunnableScheduledFuture<V>
 
-这是个接口,得自己实现.
+This is an interface, you need to implement it yourself.
 
-可用于一次性任务或者周期性任务.
+Can be used for one-time tasks or periodic tasks.
 
-这里可以参考他的子接口.ScheduledFuture的用法
+You can refer to its sub-interface here. Usage of ScheduledFuture.
 
 ### RunnableFuture
 
-这是个接口,得自己实现.
+This is an interface, you need to implement it yourself.
 
 ### FutureTask
 
-可用`Callable<V>`和`Runnable`初始化.`Callable<V>`带返回值.
+Can be initialized with `Callable<V>` and `Runnable`. `Callable<V>` has a return value.
 
-可配合ExecutorService实现多线程任务分发
+Can be used with ExecutorService to implement multi-threaded task distribution.
 
 ### CompletableFuture<T>
 
-可以用来创建链式服务(1启动多任务)
+Can be used to create chained services (1 starts multiple tasks).
 
 
 ```java
@@ -70,7 +68,7 @@ int i = 1;
         });
 
         future.thenApply((s) -> {
-            //把上个任务的结果传递到子任务中
+            // Pass the result of the previous task to the child task
             out.println(s);
             out.println("end 2");
             i = i << 1;
@@ -85,10 +83,10 @@ int i = 1;
             }
             out.println("CompletableFutureExample end");
         });
-        //通过这个信号,持续等待子线程运行完毕
+        // Through this signal, continuously wait for child threads to finish running
         while (i != 8) {
             Thread.sleep(500);
-            out.println("继续等待");
+            out.println("Continue waiting");
         }
 //        future.join();
 //        CompletableFuture.allOf(future).join();
@@ -97,20 +95,20 @@ int i = 1;
 
 ### CountedCompleter<T>
 
-CountedCompleter:任务可能产生结果，也可能不产生结果。
+CountedCompleter: Tasks may produce results, or may not produce results.
 
-CountedCompleter 在任务完成执行后会触发执行一个自定义的钩子函数。
+CountedCompleter will trigger execution of a custom hook function after the task completes execution.
 
 
 ### RecursiveAction
 
-跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`,但是`RecursiveAction`不产生结果.
+Like CountedCompleter<T>, it inherits from `ForkJoinTask<V>`, but `RecursiveAction` does not produce results.
 
 ### RecursiveTask<V>
 
-RecursiveTask类的实例表示产生结果的任务。
+Instances of the RecursiveTask class represent tasks that produce results.
 
-特点在于可递归执行.
+The characteristic is that it can be executed recursively.
 
 ```
 public class RecursiveTaskExample extends RecursiveTask<Integer> {
@@ -138,6 +136,6 @@ public class RecursiveTaskExample extends RecursiveTask<Integer> {
 }
 ```
 
-参考链接:
+Reference links:
 
-1. [JUC源码分析-线程池篇（五）：ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)
+1. [JUC Source Code Analysis - Thread Pool Part (Five): ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)

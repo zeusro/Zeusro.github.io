@@ -1,18 +1,15 @@
-<!-- TODO: Translate to en -->
+## Concurrency Related
 
-## 并发相关
+### Summary
 
-### 总结
-
-
-type | 作用
----|---
-Cond|发令枪,一般预设一个条件让子任务等待,发出的信号可以是单个(Signal)也可集体广播(Broadcast)
-Locker|简单接口
-Mutex|互斥锁
-Once|并发运行,只允许一次
-RWMutex|读写锁,多读少写,同时读锁,读写互斥.
-WaitGroup|分发任务,主线程等待所有任务完成
+| type | purpose |
+|---|---|
+| Cond | Starting gun, usually pre-sets a condition for subtasks to wait; the signal can be single (Signal) or broadcast (Broadcast) |
+| Locker | Simple interface |
+| Mutex | Mutual exclusion lock |
+| Once | Concurrent execution, only allowed once |
+| RWMutex | Read-write lock, many reads and few writes, simultaneous read locks, read-write mutual exclusion. |
+| WaitGroup | Distribute tasks, main thread waits for all tasks to complete |
 
 
 ### Cond 
@@ -25,11 +22,11 @@ type Cond
     func (c *Cond) Wait()
 ```
 
-加入到通知列表 -> 解锁 L -> 等待通知 -> 锁定 L
+Add to notification list -> Unlock L -> Wait for notification -> Lock L
 
-虽然放在最前面,但我花了最长的时间去理解这玩意.
+Although it's placed at the very beginning, I spent the longest time trying to understand this thing.
 
-按照我的理解,`Cond`就好比一个发令枪.比如我同时养了5条狗,并同时准备了5份食物,但是没有我的口令,我不准它们吃.示例代码如下:
+According to my understanding, `Cond` is like a starting gun. For example, I have 5 dogs and 5 portions of food ready at the same time, but I won't let them eat without my command. The example code is as follows:
 
 
 ```go
@@ -38,28 +35,28 @@ func useCondBroadcast() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// Create new cond
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// Compete for mutual exclusion lock
 			cond.L.Lock()
-			// 条件是否达成
+			// Check if condition is met
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("Received a notification goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d execution finished\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// Ensure all goroutines have started
 	time.Sleep(time.Millisecond * 20)
 
 	fmt.Println("broadcast...")
@@ -78,28 +75,28 @@ func useCondSignal() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// Create new cond
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// Compete for mutual exclusion lock
 			cond.L.Lock()
-			// 条件是否达成
+			// Check if condition is met
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("Received a notification goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d execution finished\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// Ensure all goroutines have started
 	time.Sleep(time.Millisecond * 20)
 
 	time.Sleep(time.Second)
@@ -117,41 +114,41 @@ func useCondSignal() {
 
 ```
 
-这时
+At this point
 
-场景:喂狗
+Scenario: Feeding dogs
 
-goroutine:每一条狗吃饭的行为
+goroutine: The act of each dog eating
 
-Broadcast()方法:通知所有狗吃饭
+Broadcast() method: Notify all dogs to eat
 
-Signal()方法:通知随机一条狗吃饭
+Signal() method: Notify a random dog to eat
 
-例子中count变量: 指示狗吃饭的信号
+`count` variable in the example: Indicates the signal for dogs to eat
 
-例子中的ch变量:狗拉的便便
+`ch` variable in the example: The poop the dogs pull
 
-`useCondBroadcast()`和`useCondSignal`这2个例子,差别只在于最后管道的读取游标(i).
+The difference between `useCondBroadcast()` and `useCondSignal` examples is only in the final pipe's read cursor (i).
 
-`Broadcast`方法通知的对象是所有的狗,所以最后所有的狗都顺利开吃(i=4).
+The `Broadcast` method notifies all dogs, so all dogs successfully start eating (i=4).
 
-`Signal`只通知了一条狗,所以最后只有一条狗拉出了便便(i=0)
+`Signal` only notifies one dog, so only one dog poops in the end (i=0).
 
-所以如果只有一条狗,那么使用`Signal`效果等同于`Broadcast`.
+So if there is only one dog, using `Signal` has the same effect as `Broadcast`.
 
-用`Signal`和`Broadcast`方法都好,如果设置了管道(ch := make(chan struct{}, 5))去接收最后的结果,要注意设置的临界值变化导致的最后出来的结果数量.
+Both `Signal` and `Broadcast` methods are fine. If a channel (ch := make(chan struct{}, 5)) is set up to receive the final result, be careful about the change in the threshold value, which affects the number of results.
 
-取少了没关系,取多了会出现`fatal error: all goroutines are asleep - deadlock!`这个`panic`(比如,在`useCondSignal`这个例子里面,把`i<1`改成`i<2`),后果不堪设想.
+It's okay to take fewer, but taking too many will cause a `fatal error: all goroutines are asleep - deadlock!` panic (e.g., in the `useCondSignal` example, change `i<1` to `i<2`), with unimaginable consequences.
 
-关于`Cond`实际的使用场景,我觉得把`Cond`应用于最优解.比如说我要爬取同一个网页,可能有ABCD四种方案,我只需要其中一个方案最快完成即可.那么只要其中一个任务完成,在主线程发起`Broadcast`,这样其他方案就不用白忙活了,可以退出舞台.
+Regarding the actual use case of `Cond`, I think `Cond` is best applied to an optimal solution. For example, if I want to crawl the same webpage, there might be four schemes A, B, C, D, and I only need one of them to finish the fastest. Then, as soon as one task completes, `Broadcast` is initiated in the main thread, so other schemes don't have to work in vain and can exit the stage.
 
-暂时没想到`Signal`的实际用法,以后有机会再补充吧.
+I haven't thought of an actual use for `Signal` yet; I'll add it later if I have a chance.
 
-真正理解了`Cond`锁的争抢方式之后,`Broadcast`和`Signal`交替使用也就不再有什么问题.
+Once the contention mechanism of `Cond` lock is truly understood, alternating `Broadcast` and `Signal` no longer poses any problem.
 
 ### [Locker](https://golang.org/pkg/sync/#Locker)
 
-只是一个简单的接口.
+Just a simple interface.
 
 ```go
 type Locker interface {
@@ -168,7 +165,7 @@ type Mutex
     func (m *Mutex) Unlock()
 ```
 
-互斥锁
+Mutual exclusion lock
 
 ```go
 func useMutex() {
@@ -178,21 +175,21 @@ func useMutex() {
 	go func() {
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine1: 我会锁定大概 2s")
+		fmt.Println("goroutine1: I will lock for about 2s")
 		time.Sleep(time.Second * 2)
-		fmt.Println("goroutine1: 我解锁了，你们去抢吧")
+		fmt.Println("goroutine1: I unlocked, go grab it")
 		ch <- struct{}{}
 	}()
 
 	go func() {
-		fmt.Println("groutine2: 等待解锁")
+		fmt.Println("groutine2: Waiting for unlock")
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine2: 哈哈，我锁定了")
+		fmt.Println("goroutine2: Haha, I locked it")
 		ch <- struct{}{}
 	}()
 
-	// 等待 goroutine 执行结束
+	// Wait for goroutines to finish
 	for i := 0; i < 2; i++ {
 		<-ch
 	}
@@ -207,7 +204,7 @@ type Once
     func (o *Once) Do(f func())
 ```    
 
-如其名,Once里的Do函数只会运行一次
+As its name suggests, the Do function in Once will only run once.
 
 ```go
 func useOnce() {
@@ -239,13 +236,13 @@ type RWMutex
     func (rw *RWMutex) Unlock()
 ```    
 
-RWMutex是基于Mutex实现的.
+RWMutex is implemented based on Mutex.
 
-读写锁,一般用在大量读操作、少量写操作的情况
+Read-write lock, generally used in scenarios with a large number of read operations and a small number of write operations.
 
-1. 同时只能有一个 goroutine 能够获得写锁定。
-1. 同时可以有任意多个 gorouinte 获得读锁定。
-1. 同时只能存在写锁定或读锁定（读和写互斥）。
+1. Only one goroutine can acquire a write lock at a time.
+1. Any number of goroutines can acquire read locks simultaneously.
+1. Only a write lock or read lock can exist simultaneously (read and write are mutually exclusive).
 
 ```go
 func useRWMutex() {
@@ -267,19 +264,19 @@ var rw sync.RWMutex
 
 func read(n int, ch chan struct{}) {
 	rw.RLock()
-	fmt.Printf("goroutine %d 进入读操作...\n", n)
+	fmt.Printf("goroutine %d entering read operation...\n", n)
 	v := count
-	fmt.Printf("goroutine %d 读取结束，值为：%d\n", n, v)
+	fmt.Printf("goroutine %d finished reading, value is: %d\n", n, v)
 	rw.RUnlock()
 	ch <- struct{}{}
 }
 
 func write(n int, ch chan struct{}) {
 	rw.Lock()
-	fmt.Printf("goroutine %d 进入写操作...\n", n)
+	fmt.Printf("goroutine %d entering write operation...\n", n)
 	v := rand.Intn(1000)
 	count = v
-	fmt.Printf("goroutine %d 写入结束，新值为：%d\n", n, v)
+	fmt.Printf("goroutine %d finished writing, new value is: %d\n", n, v)
 	rw.Unlock()
 	ch <- struct{}{}
 }
@@ -296,11 +293,11 @@ Examples(Expand All)
 
 ```
 
-简单的多任务分发
+Simple multi-task distribution
 
 ```go
 func useWaitGroup() {
-	// 通过sync包中的WaitGroup 实现并发控制
+	// Achieve concurrency control through WaitGroup in the sync package
 
 	var wg sync.WaitGroup
 
@@ -320,11 +317,11 @@ func useWaitGroup() {
 	wg.Wait()
 	fmt.Println("handle2 done")
 
-	// 在 sync 包中，提供了 WaitGroup ，它会等待它收集的所有 goroutine 任务全部完成，在主 goroutine 中 Add(delta int) 索要等待goroutine 的数量。在每一个 goroutine 完成后 Done() 表示这一个goroutine 已经完成，当所有的 goroutine 都完成后，在主 goroutine 中 WaitGroup 返回。
+	// The sync package provides WaitGroup, which waits for all goroutine tasks it collects to complete. In the main goroutine, Add(delta int) is used to specify the number of goroutines to wait for. After each goroutine completes, Done() indicates that this goroutine is finished. When all goroutines are completed, WaitGroup returns in the main goroutine.
 }
 ```
 
-## 数据结构
+## Data Structures
 
 ### Map
 
@@ -337,28 +334,22 @@ type Map
     func (m *Map) Store(key, value interface{})
 ```    
 
-#### 适用场景
+#### Applicable Scenarios
 
-线程安全集合,在2个场景做了优化
+Thread-safe collection, optimized for 2 scenarios:
 
-1. 只写1次,多次读
-2. 多个goroutines读写互不相同的键(比如goroutines1读写key1,goroutines2读写key2)
+1. Write once, read many times
+2. Multiple goroutines read and write different keys (e.g., goroutine1 reads/writes key1, goroutine2 reads/writes key2)
 
-#### 方法介绍
+#### Method Introduction
 
-Load 读取
+Load: Read
+LoadOrStore: Read, if not found, then write
+Store: Write
+Range: Cannot iterate directly, must iterate through callback
 
-LoadOrStore 读取不到则写入
-
-Store 写入
-
-Range 无法直接遍历,得通过回调的方式遍历
-
-具体用法见
-
+Specific usage can be found in:
 [Go 1.9 sync.Map揭秘](https://colobu.com/2017/07/11/dive-into-sync-Map/)
-
-
 
 ### Pool
 
@@ -377,20 +368,20 @@ var bufPool = sync.Pool{
 }
 
 func usePool(key, val string) {
-	// 获取临时对象，没有的话会自动创建
+	// Get temporary object, automatically create if not available
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
 	b.WriteString(key)
 	b.WriteByte('=')
 	b.WriteString(val)
 	os.Stdout.Write(b.Bytes())
-	// 将临时对象放回到 Pool 中
+	// Return temporary object to Pool
 	bufPool.Put(b)
 }
 ```
 
 
-## 参考链接:
+## Reference Links:
 
 1. [浅谈 Golang sync 包的相关使用方法](https://deepzz.com/post/golang-sync-package-usage.html)
 2. [map性能对比](https://medium.com/@deckarep/the-new-kid-in-town-gos-sync-map-de24a6bf7c2c)

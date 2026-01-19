@@ -1,24 +1,22 @@
-<!-- TODO: Translate to en -->
-
-## 一些实用工具
+## Some Useful Tools
 
 1. [kompose](https://github.com/kubernetes/kompose)
 
-可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
+Can be used to convert docker-compose files, very helpful for beginners learning Kubernetes.
 
-## 安装类工具
+## Installation Tools
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
 
-参考:
-1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
+References:
+1. [Certificate Rotation](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
 
 
-## 进阶调度
+## Advanced Scheduling
 
-每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+Each type of affinity has 2 contexts: preferred and required. Preferred indicates preference, while required is mandatory.
 
-### 使用亲和度确保节点在目标节点上运行
+### Using Affinity to Ensure Pods Run on Target Nodes
 
 ```yml
         nodeAffinity:
@@ -30,11 +28,11 @@
 ```
 
 
-参考链接:
+Reference Links:
 1. [advanced-scheduling-in-kubernetes](https://kubernetes.io/blog/2017/03/advanced-scheduling-in-kubernetes/)
 1. [kubernetes-scheulder-affinity](https://cizixs.com/2017/05/17/kubernetes-scheulder-affinity/)
 
-### 使用反亲和度确保每个节点只跑同一个应用
+### Using Anti-Affinity to Ensure Only One Application Runs Per Node
 
 ```yml
       affinity:
@@ -69,22 +67,22 @@
 ```
 
 
-### tolerations 和 taint
+### Tolerations and Taints
 
- tolerations 和 taint 总是结对存在, taint 就像是"虽然我刁莽,抽烟,月光,但我还是一个好女人",这种污点(taint)一般会让一般男性(pod)敬而远之,但总有几个老实人能够容忍(tolerations).
+Tolerations and taints always exist in pairs. Taint is like "Although I'm rude, smoke, and spend all my money, I'm still a good woman." This kind of taint usually makes ordinary men (pods) keep their distance, but there are always a few honest people who can tolerate (tolerations) it.
 
-#### taint
+#### Taint
 
 ```bash
 kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
 kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
 ```
 
-master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
+Master nodes come with taints by default, which is why containers we deploy won't run on master nodes. But if you customize `taint`, be careful! All `DaemonSet` and kube-system components need to have corresponding `tolerations`. Otherwise, that node will evict all containers without this `tolerations`, including network plugins and kube-proxy. The consequences are quite serious, please be careful.
 
-`taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
+`taint` and `tolerations` exist in pairs, and operators cannot be used randomly.
 
-#### tolerations
+#### Tolerations
 
 ##### NoExecute
 
@@ -99,9 +97,9 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoExecute
 
-NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务必先行确认系统组件有对应配置tolerations.
+NoExecute immediately evicts pods that don't meet the tolerance conditions. This operation is very dangerous. Please make sure system components have corresponding tolerations configured first.
 
-特别注意用`Exists`这个操作符是无效的,必须用`Equal`
+Note that using the `Exists` operator is invalid here, you must use `Equal`.
 
 ##### NoSchedule
 
@@ -118,30 +116,30 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoSchedule
 
-是尽量不往这上面调度,但实际上还是会有pod在那上面跑
+This tries to avoid scheduling pods here, but pods can still run on it.
 
-`Exists`和`Exists`随意使用,不是很影响
+`Exists` and `Equal` can be used freely, it doesn't matter much.
 
-值得一提的是,同一个key可以同时存在多个effect
+It's worth mentioning that the same key can have multiple effects simultaneously.
 
 ```yml
 Taints:             elasticsearch-exclusive=true:NoExecute
                     elasticsearch-exclusive=true:NoSchedule
 ```
 
-其他参考链接：
+Other Reference Links:
 
-1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
-1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
+1. [Taint and Toleration in Kubernetes](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
+1. [Kubernetes Scheduling Mechanism](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
-## 容器编排的技巧
+## Container Orchestration Tips
 
 ### wait-for-it
 
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
+k8s currently doesn't have a dependency startup mechanism like docker-compose's `depends_on`. It's recommended to use [wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/) to rewrite the image's command.
 
-### 在cmd中使用双引号的办法
+### Using Double Quotes in cmd
 
 ```yaml
 
@@ -153,13 +151,13 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
                   -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
 ```
 
-## k8s的 master-cluster 架构
+## k8s Master-Cluster Architecture
 
-### master(CONTROL PLANE)
+### Master (CONTROL PLANE)
 
 - etcd distributed persistent storage
 
-    Consistent and highly-available key value store used as Kubernetes’ backing store for all cluster data.
+    Consistent and highly-available key value store used as Kubernetes' backing store for all cluster data.
 
 - kube-apiserver
 
@@ -196,15 +194,15 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
          For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
 
 
-参考链接:
-1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
-1. [Kubernetes组件](https://kubernetes.io/docs/concepts/overview/components/)
+Reference Links:
+1. [Kubernetes Core Principles (II) - Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
+1. [Kubernetes Components](https://kubernetes.io/docs/concepts/overview/components/)
 
-### worker nodes
+### Worker Nodes
 
 - Kubelet
 
-    The kubelet is the primary “node agent” that runs on each node.
+    The kubelet is the primary "node agent" that runs on each node.
 - Kubernetes Proxy
 
     kube-proxy enables the Kubernetes service abstraction by maintaining network rules on the host and performing connection forwarding.
@@ -214,7 +212,7 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
     The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
 
 
-## kubernetes的资源
+## Kubernetes Resources
 
 
 - spec
@@ -228,7 +226,7 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
 
 ![image](/img/in-post/learn-kubernetes/resource.png)
 
-### pod
+### Pod
 
     A pod is a group of one or more tightly related containers that will always run together on the same worker node and in the same Linux namespace(s).
 
@@ -242,28 +240,28 @@ The kubelet uses liveness probes to know when to restart a Container.
 
 The kubelet uses readiness probes to know when a Container is ready to start accepting traffic. 
 
-- 问题：如果删除一个pod 是先从endpoint里移除pod ip,还是 pod 先删除
+- Question: If you delete a pod, is the pod IP removed from the endpoint first, or is the pod deleted first?
 
-个人见解：
+Personal Understanding:
 
-删除一个pod的k8s内部流程
-1. 用户删除pod
-2. apiserver标记pod为'dead'状态
-3. kubelet删除pod 默认等待30s还在运行时 会强制关闭pod
-   3.1 kubelet等待pod中容器的 prestop 执行结束
-   3.2 发送 sigterm 信号 让容器关闭
-   3.3 超过30s等待时间 发送 sigkill 信号强制pod关闭
-4. nodecontroller中的endpoint controller从endpoint中删除此pod
+The internal process of deleting a pod in k8s:
+1. User deletes pod
+2. apiserver marks pod as 'dead' state
+3. kubelet deletes pod, waits 30s by default, if still running, will force close pod
+   3.1 kubelet waits for prestop in pod containers to finish executing
+   3.2 sends sigterm signal to close containers
+   3.3 after 30s wait time, sends sigkill signal to force close pod
+4. endpoint controller in nodecontroller removes this pod from endpoint
 
-3 4 步骤同时进行 一般情况下4肯定会先于3完成,由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod,而endpoint controller仍然存在此pod,会导致svc请求会转发到已经删除的pod上,从而导致调用svc出错
+Steps 3 and 4 proceed simultaneously. Generally, step 4 will definitely complete before step 3. Since steps 3 and 4 are not in a fixed order, in extreme cases, kubelet may have already deleted the pod, but the endpoint controller still has this pod, which will cause svc requests to be forwarded to an already deleted pod, resulting in svc call errors.
 
-参考链接 https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+Reference link https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
 
 
-参考链接:
-1. [容器中使用pod的数据](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
-2. [在Kubernetes Pod中使用Service Account访问API Server](https://tonybai.com/2017/03/03/access-api-server-from-a-pod-through-serviceaccount/)
-3. [优雅停止pod](https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html)
+Reference Links:
+1. [Using Pod Data in Containers](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
+2. [Using Service Account to Access API Server in Kubernetes Pod](https://tonybai.com/2017/03/03/access-api-server-from-a-pod-through-serviceaccount/)
+3. [Graceful Pod Shutdown](https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html)
 
 
 
@@ -274,21 +272,21 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
 - Rolling Update
 
 ```bash
-    #只适用于pod 里面只包含一个 container 的情况
+    # Only applicable when pod contains only one container
     kubectl rolling-update NAME [NEW_NAME] --image=IMAGE:TAG
 ```
 
 
-[Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) 用来作初始化环境的容器
+[Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) are containers used to initialize the environment.
 
 
-参考:
+Reference:
 1. [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
 2. [Kubernetes deployment strategies](https://container-solutions.com/kubernetes-deployment-strategies/)
-3. [Autoscaling based on CPU/Memory in Kubernetes — Part II](https://blog.powerupcloud.com/autoscaling-based-on-cpu-memory-in-kubernetes-part-ii-fe2e495bddd4)
+3. [Autoscaling based on CPU/Memory in Kubernetes — Part II](https://blog.powerupcloud.com/autoscaling-based-on-cpu-memory-in-kubernetes-part-ii-fe2e495bddd4)
 4. [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
 
-- 资源不够时deployment无法更新
+- Deployment cannot update when resources are insufficient
 
 0/6 nodes are available: 3 Insufficient memory, 3 node(s) had taints that the pod didn't tolerate.
 
@@ -298,45 +296,45 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
 
     -> label
 
-### ReplicaSet(副本集)
+### ReplicaSet
 
-    Replication Controller(副本控制器)的替代产物
+    Replacement for Replication Controller
 
-k8s组件|pod selector
+k8s Component|pod selector
 --|--
 Replication Controller|label
-ReplicaSet|label ,pods that include a certain label key
+ReplicaSet|label, pods that include a certain label key
 
 
-参考链接:
-1. [聊聊你可能误解的Kubernetes Deployment滚动更新机制](https://blog.csdn.net/WaltonWang/article/details/77461697)
+Reference Links:
+1. [Talking About the Kubernetes Deployment Rolling Update Mechanism You May Have Misunderstood](https://blog.csdn.net/WaltonWang/article/details/77461697)
 
-### DaemonSet(守护进程集)
+### DaemonSet
 
     A DaemonSet makes sure it creates as many pods as there are nodes and deploys each one on its own node
 
-- 健康检查
+- Health Checks
 1. liveness probe
 2. HTTP-based liveness probe
 3. 
 
-### StatefulSet(有状态副本集)
-    Manages the deployment and scaling of a set of Pods , and provides guarantees about the ordering and uniqueness of these Pods.
+### StatefulSet
+    Manages the deployment and scaling of a set of Pods, and provides guarantees about the ordering and uniqueness of these Pods.
 
-参考:
+Reference:
 1. [StatefulSet](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)
 
 
-### volumes
+### Volumes
 
-> volumes有2种模式
+> Volumes have 2 modes
 > 
-> In-tree是 Kubernetes 标准版的一部分，已经写入 Kubernetes 代码中。
-> Out-of-tree 是通过 Flexvolume 接口实现的，Flexvolume 可以使得用户在 Kubernetes 内自己编写驱动或添加自有数据卷的支持。
+> In-tree is part of the Kubernetes standard version, already written into Kubernetes code.
+> Out-of-tree is implemented through the Flexvolume interface. Flexvolume allows users to write their own drivers or add support for their own data volumes within Kubernetes.
 
 
 1.  emptyDir – a simple empty directory used for storing transient data,
-1.  hostPath – for mounting directories from the worker node’s filesystem into the pod,
+1.  hostPath – for mounting directories from the worker node's filesystem into the pod,
 1.  gitRepo – a volume initialized by checking out the contents of a Git repository,
 1.  nfs – an NFS share mounted into the pod,
 1.  gcePersistentDisk (Google Compute Engine Persistent Disk), awsElasticBlockStore
@@ -347,61 +345,61 @@ photonPersistentDisk, scaleIO – for mounting other types of network storage,
 1.  configMap, secret, downwardAPI – special types of volumes used to expose certain
 Kubernetes resources and cluster info to the pod,
 1.  persistentVolumeClaim – a way to use a pre- or dynamically provisioned persistent
-storage (we’ll talk about them in the last section of this chapter).
+storage (we'll talk about them in the last section of this chapter).
 
 - Persistent Volume
-持久卷，就是将数据存储放到对应的外部可靠存储中，然后提供给Pod/容器使用，而无需先将外部存储挂在到主机上再提供给容器。它最大的特点是其生命周期与Pod不关联，在Pod死掉的时候它依然存在，在Pod恢复的时候自动恢复关联。
+Persistent volumes store data in corresponding external reliable storage, then provide it to Pods/containers for use, without needing to mount external storage to the host first and then provide it to containers. Its biggest feature is that its lifecycle is not associated with Pods. When a Pod dies, it still exists. When a Pod recovers, it automatically restores the association.
 
 - Persistent Volume Claim
-用来申明它将从PV或者Storage Class资源里获取某个存储大小的空间。
+Used to declare that it will obtain a certain storage size space from PV or Storage Class resources.
 
-参考：  
-1. [Kubernetes中的Volume介绍](https://jimmysong.io/posts/kubernetes-volumes-introduction)
+Reference:  
+1. [Introduction to Volumes in Kubernetes](https://jimmysong.io/posts/kubernetes-volumes-introduction)
 
 ### ConfigMap
 
-ConfigMap是用来存储配置文件的kubernetes资源对象，所有的配置内容都存储在etcd中.
+ConfigMap is a Kubernetes resource object used to store configuration files. All configuration content is stored in etcd.
 
-实践证明修改 ConfigMap 无法更新容器中已注入的环境变量信息。
+Practice has proven that modifying ConfigMap cannot update environment variable information already injected into containers.
 
-参考:
-1. [Kubernetes ConfigMap热更新测试](https://jimmysong.io/posts/kubernetes-configmap-hot-update/)
+Reference:
+1. [Kubernetes ConfigMap Hot Update Test](https://jimmysong.io/posts/kubernetes-configmap-hot-update/)
 
 
-### service
+### Service
 
 > A Kubernetes service is a resource you create to get a single, constant point of entry to a group of pods providing the same service.
     
 > Each service has an IP address and port that never change while the service exists. 
 
-> The resources will be created in the order they appear in the file. Therefore, it’s best to specify the service first, since that will ensure the scheduler can spread the pods associated with the service as they are created by the controller(s), such as Deployment.
+> The resources will be created in the order they appear in the file. Therefore, it's best to specify the service first, since that will ensure the scheduler can spread the pods associated with the service as they are created by the controller(s), such as Deployment.
 
 - ClusterIP
 
-集群内部访问用,外部可直接访问
+For cluster internal access, can be directly accessed externally.
 
-当type不指定时,创建的就是这一类型的服务
+When type is not specified, this type of service is created.
 
-clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service),特点是没有clusterIP
+clusterIP: None is a special [headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service), characterized by having no clusterIP.
 
 - NodePort
 
-每个节点都会开相同的端口,所以叫NodePort.有数量限制.外部可直接访问
+Each node will open the same port, so it's called NodePort. There are quantity limits. Can be directly accessed externally.
 
 - LoadBalancer
 
-特定云产商的服务.如果是阿里云,就是在NodePort的基础上,帮你自动绑定负载均衡的后端服务器而已
+Specific cloud provider service. If it's Alibaba Cloud, it's just automatically binding the backend servers of the load balancer on top of NodePort.
 
 - ExternalName
 
-参考:
+Reference:
 1. [IPVS-Based In-Cluster Load Balancing Deep Dive](https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/)
 
 ### Horizontal Pod Autoscaler
 
     The Horizontal Pod Autoscaler automatically scales the number of pods in a replication controller, deployment or replica set based on observed CPU utilization (or, with custom metrics support, on some other application-provided metrics).
 
-配合metrics APIs以及resource 里面的 request 资源进行调整.
+Works with metrics APIs and request resources in resources for adjustment.
 
 ### Kubernetes Downward API
 
@@ -413,22 +411,22 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
 ### Resource Quotas
 
-基于namespace限制pod资源的一种手段
+A means of limiting pod resources based on namespace
 
 
-## 网络模型
+## Network Model
 
-[Kubernetes网络模型原理](https://mp.weixin.qq.com/s?__biz=MjM5OTcxMzE0MQ==&mid=2653371440&idx=1&sn=49f4e773bb8a58728752275faf891273&chksm=bce4dc2a8b93553c6b33d53c688ba30d61f88f0e065f50d82b1fb7e64daa4cc68394ffd8810b&mpshare=1&scene=23&srcid=1031BL2jtxx8DABRb46lNGPl%23rd)
+[Kubernetes Network Model Principles](https://mp.weixin.qq.com/s?__biz=MjM5OTcxMzE0MQ==&mid=2653371440&idx=1&sn=49f4e773bb8a58728752275faf891273&chksm=bce4dc2a8b93553c6b33d53c688ba30d61f88f0e065f50d82b1fb7e64daa4cc68394ffd8810b&mpshare=1&scene=23&srcid=1031BL2jtxx8DABRb46lNGPl%23rd)
 
 
 
-参考命令:
-3. [kubectl命令指南](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
-4. [Kubernetes与Docker基本概念与常用命令对照](https://yq.aliyun.com/articles/385699?spm=a2c4e.11153959.0.0.7355d55acvAlBq)
+Reference Commands:
+3. [kubectl Command Guide](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+4. [Kubernetes and Docker Basic Concepts and Common Commands Comparison](https://yq.aliyun.com/articles/385699?spm=a2c4e.11153959.0.0.7355d55acvAlBq)
 6. [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-7. [K8S资源配置指南](https://kubernetes.io/docs/reference/)
+7. [K8S Resource Configuration Guide](https://kubernetes.io/docs/reference/)
 8. [Introducing Container Runtime Interface (CRI) in Kubernetes](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)
 
 
-参考电子书:
-[Kubernetes Handbook——Kubernetes中文指南/云原生应用架构实践手册](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)
+Reference E-books:
+[Kubernetes Handbook——Kubernetes Chinese Guide/Cloud Native Application Architecture Practice Manual](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)

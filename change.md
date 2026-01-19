@@ -1,5 +1,100 @@
 # 多语言SEO优化改进记录
 
+## 添加基于浏览器语言的自动语言切换功能
+
+2026-01-10
+
+实现了根据浏览器请求头（Accept-Language）自动切换到对应语言的功能。如果浏览器语言不匹配支持的语言，则根据地区判断：华文地区使用中文，其余地区使用英文。
+
+### 实现内容
+
+**更新时间**: 2026-01-10
+
+1. **自动语言检测功能** (`_includes/footer.html` 的 `detectLanguageFromBrowser` 函数)：
+   - 读取浏览器的语言偏好列表（`navigator.languages` 或 `navigator.language`）
+   - 支持的语言映射：
+     - 中文：`zh-CN`, `zh-TW`, `zh-HK`, `zh-MO`, `zh-SG` 等 → `zh`
+     - 英文：`en-US`, `en-GB` 等 → `en`
+     - 日语：`ja-JP`, `ja` → `jp`
+     - 俄语：`ru-RU`, `ru` → `ru`
+   - 首先尝试精确匹配，然后匹配语言代码前缀
+
+2. **地区回退逻辑**：
+   - 如果浏览器语言不匹配支持的语言，根据地区判断：
+     - **华文地区**（通过时区检测）：中国大陆、台湾、香港、澳门、新加坡 → 使用中文
+     - **其他地区** → 使用英文
+   - 时区检测（优先）：使用 `Intl.DateTimeFormat().resolvedOptions().timeZone` 判断
+     - 支持的华文地区时区：`Asia/Shanghai`, `Asia/Taipei`, `Asia/Hong_Kong`, `Asia/Macau`, `Asia/Singapore`
+   - 语言前缀检测（备用）：如果时区检测失败，通过浏览器语言前缀判断
+
+3. **语言选择优先级**：
+   - **第一优先级**：URL 参数（`?lang=xx`）- 用户手动选择或已保存的选择
+   - **第二优先级**：Hash 中的语言代码（`#zh`, `#en` 等）- 自动转换为 URL 参数
+   - **第三优先级**：浏览器语言自动检测 - 首次访问时使用
+
+4. **URL 管理优化** (`_includes/footer.html` 的 `initLanguage` 函数)：
+   - 自动检测后会将语言写入 URL 参数（如 `?lang=zh`），确保刷新页面时保持语言选择
+   - 将 hash 中的语言代码自动转换为 URL 参数，保持一致性
+   - 保留页面锚点（如 `#section1`），不影响页面内跳转
+
+**代码位置**: 
+- `_includes/footer.html` 第317-377行（`detectLanguageFromBrowser` 函数）
+- `_includes/footer.html` 第484-530行（`initLanguage` 函数）
+- `_includes/footer.html` 第379-447行（`_render` 函数优化）
+
+### 实现效果
+
+1. ✅ **自动语言检测**：首次访问时根据浏览器语言和地区自动选择最合适的语言
+2. ✅ **智能地区判断**：通过时区准确识别华文地区，提供更好的用户体验
+3. ✅ **保持用户选择**：用户手动选择的语言会被保存到 URL 参数中，刷新页面时保持
+4. ✅ **向后兼容**：完全兼容现有的 URL 参数和 hash 语言选择方式
+5. ✅ **不影响锚点**：自动语言检测不会影响页面内的锚点跳转功能
+
+### 技术细节
+
+#### 语言检测流程
+
+1. **读取浏览器语言**：
+   ```javascript
+   var browserLangs = navigator.languages || [navigator.language || navigator.userLanguage];
+   ```
+
+2. **精确匹配**：
+   - 首先尝试完整匹配（如 `zh-CN`, `en-US`）
+   - 然后尝试语言代码前缀匹配（如 `zh-CN` → `zh`）
+
+3. **地区回退**：
+   - 如果语言不匹配，通过时区判断地区
+   - 华文地区时区列表：`Asia/Shanghai`, `Asia/Taipei`, `Asia/Hong_Kong`, `Asia/Macau`, `Asia/Singapore`
+   - 如果时区检测失败，使用浏览器语言前缀作为备用判断
+
+#### URL 参数管理
+
+- 自动检测后更新 URL：`/path/to/page?lang=zh`
+- Hash 转换：`#zh` → `?lang=zh`
+- 保留锚点：`?lang=zh#section1` 中的 `#section1` 会被保留
+
+#### 优先级逻辑
+
+```
+1. URL 参数 (?lang=xx) → 直接使用
+2. Hash 语言代码 (#zh, #en 等) → 转换为 URL 参数后使用
+3. 浏览器语言检测 → 检测后写入 URL 参数
+```
+
+### 使用场景
+
+1. **首次访问**：用户首次访问多语言文章时，系统自动根据浏览器语言和地区选择语言
+2. **刷新页面**：刷新页面时，URL 参数中的语言选择会被保留
+3. **手动切换**：用户通过下拉菜单手动切换语言时，选择会被保存到 URL 参数中
+4. **分享链接**：分享带有语言参数的链接时，接收者会看到对应语言版本
+
+### 修改的文件列表
+
+1. `_includes/footer.html` - 添加 `detectLanguageFromBrowser` 和 `initLanguage` 函数，优化 `_render` 函数
+
+---
+
 ## 修复 Service Worker 内容更新检测缓慢和多语言冲突问题
 
 2026-01-10

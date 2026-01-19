@@ -1,61 +1,59 @@
-<!-- TODO: Translate to ru -->
+Опыт (уроки) управления кластером Kubernetes
 
-Kubernetes 集群管理经(教)验(训)
+**2020-02-26 Обновление: Эта статья снова обновлена, пожалуйста, перейдите к [Опыт управления кластером Kubernetes](https://github.com/zeusro/awesome-kubernetes-notes/blob/master/source/chapter_6.md)**
 
-**2020-02-26 更新：本文再更新，请移步 [Kubernetes集群管理经验](https://github.com/zeusro/awesome-kubernetes-notes/blob/master/source/chapter_6.md)**
+## Проблемы узлов
 
-## 节点问题
-
-### 删除节点的正确步骤
+### Правильные шаги для удаления узла
 
 ```bash
-# SchedulingDisabled,确保新的容器不会调度到该节点
+# SchedulingDisabled, убедитесь, что новые контейнеры не будут запланированы на этот узел
 kubectl cordon $node
-# 驱逐除了ds以外所有的pod
+# Вытеснить все поды, кроме daemonsets
 kubectl drain $node   --ignore-daemonsets
 kubectl delete $node
 ```
 
-### 维护节点的正确步骤
+### Правильные шаги для обслуживания узла
 
 ```bash
-# SchedulingDisabled,确保新的容器不会调度到该节点
+# SchedulingDisabled, убедитесь, что новые контейнеры не будут запланированы на этот узел
 kubectl cordon $node
-# 驱逐除了ds以外所有的pod
+# Вытеснить все поды, кроме daemonsets
 kubectl drain $node --ignore-daemonsets --delete-local-data
-# 维护完成,恢复其正常状态
+# После завершения обслуживания восстановите его нормальное состояние
 kubectl uncordon $node
 ```
 
---delete-local-data 是忽略 `emptyDir`这类的临时存储的意思
+--delete-local-data означает игнорирование временного хранилища, такого как `emptyDir`
 
 ### ImageGCFailed
 
 > 
->   kubelet 可以清除未使用的容器和镜像。kubelet 在每分钟和每五分钟分别回收容器和镜像。
+>   kubelet может очистить неиспользуемые контейнеры и образы. kubelet перерабатывает контейнеры и образы каждую минуту и каждые пять минут соответственно.
 > 
->   [配置 kubelet 垃圾收集](https://k8smeetup.github.io/docs/concepts/cluster-administration/kubelet-garbage-collection/)
+>   [Настройка сборки мусора kubelet](https://k8smeetup.github.io/docs/concepts/cluster-administration/kubelet-garbage-collection/)
 
-但是 kubelet 的垃圾回收有个问题,它只能回收那些未使用的镜像,有点像 `docker system prune`,然而观察发现,那些死掉的容器不是最大的问题,正在运行的容器才是更大的问题.如果ImageGCFailed一直发生,而容器使用的ephemeral-storage/hostpath(宿主目录)越发增多,最终将会导致更严重的DiskPressure问题,波及节点上所有容器.
+Но у сборки мусора kubelet есть проблема: она может перерабатывать только неиспользуемые образы, что-то вроде `docker system prune`. Однако наблюдения показывают, что мертвые контейнеры — не самая большая проблема; запущенные контейнеры — большая проблема. Если ImageGCFailed продолжает происходить, а использование контейнерами ephemeral-storage/hostpath (хост-каталоги) продолжает увеличиваться, это в конечном итоге приведет к более серьезным проблемам DiskPressure, затрагивающим все контейнеры на узле.
 
 
-建议:
+Рекомендации:
 
-1. 高配机器(4核32G以上)的docker目录配置100G SSD以上空间
-1. 配置[ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/#storage-resource-quota)限制整体资源限额
-1. 容器端禁用ephemeral-storage(本地文件写入),或者使用spec.containers[].resources.limits.ephemeral-storage限制,控制宿主目录写入
+1. Для машин с высокими характеристиками (4 ядра 32G и выше) настройте 100G+ SSD пространства для каталога docker
+1. Настройте [ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/#storage-resource-quota) для ограничения общих квот ресурсов
+1. Отключите ephemeral-storage (запись локальных файлов) на стороне контейнера или используйте spec.containers[].resources.limits.ephemeral-storage для ограничения и контроля записи в хост-каталоги
 
-### 节点出现磁盘压力(DiskPressure)
+### Давление диска узла (DiskPressure)
 
 ```
 --eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%
 ```
 
-kubelet在启动时指定了磁盘压力,以阿里云为例,`imagefs.available<15%`意思是说容器的读写层少于15%的时候,节点会被驱逐.节点被驱逐的后果就是产生DiskPressure这种状况,并且节点上再也不能运行任何镜像,直至磁盘问题得到解决.如果节点上容器使用了宿主目录,这个问题将会是致命的.因为你不能把目录删除掉,但是真是这些宿主机的目录堆积,导致了节点被驱逐.
+kubelet указывает давление диска при запуске. В качестве примера возьмем Alibaba Cloud: `imagefs.available<15%` означает, что когда слой чтения-записи контейнера меньше 15%, узел будет вытеснен. Последствием вытеснения узла является возникновение DiskPressure, и узел больше не может запускать какие-либо образы, пока проблема с диском не будет решена. Если контейнеры на узле используют хост-каталоги, эта проблема будет фатальной. Потому что вы не можете удалить каталоги, но именно накопление этих хост-каталогов привело к вытеснению узла.
 
-所以,平时要养好良好习惯,容器里面别瞎写东西(容器里面写文件会占用ephemeral-storage,ephemeral-storage过多pod会被驱逐),多使用无状态型容器,谨慎选择存储方式,尽量别用hostpath这种存储
+Поэтому выработайте хорошие привычки: не пишите вещи случайно в контейнерах (запись файлов в контейнерах будет занимать ephemeral-storage, слишком много ephemeral-storage приведет к вытеснению подов), используйте больше stateless-контейнеров, тщательно выбирайте способы хранения, старайтесь не использовать хранилище hostpath.
 
-出现状况时,真的有种欲哭无泪的感觉.
+Когда это происходит, действительно чувствуешь, что хочешь плакать, но нет слез.
 
 ```
 Events:
@@ -73,22 +71,22 @@ Events:
   Warning  ImageGCFailed          3m4s                  kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4920913920 bytes, but freed 0 bytes
 ```
 
-ImageGCFailed 是很坑爹的状态,出现这个状态时,表示 kubelet 尝试回收磁盘失败,这时得考虑是否要手动上机修复了.
+ImageGCFailed — очень проблемное состояние. Когда появляется это состояние, это означает, что kubelet попытался освободить диск, но не смог. На этом этапе рассмотрите возможность ручного исправления на машине.
 
-建议:
+Рекомендации:
 
-1. 镜像数量在200以上时,采购100G SSD存镜像
-1. 少用临时存储(empty-dir,hostpath之类的)
+1. Когда количество образов превышает 200, приобретите 100G SSD для хранения образов
+1. Используйте меньше временного хранилища (empty-dir, hostpath и т.д.)
 
-参考链接:
+Ссылки:
 
-1. [Eviction Signals](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals)
-1. [10张图带你深入理解Docker容器和镜像](http://dockone.io/article/783)
+1. [Сигналы вытеснения](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#eviction-signals)
+1. [10 диаграмм для глубокого понимания контейнеров и образов Docker](http://dockone.io/article/783)
 
 
-### 节点CPU彪高
+### Высокое использование CPU узла
 
-有可能是节点在进行GC(container GC/image GC),用`describe node`查查.我有次遇到这种状况,最后节点上的容器少了很多,也是有点郁闷
+Возможно, узел выполняет GC (GC контейнера/GC образа). Проверьте с помощью `describe node`. Я столкнулся с этой ситуацией один раз, и в итоге контейнеров на узле стало намного меньше, что было немного расстраивающим.
 
 ```
 Events:
@@ -97,11 +95,11 @@ Events:
   Warning  ImageGCFailed          45m                 kubelet, cn-shenzhen.xxxx  failed to get image stats: rpc error: code = DeadlineExceeded desc = context deadline exceeded
 ```
 
-参考:
+Ссылка:
 
-[kubelet 源码分析：Garbage Collect](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
+[Анализ исходного кода kubelet: Сборка мусора](https://cizixs.com/2017/06/09/kubelet-source-code-analysis-part-3/)
 
-### 节点失联(unknown)
+### Отключение узла (unknown)
 
 ```
   Ready                False   Fri, 28 Jun 2019 10:19:21 +0800   Thu, 27 Jun 2019 07:07:38 +0800   KubeletNotReady              PLEG is not healthy: pleg was last seen active 27h14m51.413818128s ago; threshold is 3m0s
@@ -111,24 +109,24 @@ Events:
   ----     ------             ----                ----                                         -------
   Warning  ContainerGCFailed  5s (x543 over 27h)  kubelet, cn-shenzhen.xxxx                    rpc error: code = DeadlineExceeded desc = context deadline exceeded
 ```
-ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.于是我顺便升级了内核到5.1,然后重启.
+После SSH-входа на хост я обнаружил, что хотя служба docker все еще работает, `docker ps` зависла. Поэтому я обновил ядро до 5.1 и перезапустил.
 
-后来发现是有个人上了一个问题镜像，无论在哪节点运行，都会把节点搞瘫，也是醉了。
+Позже выяснилось, что кто-то развернул проблемный образ, который крашил любой узел, на котором он запускался, независимо от узла. Это было расстраивающим.
 
-unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kubernetes master 自身不知道节点上面的容器是死是活,假如有一个非常重要的容器在 unknown 节点上面运行,而且他刚好又挂了,kubernetes是不会自动帮你另启一个容器的,这点要注意.
+unknown — очень серьезная проблема, и к ней нужно относиться серьезно. Когда узел становится unknown, сам kubernetes master не знает, живы ли контейнеры на узле или мертвы. Если на unknown-узле работает очень важный контейнер, и он случайно упал, kubernetes не запустит для вас другой контейнер автоматически. Это нужно отметить.
 
-参考链接:
+Ссылки:
 
-[Node flapping between Ready/NotReady with PLEG issues](https://github.com/kubernetes/kubernetes/issues/45419)
-[深度解析Kubernetes Pod Disruption Budgets(PDB)](https://my.oschina.net/jxcdwangtao/blog/1594348)
+[Узел мечется между Ready/NotReady с проблемами PLEG](https://github.com/kubernetes/kubernetes/issues/45419)
+[Глубокий анализ Pod Disruption Budgets (PDB) Kubernetes](https://my.oschina.net/jxcdwangtao/blog/1594348)
 
 ### SystemOOM
 
-`SystemOOM` 并不一定是机器内存用完了.有一种情况是docker 在控制容器的内存导致的.
+`SystemOOM` не обязательно означает, что память машины исчерпана. Одна ситуация — это docker, контролирующий память контейнера.
 
-默认情况下Docker的存放位置为：/var/lib/docker/containers/$id
+По умолчанию место хранения Docker: /var/lib/docker/containers/$id
 
-这个目录下面有个重要的文件: `hostconfig.json`,截取部分大概长这样:
+В этом каталоге есть важный файл: `hostconfig.json`, частичный отрывок выглядит так:
 
 ```json
 	"MemorySwappiness": -1,
@@ -142,36 +140,36 @@ unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kub
 }
 ```
 
-`"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
+`"OomKillDisable": false,` предотвращает гармонизацию службой docker контейнеров, превышающих лимиты ресурсов, путем убийства процессов/перезапуска, а вместо этого санкционирует их другими способами (подробности можно увидеть [здесь](https://docs.docker.com/config/containers/resource_constraints/))
 
-### docker daemon 卡住
+### docker daemon зависла
 
-这种状况我出现过一次,原因是某个容器有毛病,坑了整个节点.
+Я столкнулся с этой ситуацией один раз. Причина была в проблемном контейнере, который повлиял на весь узел.
 
-出现这个问题要尽快解决,因为节点上面所有的 pod 都会变成 unknown .
+Эту проблему нужно решить быстро, потому что все поды на узле станут unknown.
 
 ```bash
 systemctl daemon-reexec
-systemctl restart docker(可选视情况定)
+systemctl restart docker (опционально, в зависимости от ситуации)
 systemctl restart kubelet
 ```
 
-严重时只能重启节点,停止涉事容器.
+В тяжелых случаях работает только перезапуск узла и остановка задействованного контейнера.
 
-建议: `对于容器的liveness/readiness 使用tcp/httpget的方式，避免 高频率使用exec`
+Рекомендация: `Для liveness/readiness контейнера используйте методы tcp/httpget, избегайте частого использования exec`
 ## pod
 
 
-### pod频繁重启
+### Частые перезапуски pod
 
-原因有多种,不可一概而论
+Есть много причин, нельзя обобщать
 
-有一种情况是,deploy配置了健康检查,节点运行正常,但是因为节点负载过高导致了健康检查失败(load15长期大于2以上),频繁Backoff.我调高了不健康阈值之后,降低节点负载之后,问题解决
+Одна ситуация: deploy настроил проверки работоспособности, узел работает нормально, но из-за слишком высокой нагрузки узла проверки работоспособности не проходят (load15 постоянно выше 2), частые Backoff. После того, как я повысил порог нездоровья и снизил нагрузку узла, проблема была решена.
 
 ```yaml
 
           livenessProbe:
-            # 不健康阈值
+            # Порог нездоровья
             failureThreshold: 3
             initialDelaySeconds: 5
             periodSeconds: 10
@@ -181,26 +179,26 @@ systemctl restart kubelet
             timeoutSeconds: 1
 ```
 
-### 资源达到limit设置值
+### Ресурсы достигли установленного лимита
 
-调高limit或者检查应用
+Повысьте лимит или проверьте приложение
 
 ### Readiness/Liveness connection refused
 
-Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
+Неудачные проверки Readiness также перезапустят, но неудача проверки `Readiness` не обязательно является проблемой приложения. Если сам узел перегружен, также может возникнуть connection refused или timeout.
 
-这个问题要上节点排查
+Эту проблему нужно исследовать на узле.
 
 
-### pod被驱逐(Evicted)
+### pod вытеснен (Evicted)
 
-1. 节点加了污点导致pod被驱逐
-1. ephemeral-storage超过限制被驱逐
-    1. EmptyDir 的使用量超过了他的 SizeLimit，那么这个 pod 将会被驱逐
-    1. Container 的使用量（log，如果没有 overlay 分区，则包括 imagefs）超过了他的 limit，则这个 pod 会被驱逐
-    1. Pod 对本地临时存储总的使用量（所有 emptydir 和 container）超过了 pod 中所有container 的 limit 之和，则 pod 被驱逐
+1. Узел добавил taint, вызвав вытеснение pod
+1. ephemeral-storage превысил лимит и был вытеснен
+    1. Если использование EmptyDir превышает его SizeLimit, то этот pod будет вытеснен
+    1. Если использование Container (лог, и если нет раздела overlay, включает imagefs) превышает его лимит, то этот pod будет вытеснен
+    1. Если общее использование локального временного хранилища Pod (все emptydir и container) превышает сумму всех лимитов контейнеров в pod, то pod вытесняется
 
-ephemeral-storage是一个pod用的临时存储.
+ephemeral-storage — это временное хранилище, используемое pod.
 ```
 resources:
        requests: 
@@ -208,19 +206,19 @@ resources:
        limits:
            ephemeral-storage: "3Gi"
 ```
-节点被驱逐后通过get po还是能看到,用describe命令,可以看到被驱逐的历史原因
+После вытеснения узла вы все еще можете видеть его через get po. Используйте команду describe, чтобы увидеть историческую причину вытеснения.
 
 > Message:            The node was low on resource: ephemeral-storage. Container codis-proxy was using 10619440Ki, which exceeds its request of 0.
 
 
-参考:
-1. [Kubernetes pod ephemeral-storage配置](https://blog.csdn.net/hyneria_hope/article/details/79467922)
-1. [Managing Compute Resources for Containers](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
+Ссылки:
+1. [Настройка ephemeral-storage pod Kubernetes](https://blog.csdn.net/hyneria_hope/article/details/79467922)
+1. [Управление вычислительными ресурсами для контейнеров](https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/)
 
 
-### kubectl exec 进入容器失败
+### kubectl exec вход в контейнер не удался
 
-这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
+Я столкнулся с этой проблемой при настройке codis-server. В то время готовность и проверки работоспособности не были настроены. Но при получении описания pod оно показывало running. На самом деле, в этот момент контейнер уже был ненормальным.
 
 ```
 ~ kex codis-server-3 sh
@@ -228,77 +226,77 @@ rpc error: code = 2 desc = containerd: container not found
 command terminated with exit code 126
 ```
 
-解决办法:删了这个pod,配置`livenessProbe`
+Решение: Удалите этот pod, настройте `livenessProbe`
 
 
-### pod的virtual host name
+### виртуальное имя хоста pod
 
-`Deployment`衍生的pod,`virtual host name`就是`pod name`.
+Для подов, производных от `Deployment`, `virtual host name` — это `pod name`.
 
-`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.而且支持其他pod访问
+Для подов, производных от `StatefulSet`, `virtual host name` — это `<pod name>.<svc name>.<namespace>.svc.cluster.local`. По сравнению с `Deployment`, это более регулярно. И поддерживает доступ от других подов.
 
 
-### pod接连Crashbackoff
+### последовательные Crashbackoff pod
 
-`Crashbackoff`有多种原因.
+`Crashbackoff` имеет много причин.
 
-沙箱创建(FailedCreateSandBox)失败,多半是cni网络插件的问题
+Неудача создания песочницы (FailedCreateSandBox) в основном является проблемой плагина сети CNI.
 
-镜像拉取,有中国特色社会主义的问题,可能太大了,拉取较慢
+Вытягивание образа имеет проблемы с китайской спецификой, может быть слишком большим, вытягивание медленное.
 
-也有一种可能是容器并发过高,流量雪崩导致.
+Также есть возможность, что параллелизм контейнера слишком высок, вызывая лавину трафика.
 
-比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
+Например, теперь есть 3 контейнера abc. a внезапно столкнулся со всплеском трафика, вызвав внутренний сбой, затем `Crashbackoff`, поэтому a будет удален `service`. Оставшиеся bc не могут обработать столько трафика, последовательно падают, и в конечном итоге веб-сайт становится недоступным. Эта ситуация часто встречается в высококонкурентных веб-сайтах + неэффективных веб-контейнерах.
 
-在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
+Без изменения кода оптимальное решение — увеличить количество реплик и добавить HPA для достижения динамического масштабирования.
 
-### DNS 效率低下
+### Неэффективность DNS
 
-容器内打开nscd(域名缓存服务)，可大幅提升解析性能
+Включите nscd (службу кэширования доменных имен) внутри контейнеров, чтобы значительно повысить производительность разрешения.
 
-严禁生产环境使用alpine作为基础镜像(会导致dns解析请求异常)
+Строго запрещено использовать alpine в качестве базового образа в production (вызовет аномалии запросов разрешения DNS)
 
 ## deploy
 
 ### MinimumReplicationUnavailable
 
-如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
+Если `deploy` настроил SecurityContext, но api-server отклонил его, возникнет эта ситуация. В контейнере api-server удалите параметр запуска `SecurityContextDeny`.
 
-具体见[Using Admission Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+См. [Использование контроллеров допуска](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
 ## service
 
-### 建了一个服务,但是没有对应的po,会出现什么情况?
+### Создана служба, но нет соответствующего po, что произойдет?
 
-请求时一直不会有响应,直到request timeout
+Запросы не будут иметь ответа до истечения времени ожидания запроса
 
-参考
+Ссылка
 
-1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
+1. [Настройка обработки нехватки ресурсов](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/#node-conditions)
 
 
 ### service connection refuse
 
-原因可能有
+Возможные причины:
 
-1. pod没有设置readinessProbe,请求到未就绪的pod
-1. kube-proxy宕机了(kube-proxy负责转发请求)
-1. 网络过载
+1. pod не установил readinessProbe, запросы идут на неготовые поды
+1. kube-proxy не работает (kube-proxy отвечает за пересылку запросов)
+1. Перегрузка сети
 
 
-### service没有负载均衡
+### service нет балансировки нагрузки
 
-检查一下是否用了`headless service`.`headless service`是不会自动负载均衡的...
+Проверьте, используется ли `headless service`. `headless service` не балансирует нагрузку автоматически...
 
 ```yaml
 kind: Service
 spec:
-# clusterIP: None的即为`headless service`
+# clusterIP: None — это `headless service`
   type: ClusterIP
   clusterIP: None
 ```
 
-具体表现service没有自己的虚拟IP,nslookup会出现所有pod的ip.但是ping的时候只会出现第一个pod的ip
+Конкретное поведение: у службы нет собственного виртуального IP, nslookup покажет все IP подов. Но при ping будет появляться только IP первого пода.
 
 ```bash
 / # nslookup consul
@@ -329,7 +327,7 @@ round-trip min/avg/max = 0.178/0.192/0.206 ms
 ```
 
 
-普通的type: ClusterIP service,nslookup会出现该服务自己的IP
+Для обычного типа: ClusterIP service, nslookup покажет собственный IP службы
 
 ```BASH
 / # nslookup consul
@@ -339,44 +337,44 @@ Name:      consul
 Address 1: 172.30.15.52 consul.default.svc.cluster.local
 ```
 
-## ReplicationController不更新
+## ReplicationController не обновляется
 
-ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
+ReplicationController не обновляется с помощью apply, а с помощью `kubectl rolling-update`. Однако эта команда также устарела, заменена на `kubectl rollout`. Поэтому следует использовать `kubectl rollout` в качестве метода обновления, или быть ленивым, применить файл, затем удалить po.
 
-尽量使用deploy吧.
+Старайтесь использовать deploy вместо этого.
 
 ## StatefulSet
 
-### pod 更新失败
+### обновление pod не удалось
 
-StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
+StatefulSet обновляется по одному. Наблюдайте, есть ли контейнеры в `Crashbackoff`. Возможно, этот контейнер вызвал зависание обновления. Удалите его.
 
 ### unknown pod
 
-如果 StatefulSet 绑定 pod 状态变成 unknown ,这个时候是非常坑爹的,StatefulSet不会帮你重建pod.
+Если статус привязанного к StatefulSet pod становится unknown, это очень проблематично. StatefulSet не поможет вам пересоздать pod.
 
-这时会导致外部请求一直失败.
+Это приведет к постоянным сбоям внешних запросов.
 
-综合建议,不用 `StatefulSet` ,改用 operator 模式替换它.
+Комплексная рекомендация: не используйте `StatefulSet`, замените его паттерном operator.
 
 ## [kube-apiserver](https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-apiserver/)
 
-`kube-apiserver` 是一组运行在 `master` 上面的特殊容器。以 阿里云 kubernetes 为例 （`kubeadm`创建的 kubernetes 同理）
+`kube-apiserver` — это набор специальных контейнеров, работающих на `master`. В качестве примера возьмем kubernetes Alibaba Cloud (то же самое для kubernetes, созданного с помощью `kubeadm`)
 
-在 `/etc/kubernetes/manifests/` 下面定义了三个文件
+Три файла определены под `/etc/kubernetes/manifests/`
 1. kube-apiserver.yaml
 1. kube-controller-manager.yaml
 1. kube-scheduler.yaml
 
-master 节点会自动监视这个目录里面文件的变化，视情况自动重启。
+Узел master будет автоматически отслеживать изменения файлов в этом каталоге и автоматически перезапускаться по мере необходимости.
 
-所以修改 `api server` 的设置只需要修改`kube-apiserver.yaml`,保存退出，相应的容器就会重启。同理，如果你改错了配置，`api server` 就会启动失败，修改之前务必仔细看清楚[文档](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/)
+Поэтому для изменения настроек `api server` просто измените `kube-apiserver.yaml`, сохраните и выйдите, и соответствующий контейнер перезапустится. Аналогично, если вы неправильно измените конфигурацию, `api server` не запустится. Перед изменением обязательно внимательно прочитайте [документацию](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/)
 
-## 阿里云Kubernetes问题
+## Проблемы Kubernetes Alibaba Cloud
 
-### 修改默认ingress
+### Изменить Ingress по умолчанию
 
-新建一个指向ingress的负载均衡型svc,然后修改一下`kube-system`下`nginx-ingress-controller`启动参数.
+Создайте новый svc типа балансировщика нагрузки, указывающий на ingress, затем измените параметры запуска `nginx-ingress-controller` под `kube-system`.
 
 ```
         - args:
@@ -385,13 +383,13 @@ master 节点会自动监视这个目录里面文件的变化，视情况自动�
             - '--tcp-services-configmap=$(POD_NAMESPACE)/tcp-services'
             - '--udp-services-configmap=$(POD_NAMESPACE)/udp-services'
             - '--annotations-prefix=nginx.ingress.kubernetes.io'
-            - '--publish-service=$(POD_NAMESPACE)/<自定义svc>'
+            - '--publish-service=$(POD_NAMESPACE)/<пользовательский svc>'
             - '--v=2'
 ```
 
-### LoadBalancer服务一直没有IP
+### У службы LoadBalancer нет IP
 
-具体表现是EXTERNAL-IP一直显示pending.
+Конкретное поведение: EXTERNAL-IP всегда показывает pending.
 
 ```bash
 ~ kg svc consul-web
@@ -399,60 +397,60 @@ NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
 consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m  
 ```
 
-这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
+Эта проблема связана с компонентом [Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066). `cloud-controller-manager` имеет 3 компонента. Им нужно внутреннее избрание лидера. Возможно, что-то пошло не так. В то время я удалил один из проблемных `pods`, и это было исправлено.
 
-### 清理Statefulset动态PVC
+### Очистка динамического PVC Statefulset
 
-目前阿里云`Statefulset`动态PVC用的是nas。
+В настоящее время динамический PVC `Statefulset` Alibaba Cloud использует nas.
 
-1. 对于这种存储，需要先把容器副本将为0，或者整个`Statefulset`删除。
-1. 删除PVC
-1. 把nas挂载到任意一台服务器上面，然后删除pvc对应nas的目录。
+1. Для этого типа хранилища сначала масштабируйте реплики контейнера до 0 или удалите весь `Statefulset`.
+1. Удалите PVC
+1. Подключите nas к любому серверу, затем удалите соответствующий каталог nas pvc.
 
-### 升级到v1.12.6-aliyun.1之后节点可分配内存变少
+### После обновления до v1.12.6-aliyun.1 выделяемая память узла уменьшилась
 
-该版本每个节点保留了1Gi,相当于整个集群少了N GB(N为节点数)供Pod分配.
+Эта версия резервирует 1Gi на узел, что эквивалентно тому, что весь кластер имеет на N GB меньше (N — количество узлов) для выделения Pod.
 
-如果节点是4G的,Pod请求3G,极其容易被驱逐.
+Если узел 4G, а Pod запрашивает 3G, его очень легко вытеснить.
 
-建议提高节点规格.
+Рекомендация: Увеличьте спецификации узла.
 
 ```
 Server Version: version.Info{Major:"1", Minor:"12+", GitVersion:"v1.12.6-aliyun.1", GitCommit:"8cb561c", GitTreeState:"", BuildDate:"2019-04-22T11:34:20Z", GoVersion:"go1.10.8", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-### 新加节点出现NetworkUnavailable
+### Новый узел показывает NetworkUnavailable
 
 RouteController failed to create a route
 
-看一下kubernetes events,是否出现了
+Проверьте события kubernetes, чтобы увидеть, появляется ли это:
 
 ```
 timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9cpnsbt11hlelpoq2zh error, Aliyun API Error: RequestId: 7006BF4E-000B-4E12-89F2-F0149D6688E4 Status Code: 400 Code: QuotaExceeded Message: Route entry quota exceeded in this route table  
 ```
 
-出现这个问题是因为达到了[VPC的自定义路由条目限制](https://help.aliyun.com/document_detail/27750.html),默认是48,需要提高`vpc_quota_route_entrys_num`的配额
+Эта проблема возникает из-за достижения [лимита пользовательских записей маршрута VPC](https://help.aliyun.com/document_detail/27750.html). По умолчанию 48. Нужно увеличить квоту для `vpc_quota_route_entrys_num`.
 
-### 访问LoadBalancer svc随机出现流量转发异常
+### Доступ к LoadBalancer svc случайно показывает аномалии пересылки трафика
 
-见
-[[bug]阿里云kubernetes版不检查loadbalancer service port,导致流量被异常转发](https://github.com/kubernetes/cloud-provider-alibaba-cloud/issues/57)
-简单的说，同SLB不能有相同的svc端口，不然会瞎转发。
+См.
+[[bug] Версия kubernetes Alibaba Cloud не проверяет порт службы loadbalancer, вызывая аномальную пересылку трафика](https://github.com/kubernetes/cloud-provider-alibaba-cloud/issues/57)
+Проще говоря, один и тот же SLB не может иметь тот же порт svc, иначе он будет пересылать вслепую.
 
-官方说法：
-> 复用同一个SLB的多个Service不能有相同的前端监听端口，否则会造成端口冲突。
-
-
-### 控制台显示的节点内存使用率总是偏大
-
-[Docker容器内存监控](https://xuxinkun.github.io/2016/05/16/memory-monitor-with-cgroup/)
-
-原因在于他们控制台用的是usage_in_bytes(cache+buffer),所以会比云监控看到的数字大
+Официальное заявление:
+> Несколько служб, повторно использующих один и тот же SLB, не могут иметь один и тот же порт прослушивания на передней панели, иначе это вызовет конфликт портов.
 
 
-### Ingress Controller 玄学优化
+### Консоль показывает использование памяти узла всегда слишком высоким
 
-修改 kube-system 下面名为 nginx-configuration 的configmap
+[Мониторинг памяти контейнера Docker](https://xuxinkun.github.io/2016/05/16/memory-monitor-with-cgroup/)
+
+Причина в том, что их консоль использует usage_in_bytes (cache+buffer), поэтому она будет больше, чем числа, видимые в облачном мониторинге.
+
+
+### Мистическая оптимизация Ingress Controller
+
+Измените configmap с именем nginx-configuration под kube-system
 
 ```
 proxy-connect-timeout: "75" 
@@ -468,7 +466,7 @@ client-header-timeout: "75"
 worker-processes: "16"
 ```
 
-注意,是一个项对应一个配置,而不是一个文件. 格式大概这样
+Примечание: один элемент соответствует одной конфигурации, а не одному файлу. Формат примерно такой:
 
 ```
 ➜  ~ kg cm nginx-configuration -o yaml
@@ -482,35 +480,35 @@ data:
   ......
 ```
 
-### pid 问题
+### проблема pid
 
 ```
 Message: **Liveness probe failed: rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:262: starting container process caused "process_linux.go:86: adding pid 30968 to cgroups caused \"failed to write 30968 to cgroup.procs: write /sys/fs/cgroup/cpu,cpuacct/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podfe4cc065_cc58_11e9_bf64_00163e08cd06.slice/docker-0447a362d2cf4719ae2a4f5ad0f96f702aacf8ee38d1c73b445ce41bdaa8d24a.scope/cgroup.procs: invalid argument\""
 ```
 
-阿里云初始化节点用的 centos 版本老旧,内核是3.1, Centos7.4的内核3.10还没有支持cgroup对于pid/fd限制,所以会出现这类问题.
+Узлы инициализации Alibaba Cloud используют старую версию centos, ядро 3.1. Ядро 3.10 Centos7.4 еще не поддерживает ограничения cgroup для pid/fd, поэтому возникает этот тип проблемы.
 
-建议:
+Рекомендации:
 
-1. 手动维护节点,升级到5.x的内核(目前已有一些节点升级到5.x,但是docker版本还是 17.6.2 ,持续观察中~)
-1. 安装 [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer) ,利用事件机制提醒管理员手动维护
+1. Вручную обслуживайте узлы, обновите до ядра 5.x (в настоящее время некоторые узлы были обновлены до 5.x, но версия docker все еще 17.6.2, продолжаю наблюдать~)
+1. Установите [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer), используйте механизм событий для предупреждения администраторов о ручном обслуживании
 
 ### OSS PVC FailedMount
 
-可以通过PV制定access key,access secret +PVC的方式使用OSS.某天某个deploy遇到 FailedMount 的问题,联系到阿里云的开发工程师,说是 flexvolume 在初次运行的节点上面运行会有问题,要让他"重新注册"
+OSS можно использовать через PV, указывающий access key, access secret + PVC. Один день deploy столкнулся с проблемой FailedMount. Связался с инженерами разработки Alibaba Cloud, которые сказали, что flexvolume будет иметь проблемы при запуске на узлах, запускающихся впервые, нужно дать ему "перерегистрироваться"
 
-影响到的版本: registry-vpc.cn-shenzhen.aliyuncs.com/acs/flexvolume:v1.12.6.16-1f4c6cb-aliyun
+Затронутая версия: registry-vpc.cn-shenzhen.aliyuncs.com/acs/flexvolume:v1.12.6.16-1f4c6cb-aliyun
 
-解决方案:
+Решение:
 
 ```bash
 touch /usr/libexec/kubernetes/kubelet-plugins/volume/exec/alicloud~oss/debug
 ```
 
-参考(应用调度相关):
-1. [Kubernetes之健康检查与服务依赖处理](http://dockone.io/article/2587)
-2. [kubernetes如何解决服务依赖呢？](https://ieevee.com/tech/2017/04/23/k8s-svc-dependency.html)
-5. [Kubernetes之路 1 - Java应用资源限制的迷思](https://yq.aliyun.com/articles/562440?spm=a2c4e.11153959.0.0.5e0ed55aq1betz)
-8. [Control CPU Management Policies on the Node](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies)
-1. [Reserve Compute Resources for System Daemons](https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/)
-1. [Configure Out Of Resource Handling](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/)
+Ссылки (связанные с планированием приложений):
+1. [Проверки работоспособности Kubernetes и обработка зависимостей служб](http://dockone.io/article/2587)
+2. [Как kubernetes решает зависимости служб?](https://ieevee.com/tech/2017/04/23/k8s-svc-dependency.html)
+5. [Путь Kubernetes 1 - Заблуждения об ограничениях ресурсов приложения Java](https://yq.aliyun.com/articles/562440?spm=a2c4e.11153959.0.0.5e0ed55aq1betz)
+8. [Управление политиками управления CPU на узле](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies)
+1. [Резервирование вычислительных ресурсов для системных демонов](https://kubernetes.io/docs/tasks/administer-cluster/reserve-compute-resources/)
+1. [Настройка обработки нехватки ресурсов](https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/)

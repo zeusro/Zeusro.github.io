@@ -1,23 +1,21 @@
-<!-- TODO: Translate to jp -->
+## 起源
 
-## 缘起
+阿里云の[ドキュメント](https://help.aliyun.com/document_detail/125679.html)から始まりました
 
-起源来自阿里云的[文档](https://help.aliyun.com/document_detail/125679.html)
+kubernetes Eventでメッセージプッシュができることを発見した後、非常に気に入りました。しかし、その独自の钉钉プッシュ方法は使いにくかったため、自分で変更することにしました。
 
-发现能对 kubernetes Event 进行消息推送之后，非常喜欢。但是其本身的钉钉推送方式不好用，所以决定亲自修改。
+## 開発の決定
 
-## 决定开发
+プロジェクトのソースコードは[kube-eventer](https://github.com/AliyunContainerService/kube-eventer)にあります。
+ついでにkubernetesのEventメカニズムについても理解しました。
 
-项目源代码位于 [kube-eventer](https://github.com/AliyunContainerService/kube-eventer)
-，顺便了解了一下kubernetes 的 Event 机制
-
-1. Controller Manager 会记录节点注册和销毁的事件、Deployment 扩容和升级的事件
-1. kubelet 会记录镜像回收事件、volume 无法挂载事件。基本上所有的事件都在`kubernetes/pkg/kubelet/events/event.go`l里面定义
+1. Controller Managerはノードの登録と破棄のイベント、Deploymentのスケーリングとアップグレードのイベントを記録します
+1. kubeletはイメージリサイクルイベント、volumeマウント失敗イベントを記録します。基本的にすべてのイベントは`kubernetes/pkg/kubelet/events/event.go`で定義されています
 
 
-## Event 结构体
+## Event構造体
 
-Event 结构体定义在 `"k8s.io/api/core/v1"`里面
+Event構造体は`"k8s.io/api/core/v1"`で定義されています
 
 ```go
 // Event is a report of an event somewhere in the cluster.
@@ -173,27 +171,27 @@ type ObjectReference struct {
 }
 ```
 
-## 设计细节
+## 設計の詳細
 
-程序的入口是
-[eventer.go](https://note.youdao.com/)
+プログラムのエントリーポイントは
+[eventer.go](https://note.youdao.com/)です
 
-`sink` 是程序的输出端，比如可以输出到钉钉，elasticsearch等等。
-这一块插件会在一开始通过
+`sink`はプログラムの出力端で、たとえば钉钉、elasticsearchなどに出力できます。
+このプラグインは、最初に
 
 ```go
 sinkManager, err := sinks.NewEventSinkManager(sinkList, sinks.DefaultSinkExportEventsTimeout, sinks.DefaultSinkStopTimeout)
 ```
 
-这个方法，以`go func()` 形式并行启动所有 `sink` 。
+このメソッドを通じて、`go func()`形式で並列にすべての`sink`を起動します。
 
-真正的主角是 manager
+真の主役はmanagerです
 
 ```go
 manager, err := manager.NewManager(sources[0], sinkManager, *argFrequency)
 ```
 
-它接受 `sinkManager` 和其他一系列参数，启动主函数。重复展开定义之后，会找到`Housekeep` 这个方法
+これは`sinkManager`と他の一連のパラメータを受け取り、メイン関数を起動します。定義を繰り返し展開した後、`Housekeep`メソッドが見つかります
 
 ```go
 func (rm *realManager) Housekeep() {
@@ -215,14 +213,14 @@ func (rm *realManager) Housekeep() {
 }
 ```
 
-这个方法写得非常简单明了，无限递归调用，除非接收到 `stopChan` 这个停止信号。
+このメソッドは非常にシンプルで明確に書かれており、無限再帰呼び出しで、`stopChan`停止信号を受信しない限り続きます。
 
-除此以外，还默认监听了 `0.0.0.0:8084` 作为健康检查的端口。
+これに加えて、デフォルトで`0.0.0.0:8084`をヘルスチェックポートとしてリッスンします。
 
-Event 的获取也相当高效
+Eventの取得も非常に効率的です
 
 ```go
-// NewKubernetesSource 事件来源
+// NewKubernetesSource イベントソース
 func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 	kubeConfig, err := kubeconfig.GetKubeClientConfig(uri)
 	if err != nil {
@@ -243,12 +241,12 @@ func NewKubernetesSource(uri *url.URL) (*KubernetesEventSource, error) {
 }
 ```
 
-## 结语
+## 結語
 
-这个项目的开发者语言表达非常精炼，这个项目很适用于学习 golang 并发。
+このプロジェクトの開発者の言語表現は非常に簡潔です。このプロジェクトはgolangの並行性を学習するのに非常に適しています。
 
 
-1. [Kubernetes Events介绍（上）](https://www.kubernetes.org.cn/1031.html)
-2. [Kubernetes Events介绍（中）](https://www.kubernetes.org.cn/1090.html)
-3. [Kubernetes Events介绍（下）](https://www.kubernetes.org.cn/1195.html)
-4. [kubelet 源码分析： 事件处理](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)
+1. [Kubernetes Events紹介（上）](https://www.kubernetes.org.cn/1031.html)
+2. [Kubernetes Events紹介（中）](https://www.kubernetes.org.cn/1090.html)
+3. [Kubernetes Events紹介（下）](https://www.kubernetes.org.cn/1195.html)
+4. [kubeletソースコード分析：イベント処理](https://cizixs.com/2017/06/22/kubelet-source-code-analysis-part4-event/)

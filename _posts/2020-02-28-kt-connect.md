@@ -6,42 +6,32 @@ date:         2020-02-28
 author:       "Zeusro"
 header-img:   "img/b/2020/Mononoke.png"
 header-mask:  0.3
+multilingual: true
 catalog:      true
 tags:
     - Kubernetes
 ---
 
-## 项目架构
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include posts/2020-02-28-kt-connect/kt-connect_zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
 
-```
-.
-|____cmd---------------------------entry
-| |____ktctl
-| | |____main.go
-| |____shadow
-| | |____main.go
-| |____server
-| | |____main.go
-|____go.mod
-|____docker------------------------dockerfile
-|____test
-| |____integration
-| | |____command_check_test.go
-|____bin-------------------------some build bash
-| |____archive
-| |____build-shadow
-|____LICENSE
-|____go.sum
-|____docs-------------------------doc
-|____.dockerignore
-|____public
-| |____favicon.ico
-| |____index.html
-| |____manifest.json
-|____.gitignore
-|____package.json
-|____README.md
-|____.travis.yml
-|____pkg-------------------------go code
-|____src-------------------------dashboard front-end
-```
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include posts/2020-02-28-kt-connect/kt-connect_en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
+
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2020-02-28-kt-connect/kt-connect_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2020-02-28-kt-connect/kt-connect_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

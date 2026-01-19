@@ -1,44 +1,42 @@
-<!-- TODO: Translate to en -->
+kubernetes + alpine + php is particularly prone to timeout issues when accessing external networks/resolving external addresses.
 
-kubernetes + alpine+ php 特别容易出现访问外网/解析外网地址的时候出现超时的问题.
+## Cause
 
-## 原因
+When docker containers access external networks, the complete path is:
 
-docker容器访问外网的时候,整个完整路径是这样的.
+Container --> Host --> External Network --> Host --> Container
 
-容器-->主机-->外网-->主机-->容器
+Traffic between containers and hosts needs to go through Source Network Address Translation (SNAT) to flow smoothly.
 
-容器到主机之间的流量要经过源地址转换(SNAT)才能顺利流通.
+SNAT is like a porter, moving bricks (traffic) from containers to the host.
 
-SNAT就像是一个搬运工,把砖(流量)从容器搬到主机
+If multiple containers run on one host and concurrently access external networks (especially PHP which has no connection pool), they request available ports from the system (nf_nat_l4proto_unique_tuple). If unavailable, +1, then request again, then verify. When this process happens too much, it ultimately leads to addressing timeouts.
 
-如果一个主机上面运行多个容器,并发访问外网(特别是PHP这种没有连接池的)时向系统申请可用端口(nf_nat_l4proto_unique_tuple),不可用时+1,然后再申请,再校验.这个过程一多,最终就会导致寻址超时.
+Simply put, it's a system kernel issue.
 
-说白了是个系统内核问题.
+For detailed explanation, see:
 
-详细的解释见
+[Remembering a Journey to Find the Unexplained Connection Timeout on Docker/Kubernetes](https://mp.weixin.qq.com/s?__biz=MzIzNzU5NTYzMA==&mid=2247484016&idx=1&sn=72bc7f3443cbc259762fb6bd7adb33ae&chksm=e8c77cf1dfb0f5e7598497767db6365bd8db9f4b6a945cb8c72adb1e052e8b0cd46b727c929b&scene=21#wechat_redirect)
 
-[记一次Docker/Kubernetes上无法解释的连接超时原因探寻之旅](https://mp.weixin.qq.com/s?__biz=MzIzNzU5NTYzMA==&mid=2247484016&idx=1&sn=72bc7f3443cbc259762fb6bd7adb33ae&chksm=e8c77cf1dfb0f5e7598497767db6365bd8db9f4b6a945cb8c72adb1e052e8b0cd46b727c929b&scene=21#wechat_redirect)
+## Solutions
 
-## 解决方案
+### Optimal Solution
 
-### 最优解
+Upgrade nodes to Linux kernel 5.1.
 
-节点升级到 5.1的Linux内核.
+Upgrade iptables to 1.6.2 or above.
 
-iptables升级到1.6.2以上
+Use network plugins based on IPVS mode, minimize SNAT/DNAT, support random port SNAT to start kubernetes.
 
-用基于IPVS模式,尽量少做SNAT/DNAT,支持随机端口SNAT的网络插件启动kubernetes
+Or use network plugin solutions that bypass SNAT, such as Alibaba Cloud's [terway](https://github.com/AliyunContainerService/terway). But this plugin is deeply bound to Alibaba Cloud and requires purchasing an additional elastic network interface for each machine.
 
-或者用绕过SNAT的网络插件插件方案,比如阿里云的[terway](https://github.com/AliyunContainerService/terway).但这个插件跟阿里云绑定得比较深入,需要每台机器额外购买一个弹性网卡.
+### Suboptimal Solution
 
-### 次优解
+[Deploy name server with ds](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md), all nodes' DNS resolution goes through the name server on the node, alleviating this type of problem through minimal SNAT + dns cache.
 
-[用ds部署name sever](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md),所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.
+### Pseudo-Solution (Cannot Solve Root Problem)
 
-### 伪解决方案(不能解决根本问题)
-
-默认的pod的`/etc/resolv.conf`一般长这样
+The default pod's `/etc/resolv.conf` usually looks like this:
 
 ```
 sh-4.2# cat /etc/resolv.conf
@@ -47,10 +45,9 @@ search <namespace>.svc.cluster.local svc.cluster.local cluster.local localdomain
 options ndots:5
 ```
 
-这个配置的意思是，默认nameserver指向kube-dns/core-dns,所有查询中，如果.的个数少于5个，则会根据search中配置的列表依次搜索,如果没有返回，则最后再直接查询域名本
-身。ndots就是n个.(dots)的意思
+This configuration means the default nameserver points to kube-dns/core-dns. In all queries, if the number of dots is less than 5, it will search according to the list configured in search. If no result is returned, it will finally directly query the domain name itself. ndots means n dots.
 
-举个例子
+For example:
 
 ```
 sh-4.2# host -v baidu.com
@@ -62,15 +59,15 @@ Trying "baidu.com"
 ......
 ```
 
-#### 不使用 alpine 镜像
+#### Don't Use alpine Images
 
-#### 使用 [FQDN](https://baike.baidu.com/item/FQDN)
+#### Use [FQDN](https://baike.baidu.com/item/FQDN)
 
-由于域名是从右到左逐级解析的，比如 `google.com` ,实际上是 `google.com.`，com后面的.称之为根域名。解析的时候，先解析.，然后解析.com,.com称之为顶级域名，最后解析google。
+Since domain names are resolved level by level from right to left, for example `google.com`, it's actually `google.com.`, the . after com is called the root domain. When resolving, first resolve ., then resolve .com, .com is called the top-level domain, finally resolve google.
 
-使用 FQDN：(Fully Qualified Domain Name)全限定域名，是为了尽可能减少内部DNS(比如coreDNS，节点DNS)的解析压力
+Using FQDN: (Fully Qualified Domain Name) is to minimize the resolution pressure on internal DNS (like coreDNS, node DNS) as much as possible.
 
-#### 重开socket
+#### Reopen Socket
 
 ```yaml
         lifecycle:
@@ -82,16 +79,16 @@ Trying "baidu.com"
               - "/bin/echo 'options single-request-reopen' >> /etc/resolv.conf"
 ```
 
-设置重开socket是规避容器并发A,AAAA查询
+Setting reopen socket is to avoid concurrent A, AAAA queries in containers.
 
 
-#### 2级域名直接走上层解析
+#### 2-Level Domain Directly Goes to Upper-Level Resolution
 
-参考[kubernetes 使用基于 alpine 镜像无法正常解析外网DNS](https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html) 做的
+Reference [kubernetes using alpine-based images cannot properly resolve external DNS](https://www.sudops.com/kubernetes-alpine-image-resolve-ext-dns.html)
 
-直接运行 `sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf` 会报错
+Running `sed -i 's/options ndots:5/#options ndots:5/g' /etc/resolv.conf` directly will error.
 
-alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报错
+alpine's echo command swallows newlines, and if resolv.conf format is wrong, DNS resolution will error.
 
 ```yaml
   dnsConfig:
@@ -101,16 +98,16 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
       - name: single-request-reopen
 ```
 
-去掉了`options ndots:5`，变会默认值1，这样的话，容器内部直接访问<svc>还是没问题的，走search列表，`<svc>.<namespace>.svc.cluster.local`，还是能够访问。
+Removed `options ndots:5`, changed to default value 1. This way, containers directly accessing <svc> is still fine, going through search list, `<svc>.<namespace>.svc.cluster.local`, can still be accessed.
 
-而解析`Google.com`，实际上是解析`Google.com.`,.的数量超过1个，这时不走search列表，直接用上层DNS
+When resolving `Google.com`, it's actually resolving `Google.com.`, the number of dots exceeds 1, so it doesn't go through the search list, directly uses upper-level DNS.
 
-综上所述，去掉ndots/ndots设为1 降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”。
+In summary, removing ndots/setting ndots to 1 reduces the possibility of frequent DNS queries. It has "miraculous effects" for resolving external IPs.
 
-但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
+But if this host runs other containers (isn't this nonsense, if a node doesn't run multiple containers, why use kubernetes), other containers will also request concurrently, the SNAT problem will still appear, so modifying the `/etc/resolv.conf` file cannot solve the root problem.
 
 
-歪门邪道1
+Workaround 1
 
 ```
           lifecycle:
@@ -122,7 +119,7 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
                 - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
 ```
 
-歪门邪道2
+Workaround 2
 
 ```
       initContainers:
@@ -134,46 +131,46 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
          - "head -n 2 /etc/resolv.conf > /etc/temp.conf;cat /etc/temp.conf > /etc/resolv.conf;rm -rf /etc/temp.conf"
 ```
 
-## 衍生的问题
+## Derived Problems
 
 ### DNAT
 
-容器访问clusterIP(因为是虚拟IP所以需要DNAT)也有可能出现这类超时的问题
+Containers accessing clusterIP (because it's a virtual IP, DNAT is needed) may also have this type of timeout problem.
 
-### 访问同 namespace svc 不要强行加戏
+### Don't Forcefully Add Drama When Accessing Same Namespace svc
 
-non-head service的 virtual domain 格式是`<svc>.<namespace>.svc.cluster.local`
+The virtual domain format for non-head service is `<svc>.<namespace>.svc.cluster.local`
 
-如果我们容器直接访问`<svc>.<namespace>.svc.cluster.local`,因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问`<svc>`
+If our container directly accesses `<svc>.<namespace>.svc.cluster.local`, because of default DNS settings, the number of resolutions is actually more. The correct way is to access `<svc>`
 
-例子：假设test下面有个s的svc
+Example: Assume there's an s svc under test
 
 ```bash
 host -v s 
-# 解析1次
+# Resolve 1 time
 host -v s.test.svc.cluster.local
-# 解析4次
+# Resolve 4 times
 ```
 
-所以，访问同namespace其他svc，直接用svc名去访问即可，没必要装逼使用`<svc>.<namespace>.svc.cluster.local`这种格式。
+So, when accessing other svc in the same namespace, just use the svc name directly, no need to show off using the `<svc>.<namespace>.svc.cluster.local` format.
 
-## 其他知识
+## Other Knowledge
 
-### dns记录类型
+### DNS Record Types
 
-1. A记录：地址记录，用来指定域名的IPv4地址（如：8.8.8.8），如果需要将域名指向一个IP地址，就需要添加A记录。
-1. CNAME： 如果需要将域名指向另一个域名，再由另一个域名提供ip地址，就需要添加CNAME记录。
-1. TXT：在这里可以填写任何东西，长度限制255。绝大多数的TXT记录是用来做SPF记录（反垃圾邮件）。
-1. NS：域名服务器记录，如果需要把子域名交给其他DNS服务商解析，就需要添加NS记录。
-1. AAAA：用来指定主机名（或域名）对应的IPv6地址（例如：ff06:0:0:0:0:0:0:c3）记录。
-1. MX：如果需要设置邮箱，让邮箱能收到邮件，就需要添加MX记录。
-1. 显性URL：从一个地址301重定向到另一个地址的时候，就需要添加显性URL记录（注：DNSPod目前只支持301重定向）。
-1. 隐性URL：类似于显性URL，区别在于隐性URL不会改变地址栏中的域名。
-1. SRV：记录了哪台计算机提供了哪个服务。格式为：服务的名字、点、协议的类型，例如：_xmpp-server._tcp。
+1. A record: Address record, used to specify the IPv4 address of a domain name (e.g., 8.8.8.8). If you need to point a domain name to an IP address, you need to add an A record.
+1. CNAME: If you need to point a domain name to another domain name, which then provides an IP address, you need to add a CNAME record.
+1. TXT: You can fill in anything here, length limit 255. The vast majority of TXT records are used for SPF records (anti-spam).
+1. NS: Name server record. If you need to hand over subdomain resolution to other DNS service providers, you need to add an NS record.
+1. AAAA: Used to specify the IPv6 address corresponding to a hostname (or domain name) (e.g., ff06:0:0:0:0:0:0:c3) record.
+1. MX: If you need to set up email so emails can be received, you need to add an MX record.
+1. Explicit URL: When you need to 301 redirect from one address to another, you need to add an explicit URL record (Note: DNSPod currently only supports 301 redirect).
+1. Implicit URL: Similar to explicit URL, the difference is that implicit URL doesn't change the domain name in the address bar.
+1. SRV: Records which computer provides which service. Format: service name, dot, protocol type, e.g., _xmpp-server._tcp.
 
-### 用到的命令
+### Commands Used
 
-安装方法：
+Installation method:
 
 ```bash
   yum install -y bind-utils
@@ -190,13 +187,13 @@ host -v s.test.svc.cluster.local
 
   host -v $host
 
-## 参考链接:
+## Reference Links:
 
-1. [iptables中DNAT、SNAT和MASQUERADE的理解](https://blog.csdn.net/wgwgnihao/article/details/68490985#)
-1. [linux根文件系统 /etc/resolv.conf 文件详解](https://blog.csdn.net/mybelief321/article/details/10049429#)
+1. [Understanding DNAT, SNAT and MASQUERADE in iptables](https://blog.csdn.net/wgwgnihao/article/details/68490985#)
+1. [Detailed Explanation of Linux Root File System /etc/resolv.conf File](https://blog.csdn.net/mybelief321/article/details/10049429#)
 1. [kube-dns per node #45363](https://github.com/kubernetes/kubernetes/issues/45363)
 1. [DNS intermittent delays of 5s #56903](https://github.com/kubernetes/kubernetes/issues/56903)
 1. [Racy conntrack and DNS lookup timeouts](https://www.weave.works/blog/racy-conntrack-and-dns-lookup-timeouts)
 1. [/etc/resolv.conf](http://www.man7.org/linux/man-pages/man5/resolver.5.html)
-1. [/etc/resolv.conf search和ndots配置](https://www.ichenfu.com/2018/10/09/resolv-conf-desc/)
+1. [/etc/resolv.conf search and ndots configuration](https://www.ichenfu.com/2018/10/09/resolv-conf-desc/)
 1. [DNS for Services and Pods](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/)

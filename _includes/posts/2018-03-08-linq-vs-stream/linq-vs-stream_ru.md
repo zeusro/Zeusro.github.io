@@ -1,41 +1,39 @@
-<!-- TODO: Translate to ru -->
+1. [Подготовка](#подготовка)
+    * Определение сущности
+    * Определение коллекции
+1. [Одна коллекция](#одна-коллекция)
+    1. [Классификация и фильтрация](#классификация-и-фильтрация)
+        * Подсчет (Count)
+        * Группировка (GroupBy)
+        * Первый совпадающий элемент (findFirst/First, FirstOrDefault)
+        * Обход (ForEach)
+        * Экстремальные значения Max/Min        
+        * Пропуск (skip/Skip), извлечение (limit/Take)
+    1. [Сортировка](#сортировка)
+        * Удаление дубликатов (Distinct)
+        * По возрастанию (sort/OrderBy)
+        * По убыванию (sort/OrderByDescending)
+1. [Несколько коллекций](#несколько-коллекций)
+    * Пересечение list1 ∩ list2
+    * Объединение list1 ∪ list2
+    * Разность list1 - list2
+1. [Преобразование структуры данных](#преобразование-структуры-данных)
 
-1. [前期准备](#前期准备)
-    * 定义实体
-    * 定义集合
-1. [单集合](#单集合)
-    1. [分类筛选](#分类筛选)
-        * 计数(Count)
-        * 分组(GroupBy)
-        * 匹配的第一项(findFirst/First,FirstOrDefault)
-        * 遍历(ForEach)
-        * 极值Max/Min        
-        * 跳过(skip/Skip),截取(limit/Take)
-    1. [排序](#排序)
-        * 去重复(Distinct)
-        * 升序(sort/OrderBy)
-        * 降序(sort/OrderByDescending)
-1. [多集合](#多集合)
-    * 交集 list1 ∩ list2
-    * 并集list1 ∪ list2
-    * 差集list1 - list2
-1. [数据结构转换](#数据结构转换)
+Эта статья написана специально для помощи начинающим изучать операции с коллекциями Java8/C#.
 
-为方便初学 Java8/C# 集合操作的人,特意写下这篇文章.
-
-## 前期准备
+## Подготовка
 
 
-[C#版](https://gist.github.com/zeusro/6b4d0efa2e2b5a7ff29d3b22c98e6df3)
+[Версия C#](https://gist.github.com/zeusro/6b4d0efa2e2b5a7ff29d3b22c98e6df3)
 
 
-[java版](https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98)
+[Версия Java](https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98)
 
-## 单集合
+## Одна коллекция
 
-### 分类筛选
+### Классификация и фильтрация
 
-* 计数(Count)
+* Подсчет (Count)
 
 ```java
             Date time1 = convertLocalDateToTimeZone(LocalDate.of(1990, 1, 1));
@@ -52,7 +50,7 @@
              */
 ```
 
-* 分组(GroupBy)
+* Группировка (GroupBy)
 
 ```java
             Map<Sex, List<Person>> group1 = list1.stream().collect(Collectors.groupingBy(Person::getSex));
@@ -66,7 +64,7 @@
                 });
             }
 /*
-输出结果:
+Вывод:
 Male
 {"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
 Female
@@ -78,8 +76,8 @@ X
 
 ```csharp
 var group1 = list1.GroupBy(o => o.Sex);
-            //当我们使用 GroupBy（） 扩展方法时，使用了延迟执行。 这意味着，当你遍历集合的时候,下一个要出现的项目可能会或者可能不会被加载。 这是一个很大的性能改进，但它会引起有趣的副作用。
-            list1.RemoveAll(o => o.Sex == Sex.X);//定义 groupby 集合后对原集合进行修改,会发现group1里面已经没了 Sex=X的分组
+            //Когда мы используем метод расширения GroupBy(), используется отложенное выполнение. Это означает, что при итерации по коллекции следующий элемент может быть или не быть загружен. Это большое улучшение производительности, но может вызвать интересные побочные эффекты.
+            list1.RemoveAll(o => o.Sex == Sex.X);//После определения коллекции groupby, изменение исходной коллекции обнаружит, что группа Sex=X уже отсутствует в group1
             foreach (var groupByItem in group1)
             {
                 Sex sex = groupByItem.Key;
@@ -90,7 +88,7 @@ var group1 = list1.GroupBy(o => o.Sex);
                 }
             }
             /*
-            输出结果:
+            Вывод:
             {"Height":165,"Weight":50,"Birthday":"1981-01-01T00:00:00","Hobbies":["吃飯","逛街"],"Identifier":"1","Address":"北京","Sex":2}
             Male
             {"Height":170,"Weight":50,"Birthday":"1982-02-01T00:00:00","Hobbies":["吃飯","看電影"],"Identifier":"2","Address":"北京","Sex":1}
@@ -99,7 +97,7 @@ var group1 = list1.GroupBy(o => o.Sex);
             Male
             {"Height":170,"Weight":50,"Birthday":"1982-02-01T00:00:00","Hobbies":["吃飯","看電影"],"Identifier":"2","Address":"北京","Sex":1}
              */
-            //该 ToLookup（） 方法创建一个类似 字典（Dictionary ） 的列表List, 但是它是一个新的 .NET Collection 叫做 lookup。 Lookup，不像Dictionary, 是不可改变的。 这意味着一旦你创建一个lookup, 你不能添加或删除元素。
+            //Метод ToLookup() создает список, похожий на Dictionary, но это новая коллекция .NET под названием lookup. Lookup, в отличие от Dictionary, неизменяем. Это означает, что после создания lookup вы не можете добавлять или удалять элементы.
             var group2 = list1.ToLookup(o => o.Sex);
             foreach (var groupByItem in group2)
             {
@@ -112,15 +110,15 @@ var group1 = list1.GroupBy(o => o.Sex);
 
             }
             /*
-            输出结果:            
+            Вывод:            
             {"Height":165,"Weight":50,"Birthday":"1981-01-01T00:00:00","Hobbies":["吃飯","逛街"],"Identifier":"1","Address":"北京","Sex":3}
             {"Height":170,"Weight":50,"Birthday":"1982-02-01T00:00:00","Hobbies":["吃飯","看電影"],"Identifier":"2","Address":"北京","Sex":3}
              */
 ```
 
-与此对比,stream没有RemoveAll的操作
+В отличие от этого, stream не имеет операции RemoveAll
 
-* 匹配的第一项(findFirst/First,FirstOrDefault)
+* Первый совпадающий элемент (findFirst/First, FirstOrDefault)
 
 ```java
  Person after90 = list1.stream()
@@ -132,19 +130,19 @@ var group1 = list1.GroupBy(o => o.Sex);
 
 ```csharp
 
-            var after90 = list1.Where(o => o.Birthday >= new DateTime(1990, 1, 1)).First();//如果结果为空,将会导致异常,所以一般极少使用该方法
+            var after90 = list1.Where(o => o.Birthday >= new DateTime(1990, 1, 1)).First();//Если результат пуст, это вызовет исключение, поэтому этот метод редко используется
             //An unhandled exception of type 'System.InvalidOperationException' occurred in System.Linq.dll: 'Sequence contains no elements'
             after90 = list1.Where(o => o.Birthday >= new DateTime(1990, 1, 1)).FirstOrDefault();
             var after00 = list1.Where(o => o.Birthday >= new DateTime(2000, 1, 1)).FirstOrDefault();
 ```
 
 
-* 遍历(ForEach)
+* Обход (ForEach)
 
 ```java
 
             list1.stream().forEach(o -> {
-                //在ForEach當中可對集合進行操作
+                //Можно работать с коллекцией внутри ForEach
                 o.setSex(Sex.X);
             });
             list1.forEach(o -> {
@@ -161,7 +159,7 @@ var group1 = list1.GroupBy(o => o.Sex);
 
             list1.ForEach(item =>
             {
-                //在ForEach當中可對集合進行操作
+                //Можно работать с коллекцией внутри ForEach
                 item.Sex = Sex.X;
             });
             list1.ForEach(item =>
@@ -170,21 +168,21 @@ var group1 = list1.GroupBy(o => o.Sex);
            });
 ```
 
-* 极值Max/Min
+* Экстремальные значения Max/Min
 
 ```java
 
-            //IntStream的max方法返回的是OptionalInt,要先判断有没有值再读取值.isPresent=false 时直接getAsInt会报错.mapToLong,mapToDouble同理
+            //Метод max IntStream возвращает OptionalInt, нужно проверить, есть ли значение, прежде чем читать. getAsInt выдаст ошибку, когда isPresent=false. mapToLong, mapToDouble аналогичны
             OptionalInt maxHeightOption = list1.stream().mapToInt(Person::getHeight).max();
-            //字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。
-            //当集合为长度0的集合时会返回起始值Integer.MIN_VALUE,起始值也不能乱传,个中缘由我暂不清楚
+            //Конкатенация строк, sum, min, max, average чисел — все это специальные reduce.
+            //Когда коллекция имеет длину 0, возвращается начальное значение Integer.MIN_VALUE. Начальное значение нельзя передавать случайно, причина мне пока не ясна
             int maxHeight = list1.stream().mapToInt(Person::getHeight).reduce(Integer.MIN_VALUE, Integer::max);
             out.println(maxHeight);
             if (maxHeightOption.isPresent()) {
                 maxHeight = maxHeightOption.getAsInt();
                 out.println(maxHeight);
             }
-            //mapToInt参数的2种写法都一样,我比较喜欢以下写法,但是 idea 会报 warning
+            //Оба способа записи параметров mapToInt одинаковы. Я предпочитаю следующий, но idea выдаст предупреждение
             OptionalInt minWeightOption = list1.stream().mapToInt(o -> o.getHeight()).min();
             int minWeight = list1.stream().mapToInt(o -> o.getHeight()).reduce(Integer.MAX_VALUE, Integer::min);
 ```
@@ -192,21 +190,21 @@ var group1 = list1.GroupBy(o => o.Sex);
 ```csharp
 
             int maxHeight = list1.Select(o => o.Height).Max();
-            //同 list1.Max(o => o.Height);
+            //То же, что list1.Max(o => o.Height);
             int minWeight = list1.Min(o => o.Weight);            
 ```
 
-* 跳过(skip/Skip),截取(limit/Take)
+* Пропуск (skip/Skip), извлечение (limit/Take)
 
 ```java
 
-            //skip和 limit参数都是long, 这个要注意
+            //Оба параметра skip и limit имеют тип long, обратите на это внимание
             list1.stream().skip(1L).limit(2L);
 ```
 
-### 排序
+### Сортировка
 
-* 去重复(Distinct)
+* Удаление дубликатов (Distinct)
 
 ```java
 list1.stream().map(Person::getIdentifier).distinct();
@@ -220,11 +218,11 @@ list1.Select(o=>o.Identifier).Distinct();
  list1.Skip(1).Take(2);
 ```
 
-* 升序(sort/OrderBy)
+* По возрастанию (sort/OrderBy)
 
 ```java
 
-            out.println("------------------------------------|升序|------------------------------------");
+            out.println("------------------------------------|По возрастанию|------------------------------------");
             list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday)).collect(Collectors.toList());
             out.println(new Gson().toJson(list1));
             list1 = list1.stream().sorted((left, right) -> left.getBirthday().compareTo(right.getBirthday())).collect(Collectors.toList());
@@ -232,15 +230,15 @@ list1.Select(o=>o.Identifier).Distinct();
 ```
 
 ```csharp
-            //升序
+            //По возрастанию
             list1 = list1.OrderBy(o => o.Birthday).ToList();
 ```
 
-* 降序(sort/OrderByDescending)
+* По убыванию (sort/OrderByDescending)
 
 ```java
 
-            out.println("------------------------------------|降序|------------------------------------");
+            out.println("------------------------------------|По убыванию|------------------------------------");
             list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday).reversed()).collect(Collectors.toList());
             out.println(new Gson().toJson(list1));
             list1 = list1.stream().sorted((left, right) -> right.getBirthday().compareTo(left.getBirthday())).collect(Collectors.toList());
@@ -250,60 +248,60 @@ list1.Select(o=>o.Identifier).Distinct();
 
 ```csharp
 
-            //降序
+            //По убыванию
             list1 = list1.OrderByDescending(o => o.Birthday).ToList();
 ```
 
-## 多集合
+## Несколько коллекций
 
-* 交集 list1 ∩ list2
+* Пересечение list1 ∩ list2
 
 ```java
 
-            out.println("------------------------------------|交集 list1 ∩ list2|------------------------------------");
+            out.println("------------------------------------|Пересечение list1 ∩ list2|------------------------------------");
             list1.stream().filter(o -> list2.contains(o)).collect(Collectors.toList());
 ```
 
 ```csharp
-//连接,下面表示把 list1和 list2当中相同身份证号的取出来,生成一个新的集合            
-            //实际上, join 有另外的用法,类似 sqlserver 里面的多表连接,将不同数据源结合到一起,生成新的数据结构
+//Соединение, ниже означает извлечение элементов с одинаковым номером ID из list1 и list2, создание новой коллекции            
+            //На самом деле, join имеет другое использование, подобное многотабличным соединениям в sqlserver, объединяя разные источники данных вместе для создания новых структур данных
             var intersect = list1.Join(list2, o => o.Identifier, o => o.Identifier, (a, b) => a).ToList();
-            //交集 list1 ∩ list2                        
+            //Пересечение list1 ∩ list2                        
             intersect = list1.Intersect(list2).ToList();
 ```
 
-* 并集list1 ∪ list2
+* Объединение list1 ∪ list2
 
 ```java
 
-            out.println("------------------------------------|并集list1 ∪ list2 |------------------------------------");
+            out.println("------------------------------------|Объединение list1 ∪ list2 |------------------------------------");
             list1.addAll(list2);
 ```
 
 ```csharp
 
-            //并集list1 ∪ list2 
+            //Объединение list1 ∪ list2 
             var union = list1.Union(list2).ToList();
 ```
 
-* 差集list1 - list2
+* Разность list1 - list2
 
 ```java
 
-            out.println("------------------------------------|差集list1 - list2|------------------------------------");
+            out.println("------------------------------------|Разность list1 - list2|------------------------------------");
             list1.stream().filter(item1 -> !list2.contains(item1)).collect(Collectors.toList());
 ```
 
 ```csharp
-            //差集list1 - list2
+            //Разность list1 - list2
             var except = list1.Except(list2).ToList();
 ```
 
-## 数据结构转换
+## Преобразование структуры данных
 
 ```java
 
-            out.println("------------------------------------|数据结构转换|------------------------------------");
+            out.println("------------------------------------|Преобразование структуры данных|------------------------------------");
             List<Person> list3 = list1.stream().filter(o -> true).collect(Collectors.toList());
             ArrayList<Person> list4 = list1.stream().filter(o -> true).collect(Collectors.toCollection(ArrayList::new));
             Set<Person> list5 = list1.stream().filter(o -> true).collect(Collectors.toSet());
@@ -312,9 +310,9 @@ list1.Select(o=>o.Identifier).Distinct();
 ```
 
 ```csharp
-            //数据结构转换
+            //Преобразование структуры данных
             list1.ToArray();
-            //注意如果 key 重复,ToDictionary会导致出错
+            //Обратите внимание, если ключ дублируется, ToDictionary вызовет ошибку
             list1.ToDictionary(o => o.Identifier, o => o);
             list1.ToHashSet();
 ```

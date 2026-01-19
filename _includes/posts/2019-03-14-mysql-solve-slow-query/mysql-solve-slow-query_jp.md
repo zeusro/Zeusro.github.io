@@ -1,43 +1,41 @@
-<!-- TODO: Translate to jp -->
+## 主な考え方
 
-## 主要思路
+リアルタイム分析（`show full processlist;`）と遅延分析（`mysql.slow_log`）を組み合わせて、SQLステートメントを最適化します。
 
-实时分析(`show full processlist;`)结合延后分析(`mysql.slow_log`),对SQL语句进行优化
+## リアルタイム分析
 
-## 实时分析
-
-### 查看有哪些线程正在执行
+### 実行中のスレッドを確認
 
     show processlist;
     show full processlist;
 
-相比`show processlist;`我比较喜欢用.因为这个查询可以用where条件
+`show processlist;`と比較して、このクエリはwhere条件を使用できるため、こちらを好んで使用します。
 
 ```SQL
 SELECT * FROM INFORMATION_SCHEMA.PROCESSLIST where state !='' order by state,time desc,command ;
--- 按照客户端IP对当前连接用户进行分组
+-- クライアントIPで現在接続されているユーザーをグループ化
 SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by h  order by c desc,user;
--- 按用户名对当前连接用户进行分组
+-- ユーザー名で現在接続されているユーザーをグループ化
 SELECT substring_index(Host,':',1) as h,count(Host)  as c,user FROM INFORMATION_SCHEMA.PROCESSLIST  group by user  order by c desc,user;
 ```
 
-### 各种耗时SQL对应的特征
+### 時間のかかるSQLに対応する特徴
 
-1. 改表
+1. テーブル変更
 1. Copying to tmp table
 1. Copying to tmp table on disk
 1. Reading from net
 1. Sending data
-1. 没有索引
+1. インデックスなし
 1. Sorting result
 1. Creating sort index
 1. Sorting result
 
-重点关注这些状态,参考《[processlist中哪些状态要引起关注](https://www.kancloud.cn/thinkphp/mysql-faq/47446)》进行优化
+これらの状態に注目し、[processlistで注意すべき状態](https://www.kancloud.cn/thinkphp/mysql-faq/47446)を参考にして最適化します。
 
-## 延后分析
+## 遅延分析
 
-### 设置慢查询参数
+### スロークエリパラメータの設定
 
 ```
 slow_query_log 1
@@ -47,7 +45,7 @@ slow_query_log 1
 ```
 
 ```SQL
-# 建数据库
+# データベースを作成
 CREATE TABLE `slow_log_2019-05-30` (
   `start_time` timestamp(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
   `user_host` mediumtext NOT NULL,
@@ -73,17 +71,17 @@ where sql_text not like 'xxx`%'
 order by  query_time desc,query_time desc;
 ```
 
-按优先级排列,需要关注的列是`lock_time`,`query_time`,`rows_examined`.分析的时候应用二八法则,先找出最坑爹的那部分SQL,率先优化掉,然后不断not like或者删除掉排除掉已经优化好的低效SQL.
+優先順位で、注目すべき列は`lock_time`、`query_time`、`rows_examined`です。分析する際は、80/20の法則を適用し、まず最も問題のあるSQLを見つけて最適化し、その後、not likeまたは削除を継続して、すでに最適化された非効率なSQLを除外します。
 
-## 低效SQL的优化思路
+## 非効率なSQLの最適化の考え方
 
-对于每一个查询,先用 `explain SQL` 分析一遍,是比较明智的做法.
+各クエリについて、まず`explain SQL`で分析するのが賢明です。
 
-一般而言,rows越少越好,提防Extra:`Using where`这种情况,这种情况一般是扫全表,在数据量大(>10万)的时候考虑增加索引.
+一般的に、rowsは少ないほど良いです。Extra:`Using where`の状況に注意してください。これは通常、全テーブルスキャンです。データ量が大きい（>10万）場合は、インデックスの追加を検討してください。
 
-### 慎用子查询
+### サブクエリの使用に注意
 
-尽力避免嵌套子查询，使用索引来优化它们。
+ネストされたサブクエリを避け、インデックスを使用して最適化します。
 
 ```SQL
 EXPLAIN SELECT *
@@ -96,49 +94,49 @@ FROM (
 ORDER BY a.modified DESC
 ```
 
-比如说这种的,根本毫无必要.表面上看,比去掉子查询更快一点,实际上是因为mysql 5.7对子查询进行了优化,生成了[Derived table](http://mysql.taobao.org/monthly/2017/03/05/),把结果集做了一层缓存.
+たとえば、このようなものは完全に不要です。表面的には、サブクエリを削除するよりも少し速く見えますが、実際には、MySQL 5.7がサブクエリを最適化し、[Derived table](http://mysql.taobao.org/monthly/2017/03/05/)を生成し、結果セットをキャッシュしたためです。
 
-按照实际的场景分析发现,`status`这个字段没有做索引,导致查询变成了全表扫描(using where),加了索引后,问题解决.
+実際のシナリオ分析によると、`status`フィールドにインデックスがなかったため、クエリが全テーブルスキャン（using where）になりました。インデックスを追加した後、問題は解決しました。
 
-### json类型
+### json型
 
-json数据类型,如果存入的JSON很长,读取出来自然越慢.在实际场景中,首先要确定是否有使用这一类型的必要,其次,尽量只取所需字段.
+jsonデータ型は、保存されるJSONが非常に長い場合、読み取りが自然に遅くなります。実際のシナリオでは、まずこの型を使用する必要があるかどうかを確認し、次に、必要なフィールドのみを取得するようにします。
 
-见过这样写的
+このように書かれているのを見たことがあります：
 
 ```SQL
 WHERE j_a like '%"sid":514572%'
 ```
 
-这种行为明显是对mysql不熟悉,MYSQL是有JSON提取函数的.
+この動作は明らかにMySQLに不慣れです。MySQLにはJSON抽出関数があります。
 
 ```SQL
 WHERE JSON_EXTRACT(j_a, "$[0].sid")=514572;
 ```
 
-虽然也是全表扫描,但怎么说也比like全模糊查询好吧?
+これも全テーブルスキャンですが、like全あいまいクエリよりも良いでしょう？
 
-更好的做法,是通过虚拟字段建索引
+より良い方法は、仮想フィールドでインデックスを作成することです。
 
-[MySQL · 最佳实践 · 如何索引JSON字段](http://mysql.taobao.org/monthly/2017/12/09/)
+[MySQL · ベストプラクティス · JSONフィールドのインデックス方法](http://mysql.taobao.org/monthly/2017/12/09/)
 
-但是现阶段MYSQL对json的索引做的是不够的,如果json数据列过大,建议还是存`MongoDB`(见过把12万json存mysql的,那读取速度简直无语).
+ただし、現時点ではMySQLのjsonのインデックスは不十分です。jsonデータ列が大きすぎる場合は、`MongoDB`に保存することをお勧めします（12万のjsonをMySQLに保存しているのを見たことがありますが、読み取り速度は言葉になりませんでした）。
 
-### 字符串类型
+### 文字列型
 
 ```SQL
 WHERE a=1
 ```
 
-用数字给字符串类型的字段赋值会导致该字段上的索引失效.
+数値で文字列型のフィールドに値を割り当てると、そのフィールドのインデックスが無効になります。
 
 ```SQL
 WHERE a='1'
 ```
 
-### 分组查询
+### グループ化クエリ
 
-`group by`,`count(x)`,`sum(x)`,慎用.非常消耗CPU
+`group by`、`count(x)`、`sum(x)`は慎重に使用してください。CPUを非常に消費します。
 
 #### `group by`
 
@@ -146,23 +144,23 @@ WHERE a='1'
 select col_1 from table_a where (col_2 > 7 or mtsp_col_2 > 0) and col_3 = 1 group by col_1
 ```
 
-这种不涉及聚合查询(`count(x)`,`sum(x)`)的`group by`明显就是不合理的,去重复查询效果更高点
+集約クエリ（`count(x)`、`sum(x)`）に関係しないこの種の`group by`は明らかに不合理です。distinctクエリの方が効果的です。
 
 ```SQL
 select distinct(col_1) from table_a where (col_2 > 7 or mtsp_col_2 > 0) and col_3 = 1 limit xxx;
 ```
 
-### `count(x)`,`sum(x)`
+### `count(x)`、`sum(x)`
 
-x 这个字段最好带索引,不然就算筛选条件有索引也会很慢
+xフィールドにはインデックスを付けるのが最善です。そうしないと、フィルター条件にインデックスがあっても非常に遅くなります。
 
 ### order by x
 
-x这字段最好带上索引,不然 `show processlist;` 里面可能会出现大量 `Creating sort index` 的结果
+xフィールドにはインデックスを付けるのが最善です。そうしないと、`show processlist;`に大量の`Creating sort index`結果が表示される可能性があります。
 
-### 组合索引失效
+### 複合インデックスの無効化
 
-组合索引有个最左匹配原则
+複合インデックスには最左一致原則があります。
 
 ```SQL
 KEY 'idx_a' (a,b,c)
@@ -172,9 +170,9 @@ KEY 'idx_a' (a,b,c)
 WHERE b='' and c =''
 ```
 
-这时组合索引是无效的.
+この場合、複合インデックスは無効です。
 
-## 其他
+## その他
 
 ```SQL
 EXPLAIN SQL
@@ -182,15 +180,15 @@ DESC SQL
 ```
 
 ```SQL
-# INNODB_TRX表主要是包含了正在InnoDB引擎中执行的所有事务的信息，包括waiting for a lock和running的事务
+# INNODB_TRXテーブルは主に、InnoDBエンジンで実行されているすべてのトランザクションの情報を含み、waiting for a lockとrunningのトランザクションを含みます
 SELECT * FROM information_schema.INNODB_TRX;
 SELECT * FROM information_schema.innodb_locks;
 SELECT * FROM information_schema.INNODB_LOCK_WAITS;
 ```
 
-## 参考链接
+## 参考リンク
 
-1. [MySQL慢查询日志总结](https://www.cnblogs.com/kerrycode/p/5593204.html)
-1. [MySQL CPU 使用率高的原因和解决方法](https://help.aliyun.com/knowledge_detail/51587.html)
-1. [mysql优化，导致查询不走索引的原因总结](https://blog.csdn.net/m0_37808356/article/details/72526687)
-1. [information_schema中Innodb相关表用于分析sql查询锁的使用情况介绍](https://blog.csdn.net/and1kaney/article/details/51213979)
+1. [MySQLスロークエリログのまとめ](https://www.cnblogs.com/kerrycode/p/5593204.html)
+1. [MySQL CPU使用率が高い原因と解決方法](https://help.aliyun.com/knowledge_detail/51587.html)
+1. [mysql最適化、クエリがインデックスを使用しない原因のまとめ](https://blog.csdn.net/m0_37808356/article/details/72526687)
+1. [information_schemaのInnodb関連テーブルを使用してSQLクエリロックの使用状況を分析する方法の紹介](https://blog.csdn.net/and1kaney/article/details/51213979)

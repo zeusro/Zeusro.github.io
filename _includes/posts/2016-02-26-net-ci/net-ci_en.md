@@ -1,40 +1,38 @@
-<!-- TODO: Translate to en -->
-
-* [准备工作](#准备工作)
-* [全局设置](#全局设置)
-  * [配置git插件](#配置git插件)
-  * [配置MSBuild插件](#配置MSBuild插件)
-  * [配置gitlab插件](#配置gitlab插件)
-* [Job的配置](#Job的配置)
-  * [SSH的问题](#SSH的问题)
-  * [源码管理](#源码管理)
-  * [触发器](#触发器)
-  * [构建](#构建)   
-* [血泪教训](#血泪教训)
-* [更改Jenkins目录](#更改Jenkins目录)
-* [一些配置](#一些配置)
-* [插件选用](#插件选用)
-* [异常处理](#异常处理)
-  * [误设置了安全选项导致无法登录进去](#误设置了安全选项导致无法登录进去)
-* [参考链接](#参考链接)
+* [Preparation](#preparation)
+* [Global Settings](#global-settings)
+  * [Configure Git Plugin](#configure-git-plugin)
+  * [Configure MSBuild Plugin](#configure-msbuild-plugin)
+  * [Configure GitLab Plugin](#configure-gitlab-plugin)
+* [Job Configuration](#job-configuration)
+  * [SSH Issues](#ssh-issues)
+  * [Source Code Management](#source-code-management)
+  * [Triggers](#triggers)
+  * [Build](#build)   
+* [Lessons Learned](#lessons-learned)
+* [Change Jenkins Directory](#change-jenkins-directory)
+* [Some Configurations](#some-configurations)
+* [Plugin Selection](#plugin-selection)
+* [Exception Handling](#exception-handling)
+  * [Anonymous Missing Overall/Administer Permission](#anonymous-missing-overalladminister-permission)
+* [Reference Links](#reference-links)
 
 ![Image](/img/in-post/net-ci/ci_1.png)
 
-## 准备工作
+## Preparation
 
-安装之后记得安装MSbuild,gitlab,gitlab-hook插件 
+After installation, remember to install MSBuild, GitLab, and GitLab-hook plugins.
 
-服务器上面,需要安装.net环境,git
+On the server, you need to install the .NET environment and Git.
 
-## 全局设置
+## Global Settings
 
 - Git plugin
 
-瞎填一个user name和email就行
+Just fill in any user name and email.
 
 ## Global Tool Configuration
 
-不知道什么时候开始,插件的设置移动到了这个地方,这里需要设置几个地方
+I don't know when it started, but plugin settings moved to this location. You need to configure several things here:
 
 - MSBuild
 
@@ -42,71 +40,71 @@
 
 - Git
 
-主要是设置git的可执行文件,由于我有加到path上,所以忽略
+Mainly to set the Git executable file. Since I've added it to the PATH, I'll skip this.
 
 ## Credentials
 
-证书的设置比较奇葩
+The credential settings are quite unusual.
 
-需要点击(global),然后在弹出的内容里面点击add Credentials
+You need to click (global), then click "Add Credentials" in the popup.
 
-## Job的配置
+## Job Configuration
 
-- SSH的问题
+- SSH Issues
 
-我们都知道每一个Windows命令其实有着角色附在上面的.以前用git的时候，发现自己是有加ssh私钥到服务器上面的,但是git push失败,那也其实就是因为我们用的角色有问题.
+We all know that every Windows command actually has a role attached to it. When I used Git before, I found that I had added an SSH private key to the server, but Git push failed. This was actually because the role we were using had issues.
 
-Jenkins用的是**Local System account**.在用ssh key连接我们gitlab上面的项目时,要把我们系统用户上面的.ssh复制到Jenkins使用的用户用的文件夹.
+Jenkins uses the **Local System account**. When connecting to our GitLab project using an SSH key, you need to copy the .ssh folder from your system user to the folder used by the Jenkins user.
 
-但是在这之前.需要ssh(在git的安装目录里面有这个exe)一下我们的gitlab主机
+But before that, you need to SSH (there's an exe in the Git installation directory) to our GitLab host:
 
 ```bash
 ssh.exe -T git@192.1.1.123
 ```
 
-确保known_hosts里面有了这个主机后,把整个.ssh文件夹复制到**C:\Windows\SysWOW64\config\systemprofile**,以及**C:\Windows\System32\config\systemprofile**这个目录
+After ensuring that known_hosts contains this host, copy the entire .ssh folder to **C:\Windows\SysWOW64\config\systemprofile** and **C:\Windows\System32\config\systemprofile**.
 
-**小技巧**
+**Tip**
 
-看到permission denied的话,加多一句
+If you see "permission denied", add this command:
 
 ```bash
 ssh-keygen -t rsa -C "robot233@robot.com"
 ```
 
-看一下know host加到哪个目录,然后把自己生成的丢过去这个导致失败的目录就行.
+Check which directory the known host was added to, then copy your generated key to the directory that caused the failure.
 
-- 源码管理
+- Source Code Management
 
-在安装了上文提到的必备插件之后,源码里面就可以选择git,这里面我用了ssh,所以是下图这种格式
+After installing the required plugins mentioned above, you can select Git in the source code section. I used SSH here, so the format is as shown in the image below:
 
 ![Image](/img/in-post/net-ci/job里面的git设置1.png)
 
-**重点:**
+**Important:**
 
-这个证书别用计算机用户那个SSH.我们知道,一个gitlab只允许一台机子一个ssh,同一个ssh不能添加到多个账户.这样就会有一个问题.我们这台编译机要连源码的项目,于是需要一个ssh key.但是它编译后的结果,在Windows中我是用git去做目录同步的,于是需要另外一个ssh 去连我的机器人账户,这2个ssh key一样的话,将会导致一个步骤失败.
+Don't use the SSH from the computer user for this credential. We know that a GitLab only allows one SSH per machine, and the same SSH cannot be added to multiple accounts. This creates a problem: our build machine needs to connect to the source code project, so it needs an SSH key. However, for the compiled results, I use Git for directory synchronization in Windows, so I need another SSH to connect to my robot account. If these two SSH keys are the same, one step will fail.
 
-源码浏览器,其实是跳到我们的gitlab对应项目上,所以用http
+The source browser actually jumps to our corresponding GitLab project, so use HTTP:
 
 ![Image](/img/in-post/net-ci/job里面的git设置2.png)
 
-- 触发器
+- Triggers
 
-这个很重要.我们根据自己的需要打勾以及选择之后
+This is very important. After checking and selecting according to our needs:
 
 ![Image](/img/in-post/net-ci/job里面的git设置3.png)
 
-复制Build when a change is pushed to GitLab. GitLab CI Service URL后面的url.
+Copy the URL after "Build when a change is pushed to GitLab. GitLab CI Service URL".
 
-回到这个项目对应gitlab项目设置,在setting→_→web hooks里面填上这个URL,并按需要打勾,确认无误后添加.
+Go back to the corresponding GitLab project settings, fill in this URL in Settings → Web Hooks, check as needed, and add after confirming.
 
-这样当我们gitlab上面的源码有变动时,就会触发web hook.告诉我们的CI该干活了.
+This way, when there are changes to the source code on our GitLab, it will trigger the web hook and tell our CI to get to work.
 
 ![Image](/img/in-post/net-ci/添加WebHook.png)
 
 - MSBuild
 
-这里主要需要学习MSBuild的文法.当初我建这个CI的目的.纯粹是为了编译网站.下面这个几个就是常用的,非常容易理解. 
+Here you mainly need to learn MSBuild syntax. When I built this CI, my purpose was purely to compile websites. The following are commonly used and very easy to understand:
 
 ```text
 /p:PublishProfile="F:xxxxx.pubxml"
@@ -116,13 +114,13 @@ ssh-keygen -t rsa -C "robot233@robot.com"
 /property:TargetFrameworkVersion=v4.5
 ```
 
-pubxml文件在我们选择发布时就会生成一个.这个自己看,也非常容易理解.
+The pubxml file is generated when we choose to publish. You can check it yourself, and it's very easy to understand.
 
-我建议在自己开发的机器msbuild一遍.
+I recommend running MSBuild once on your development machine.
 
-一般来讲.我们的msbuild位于**cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319\**
+Generally, our MSBuild is located at **cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319\**
 
-然后
+Then:
 
 ```bash
 cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319\
@@ -137,7 +135,7 @@ MSBuild.exe "C:\xxxxx.sln" \
 /maxcpucount:16
 ```
 
-我个人推荐的配置是
+My recommended configuration is:
 
 ```bash
 /p:PublishProfile="C:\xxxxx.pubxml" \
@@ -149,15 +147,15 @@ MSBuild.exe "C:\xxxxx.sln" \
 /maxcpucount:16
 ```
 
-通过编译后上服务器一遍来说没问题
+After compiling and deploying to the server, it should generally be fine.
 
-但是,我特么就是**有问题啊!!!!**
+But, I **had problems!!!!**
 
-- nuget feed的问题
+- NuGet Feed Issues
 
-因为我项目里面用了我私有的nuget包,这个包在nuget的官方源头是找不到的.所以我需要像在VS那样,在CI server上面配置自己的feed
+Because my project uses my private NuGet packages, which cannot be found in the official NuGet source, I need to configure my own feed on the CI server, just like in VS.
 
-在**C:\Windows\SysWOW64\config\systemprofile\AppData\Roaming\NuGet**中找到NuGet.Config,改为
+Find NuGet.Config in **C:\Windows\SysWOW64\config\systemprofile\AppData\Roaming\NuGet** and change it to:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -171,7 +169,7 @@ MSBuild.exe "C:\xxxxx.sln" \
   </bindingRedirects>
   <packageSources>
     <add key="nuget.org" value="https://www.nuget.org/api/v2/" />
-    <add key="我的后宫" value="D:\nuget" />     
+    <add key="My Private Feed" value="D:\nuget" />     
   </packageSources>
   <activePackageSource>
     <add key="All" value="(Aggregate source)" />
@@ -179,41 +177,41 @@ MSBuild.exe "C:\xxxxx.sln" \
 </configuration>
 ```
 
-- 编译失败问题
+- Build Failure Issues
 
-这个不能忍了.妹的在我的电脑一点问题都没有,在server上死活不给编译过去.后来重点排查了程序中的第三方dll和我的后宫nuget包,发现错误都出在那里.之所以在开发机上面没有发觉,是因为开发机上面的nuget依赖有本地缓存.编译的时候直接跳过去了.于是历经了35次后,本宝宝的程序终于在CI上面编译成功
+This is unacceptable. It worked fine on my computer, but the server absolutely refused to compile. Later, I focused on checking third-party DLLs and my private NuGet packages in the program, and found that all errors were there. The reason I didn't notice on the development machine was because the NuGet dependencies on the development machine had local cache. The compilation directly skipped them. After 35 attempts, my program finally compiled successfully on CI.
 
-- git没有权限clone不了项目的问题
+- Git Permission Issues - Cannot Clone Project
 
-这个是job的配置出错.job的git配置里面,选择SSH Username with private key,直接输入私钥，要完整复制 ~/.ssh/id_isa里面的内容。即是包括首尾那个没有意义的分割符!
+This is a job configuration error. In the job's Git configuration, select "SSH Username with private key", directly enter the private key, and completely copy the content from ~/.ssh/id_rsa. This includes the meaningless separators at the beginning and end!
 
-## 血泪教训
+## Lessons Learned
 
-- 不要使用gitlab的**test hook**
+- Don't use GitLab's **test hook**
 
-当时我项目有2个分支,我要生成的是某个分支的,但是点了一下test hook.我擦,主分支的东西都被拉过去了.
+At that time, my project had 2 branches. I wanted to generate from a specific branch, but I clicked the test hook. Damn it, the main branch content was all pulled over.
 
-## 异常处理
+## Exception Handling
 
-### anonymous没有Overall/Administer权限
+### Anonymous Missing Overall/Administer Permission
 
 http://stackoverflow.com/questions/22833665/hudson-security-accessdeniedexception2-anonymous-is-missing-the-overall-admini
 
-### 误设置了安全选项导致无法登录进去
+### Mistakenly Set Security Options Causing Unable to Log In
 
-修改
+Modify:
 
 ```xml
 <authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/>
 ```
 
 ```bash
-cd jenkins目录
-# 重启
+cd jenkins directory
+# Restart
 jenkins restart   # Forces
 ```
 
-## 更改Jenkins目录
+## Change Jenkins Directory
 
 > Stop Jenkins service
 
@@ -223,48 +221,48 @@ jenkins restart   # Forces
 
 > Start service
 
-## 一些配置 
+## Some Configurations
 
-- 这个权限对应“任何用户可以做任何事(没有任何限制)”
+- This permission corresponds to "Any user can do anything (no restrictions)"
 
 ```xml
 <authorizationStrategy class="hudson.security.AuthorizationStrategy$Unsecured"/>
 ```
 
-- 这个权限对应“登录用户可以做任何事”
+- This permission corresponds to "Logged-in users can do anything"
 
 ```xml
 <authorizationStrategy class="hudson.security.FullControlOnceLoggedInAuthorizationStrategy"/>
 ```
 
-## 插件选用
+## Plugin Selection
 
-| 插件名          | 用途                 | 介绍url                                                      |
-| --------------- | -------------------- | ------------------------------------------------------------ |
-| proxy           | 代理                 |                                                              |
-| gitlab          | 用于与gitlab集成     | https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin    |
-| publish-over-ssh | 通过ssh连接其他Linux机器 |                                                              |
-| Mercurial       | 构建工具             | https://wiki.jenkins-ci.org/display/JENKINS/Mercurial+Plugin |
-| gitlab-hook     | Enables Gitlab web hooks to be used to trigger SMC polling on Gitlab projects | https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Hook+Plugin |
+| Plugin Name      | Purpose                          | Introduction URL                                                      |
+| ---------------- | -------------------------------- | ---------------------------------------------------------------------- |
+| proxy            | Proxy                            |                                                                        |
+| gitlab           | For GitLab integration           | https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Plugin            |
+| publish-over-ssh | Connect to other Linux machines via SSH |                                                                        |
+| Mercurial        | Build tool                       | https://wiki.jenkins-ci.org/display/JENKINS/Mercurial+Plugin          |
+| gitlab-hook      | Enables Gitlab web hooks to be used to trigger SMC polling on Gitlab projects | https://wiki.jenkins-ci.org/display/JENKINS/GitLab+Hook+Plugin |
 
-## 参考链接
+## Reference Links
 
-1. [取消安全选项](https://wiki.jenkins-ci.org/display/JENKINS/Disable+security)
-2. [配置权限](http://www.cnblogs.com/zz0412/p/jenkins_jj_14.html)
-3. [用 GitLab + Jenkins 搭建 CI](http://zipperary.com/2015/07/10/%E7%94%A8-gitlab-+-jenkins-%E6%90%AD%E5%BB%BA-ci/?utm_source=tuicool&utm_medium=referral)
-4. [Jenkins搭建.NET自动编译测试与发布环境](http://blog.csdn.net/wangjia184/article/details/18365553)
-5. [利用Jenkins+Gitlab搭建持续集成(CI)环境](http://hyhx2008.github.io/li-yong-jenkinsgitlabda-jian-chi-xu-ji-cheng-cihuan-jing.html)
-6. [用MSBuild和Jenkins搭建持续集成环境（1）](http://www.infoq.com/cn/articles/MSBuild-1)
-7. [用MSBuild和Jenkins搭建持续集成环境（2）](http://www.infoq.com/cn/articles/MSBuild-2)
-8. [Jenkins进阶系列](http://www.cnblogs.com/zz0412/tag/jenkins/)
+1. [Disable Security](https://wiki.jenkins-ci.org/display/JENKINS/Disable+security)
+2. [Configure Permissions](http://www.cnblogs.com/zz0412/p/jenkins_jj_14.html)
+3. [Building CI with GitLab + Jenkins](http://zipperary.com/2015/07/10/%E7%94%A8-gitlab-+-jenkins-%E6%90%AD%E5%BB%BA-ci/?utm_source=tuicool&utm_medium=referral)
+4. [Jenkins .NET Automatic Build Test and Release Environment](http://blog.csdn.net/wangjia184/article/details/18365553)
+5. [Building Continuous Integration (CI) Environment with Jenkins+Gitlab](http://hyhx2008.github.io/li-yong-jenkinsgitlabda-jian-chi-xu-ji-cheng-cihuan-jing.html)
+6. [Building Continuous Integration Environment with MSBuild and Jenkins (1)](http://www.infoq.com/cn/articles/MSBuild-1)
+7. [Building Continuous Integration Environment with MSBuild and Jenkins (2)](http://www.infoq.com/cn/articles/MSBuild-2)
+8. [Jenkins Advanced Series](http://www.cnblogs.com/zz0412/tag/jenkins/)
 9. [Jenkins CI integration](http://doc.gitlab.com/ee/integration/jenkins.html)
 10. [GitLab Documentation](http://doc.gitlab.com/ce/ci/quick_start/README.html)
 11. [Configuring your repo for Jenkins CI](https://github.com/dotnet/dotnet-ci/blob/master/docs/CI-SETUP.md)
 12. [Jenkins git clone via SSH on Windows 7 x64](http://computercamp-cdwilson-us.tumblr.com/post/48589650930/jenkins-git-clone-via-ssh-on-windows-7-x64)
-13. [使用Jenkins搭建持续集成服务](http://chenpeng.info/html/3081?utm_source=tuicool)
+13. [Building Continuous Integration Service with Jenkins](http://chenpeng.info/html/3081?utm_source=tuicool)
 14. [Hosting Your Own NuGet Feeds](https://docs.nuget.org/create/hosting-your-own-nuget-feeds)
-15. [Using MSBuild.exe to “Publish” a ASP.NET MVC 4 project with the cmd line](http://stackoverflow.com/questions/13920146/using-msbuild-exe-to-publish-a-asp-net-mvc-4-project-with-the-cmd-line)
-16. [项目开发环境搭建手记（5.Jenkins搭建）](http://blog.csdn.net/fbysss/article/details/44087185)
+15. [Using MSBuild.exe to "Publish" a ASP.NET MVC 4 project with the cmd line](http://stackoverflow.com/questions/13920146/using-msbuild-exe-to-publish-a-asp-net-mvc-4-project-with-the-cmd-line)
+16. [Project Development Environment Setup Notes (5. Jenkins Setup)](http://blog.csdn.net/fbysss/article/details/44087185)
 17. [MSBuild DeployOnBuild=true not publishing](http://stackoverflow.com/questions/4962705/msbuild-deployonbuild-true-not-publishing)
 18. [How to change Jenkins default folder on Windows](http://stackoverflow.com/questions/12689139/how-to-change-jenkins-default-folder-on-windows)
-19. [Jenkins环境变量](https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables)
+19. [Jenkins Environment Variables](https://wiki.jenkins-ci.org/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-JenkinsSetEnvironmentVariables)

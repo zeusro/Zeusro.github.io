@@ -1,18 +1,16 @@
-<!-- TODO: Translate to en -->
-
-## 推荐工具
+## Recommended Tools
 
 ### [kubectx](https://github.com/ahmetb/kubectx)
 
-kubectx:用来切换集群的访问
+kubectx: Used to switch cluster access
 
-kubens:用来切换默认的namespace
+kubens: Used to switch default namespace
 
 ### [kubectl-aliases](https://github.com/ahmetb/kubectl-aliases)
 
-`kubectl`命令别名
+`kubectl` command aliases
 
-### 自动完成
+### Auto-completion
 
 zsh
 
@@ -21,28 +19,28 @@ source <(kubectl completion zsh)  # setup autocomplete in zsh into the current s
 echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~/.zshrc # add autocomplete permanently to your zsh shell
 ```
 
-其他的方式见[kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
+For other methods, see [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
 
-## kubectl常用命令
+## Common kubectl Commands
 
 ```bash
 
     kubectl api-resources --namespaced=false
     kubectl api-resources --namespaced=true
-    # -R表示递归目录下所有配置
+    # -R means recursively apply all configs in the directory
     kubectl apply -R -f configs/
 
 
     kubectl get cs
     kubectl get svc --sort-by=.metadata.creationTimestamp
-    # 查看节点
+    # View nodes
     kubectl get no --sort-by=.metadata.creationTimestamp
     kubectl drain <node-name>
     kubectl taint nodes node1 key=value:NoSchedule
 
 
     kubectl get ing pdd --n java
-    # 不调度
+    # Don't schedule
     kubectl cluster-info dump
 
 
@@ -53,13 +51,13 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
     kubectl get po -l app=nginx -w
     kubectl delete po -l app=onekey-ali-web -n=$(namespace)
     kubectl get po --all-namespaces
-    # 查看异常pod
+    # View abnormal pods
     kubectl get po --all-namespaces --field-selector 'status.phase!=Running'
 ```
 
-## 集群管理相关命令
+## Cluster Management Related Commands
 
-### 应用管理相关
+### Application Management Related
 
 ```bash
     kubectl top pod
@@ -68,29 +66,29 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
     kubectl get svc --all-namespaces=true
     kubectl rollout undo deployment/nginx-deployment --to-revision=2
     kubectl autoscale deployment <deployment-name> --min=2 --max=5 --cpu-percent=80
-    #来watch ReplicaSet的变化。
+    # To watch ReplicaSet changes.
     kubectl get rs -w
     kubectl set image deployment/nginx-deployment nginx=nginx:1.9.1
     # deployment "nginx-deployment" image updated
     kubectl set image deploy monitorapi-deployment  monitorapi=registry-vpc.cn-shenzhen.aliyuncs.com/amiba/monitorapi:1.2.4 -n=java
 ```
 
-### 强制删除
+### Force Delete
 
-有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
+Sometimes there are problems when deleting pv/pvc. In this case, you need to add 2 command parameters `--grace-period=0 --force `
 
-### 删除所有失败的pod
+### Delete All Failed Pods
 
 ```bash
   kubectl get po --all-namespaces --field-selector 'status.phase==Failed'
   kubectl delete po  --field-selector 'status.phase==Failed'
-  #模糊删除pod
+  # Fuzzy delete pods
   key=
   kgpo -n default | grep $key | awk '{print $1}' | xargs kubectl delete po -n1 -n default
   
 ```
 
-### 事件
+### Events
 
 ```bash
     kubectl get events  --field-selector involvedObject.kind=Service --sort-by='.metadata.creationTimestamp'
@@ -98,5 +96,5 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
 ```
 
 
-参考链接:
-1. [kubernetes 节点维护 cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)
+Reference links:
+1. [kubernetes Node Maintenance cordon, drain, uncordon](https://blog.csdn.net/stonexmx/article/details/73543185)

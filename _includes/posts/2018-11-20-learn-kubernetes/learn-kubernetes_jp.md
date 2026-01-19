@@ -1,24 +1,22 @@
-<!-- TODO: Translate to jp -->
-
-## 一些实用工具
+## いくつかの便利なツール
 
 1. [kompose](https://github.com/kubernetes/kompose)
 
-可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
+docker-composeファイルの変換に使用でき、Kubernetesを学び始める人にとって非常に役立ちます。
 
-## 安装类工具
+## インストールツール
 
 1. [kubeadm](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/)
 
-参考:
-1. [证书轮换](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
+参考：
+1. [証明書のローテーション](https://kubernetes.io/cn/docs/tasks/tls/certificate-rotation/)
 
 
-## 进阶调度
+## 高度なスケジューリング
 
-每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+各タイプのアフィニティには2つのコンテキストがあります：preferredとrequired。preferredは傾向を示し、requiredは必須です。
 
-### 使用亲和度确保节点在目标节点上运行
+### アフィニティを使用してポッドがターゲットノードで実行されるようにする
 
 ```yml
         nodeAffinity:
@@ -30,11 +28,11 @@
 ```
 
 
-参考链接:
+参考リンク：
 1. [advanced-scheduling-in-kubernetes](https://kubernetes.io/blog/2017/03/advanced-scheduling-in-kubernetes/)
 1. [kubernetes-scheulder-affinity](https://cizixs.com/2017/05/17/kubernetes-scheulder-affinity/)
 
-### 使用反亲和度确保每个节点只跑同一个应用
+### アンチアフィニティを使用して各ノードで1つのアプリケーションのみが実行されるようにする
 
 ```yml
       affinity:
@@ -69,9 +67,9 @@
 ```
 
 
-### tolerations 和 taint
+### tolerations と taint
 
- tolerations 和 taint 总是结对存在, taint 就像是"虽然我刁莽,抽烟,月光,但我还是一个好女人",这种污点(taint)一般会让一般男性(pod)敬而远之,但总有几个老实人能够容忍(tolerations).
+tolerations と taint は常にペアで存在します。taint は「私は粗野で、タバコを吸い、浪費家ですが、それでも良い女性です」のようなものです。この種のtaint（汚点）は通常、一般的な男性（pod）を遠ざけますが、常にそれを許容（tolerations）できる誠実な人が何人かいます。
 
 #### taint
 
@@ -80,9 +78,9 @@ kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
 kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
 ```
 
-master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
+masterノードはデフォルトでtaintが付いているため、デプロイしたコンテナがmasterノードで実行されない理由です。しかし、`taint`をカスタマイズする場合は注意してください！すべての`DaemonSet`とkube-systemコンポーネントには、対応する`tolerations`が必要です。そうしないと、そのノードはこの`tolerations`を持たないすべてのコンテナを追放し、ネットワークプラグインやkube-proxyも含まれます。結果は非常に深刻ですので、注意してください。
 
-`taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
+`taint`と`tolerations`はペアで対応して存在し、演算子も乱用できません。
 
 #### tolerations
 
@@ -99,9 +97,9 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoExecute
 
-NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务必先行确认系统组件有对应配置tolerations.
+NoExecuteは、許容条件を満たさないpodを即座に追放します。この操作は非常に危険です。まず、システムコンポーネントに対応するtolerationsが設定されていることを確認してください。
 
-特别注意用`Exists`这个操作符是无效的,必须用`Equal`
+特に注意：`Exists`演算子は無効です。`Equal`を使用する必要があります。
 
 ##### NoSchedule
 
@@ -118,30 +116,30 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoSchedule
 
-是尽量不往这上面调度,但实际上还是会有pod在那上面跑
+ここにスケジュールしないようにしますが、実際にはまだその上でpodが実行される可能性があります。
 
-`Exists`和`Exists`随意使用,不是很影响
+`Exists`と`Equal`は自由に使用でき、それほど影響はありません。
 
-值得一提的是,同一个key可以同时存在多个effect
+同じキーが複数のeffectを同時に持つことができることは言及する価値があります。
 
 ```yml
 Taints:             elasticsearch-exclusive=true:NoExecute
                     elasticsearch-exclusive=true:NoSchedule
 ```
 
-其他参考链接：
+その他の参考リンク：
 
-1. [Kubernetes中的Taint和Toleration（污点和容忍）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
-1. [kubernetes的调度机制](https://segmentfault.com/a/1190000012709117#articleHeader8)
+1. [KubernetesのTaintとToleration（汚点と許容）](https://jimmysong.io/posts/kubernetes-taint-and-toleration/)
+1. [kubernetesのスケジューリングメカニズム](https://segmentfault.com/a/1190000012709117#articleHeader8)
 
 
-## 容器编排的技巧
+## コンテナオーケストレーションのテクニック
 
 ### wait-for-it
 
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
+k8sには現在、docker-composeの`depends_on`のような依存起動メカニズムがありません。[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)を使用してイメージのcommandを書き直すことをお勧めします。
 
-### 在cmd中使用双引号的办法
+### cmdで二重引用符を使用する方法
 
 ```yaml
 
@@ -153,259 +151,259 @@ k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建�
                   -d '{"query":{"range":{"@timestamp":{"lt":"now-90d","format": "epoch_millis"}}}}'
 ```
 
-## k8s的 master-cluster 架构
+## k8sのmaster-clusterアーキテクチャ
 
 ### master(CONTROL PLANE)
 
 - etcd distributed persistent storage
 
-    Consistent and highly-available key value store used as Kubernetes’ backing store for all cluster data.
+    Kubernetesのすべてのクラスターデータのバッキングストアとして使用される一貫性と高可用性のキー値ストア。
 
 - kube-apiserver
 
-    front-end for the Kubernetes control plane.
+    Kubernetesコントロールプレーンのフロントエンド。
 - kube-scheduler
 
-    Component on the master that watches newly created pods that have no node assigned, and selects a node for them to run on.
+    マスター上のコンポーネントで、割り当てられたノードがない新しく作成されたpodを監視し、それらが実行するノードを選択します。
 
 - Controller Manager 
     - Node Controller
     
-        Responsible for noticing and responding when nodes go down.
+        ノードがダウンしたときに気づいて対応する責任があります。
     - Replication Controller
         
-        Responsible for maintaining the correct number of pods for every replication controller object in the system.
+        システム内のすべてのレプリケーションコントローラーオブジェクトに対して、正しい数のpodを維持する責任があります。
     - Endpoints Controller
 
-        Populates the Endpoints object (that is, joins Services & Pods).
+        Endpointsオブジェクトを埋めます（つまり、ServicesとPodsを結合します）。
     - Service Account & Token Controllers
         
-        Create default accounts and API access tokens for new namespaces.
+        新しい名前空間のデフォルトアカウントとAPIアクセストークンを作成します。
 - cloud-controller-manager(**alpha feature**)
     - Node Controller
 
-        For checking the cloud provider to determine if a node has been deleted in the cloud after it stops responding        
+        クラウドプロバイダーをチェックして、ノードが応答を停止した後にクラウドで削除されたかどうかを判断するため        
     - Route Controller
 
-        For setting up routes in the underlying cloud infrastructure
+        基盤となるクラウドインフラストラクチャでルートを設定するため
     - Service Controller
 
-        For creating, updating and deleting cloud provider load balancers
+        クラウドプロバイダーのロードバランサーを作成、更新、削除するため
     - Volume Controller
         
-         For creating, attaching, and mounting volumes, and interacting with the cloud provider to orchestrate volumes
+         ボリュームを作成、アタッチ、マウントし、クラウドプロバイダーと対話してボリュームをオーケストレートするため
 
 
-参考链接:
-1. [Kubernetes核心原理（二）之Controller Manager](https://blog.csdn.net/huwh_/article/details/75675761)
-1. [Kubernetes组件](https://kubernetes.io/docs/concepts/overview/components/)
+参考リンク：
+1. [Kubernetesコア原理（二）のController Manager](https://blog.csdn.net/huwh_/article/details/75675761)
+1. [Kubernetesコンポーネント](https://kubernetes.io/docs/concepts/overview/components/)
 
 ### worker nodes
 
 - Kubelet
 
-    The kubelet is the primary “node agent” that runs on each node.
+    kubeletは各ノードで実行される主要な「ノードエージェント」です。
 - Kubernetes Proxy
 
-    kube-proxy enables the Kubernetes service abstraction by maintaining network rules on the host and performing connection forwarding.
+    kube-proxyは、ホスト上のネットワークルールを維持し、接続転送を実行することで、Kubernetesサービス抽象化を有効にします。
 
-- Container Runtime (Docker, rkt, or others)
+- Container Runtime (Docker, rkt, その他)
 
-    The container runtime is the software that is responsible for running containers. Kubernetes supports several runtimes: Docker, rkt, runc and any OCI runtime-spec implementation.
+    コンテナランタイムは、コンテナの実行を担当するソフトウェアです。Kubernetesはいくつかのランタイムをサポートしています：Docker、rkt、runc、およびOCI runtime-spec実装。
 
 
-## kubernetes的资源
+## kubernetesのリソース
 
 
 - spec
 
- The spec, which you must provide, describes your desired state for the object–the characteristics that you want the object to have. 
+ 提供する必要があるspecは、オブジェクトの希望する状態、つまりオブジェクトに持たせたい特性を記述します。 
 
 
 - status
 
- The status describes the actual state of the object, and is supplied and updated by the Kubernetes system.
+ statusはオブジェクトの実際の状態を記述し、Kubernetesシステムによって提供および更新されます。
 
 ![image](/img/in-post/learn-kubernetes/resource.png)
 
 ### pod
 
-    A pod is a group of one or more tightly related containers that will always run together on the same worker node and in the same Linux namespace(s).
+    podは、常に同じワーカーノード上で同じLinux名前空間内で一緒に実行される、1つ以上の密接に関連するコンテナのグループです。
 
-    Each pod is like a separate logical machine with its own IP, hostname, processes, etc., running a single application.
+    各podは、単一のアプリケーションを実行する独自のIP、ホスト名、プロセスなどを備えた別個の論理マシンのようなものです。
 
 - liveness
 
-The kubelet uses liveness probes to know when to restart a Container.
+kubeletはlivenessプローブを使用して、コンテナを再起動するタイミングを判断します。
 
 - readiness
 
-The kubelet uses readiness probes to know when a Container is ready to start accepting traffic. 
+kubeletはreadinessプローブを使用して、コンテナがトラフィックの受け入れを開始する準備ができているタイミングを判断します。 
 
-- 问题：如果删除一个pod 是先从endpoint里移除pod ip,还是 pod 先删除
+- 問題：podを削除する場合、endpointからpod ipを先に削除するか、podを先に削除するか
 
-个人见解：
+個人的な見解：
 
-删除一个pod的k8s内部流程
-1. 用户删除pod
-2. apiserver标记pod为'dead'状态
-3. kubelet删除pod 默认等待30s还在运行时 会强制关闭pod
-   3.1 kubelet等待pod中容器的 prestop 执行结束
-   3.2 发送 sigterm 信号 让容器关闭
-   3.3 超过30s等待时间 发送 sigkill 信号强制pod关闭
-4. nodecontroller中的endpoint controller从endpoint中删除此pod
+podを削除するk8sの内部プロセス
+1. ユーザーがpodを削除
+2. apiserverがpodを'dead'状態としてマーク
+3. kubeletがpodを削除、デフォルトで30秒待機、まだ実行中の場合はpodを強制終了
+   3.1 kubeletがpod内のコンテナのprestopの実行終了を待機
+   3.2 sigterm信号を送信してコンテナを閉じる
+   3.3 30秒の待機時間を超えると、sigkill信号を送信してpodを強制終了
+4. nodecontroller内のendpoint controllerがendpointからこのpodを削除
 
-3 4 步骤同时进行 一般情况下4肯定会先于3完成,由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod,而endpoint controller仍然存在此pod,会导致svc请求会转发到已经删除的pod上,从而导致调用svc出错
+3と4のステップは同時に進行します。一般的に、4は3より先に完了します。3と4の順序が不定のため、極端な場合、kubeletがすでにpodを削除したが、endpoint controllerがまだこのpodを持っている可能性があり、svcリクエストがすでに削除されたpodに転送され、svc呼び出しエラーが発生する可能性があります。
 
-参考链接 https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+参考リンク https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
 
 
-参考链接:
-1. [容器中使用pod的数据](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
-2. [在Kubernetes Pod中使用Service Account访问API Server](https://tonybai.com/2017/03/03/access-api-server-from-a-pod-through-serviceaccount/)
-3. [优雅停止pod](https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html)
+参考リンク：
+1. [コンテナでpodのデータを使用](https://kubernetes.io/docs/tasks/inject-data-application/environment-variable-expose-pod-information/)
+2. [Kubernetes PodでService Accountを使用してAPI Serverにアクセス](https://tonybai.com/2017/03/03/access-api-server-from-a-pod-through-serviceaccount/)
+3. [podの優雅な停止](https://pracucci.com/graceful-shutdown-of-kubernetes-pods.html)
 
 
 
 ### Deployment
-    A Deployment controller provides declarative updates for Pods and ReplicaSets.
+    Deploymentコントローラーは、PodとReplicaSetの宣言的更新を提供します。
 
 
 - Rolling Update
 
 ```bash
-    #只适用于pod 里面只包含一个 container 的情况
+    # pod内に1つのcontainerのみが含まれる場合にのみ適用
     kubectl rolling-update NAME [NEW_NAME] --image=IMAGE:TAG
 ```
 
 
-[Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) 用来作初始化环境的容器
+[Init Containers](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) は初期化環境を作成するために使用されるコンテナです。
 
 
-参考:
-1. [Assign CPU Resources to Containers and Pods](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
-2. [Kubernetes deployment strategies](https://container-solutions.com/kubernetes-deployment-strategies/)
-3. [Autoscaling based on CPU/Memory in Kubernetes — Part II](https://blog.powerupcloud.com/autoscaling-based-on-cpu-memory-in-kubernetes-part-ii-fe2e495bddd4)
-4. [Assigning Pods to Nodes](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
+参考：
+1. [コンテナとPodにCPUリソースを割り当て](https://kubernetes.io/docs/tasks/configure-pod-container/assign-cpu-resource/)
+2. [Kubernetesデプロイメント戦略](https://container-solutions.com/kubernetes-deployment-strategies/)
+3. [KubernetesでのCPU/メモリに基づく自動スケーリング—パートII](https://blog.powerupcloud.com/autoscaling-based-on-cpu-memory-in-kubernetes-part-ii-fe2e495bddd4)
+4. [Podをノードに割り当て](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/)
 
-- 资源不够时deployment无法更新
+- リソースが不足している場合、deploymentは更新できません
 
 0/6 nodes are available: 3 Insufficient memory, 3 node(s) had taints that the pod didn't tolerate.
 
 ### Replication Controller
 
-    A replication controller is a Kubernetes resource that ensures a pod is always up and running.
+    レプリケーションコントローラーは、podが常に稼働していることを保証するKubernetesリソースです。
 
     -> label
 
-### ReplicaSet(副本集)
+### ReplicaSet(レプリカセット)
 
-    Replication Controller(副本控制器)的替代产物
+    Replication Controller(レプリケーションコントローラー)の代替品
 
-k8s组件|pod selector
+k8sコンポーネント|pod selector
 --|--
 Replication Controller|label
-ReplicaSet|label ,pods that include a certain label key
+ReplicaSet|label、特定のラベルキーを含むpod
 
 
-参考链接:
-1. [聊聊你可能误解的Kubernetes Deployment滚动更新机制](https://blog.csdn.net/WaltonWang/article/details/77461697)
+参考リンク：
+1. [誤解している可能性のあるKubernetes Deploymentローリング更新メカニズムについて](https://blog.csdn.net/WaltonWang/article/details/77461697)
 
-### DaemonSet(守护进程集)
+### DaemonSet(デーモンセット)
 
-    A DaemonSet makes sure it creates as many pods as there are nodes and deploys each one on its own node
+    DaemonSetは、ノードと同じ数のpodを作成し、それぞれを独自のノードにデプロイすることを確認します
 
-- 健康检查
+- ヘルスチェック
 1. liveness probe
-2. HTTP-based liveness probe
+2. HTTPベースのliveness probe
 3. 
 
-### StatefulSet(有状态副本集)
-    Manages the deployment and scaling of a set of Pods , and provides guarantees about the ordering and uniqueness of these Pods.
+### StatefulSet(ステートフルレプリカセット)
+    Podのセットのデプロイメントとスケーリングを管理し、これらのPodの順序と一意性について保証を提供します。
 
-参考:
+参考：
 1. [StatefulSet](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)
 
 
 ### volumes
 
-> volumes有2种模式
+> volumesには2つのモードがあります
 > 
-> In-tree是 Kubernetes 标准版的一部分，已经写入 Kubernetes 代码中。
-> Out-of-tree 是通过 Flexvolume 接口实现的，Flexvolume 可以使得用户在 Kubernetes 内自己编写驱动或添加自有数据卷的支持。
+> In-treeはKubernetes標準版の一部で、すでにKubernetesコードに書き込まれています。
+> Out-of-treeはFlexvolumeインターフェースを通じて実装されます。Flexvolumeにより、ユーザーはKubernetes内で独自のドライバーを記述したり、独自のデータボリュームのサポートを追加したりできます。
 
 
-1.  emptyDir – a simple empty directory used for storing transient data,
-1.  hostPath – for mounting directories from the worker node’s filesystem into the pod,
-1.  gitRepo – a volume initialized by checking out the contents of a Git repository,
-1.  nfs – an NFS share mounted into the pod,
+1.  emptyDir – 一時データを保存するために使用されるシンプルな空のディレクトリ、
+1.  hostPath – ワーカーノードのファイルシステムからディレクトリをpodにマウントするため、
+1.  gitRepo – Gitリポジトリの内容をチェックアウトして初期化されたボリューム、
+1.  nfs – podにマウントされたNFS共有、
 1.  gcePersistentDisk (Google Compute Engine Persistent Disk), awsElasticBlockStore
 (Amazon Web Services Elastic Block Store Volume), azureDisk (Microsoft Azure Disk
-Volume) – for mounting cloud provider specific storage,
+Volume) – クラウドプロバイダー固有のストレージをマウントするため、
 1.  cinder, cephfs, iscsi, flocker, glusterfs, quobyte, rbd, flexVolume, vsphereVolume,
-photonPersistentDisk, scaleIO – for mounting other types of network storage,
-1.  configMap, secret, downwardAPI – special types of volumes used to expose certain
-Kubernetes resources and cluster info to the pod,
-1.  persistentVolumeClaim – a way to use a pre- or dynamically provisioned persistent
-storage (we’ll talk about them in the last section of this chapter).
+photonPersistentDisk, scaleIO – 他のタイプのネットワークストレージをマウントするため、
+1.  configMap, secret, downwardAPI – 特定の
+Kubernetesリソースとクラスター情報をpodに公開するために使用される特別なタイプのボリューム、
+1.  persistentVolumeClaim – 事前または動的にプロビジョニングされた永続
+ストレージを使用する方法（この章の最後のセクションで説明します）。
 
 - Persistent Volume
-持久卷，就是将数据存储放到对应的外部可靠存储中，然后提供给Pod/容器使用，而无需先将外部存储挂在到主机上再提供给容器。它最大的特点是其生命周期与Pod不关联，在Pod死掉的时候它依然存在，在Pod恢复的时候自动恢复关联。
+永続ボリュームは、データストレージを対応する外部の信頼性の高いストレージに配置し、Pod/コンテナに提供して使用できるようにします。ホストに外部ストレージをマウントしてからコンテナに提供する必要はありません。その最大の特徴は、ライフサイクルがPodに関連付けられていないことです。Podが死んでも依然として存在し、Podが回復すると自動的に関連付けが復元されます。
 
 - Persistent Volume Claim
-用来申明它将从PV或者Storage Class资源里获取某个存储大小的空间。
+PVまたはStorage Classリソースから特定のストレージサイズのスペースを取得することを宣言するために使用されます。
 
 参考：  
-1. [Kubernetes中的Volume介绍](https://jimmysong.io/posts/kubernetes-volumes-introduction)
+1. [KubernetesのVolume紹介](https://jimmysong.io/posts/kubernetes-volumes-introduction)
 
 ### ConfigMap
 
-ConfigMap是用来存储配置文件的kubernetes资源对象，所有的配置内容都存储在etcd中.
+ConfigMapは、設定ファイルを保存するために使用されるKubernetesリソースオブジェクトで、すべての設定内容がetcdに保存されます。
 
-实践证明修改 ConfigMap 无法更新容器中已注入的环境变量信息。
+実践により、ConfigMapを変更しても、コンテナにすでに注入された環境変数情報を更新できないことが証明されています。
 
-参考:
-1. [Kubernetes ConfigMap热更新测试](https://jimmysong.io/posts/kubernetes-configmap-hot-update/)
+参考：
+1. [Kubernetes ConfigMapホットアップデートテスト](https://jimmysong.io/posts/kubernetes-configmap-hot-update/)
 
 
 ### service
 
-> A Kubernetes service is a resource you create to get a single, constant point of entry to a group of pods providing the same service.
+> Kubernetesサービスは、同じサービスを提供するpodのグループへの単一の一定のエントリーポイントを取得するために作成するリソースです。
     
-> Each service has an IP address and port that never change while the service exists. 
+> 各サービスには、サービスが存在する限り変更されないIPアドレスとポートがあります。 
 
-> The resources will be created in the order they appear in the file. Therefore, it’s best to specify the service first, since that will ensure the scheduler can spread the pods associated with the service as they are created by the controller(s), such as Deployment.
+> リソースは、ファイルに表示される順序で作成されます。したがって、サービスを最初に指定するのが最善です。これにより、スケジューラーが、Deploymentなどのコントローラーによって作成されるときに、サービスに関連付けられたpodを分散できることが保証されます。
 
 - ClusterIP
 
-集群内部访问用,外部可直接访问
+クラスター内部アクセス用、外部から直接アクセス可能
 
-当type不指定时,创建的就是这一类型的服务
+typeが指定されていない場合、このタイプのサービスが作成されます
 
-clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service),特点是没有clusterIP
+clusterIP: Noneは特別な[headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service)で、clusterIPがないことが特徴です
 
 - NodePort
 
-每个节点都会开相同的端口,所以叫NodePort.有数量限制.外部可直接访问
+各ノードは同じポートを開くため、NodePortと呼ばれます。数量制限があります。外部から直接アクセス可能
 
 - LoadBalancer
 
-特定云产商的服务.如果是阿里云,就是在NodePort的基础上,帮你自动绑定负载均衡的后端服务器而已
+特定のクラウドプロバイダーのサービス。阿里云の場合、NodePortの上にロードバランサーのバックエンドサーバーを自動的にバインドするだけです
 
 - ExternalName
 
-参考:
-1. [IPVS-Based In-Cluster Load Balancing Deep Dive](https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/)
+参考：
+1. [IPVSベースのクラスター内ロードバランシングの詳細](https://kubernetes.io/blog/2018/07/09/ipvs-based-in-cluster-load-balancing-deep-dive/)
 
 ### Horizontal Pod Autoscaler
 
-    The Horizontal Pod Autoscaler automatically scales the number of pods in a replication controller, deployment or replica set based on observed CPU utilization (or, with custom metrics support, on some other application-provided metrics).
+    Horizontal Pod Autoscalerは、観測されたCPU使用率（または、カスタムメトリクスサポートにより、他のアプリケーション提供のメトリクス）に基づいて、レプリケーションコントローラー、デプロイメント、またはレプリカセット内のpodの数を自動的にスケーリングします。
 
-配合metrics APIs以及resource 里面的 request 资源进行调整.
+メトリクスAPIとリソース内のrequestリソースと連携して調整します。
 
 ### Kubernetes Downward API
 
-    It allows us to pass metadata about the pod and its environment through environment variables or files (in a so- called downwardAPI volume)
+    podとその環境に関するメタデータを環境変数またはファイル（いわゆるdownwardAPIボリューム）を通じて渡すことができます
 
 - environment variables
 - downwardAPI volume
@@ -413,22 +411,22 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
 ### Resource Quotas
 
-基于namespace限制pod资源的一种手段
+名前空間に基づいてpodリソースを制限する手段
 
 
-## 网络模型
+## ネットワークモデル
 
-[Kubernetes网络模型原理](https://mp.weixin.qq.com/s?__biz=MjM5OTcxMzE0MQ==&mid=2653371440&idx=1&sn=49f4e773bb8a58728752275faf891273&chksm=bce4dc2a8b93553c6b33d53c688ba30d61f88f0e065f50d82b1fb7e64daa4cc68394ffd8810b&mpshare=1&scene=23&srcid=1031BL2jtxx8DABRb46lNGPl%23rd)
+[Kubernetesネットワークモデル原理](https://mp.weixin.qq.com/s?__biz=MjM5OTcxMzE0MQ==&mid=2653371440&idx=1&sn=49f4e773bb8a58728752275faf891273&chksm=bce4dc2a8b93553c6b33d53c688ba30d61f88f0e065f50d82b1fb7e64daa4cc68394ffd8810b&mpshare=1&scene=23&srcid=1031BL2jtxx8DABRb46lNGPl%23rd)
 
 
 
-参考命令:
-3. [kubectl命令指南](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
-4. [Kubernetes与Docker基本概念与常用命令对照](https://yq.aliyun.com/articles/385699?spm=a2c4e.11153959.0.0.7355d55acvAlBq)
+参考コマンド：
+3. [kubectlコマンドガイド](https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands)
+4. [KubernetesとDockerの基本概念と一般的なコマンドの比較](https://yq.aliyun.com/articles/385699?spm=a2c4e.11153959.0.0.7355d55acvAlBq)
 6. [kubectl Cheat Sheet](https://kubernetes.io/docs/reference/kubectl/cheatsheet/)
-7. [K8S资源配置指南](https://kubernetes.io/docs/reference/)
-8. [Introducing Container Runtime Interface (CRI) in Kubernetes](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)
+7. [K8Sリソース設定ガイド](https://kubernetes.io/docs/reference/)
+8. [KubernetesでのContainer Runtime Interface (CRI)の紹介](https://kubernetes.io/blog/2016/12/container-runtime-interface-cri-in-kubernetes/)
 
 
-参考电子书:
-[Kubernetes Handbook——Kubernetes中文指南/云原生应用架构实践手册](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)
+参考電子書籍：
+[Kubernetes Handbook——Kubernetes日本語ガイド/クラウドネイティブアプリケーションアーキテクチャ実践マニュアル](https://jimmysong.io/kubernetes-handbook/concepts/statefulset.html)

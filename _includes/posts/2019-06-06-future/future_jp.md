@@ -1,5 +1,3 @@
-<!-- TODO: Translate to jp -->
-
 ```
 graph TB
 g(Comparable<Delayed>)-->A
@@ -23,35 +21,35 @@ fjt-->rtt(RecursiveTask<V>)
 
 ### Future<V>
 
-上图可以看出`Future<V>`地位超凡,基本上很多成员都是他"儿子"
+上の図から、`Future<V>`が並外れた地位を持っていることがわかります。基本的に多くのメンバーがその「子」です。
 
-Future<V>表示异步运算的结果
+Future<V>は非同期計算の結果を表します。
 
 ### ScheduledFuture<V>
 
-代表了一种预期的任务,比如可以用`ScheduledFuture`配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate),延迟作业(scheduleWithFixedDelay)
+予定されたタスクを表します。たとえば、`ScheduledFuture`をScheduledExecutorServiceと組み合わせて、周期的な繰り返し作業（scheduleAtFixedRate）、遅延作業（scheduleWithFixedDelay）を行うことができます。
 
 ### RunnableScheduledFuture<V>
 
-这是个接口,得自己实现.
+これはインターフェースで、自分で実装する必要があります。
 
-可用于一次性任务或者周期性任务.
+1回限りのタスクまたは周期的なタスクに使用できます。
 
-这里可以参考他的子接口.ScheduledFuture的用法
+ここでそのサブインターフェースを参照できます。ScheduledFutureの用法。
 
 ### RunnableFuture
 
-这是个接口,得自己实现.
+これはインターフェースで、自分で実装する必要があります。
 
 ### FutureTask
 
-可用`Callable<V>`和`Runnable`初始化.`Callable<V>`带返回值.
+`Callable<V>`と`Runnable`で初期化できます。`Callable<V>`には戻り値があります。
 
-可配合ExecutorService实现多线程任务分发
+ExecutorServiceと組み合わせて、マルチスレッドタスク分散を実装できます。
 
 ### CompletableFuture<T>
 
-可以用来创建链式服务(1启动多任务)
+チェーンサービス（1が複数のタスクを開始）を作成するために使用できます。
 
 
 ```java
@@ -70,7 +68,7 @@ int i = 1;
         });
 
         future.thenApply((s) -> {
-            //把上个任务的结果传递到子任务中
+            // 前のタスクの結果を子タスクに渡す
             out.println(s);
             out.println("end 2");
             i = i << 1;
@@ -85,10 +83,10 @@ int i = 1;
             }
             out.println("CompletableFutureExample end");
         });
-        //通过这个信号,持续等待子线程运行完毕
+        // この信号を通じて、子スレッドの実行完了を継続的に待機
         while (i != 8) {
             Thread.sleep(500);
-            out.println("继续等待");
+            out.println("継続的に待機");
         }
 //        future.join();
 //        CompletableFuture.allOf(future).join();
@@ -97,20 +95,20 @@ int i = 1;
 
 ### CountedCompleter<T>
 
-CountedCompleter:任务可能产生结果，也可能不产生结果。
+CountedCompleter：タスクは結果を生成する場合と生成しない場合があります。
 
-CountedCompleter 在任务完成执行后会触发执行一个自定义的钩子函数。
+CountedCompleterは、タスクの実行完了後にカスタムフック関数の実行をトリガーします。
 
 
 ### RecursiveAction
 
-跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`,但是`RecursiveAction`不产生结果.
+CountedCompleter<T>と同様に、`ForkJoinTask<V>`から継承しますが、`RecursiveAction`は結果を生成しません。
 
 ### RecursiveTask<V>
 
-RecursiveTask类的实例表示产生结果的任务。
+RecursiveTaskクラスのインスタンスは、結果を生成するタスクを表します。
 
-特点在于可递归执行.
+特徴は、再帰的に実行できることです。
 
 ```
 public class RecursiveTaskExample extends RecursiveTask<Integer> {
@@ -138,6 +136,6 @@ public class RecursiveTaskExample extends RecursiveTask<Integer> {
 }
 ```
 
-参考链接:
+参考リンク：
 
-1. [JUC源码分析-线程池篇（五）：ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)
+1. [JUCソースコード分析-スレッドプール編（五）：ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)

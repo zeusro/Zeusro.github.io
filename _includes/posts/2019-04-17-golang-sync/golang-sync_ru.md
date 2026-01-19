@@ -1,18 +1,15 @@
-<!-- TODO: Translate to ru -->
+## Связанное с параллелизмом
 
-## 并发相关
+### Резюме
 
-### 总结
-
-
-type | 作用
----|---
-Cond|发令枪,一般预设一个条件让子任务等待,发出的信号可以是单个(Signal)也可集体广播(Broadcast)
-Locker|简单接口
-Mutex|互斥锁
-Once|并发运行,只允许一次
-RWMutex|读写锁,多读少写,同时读锁,读写互斥.
-WaitGroup|分发任务,主线程等待所有任务完成
+| type | назначение |
+|---|---|
+| Cond | Стартовый пистолет, обычно предустанавливает условие для подзадач ожидания; сигнал может быть одиночным (Signal) или широковещательным (Broadcast) |
+| Locker | Простой интерфейс |
+| Mutex | Взаимоисключающая блокировка |
+| Once | Параллельное выполнение, разрешено только один раз |
+| RWMutex | Блокировка чтения-записи, много чтений и мало записей, одновременные блокировки чтения, взаимное исключение чтения-записи. |
+| WaitGroup | Распределение задач, главный поток ждет завершения всех задач |
 
 
 ### Cond 
@@ -25,11 +22,11 @@ type Cond
     func (c *Cond) Wait()
 ```
 
-加入到通知列表 -> 解锁 L -> 等待通知 -> 锁定 L
+Добавить в список уведомлений -> Разблокировать L -> Ждать уведомления -> Заблокировать L
 
-虽然放在最前面,但我花了最长的时间去理解这玩意.
+Хотя это помещено в самом начале, я потратил больше всего времени, пытаясь понять эту вещь.
 
-按照我的理解,`Cond`就好比一个发令枪.比如我同时养了5条狗,并同时准备了5份食物,但是没有我的口令,我不准它们吃.示例代码如下:
+Согласно моему пониманию, `Cond` похож на стартовый пистолет. Например, у меня есть 5 собак и 5 порций еды, готовых одновременно, но я не позволю им есть без моей команды. Примерный код выглядит следующим образом:
 
 
 ```go
@@ -38,28 +35,28 @@ func useCondBroadcast() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// Создать новый cond
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// Конкурировать за блокировку взаимного исключения
 			cond.L.Lock()
-			// 条件是否达成
+			// Проверить, выполнено ли условие
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("Получено уведомление goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d выполнение завершено\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// Убедиться, что все goroutines запущены
 	time.Sleep(time.Millisecond * 20)
 
 	fmt.Println("broadcast...")
@@ -78,28 +75,28 @@ func useCondSignal() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// Создать новый cond
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// Конкурировать за блокировку взаимного исключения
 			cond.L.Lock()
-			// 条件是否达成
+			// Проверить, выполнено ли условие
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("Получено уведомление goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d выполнение завершено\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// Убедиться, что все goroutines запущены
 	time.Sleep(time.Millisecond * 20)
 
 	time.Sleep(time.Second)
@@ -117,41 +114,41 @@ func useCondSignal() {
 
 ```
 
-这时
+В этот момент
 
-场景:喂狗
+Сценарий: Кормление собак
 
-goroutine:每一条狗吃饭的行为
+goroutine: Действие каждой собаки, поедающей еду
 
-Broadcast()方法:通知所有狗吃饭
+Метод Broadcast(): Уведомить всех собак поесть
 
-Signal()方法:通知随机一条狗吃饭
+Метод Signal(): Уведомить случайную собаку поесть
 
-例子中count变量: 指示狗吃饭的信号
+Переменная `count` в примере: Указывает сигнал для собак поесть
 
-例子中的ch变量:狗拉的便便
+Переменная `ch` в примере: Какашки, которые тянут собаки
 
-`useCondBroadcast()`和`useCondSignal`这2个例子,差别只在于最后管道的读取游标(i).
+Разница между примерами `useCondBroadcast()` и `useCondSignal` только в курсоре чтения финальной трубы (i).
 
-`Broadcast`方法通知的对象是所有的狗,所以最后所有的狗都顺利开吃(i=4).
+Метод `Broadcast` уведомляет всех собак, поэтому все собаки успешно начинают есть (i=4).
 
-`Signal`只通知了一条狗,所以最后只有一条狗拉出了便便(i=0)
+`Signal` уведомляет только одну собаку, поэтому в конце только одна собака какает (i=0).
 
-所以如果只有一条狗,那么使用`Signal`效果等同于`Broadcast`.
+Так что если есть только одна собака, использование `Signal` имеет тот же эффект, что и `Broadcast`.
 
-用`Signal`和`Broadcast`方法都好,如果设置了管道(ch := make(chan struct{}, 5))去接收最后的结果,要注意设置的临界值变化导致的最后出来的结果数量.
+Оба метода `Signal` и `Broadcast` хороши. Если настроен канал (ch := make(chan struct{}, 5)) для получения финального результата, будьте осторожны с изменением порогового значения, которое влияет на количество результатов.
 
-取少了没关系,取多了会出现`fatal error: all goroutines are asleep - deadlock!`这个`panic`(比如,在`useCondSignal`这个例子里面,把`i<1`改成`i<2`),后果不堪设想.
+Можно взять меньше, но взять слишком много вызовет панику `fatal error: all goroutines are asleep - deadlock!` (например, в примере `useCondSignal` изменить `i<1` на `i<2`), с непредсказуемыми последствиями.
 
-关于`Cond`实际的使用场景,我觉得把`Cond`应用于最优解.比如说我要爬取同一个网页,可能有ABCD四种方案,我只需要其中一个方案最快完成即可.那么只要其中一个任务完成,在主线程发起`Broadcast`,这样其他方案就不用白忙活了,可以退出舞台.
+Что касается фактического случая использования `Cond`, я думаю, что `Cond` лучше всего применять к оптимальному решению. Например, если я хочу сканировать одну и ту же веб-страницу, могут быть четыре схемы A, B, C, D, и мне нужна только одна из них, чтобы завершиться быстрее всего. Затем, как только одна задача завершится, `Broadcast` инициируется в главном потоке, так что другим схемам не нужно работать впустую и они могут покинуть сцену.
 
-暂时没想到`Signal`的实际用法,以后有机会再补充吧.
+Я еще не придумал фактическое использование `Signal`; добавлю позже, если будет возможность.
 
-真正理解了`Cond`锁的争抢方式之后,`Broadcast`和`Signal`交替使用也就不再有什么问题.
+Как только механизм конкуренции блокировки `Cond` действительно понят, чередование `Broadcast` и `Signal` больше не представляет проблемы.
 
 ### [Locker](https://golang.org/pkg/sync/#Locker)
 
-只是一个简单的接口.
+Просто простой интерфейс.
 
 ```go
 type Locker interface {
@@ -168,7 +165,7 @@ type Mutex
     func (m *Mutex) Unlock()
 ```
 
-互斥锁
+Взаимоисключающая блокировка
 
 ```go
 func useMutex() {
@@ -178,21 +175,21 @@ func useMutex() {
 	go func() {
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine1: 我会锁定大概 2s")
+		fmt.Println("goroutine1: Я заблокирую примерно на 2s")
 		time.Sleep(time.Second * 2)
-		fmt.Println("goroutine1: 我解锁了，你们去抢吧")
+		fmt.Println("goroutine1: Я разблокировал, идите захватывать")
 		ch <- struct{}{}
 	}()
 
 	go func() {
-		fmt.Println("groutine2: 等待解锁")
+		fmt.Println("groutine2: Ожидание разблокировки")
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine2: 哈哈，我锁定了")
+		fmt.Println("goroutine2: Ха-ха, я заблокировал")
 		ch <- struct{}{}
 	}()
 
-	// 等待 goroutine 执行结束
+	// Ждать завершения goroutines
 	for i := 0; i < 2; i++ {
 		<-ch
 	}
@@ -207,7 +204,7 @@ type Once
     func (o *Once) Do(f func())
 ```    
 
-如其名,Once里的Do函数只会运行一次
+Как следует из названия, функция Do в Once будет выполняться только один раз.
 
 ```go
 func useOnce() {
@@ -239,13 +236,13 @@ type RWMutex
     func (rw *RWMutex) Unlock()
 ```    
 
-RWMutex是基于Mutex实现的.
+RWMutex реализован на основе Mutex.
 
-读写锁,一般用在大量读操作、少量写操作的情况
+Блокировка чтения-записи, обычно используется в сценариях с большим количеством операций чтения и небольшим количеством операций записи.
 
-1. 同时只能有一个 goroutine 能够获得写锁定。
-1. 同时可以有任意多个 gorouinte 获得读锁定。
-1. 同时只能存在写锁定或读锁定（读和写互斥）。
+1. Только одна goroutine может получить блокировку записи одновременно.
+1. Любое количество goroutines может одновременно получить блокировки чтения.
+1. Может существовать только блокировка записи или блокировка чтения одновременно (чтение и запись взаимно исключают друг друга).
 
 ```go
 func useRWMutex() {
@@ -267,19 +264,19 @@ var rw sync.RWMutex
 
 func read(n int, ch chan struct{}) {
 	rw.RLock()
-	fmt.Printf("goroutine %d 进入读操作...\n", n)
+	fmt.Printf("goroutine %d входит в операцию чтения...\n", n)
 	v := count
-	fmt.Printf("goroutine %d 读取结束，值为：%d\n", n, v)
+	fmt.Printf("goroutine %d закончил чтение, значение: %d\n", n, v)
 	rw.RUnlock()
 	ch <- struct{}{}
 }
 
 func write(n int, ch chan struct{}) {
 	rw.Lock()
-	fmt.Printf("goroutine %d 进入写操作...\n", n)
+	fmt.Printf("goroutine %d входит в операцию записи...\n", n)
 	v := rand.Intn(1000)
 	count = v
-	fmt.Printf("goroutine %d 写入结束，新值为：%d\n", n, v)
+	fmt.Printf("goroutine %d закончил запись, новое значение: %d\n", n, v)
 	rw.Unlock()
 	ch <- struct{}{}
 }
@@ -296,11 +293,11 @@ Examples(Expand All)
 
 ```
 
-简单的多任务分发
+Простое распределение многозадачности
 
 ```go
 func useWaitGroup() {
-	// 通过sync包中的WaitGroup 实现并发控制
+	// Достичь управления параллелизмом через WaitGroup в пакете sync
 
 	var wg sync.WaitGroup
 
@@ -320,11 +317,11 @@ func useWaitGroup() {
 	wg.Wait()
 	fmt.Println("handle2 done")
 
-	// 在 sync 包中，提供了 WaitGroup ，它会等待它收集的所有 goroutine 任务全部完成，在主 goroutine 中 Add(delta int) 索要等待goroutine 的数量。在每一个 goroutine 完成后 Done() 表示这一个goroutine 已经完成，当所有的 goroutine 都完成后，在主 goroutine 中 WaitGroup 返回。
+	// Пакет sync предоставляет WaitGroup, который ждет завершения всех собранных им задач goroutine. В главной goroutine Add(delta int) используется для указания количества goroutines для ожидания. После завершения каждой goroutine Done() указывает, что эта goroutine завершена. Когда все goroutines завершены, WaitGroup возвращается в главной goroutine.
 }
 ```
 
-## 数据结构
+## Структуры данных
 
 ### Map
 
@@ -337,28 +334,22 @@ type Map
     func (m *Map) Store(key, value interface{})
 ```    
 
-#### 适用场景
+#### Применимые сценарии
 
-线程安全集合,在2个场景做了优化
+Потокобезопасная коллекция, оптимизирована для 2 сценариев:
 
-1. 只写1次,多次读
-2. 多个goroutines读写互不相同的键(比如goroutines1读写key1,goroutines2读写key2)
+1. Записать один раз, читать много раз
+2. Несколько goroutines читают и пишут разные ключи (например, goroutine1 читает/пишет key1, goroutine2 читает/пишет key2)
 
-#### 方法介绍
+#### Введение методов
 
-Load 读取
+Load: Чтение
+LoadOrStore: Чтение, если не найдено, затем запись
+Store: Запись
+Range: Нельзя итерировать напрямую, нужно итерировать через callback
 
-LoadOrStore 读取不到则写入
-
-Store 写入
-
-Range 无法直接遍历,得通过回调的方式遍历
-
-具体用法见
-
+Конкретное использование можно найти в:
 [Go 1.9 sync.Map揭秘](https://colobu.com/2017/07/11/dive-into-sync-Map/)
-
-
 
 ### Pool
 
@@ -377,20 +368,20 @@ var bufPool = sync.Pool{
 }
 
 func usePool(key, val string) {
-	// 获取临时对象，没有的话会自动创建
+	// Получить временный объект, автоматически создать, если недоступен
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
 	b.WriteString(key)
 	b.WriteByte('=')
 	b.WriteString(val)
 	os.Stdout.Write(b.Bytes())
-	// 将临时对象放回到 Pool 中
+	// Вернуть временный объект в Pool
 	bufPool.Put(b)
 }
 ```
 
 
-## 参考链接:
+## Ссылки:
 
-1. [浅谈 Golang sync 包的相关使用方法](https://deepzz.com/post/golang-sync-package-usage.html)
-2. [map性能对比](https://medium.com/@deckarep/the-new-kid-in-town-gos-sync-map-de24a6bf7c2c)
+1. [Кратко о связанных методах использования пакета Golang sync](https://deepzz.com/post/golang-sync-package-usage.html)
+2. [Сравнение производительности map](https://medium.com/@deckarep/the-new-kid-in-town-gos-sync-map-de24a6bf7c2c)
