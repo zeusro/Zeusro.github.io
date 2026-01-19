@@ -1,5 +1,3 @@
-<!-- TODO: Translate to jp -->
-
 ```
 graph TB
 A(CompletionService<V>)-->B(ExecutorCompletionService)
@@ -9,41 +7,41 @@ A(CompletionService<V>)-->B(ExecutorCompletionService)
 
 ### CompletionService<V>
 
-可自行实现该接口.这是一个任务队列.
+このインターフェースを自分で実装できます。これはタスクキューです。
 
-取出队列元素的poll和take方法
+キュー要素を取得するpollメソッドとtakeメソッド。
 
-take会阻塞知道队列出现结果
+takeはキューに結果が現れるまでブロックします。
 
-poll使用的前提是确保队列已经有结果,不然贸贸然使用会出现空指针.可以指定一个超时等待时间,避免长时间卡死.
+pollは、キューにすでに結果があることを前提に使用する必要があります。そうでない場合、軽率に使用するとnullポインターが発生します。長時間のブロックを避けるために、タイムアウト待機時間を指定できます。
 
 
 ### ExecutorCompletionService
 
-一般都是声明`CompletionService<V>`,实例化ExecutorCompletionService
+一般的に`CompletionService<V>`を宣言し、ExecutorCompletionServiceをインスタンス化します。
 
 ```java
     int TOTAL_TASK = 2;
 
     public void run() throws InterruptedException, ExecutionException {
-        // 创建线程池
+        // スレッドプールを作成
         ExecutorService pool = Executors.newFixedThreadPool(TOTAL_TASK);
         CompletionService<Integer> cService = new ExecutorCompletionService<>(pool);
 
-        // 向里面扔任务
+        // タスクを投入
         for (int i = 0; i < TOTAL_TASK; i++) {
             cService.submit(new CallableExample());
-            //重载的这个submit(Runnable task, V result)方法,是自行把结果传入
+            //このオーバーロードされたsubmit(Runnable task, V result)メソッドは、結果を自分で渡します
         }
-        // 检查线程池任务执行结果
+        // スレッドプールタスクの実行結果を確認
         for (int i = 0; i < TOTAL_TASK; i++) {
             Future<Integer> future = cService.take();
             System.out.println("method:" + future.get());
         }
-        // 关闭线程池
+        // スレッドプールをシャットダウン
         pool.shutdown();
     }
 ```    
 
 
-[其他例子](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)
+[その他の例](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)

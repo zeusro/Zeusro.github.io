@@ -1,154 +1,152 @@
-<!-- TODO: Translate to en -->
-
 > If you can't explain it simply, you don't understand it well enough.
 
 
-我把[之前一篇文章]()发给一个女性朋友看，得到的反馈是“**卖弄概念，表述单薄，缺乏深度，收尾草率，一通胡扯**”。
+I sent [a previous article]() to a female friend, and the feedback was "**showing off concepts, thin expression, lack of depth, hasty conclusion, a bunch of nonsense**".
 
-好吧，我承认，我写的就是一坨屎。
+Alright, I admit, what I wrote is a pile of crap.
 
-今天，我决定抛开一切概念，以第一人称的视角，重新解释`动态规划`这种行动策略。
+Today, I decided to set aside all concepts and, from a first-person perspective, re-explain this action strategy called `dynamic programming`.
 
-## 小偷偷东西
+## A Thief Stealing Things
 
 ![](/img/in-post/dynamic-optimization/偷.gif)
 
-我是一个小偷，现在是凌晨12点，我正在入室盗窃。屋主的主人随时可能醒来，所以我要在天亮之前，偷窃屋内所有价值最高的东西，然后跑路。我要制定一个详细的行动纲领，指导我做这件事情。
+I'm a thief, it's midnight, and I'm breaking into a house. The homeowner could wake up at any time, so I need to steal all the most valuable things in the house before dawn, then run. I need to make a detailed action plan to guide me in doing this.
 
-这件事情就是：**在有限的时间里面偷窃价值最高的物品**。
+This task is: **steal the most valuable items within limited time**.
 
-偷取物品需要成本，这个成本我们简单地当成时间成本，单位是小时。
+Stealing items has a cost, which we simply treat as time cost, measured in hours.
 
-我创建了一个符号来表示物品的大致属性。
+I created a symbol to represent the general attributes of items.
 
 ```bash
-# 偷iPhone需要1小时，而它价值5000块
+# Stealing an iPhone takes 1 hour, and it's worth 5000 yuan
 iPhone（1，5000）
-# 偷洗衣机需要3小时，而它价值2000块
-洗衣机（3,2000）
-# 偷现金需要1小时，而它价值10000块（现金）
-现金（1,10000）
+# Stealing a washing machine takes 3 hours, and it's worth 2000 yuan
+Washing machine（3,2000）
+# Stealing cash takes 1 hour, and it's worth 10000 yuan (cash)
+Cash（1,10000）
 
-以此类推......
+And so on......
 ```
 
-表格的内容为当前最佳决策产生的价值
+The table content is the value produced by the current optimal decision
 
-物品\时间 | 0:00|1:00|2:00|3:00|4:00|5:00|6:00
----|---|---|---|---|---|---|---
-洗衣机（3,2000）|0|0|0|2000|2000|2000|2000
-switch游戏机（1，1500）|0|1500|1500|2000|3500|3500|3500
+Item\Time | 0:00|1:00|2:00|3:00|4:00|5:00|6:00
+|---|---|---|---|---|---|---|---
+Washing machine（3,2000）|0|0|0|2000|2000|2000|2000
+Switch game console（1，1500）|0|1500|1500|2000|3500|3500|3500
 iPhone（1，5000）|0|5000|6500|6500|6500|8500|8500
-保险柜里的现金（3,10000）|0|5000|6500|6500|6500|16500|16500
+Cash in safe（3,10000）|0|5000|6500|6500|6500|16500|16500
 
-结论是显而易见的，如果我有5个小时的时间，偷`switch游戏机`+ `iPhone` + `保险柜里的现金`（1500+5000+10000=16500）是最优选择；如果屋内没有现金，那么我只能选择 `洗衣机` + `switch游戏机`+ `iPhone`；而如果这个房间只有一台洗衣机，那么我就只能花3个小时的时间偷走洗衣机。
+The conclusion is obvious: if I have 5 hours, stealing `Switch game console` + `iPhone` + `Cash in safe` (1500+5000+10000=16500) is the optimal choice; if there's no cash in the house, then I can only choose `Washing machine` + `Switch game console` + `iPhone`; and if this room only has a washing machine, then I can only spend 3 hours stealing the washing machine.
 
-至此，我们可以得出第一个结论：**有限的条件（时间）制约了我收益的最大化**
+From this, we can draw the first conclusion: **limited conditions (time) constrain the maximization of my gains**
 
-但这里有一个问题，直接给我5个小时干就不完事了，横轴的这个时间的意义是什么？我们接着来看第二个例子。
+But there's a problem here: just give me 5 hours and I'm done, what's the meaning of the time on the horizontal axis? Let's look at the second example.
 
-## 秦王扫六合
+## The King of Qin Unifying the Six States
 
 ![](/img/in-post/dynamic-optimization/seven-kingdom.jpg)
 
-> 秦王扫六合，虎视何雄哉！挥剑决浮云，诸侯尽西来。
+> The King of Qin unified the six states, how majestic his gaze! Wielding his sword to cut through floating clouds, all the feudal lords came from the west.
 > 
-> 明断自天启，大略驾群才。收兵铸金人，函谷正东开。
+> Clear judgment from heaven, great strategy surpassing all talents. Collecting weapons to cast golden figures, Hangu Pass opened to the east.
 > 
-> 铭功会稽岭，骋望琅琊台。刑徒七十万，起土骊山隈。
+> Inscribing achievements at Mount Kuaiji, galloping to Langya Terrace. Seven hundred thousand prisoners, building at Mount Li.
 > 
-> 尚采不死药，茫然使心哀。连弩射海鱼，长鲸正崔嵬。
+> Still seeking immortality elixir, lost in sorrow. Crossbow shooting sea fish, long whales towering.
 > 
-> 额鼻象五岳，扬波喷云雷。鬐鬣蔽青天，何由睹蓬莱？
+> Nose like five mountains, waves spraying clouds and thunder. Fins covering the blue sky, how to see Penglai?
 > 
-> 徐氏载秦女，楼船几时回？但见三泉下，金棺葬寒灰。
+> Xu Fu carrying Qin women, when will the tower ship return? Only seeing three springs below, golden coffin burying cold ashes.
 
-我现在是秦王了，立志要扫六合（国）。我参照第一节的内容，对春秋六国进行建模。
+Now I'm the King of Qin, determined to unify the six states. I refer to the content of the first section and model the six states of the Spring and Autumn period.
 
 ```bash
-# 韩国离我秦国最近，它的领土价值1，实力计为1
-韩国（1，1）
-# 燕国虽然小，但离我很远，打它比较费力，成本比较高，所以实力计为2
-燕国（2，1）
+# Han is closest to my Qin, its territory value is 1, strength is 1
+Han（1，1）
+# Although Yan is small, it's far from me, attacking it is more laborious, the cost is higher, so strength is 2
+Yan（2，1）
 
-其他以此类推......
+Others follow the same pattern......
 ```
 
-这里我们定个新规矩：
-1. **只有实力>其他国家实力，才能实现兼并**
-2. **兼并其他国家，能够把其他国家的价值加到自身的实力上面**
+Here we set a new rule:
+1. **Only when strength > other states' strength can annexation be achieved**
+2. **Annexing other states can add their value to one's own strength**
 
-所以我们会得到这样一个表：
+So we get such a table:
 
-其他国家\自身实力 |1|2|3|4|5|6|7
----|---|---|---|---|---|---|---
-韩国（1，1）|0
-赵国（2,3）|0
-燕国（2，1）|0
-魏国（1,1）|0
-楚国（5,8）|0
-齐国（2,3）|0
+Other States\Own Strength |1|2|3|4|5|6|7
+|---|---|---|---|---|---|---|---
+Han（1，1）|0
+Zhao（2,3）|0
+Yan（2，1）|0
+Wei（1,1）|0
+Chu（5,8）|0
+Qi（2,3）|0
 
-可以看到，我作为秦王，如果本国只有1的实力，那么呆在家里扫地就行了，还搞什么兼并战争？
+As you can see, as the King of Qin, if my state only has strength 1, then I should just stay home and sweep the floor, what's the point of annexation wars?
 
-这个表格的其余部分我就不填了。
+I won't fill in the rest of this table.
 
-最终我们会得出这样的结论：
+In the end, we'll draw such conclusions:
 
-1. 当我有实力时，可以一举击破比我弱小的人
-2. 当我实力增长，就可以挑战以前打不过的人
+1. When I have strength, I can defeat those weaker than me in one blow
+2. When my strength grows, I can challenge those I couldn't beat before
 
-这个时候，我们就解答了第一个故事里面的问题：**横轴（时间）的意义**。
+At this point, we've answered the question from the first story: **the meaning of the horizontal axis (time)**.
 
-**条件是有限的，并且条件会随着自身的能力的增长/衰弱和时间的推移，而发生变化**
+**Conditions are limited, and conditions change as one's own ability grows/weakens and time passes**
 
-这就是“动态”的意思。
+This is what "dynamic" means.
 
-而且对于这个游戏来说，每一个参与的国家，他们也有自己的算盘。对于他们来说，这也是一个动态规划的问题。主语和宾语发生互换。
+And for this game, every participating state also has its own calculations. For them, this is also a dynamic programming problem. Subject and object are swapped.
 
-至此，我们可以得出一个新的结论：
-1. 当自身弱小时，只能团结一切可以团结的力量（内援外援）
+From this, we can draw a new conclusion:
+1. When oneself is weak, one can only unite all forces that can be united (internal and external support)
 
-## 绿茶骗舔狗
+## Green Tea Scamming Simps
 
 ![](/img/in-post/dynamic-optimization/r4.jpg)
 
-我直接把上面的表格拿来用。
+I'll directly use the table above.
 
-舔狗\绿茶的时间|1|2|3|4|5|6|7
----|---|---|---|---|---|---|---
-舔狗A（1，1）|0
-舔狗B（2,3）|0
-舔狗C（2，1）|0
-舔狗D（1,1）|0
-舔狗E（5,8）|0
-舔狗F（2,3）|0
+Simp\Green Tea's Time|1|2|3|4|5|6|7
+|---|---|---|---|---|---|---|---
+Simp A（1，1）|0
+Simp B（2,3）|0
+Simp C（2，1）|0
+Simp D（1,1）|0
+Simp E（5,8）|0
+Simp F（2,3）|0
 
-到这里，我觉得可以更抽象化一点，讲清楚各个概念了。
+At this point, I think we can be more abstract and clarify each concept.
 
-**有限的条件**: 绿茶的青春年华
+**Limited conditions**: The green tea's youth
 
-**基本策略**：广撒网，多认识点男的，才有多种排列组合
+**Basic strategy**: Cast a wide net, get to know more men, to have more permutations and combinations
 
-**局部最优解**：在有限的条件，让N个舔狗给我花钱买礼物。比如，本绿茶正在跟舔狗A逛街，于是发消息给舔狗B，让舔狗B给我打钱。这是一种多线程的高级操作，这种人对事务锁的理解远超常人。
+**Local optimal solution**: Under limited conditions, have N simps spend money buying me gifts. For example, this green tea is shopping with Simp A, so I send a message to Simp B to have him send me money. This is an advanced multi-threaded operation, this kind of person's understanding of transaction locks far exceeds ordinary people.
 
 ![](/img/in-post/dynamic-optimization/shy.gif)
 
 
-**最大价值**：在有限的时间内，所有舔狗付出的总和
+**Maximum value**: Within limited time, the sum of all simps' contributions
 
 
-那这里有个问题，秦王和绿茶都是动态规划的践行者，但是我们为什么那么讨厌绿茶婊呢？
+There's a question here: both the King of Qin and the green tea are practitioners of dynamic programming, but why do we hate green tea bitches so much?
 
-因为绿茶婊无视了**道德契约，不尊重公序良俗**。
+Because green tea bitches ignore **moral contracts and don't respect public order and good customs**.
 
-而且她这种做法，**只顾短期收益而忽略了长期收益**。
+And her approach **only focuses on short-term gains while ignoring long-term gains**.
 
-想想，如果舔狗ABCDEF一起开个会，那场面想想就刺激。
+Think about it, if simps ABCDEF all have a meeting together, that scene would be quite exciting.
 
 ![](/img/in-post/dynamic-optimization/lv.jpg)
 
 
-## 结语
+## Conclusion
 
-动态规划其实不止是算法，更是一种方法论，能够帮助你更好地规划自己的人生和时间。
+Dynamic programming is not just an algorithm, but more of a methodology that can help you better plan your life and time.

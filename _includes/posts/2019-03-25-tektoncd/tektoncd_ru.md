@@ -1,16 +1,14 @@
-<!-- TODO: Translate to ru -->
+`tektoncd` — это система CI/CD типа `pipeline` (kubectl apply) для `kubernetes`, использующая пользовательский `kaniko` для сборки образов `docker`.
 
-`tektoncd`是面向`kubernetes`的`pipeline`型CI/CD(kubectl apply)系统,自定义`kaniko`构建`docker`镜像
+Способ развертывания — создание некоторых ресурсов, связанных с RBAC (ClusterRole, ClusterRoleBinding), а также CustomResourceDefinition.
 
-部署方式是创建一些RBAC相关的资源（ClusterRole，ClusterRoleBinding)以及CustomResourceDefinition。
+Единственные постоянные контейнеры — tekton-pipelines-controller и tekton-pipelines-webhook.
 
-常驻的容器只有tekton-pipelines-controller，tekton-pipelines-webhook。
-
-首先声明,我没有实际安装使用过`tektoncd`,以下内容纯属扯淡.
+Сначала заявляю, что я фактически не устанавливал и не использовал `tektoncd`. Следующий контент — чистая ерунда.
 ![image](/img/in-post/tektoncd/9150e4e5ly1fve14owghxj206o06omx8.jpg)
 
 
-## tektoncd的五类公民
+## Пять типов граждан в tektoncd
 
 1. Task
 1. TaskRun
@@ -20,15 +18,15 @@
 1. Pipeline
 1. PipelineRun
 
-tektoncd目前(0.1.0)有5类对象,核心理念是通过定义yaml定义构建过程.构建任务的状态存放在status字段中
+tektoncd в настоящее время (0.1.0) имеет 5 типов объектов. Основная концепция — определить процесс сборки через определения yaml. Статус задачи сборки хранится в поле status.
 
-Task是单个任务的构建过程,定义TaskRun任务才会运行.
+Task — это процесс сборки одной задачи. TaskRun нужно определить, чтобы задача запустилась.
 
-Pipeline包含多个Task,并在此基础上定义input和output,input和output以PipelineResource作为交付,PipelineResource的本质是PVC.
+Pipeline содержит несколько Tasks и определяет input и output на этой основе. Input и output доставляются как PipelineResource. Суть PipelineResource — это PVC.
 
-同样地,需要定义PipelineRun才会运行Pipeline
+Аналогично, PipelineRun нужно определить, чтобы Pipeline запустился.
 
-官方Github这个例子能够让大家理清这几类对象之间的关系
+Этот пример из официального Github может помочь всем понять отношения между этими типами объектов.
 
 ```yaml
 ---
@@ -293,10 +291,10 @@ spec:
       name: skaffold-image-leeroy-app
 ```
 
-## 总结
+## Резюме
 
-通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.
+Переопределение CI/CD через CRD — это большой плюс, но в настоящее время задачи сборки можно создавать только путем ручного создания YAML-файлов. Когда задач сборки много, в кластере накапливается большое количество CRD, связанных с CI, что кажется довольно глупым.
 
 ![image](/img/in-post/tektoncd/1543218293905992.jpg)
 
-`serviceaccount`+`secret`配置SSH/auth实现对git仓库进行连接的,建议`Jenkins-X`好好学学.目前`Jenkins-X`还是无法在pipeline中定义`resource`,雪花配置荼毒不浅.
+Конфигурация `serviceaccount`+`secret` SSH/auth для подключения к git-репозиториям. Рекомендуется, чтобы `Jenkins-X` поучился этому. В настоящее время `Jenkins-X` все еще не может определять `resource` в pipeline. Конфигурация снежинки довольно вредна.

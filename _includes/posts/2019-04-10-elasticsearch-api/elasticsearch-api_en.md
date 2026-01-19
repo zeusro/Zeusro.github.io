@@ -1,10 +1,8 @@
-<!-- TODO: Translate to en -->
+## Basic Queries
 
-## 基本查询
+ES has a default concurrency limit of 1000. If previous queries get stuck or there are too many instantaneous requests, exceptions will occur.
 
-ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,就会出现异常.
-
-### 创建
+### Create
 
 ```
 POST /a/_doc/2
@@ -14,9 +12,9 @@ POST /a/_doc/1
 
 ```
 
-### 查询
+### Query
 
-- 返回文档的一部分
+- Return part of document
 
 ?_source=title,text
 
@@ -27,18 +25,18 @@ get /a/text/1
 get /a/text/2
 ```
 
-### 更新
+### Update
 
-- 部分更新
+- Partial update
 
 /_update
 
-- 取回多个文档
+- Retrieve multiple documents
 
 /_mget
 
 
-- 分析
+- Analyze
 
 ```
 GET _analyze
@@ -48,7 +46,7 @@ GET _analyze
 }
 ```
 
-## 分片
+## Shards
 
 ```
 PUT test
@@ -67,17 +65,17 @@ GET /_all/_search?q=tag:wow
 GET _cat/indices
 ```
 
-## 系统查询
+## System Queries
 
-- 健康检查
+- Health check
 
 GET /_cluster/health
 
-## 基于插件的查询
+## Plugin-Based Queries
 
 ### [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik)
 
-使用该插件,要注意**mappings要在创建index时创建**,不能后期修改/添加
+When using this plugin, note that **mappings must be created when creating the index**, they cannot be modified/added later.
 
 ```
 PUT /a
@@ -96,13 +94,13 @@ PUT /a
 }
 ```
 
-使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词,这种需求是无法实现的.
+There's a problem with using the online hot update interface: old data needs to be reindexed (reindex). So the idea of adding new words to segment old data cannot be achieved.
 
-热更新的词语存在内存中,不会更新dic文件
+Hot-updated words are stored in memory and won't update dic files.
 
-## 分片管理
+## Shard Management
 
-### 默认模板设置
+### Default Template Settings
 
 ```
 POST _template/default
@@ -115,7 +113,7 @@ POST _template/default
 }
 ```
 
-### 自定义模板-设置副本数默认为0
+### Custom Template - Set Replica Count Default to 0
 
 ```bash
 curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/json' -d '
@@ -127,7 +125,7 @@ curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/js
 }'
 ```
 
-### 缩容
+### Scale Down
 
 ```
 put */_settings
@@ -142,13 +140,13 @@ put */_settings
 }
 ```
 
-## ingest/pipeline 用法
+## ingest/pipeline Usage
 
-ingest 是 elasticsearch 的节点角色。在ingest里面定义pipeline。
+ingest is a node role in elasticsearch. Pipelines are defined within ingest.
 
-pipeline是预处理器。什么是预处理器呢，可以勉强理解为数据清洗，在入库前对数据进行处理。
+A pipeline is a preprocessor. What is a preprocessor? It can be roughly understood as data cleaning, processing data before storage.
 
-比如下面这个pipeline的定义
+For example, the definition of this pipeline:
 
 ```
 PUT _ingest/pipeline/monthlyindex
@@ -189,28 +187,28 @@ PUT _ingest/pipeline/monthlyindex
 }
 ```
 
-意思是把写入"servicelog-test" index 的数据按月分片处理。
+This means data written to the "servicelog-test" index is processed by month.
 
-原始写入"servicelog-test"的请求，最终最写入到 `servicelog-test_2020-02-01`(当前月份的自动分片)
+Original requests writing to "servicelog-test" will ultimately be written to `servicelog-test_2020-02-01` (automatic sharding for the current month).
 
-这个 `pipeline` 解决了我们写入单一elasticsearch index 的问题。以后再也不需要 delete by query 了，直接删过往的index，这也是elasticsearch推荐的方式。
+This `pipeline` solves our problem of writing to a single elasticsearch index. We no longer need delete by query. Just directly delete past indices, which is also the way elasticsearch recommends.
 
-参考链接：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
+Reference link: [Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
 
-## 付费功能(_xpack)
+## Paid Features (_xpack)
 
-es默认没有密码,需要用户授权功能的话买商业版的许可.
+ES has no password by default. If you need user authorization features, buy a commercial license.
 
 - [security-api-users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html)
 
 
 GET /_xpack/security/user
 
-## 7.0废弃的查询
+## Deprecated Queries in 7.0
 
 As of version 7.0 Elasticsearch will require that a [field] parameter is provided when a [seed] is set
 
-改为
+Change to:
 
 ```
  "random_score": {
@@ -228,8 +226,8 @@ Deprecation: Deprecated field [inline] used, expected [source] instead
 ```
 inline
 
-## 参考链接:
+## Reference Links:
 
-1. [基础入门](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
-1. [文档元数据](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
-2. [es 的常用查询语法](https://blog.csdn.net/qingmoruoxi/article/details/77221602)
+1. [Getting Started](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
+1. [Document Metadata](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
+2. [Common ES Query Syntax](https://blog.csdn.net/qingmoruoxi/article/details/77221602)

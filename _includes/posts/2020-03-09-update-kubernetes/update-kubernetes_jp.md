@@ -1,21 +1,19 @@
-<!-- TODO: Translate to jp -->
+## 最大の落とし穴は非推奨のapiVersionです
 
-## 最大的坑是 deprecated apiVersion
+`Kubernetes`の`apiVersion`は期限切れになる可能性があります
 
-`Kubernetes` 的 `apiVersion` 是会过期的
+1.16の場合、`DaemonSet`、`Deployment`、`StatefulSet`、`ReplicaSet`はすべて`apps/v1`を統一して使用します
 
-以 1.16来说,`DaemonSet`, `Deployment`, `StatefulSet`, `ReplicaSet` 全部统一使用 `apps/v1`
+`NetworkPolicy`は`networking.k8s.io/v1`を使用します
 
-`NetworkPolicy`  使用 `networking.k8s.io/v1`
+`PodSecurityPolicy`は`networking.k8s.io/v1`を使用します
 
-`PodSecurityPolicy` 使用 `networking.k8s.io/v1`
+したがって、`1.16`で`apps/v1beta2`、`extensions/v1beta1`などの非推奨APIを使用するとエラーになります。
 
-所以,在 `1.16` 中使用 `apps/v1beta2`, `extensions/v1beta1` 等废弃API都会出错
-
-## 拥抱变化
+## 変化を受け入れる
 
 
-### 检查受影响资源
+### 影響を受けるリソースを確認
 
 ```bash
 kubectl get NetworkPolicy,PodSecurityPolicy,DaemonSet,Deployment,ReplicaSet \
@@ -34,20 +32,20 @@ kubectl get --raw="/metrics" | grep apiserver_request_count | grep 'group="apps"
 
 ### recreate
 
-是的，你没有听错，只能删除后重建。
+はい、聞き間違いではありません。削除して再作成するしかありません。
 
-我的建议是，在业务低峰期，建同label deploy 覆盖旧的`resource`，旧的`resource`缩容至0,并加上`deprecated:true`的`label`观察一段时间后,再彻底删除.
+私の提案は、ビジネスの低ピーク時に、同じラベルでdeployを作成して古い`resource`をカバーし、古い`resource`を0にスケールし、`deprecated:true`の`label`を追加してしばらく観察した後、完全に削除することです。
 
-## 后记
+## 後記
 
-apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容器调度方面的霸权——毕竟，如果你跟女朋友分手了，也不会想给她买新衣服，对吧？
+apiVersionの変更の頻度は、ある程度、`Kubernetes`のコンテナスケジューリングにおける覇権を証明することもできます—結局のところ、ガールフレンドと別れた場合、新しい服を買いたくないでしょう、そうでしょう？
 
 ![](/img/sticker/云原生开发.gif)
 
-## 参考链接
+## 参考リンク
 
 1. [error: At least one of apiVersion, kind and name was changed](https://stackoverflow.com/questions/56386647/error-at-least-one-of-apiversion-kind-and-name-was-changed)
 1. [Kubernetes Version 1.16 Removes Deprecated APIs](https://www.ibm.com/cloud/blog/announcements/kubernetes-version-1-16-removes-deprecated-apis)
-1. [Kubernetes v1.17 版本解读](https://yq.aliyun.com/articles/739120)
+1. [Kubernetes v1.17バージョンの解釈](https://yq.aliyun.com/articles/739120)
 1. [API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md)
 1. [Kubernetes Deprecation Policy](https://kubernetes.io/docs/reference/using-api/deprecation-policy/)

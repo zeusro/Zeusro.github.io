@@ -1,12 +1,10 @@
-<!-- TODO: Translate to jp -->
+## 環境：
 
-## 环境:
+1. kubernetesバージョン：阿里云v1.11.5
+1. ノードシステム：CentOS Linux 7 (Core)
+1. ノードコンテナバージョン：docker://17.6.2
 
-1. kubernetes版本: 阿里云v1.11.5
-1. 节点系统 CentOS Linux 7 (Core)
-1. 节点容器版本 docker://17.6.2
-
-## 概念介绍
+## 概念の紹介
 
 ### X-Forwarded-For
 
@@ -16,20 +14,20 @@ X-Forwarded-For: <client>, <proxy1>, <proxy2>
 
 ### remote_addr
 
-remote_addr代表客户端的IP，但它的值不是由客户端提供的，而是服务端根据客户端的ip指定的，当你的浏览器访问某个网站时，假设中间没有任何代理，那么网站的web服务器（Nginx，Apache等）就会把remote_addr设为你的机器IP，如果你用了某个代理，那么你的浏览器会先访问这个代理，然后再由这个代理转发到网站，这样web服务器就会把remote_addr设为这台代理机器的IP。
+remote_addrはクライアントのIPを表しますが、その値はクライアントによって提供されるのではなく、サーバーがクライアントのIPに基づいて指定します。ブラウザがWebサイトにアクセスする場合、中間にプロキシがないと仮定すると、WebサイトのWebサーバー（Nginx、Apacheなど）はremote_addrをマシンのIPに設定します。プロキシを使用する場合、ブラウザはまずプロキシにアクセスし、次にプロキシがWebサイトに転送します。この場合、Webサーバーはremote_addrをそのプロキシマシンのIPに設定します。
 
-## 内部请求(Pod对Pod请求)
+## 内部リクエスト（PodからPodへのリクエスト）
 
 ```
 podA-->podB
 ```
 
-这时只有`getRemoteAddr`能够获取IP,其余header全空.podB获得的clientIP为podA的podIP(虚拟IP)
+この時、`getRemoteAddr`のみがIPを取得でき、その他のヘッダーはすべて空です。podBが取得するclientIPはpodAのpodIP（仮想IP）です。
 
-The client_address is always the client pod’s IP address, whether the client pod and server pod are in the same node or in different nodes.
+client_addressは、クライアントpodとサーバーポッドが同じノードにあるか、異なるノードにあるかに関わらず、常にクライアントpodのIPアドレスです。
 
 
-## 外部请求
+## 外部リクエスト
 
 ### Nodeport svc
 
@@ -39,7 +37,7 @@ client-->svc-->pod
 
 #### externalTrafficPolicy: Cluster
 
-svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动`kube-proxy`,外部流量可能转发多1次.
+svc.specで`externalTrafficPolicy: Cluster`を設定すると、すべてのノードが`kube-proxy`を起動し、外部トラフィックが1回多く転送される可能性があります。
 
 ```
           client
@@ -53,11 +51,11 @@ svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动
  endpoint
 ```
 
-这时流量通过node2的转发,app 获得的clientIP不定,有可能是`node 2` 的IP,也有可能是客户端的IP
+この時、トラフィックはnode2の転送を通過します。appが取得するclientIPは不定で、`node 2`のIPである可能性もあれば、クライアントのIPである可能性もあります。
 
 #### externalTrafficPolicy: Local
 
-svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube-proxy`,外部流量直达节点.
+svc.specで`externalTrafficPolicy: Local`を設定すると、podを実行しているノードで`kube-proxy`が起動し、外部トラフィックがノードに直接到達します。
 
 ```
         client
@@ -71,14 +69,14 @@ svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube
  endpoint
 ```
 
-这时,只有运行了pod的节点才会有对应的proxy,避免了中间商(node 2)挣差价
+この時、podを実行しているノードのみが対応するproxyを持ち、中間業者（node 2）の利益を回避します。
 
-`clientIP`为`remote_addr`
+`clientIP`は`remote_addr`です。
 
 
 ### LoadBalancer svc
 
-svc.spec设置`externalTrafficPolicy: Local`.
+svc.specで`externalTrafficPolicy: Local`を設定します。
 
 ```
                       client
@@ -94,11 +92,11 @@ health check --->   node 1   node 2 <--- health check
 
 ![image](/img/in-post/get-client-ip-in-kubernetes/15450327712333_zh-CN.png)
 
-SLB监听HTTP:取`X-Forwarded-For`即可(从SLB获得客户端IP).
+SLBがHTTPをリッスン：`X-Forwarded-For`を取得します（SLBからクライアントIPを取得）。
 
-SLB监听TCP,则取`remote_addr`
+SLBがTCPをリッスン：`remote_addr`を取得します。
 
-`externalTrafficPolicy: Cluster`的情况就不用说了,没有意义.
+`externalTrafficPolicy: Cluster`の場合は言うまでもなく、意味がありません。
 
 ### ingress
 
@@ -106,18 +104,18 @@ SLB监听TCP,则取`remote_addr`
 client-->slb-->ingress svc-->ingress pod-->app svc-->pod
 ```
 
-首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`,并且`externalTrafficPolicy: Local`
+まず、`ingress`のsvcタイプを`Nodeport`/`LoadBalancer`に設定し、`externalTrafficPolicy: Local`にする必要があります。
 
-app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
+app svcタイプは`ClusterIP`/`NodePort`/`LoadBalancer`のいずれでも問題ありません。
 
-这个时候,`X-Forwarded-For`的值即为`clientIP`
+この時、`X-Forwarded-For`の値が`clientIP`になります。
 
-`remote_addr`为`ingress pod` Virtual IP
+`remote_addr`は`ingress pod`の仮想IPです。
 
-## 参考链接:
+## 参考リンク：
 
 1. [source-ip](https://kubernetes.io/docs/tutorials/services/source-ip/)
-1. [HTTP 请求头中的 X-Forwarded-For](https://imququ.com/post/x-forwarded-for-header-in-http.html)
-1. [如何获取客户端真实IP](https://help.aliyun.com/document_detail/54007.html?spm=5176.11065259.1996646101.searchclickresult.610a1293EtcJUu)
-1. [源地址审计：追踪 kubernetes 服务的SNAT](https://ieevee.com/tech/2017/09/18/k8s-svc-src.html)
-1. [谈谈kubernets的service组件的Virtual IP](https://ieevee.com/tech/2017/01/20/k8s-service.html)
+1. [HTTPリクエストヘッダー内のX-Forwarded-For](https://imququ.com/post/x-forwarded-for-header-in-http.html)
+1. [クライアントの実際のIPを取得する方法](https://help.aliyun.com/document_detail/54007.html?spm=5176.11065259.1996646101.searchclickresult.610a1293EtcJUu)
+1. [ソースアドレス監査：KubernetesサービスのSNATを追跡](https://ieevee.com/tech/2017/09/18/k8s-svc-src.html)
+1. [kubernetsのserviceコンポーネントのVirtual IPについて](https://ieevee.com/tech/2017/01/20/k8s-service.html)

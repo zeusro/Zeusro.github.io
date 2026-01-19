@@ -1,42 +1,40 @@
-<!-- TODO: Translate to jp -->
-
-## 背景信息
+## 背景情報
 
 ![img](/img/in-post/mydnspod/ticket.png)
 
-通过腾讯云向他们吐槽了不满,结果他们叫我按`ctrl + `缩放页面,作为一个资深键盘侠,孰能忍.
+腾讯雲を通じて不満を訴えましたが、`ctrl + `を押してページをズームするように言われました。ベテランのキーボード戦士として、誰がこれに耐えられますか？
 
-dnspod这个770px宽度的域名配置页真的恶心到我了,我决定把他改长一点.
+DNSPodの770px幅のドメイン設定ページは本当に嫌でした。もう少し長くすることにしました。
 
-一怒之下我决定自己动手,用油猴插件把整个页面拓宽点.
+怒りに任せて、Tampermonkeyプラグインを使用してページ全体を広げることにしました。
 
-## 熟悉油猴插件开发模式
+## Tampermonkeyプラグイン開発に慣れる
 
-可以参考[这个](https://greasyfork.org/zh-CN/help/meta-keys)
+[これ](https://greasyfork.org/zh-CN/help/meta-keys)を参照できます。
 
-大致跟原生JavaScript没啥区别,只是多了一点点约束和语法
+ネイティブJavaScriptとほぼ同じで、いくつかの制約と構文が追加されているだけです。
 
-## 分发
+## 配布
 
-[油猴脚本,适配1080p屏幕](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
+[Tampermonkeyスクリプト、1080p画面に適応](https://greasyfork.org/zh-CN/scripts/387189-zeusro-%E5%AE%BD%E7%89%88-dnspod-cn)
 
-## 源代码
+## ソースコード
 
 [mydnspod](https://github.com/zeusro/mydnspod)
 
-欢迎PR
+PR歓迎
 
-## 后续恶搞
+## 後続の悪戯
 
-在 dnspod 网站上面看到他们在[招工](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw) 我决定皮一波,发一封邮件给`hr@dnspod.com`🤡.
+DNSPodのウェブサイトで[募集](https://mp.weixin.qq.com/s/_VDth24K8HPzsbbwMIQZAw)しているのを見ました。いたずらをして、`hr@dnspod.com`にメールを送ることにしました🤡。
 
 ![img](/img/in-post/mydnspod/email.png)
 
-`2019-10-17` 更新:最近他们换新版了,所以把项目冻结了
+`2019-10-17`更新：最近新しいバージョンに切り替えたため、プロジェクトは凍結されました。
 
-## 参考链接
+## 参考リンク
 
-1. [油猴脚本编写规则](https://blog.csdn.net/Senreme/article/details/79939249)
-2. [Tutorials](https://wiki.greasespot.net/Tutorials)
-3. [引入外部脚本](https://greasyfork.org/zh-CN/help/external-scripts)
-4. [深入浅出 Greasemonkey](http://www.ttlsa.com/docs/greasemonkey/)
+1. [Tampermonkeyスクリプト作成ルール](https://blog.csdn.net/Senreme/article/details/79939249)
+2. [チュートリアル](https://wiki.greasespot.net/Tutorials)
+3. [外部スクリプトの導入](https://greasyfork.org/zh-CN/help/external-scripts)
+4. [Greasemonkey詳細](http://www.ttlsa.com/docs/greasemonkey/)

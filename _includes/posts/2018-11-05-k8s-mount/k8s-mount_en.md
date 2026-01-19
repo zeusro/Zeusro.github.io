@@ -1,14 +1,12 @@
-<!-- TODO: Translate to en -->
+I've been slacking off a bit recently. I've been writing articles, but they're not polished, so I haven't published them.
 
-最近有点划水,文章还是有写的,只是没成型,所以没发出来.
+Today I'll introduce how to mount some commonly used resources in k8s.
 
-今天介绍下用k8s挂载一些常用的资源
-
-当前版本Kubernetes版本:1.12.2
+Current Kubernetes version: 1.12.2
 
 ## env
 
-###  env
+### env
 
 ```
           env:
@@ -16,7 +14,7 @@
               value: 'ssh://git@127.0.0.1:22/a/b.git'
 ```
 
-### 嵌套env
+### Nested env
 
 ```
           env:
@@ -32,7 +30,7 @@
 
 ### configMap
 
-**注意一下,修改configmap不会导致容器里的挂载的configmap文件/环境变量发生改变;删除configmap也不会影响到容器内部的环境变量/文件,但是删除configmap之后,被挂载的pod上面会出现一个warnning的事件**
+**Note: Modifying configmap will not cause mounted configmap files/environment variables in containers to change; deleting configmap will also not affect environment variables/files inside containers, but after deleting configmap, a warning event will appear on the mounted pod**
 
 ```
 Events:
@@ -41,11 +39,11 @@ Events:
   Warning  FailedMount  64s (x13 over 11m)  kubelet, cn-shenzhen.i-wz9498k1n1l7sx8bkc50  MountVolume.SetUp failed for volume "nginx" : configmaps "nginx" not found
 ```
 
-[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)写的很清楚了,这里恬不知耻得copy一下
+The [config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data) documentation is very clear, so I'll shamelessly copy it here.
 
-**注意,configmap有1M的限制,一般用来挂载小型配置,大量配置建议上配置中心**
+**Note: configmap has a 1M limit, generally used to mount small configurations. For large configurations, it's recommended to use a configuration center.**
 
-### 挂载单一项
+### Mount a Single Item
 ```
 apiVersion: v1
 kind: Pod
@@ -68,10 +66,9 @@ spec:
   restartPolicy: Never
 ```
 
-表示挂载`special-config`这个configmap的`special.how`项
+This mounts the `special.how` item from the `special-config` configmap.
 
-
-### 挂载整个configmap
+### Mount Entire ConfigMap
 
 ```
 apiVersion: v1
@@ -89,14 +86,14 @@ spec:
   restartPolicy: Never
 ```
 
-参考:
+Reference:
 
 1. [Add nginx.conf to Kubernetes cluster](https://stackoverflow.com/questions/42078080/add-nginx-conf-to-kubernetes-cluster)
 2. [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)
 
-###  fieldRef
+### fieldRef
 
-可以挂载pod的一些属性
+Can mount some properties of the pod
 
 ```
           env:
@@ -114,9 +111,9 @@ Selects a field of the pod: supports metadata.name, metadata.namespace, metadata
 
 Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
 
-英文介绍得很明白,用来挂载当前yaml里面container的资源(CPU/内存)限制,用得比较少啦其实.此外还可以结合`downloadAPI`
+The English documentation explains it clearly - used to mount resource (CPU/memory) limits of containers in the current yaml. It's actually used less frequently. Additionally, it can be combined with `downloadAPI`.
 
-注意`containerName`不能配错,不然pod状态会变成`CreateContainerConfigError`
+Note that `containerName` cannot be misconfigured, otherwise the pod status will become `CreateContainerConfigError`.
 
 ```
           env:  
@@ -147,27 +144,27 @@ Selects a key of a secret in the pod's namespace
               key: password
 ```
 
-参考:
-1. [Kubernetes中Secret使用详解](https://blog.csdn.net/yan234280533/article/details/77018640)
+Reference:
+1. [Detailed Explanation of Secret Usage in Kubernetes](https://blog.csdn.net/yan234280533/article/details/77018640)
 2. https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#envvarsource-v1-core
 
 
-## 目录/文件类挂载
+## Directory/File Mounting
 
-k8s可以挂载的资源实在是太多,这里挑一些比较有代表性的来讲一下
+k8s can mount too many resources, so I'll pick some representative ones to discuss.
 
-这一类资源一般要先在spec层级定义`volumes`,然后在`containers`定义`volumeMounts`,有种先声明,再使用的意思
+This type of resource generally needs to define `volumes` at the spec level first, then define `volumeMounts` in `containers`, which has a meaning of declaring first, then using.
 
-### hostPath(宿主机目录/文件)
+### hostPath (Host Directory/File)
 
-1. 既有目录/文件用`Directory`/`File`+nodeSelector
-  但是用了`nodeSelector`之后,以后的伸缩都会在匹配的节点上,如果节点只有1个,副本集设置得超出实际节点可承受空间,最终将导致单点问题,这个要注意下
-1. 应用启用时读写空文件用`DirectoryOrCreate`或者`FileOrCreate`
+1. For existing directories/files, use `Directory`/`File` + nodeSelector
+  But after using `nodeSelector`, future scaling will be on matching nodes. If there's only 1 node, and the replica set exceeds what the actual node can handle, it will eventually lead to a single point of failure. This needs attention.
+1. For applications that read/write empty files on startup, use `DirectoryOrCreate` or `FileOrCreate`
 
-以下演示第一种方案
+The following demonstrates the first approach.
 
 
-    #给节点打上标签(这里省略)
+    # Label the node (omitted here)
     kubectl get node --show-labels
 
 ```
@@ -227,9 +224,9 @@ spec:
 ### configMap
 
 
-#### 单项挂载(第1种)
+#### Single Item Mount (Method 1)
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+This mount supports hot updates. Changes will be visible about 10 seconds after modification.
 
 ```
       volumeMounts:
@@ -244,9 +241,9 @@ spec:
             path: log_level
 ```
 
-#### 单项挂载(第2种)
+#### Single Item Mount (Method 2)
 
-这种挂载方式不会热更新
+This mounting method does not support hot updates.
 
 ```
           volumeMounts:                  
@@ -259,9 +256,9 @@ spec:
               name: amiba-nginx 
 ```
 
-#### 完全挂载
+#### Complete Mount
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+This mount supports hot updates. Changes will be visible about 10 seconds after modification.
 
 ```
       volumeMounts:
@@ -275,7 +272,7 @@ spec:
 
 ### secret
 
-#### 单项挂载
+#### Single Item Mount
 
 ```
   volumes:
@@ -292,9 +289,9 @@ spec:
 ```
 
 
-#### 完全挂载
+#### Complete Mount
 
-这里用了特定权限去挂载文件,默认好像是777
+Here specific permissions are used to mount files. The default seems to be 777.
 
 ```
           volumeMounts:
@@ -313,11 +310,11 @@ spec:
 --from-file=id_rsa.pub=/Volumes/D/temp/id_rsa.pub  \
 --from-file=known_hosts=/Volumes/D/temp/known_hosts \
 ```
-比如这个模式创建出来的secret,容器里面/root/.ssh目录就会有`id_rsa`,`id_rsa.pub`,`known_hosts`3个文件
+For example, a secret created with this pattern will have `id_rsa`, `id_rsa.pub`, and `known_hosts` files in the `/root/.ssh` directory inside the container.
 
 ### downwardAPI
 
 
-参考链接:
+Reference Links:
 1. [volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
 1. [kubernetes-api/v1.12](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#hostpathvolumesource-v1-core)

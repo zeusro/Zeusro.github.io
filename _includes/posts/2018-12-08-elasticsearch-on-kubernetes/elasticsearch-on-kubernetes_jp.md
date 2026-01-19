@@ -1,33 +1,31 @@
-<!-- TODO: Translate to jp -->
+## インストールと設定
 
-## 安装和配置
-
-### 自制带插件的ES镜像
+### プラグイン付きのカスタムESイメージ
 
 ```dockerfile
 FROM elasticsearch:6.5.0
-#或者手动下载后然后安装也行
+#または手動でダウンロードしてインストールすることもできます
 # COPY elasticsearch-analysis-ik-6.5.0.zip /
 # elasticsearch-plugin install --batch file:///elasticsearch-analysis-ik-6.5.0.zip
-    #IK Analyzer是一个开源的，基于java语言开发的中文分词工具包。是开源社区中处理中分分词非常热门的插件。 
+    # IK Analyzerは、Java言語で開発されたオープンソースの中国語分かち書きツールキットです。オープンソースコミュニティで中国語分かち書きを処理する非常に人気のあるプラグインです。
 RUN elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v6.5.0/elasticsearch-analysis-ik-6.5.0.zip && \
-    # 拼音分词器
+    # ピンイン分かち書き器
     elasticsearch-plugin install --batch https://github.com/medcl/elasticsearch-analysis-pinyin/releases/download/v6.5.0/elasticsearch-analysis-pinyin-6.5.0.zip && \    
     # Smart Chinese Analysis Plugin
     elasticsearch-plugin install analysis-icu && \
-    # 日文分词器
+    # 日本語分かち書き器
     elasticsearch-plugin install analysis-kuromoji && \
-    # 语音分析
+    # 音声分析
     elasticsearch-plugin install analysis-phonetic && \
-    # 计算字符哈希
+    # 文字ハッシュの計算
     elasticsearch-plugin install  mapper-murmur3 && \
-    # 在_source中提供size字段
+    # _sourceでsizeフィールドを提供
     elasticsearch-plugin install mapper-size
 ```
 
-### 编排文件
+### オーケストレーションファイル
 
-- RBAC 相关内容
+- RBAC関連コンテンツ
 
 ```
 apiVersion: v1
@@ -56,10 +54,10 @@ roleRef:
   apiGroup: ""
 ```
 
-- 主体程序
+- メインプログラム
 
 
-存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
+ストレージはhostpathを使用しています。ホスト上でディレクトリを先に作成し、適切な権限を付与する必要があります。そうしないとエラーになります。
 
 ```bash
 cd /root/kubernetes/$(namespace)/elasticsearch/data
@@ -119,9 +117,8 @@ spec:
             - default    
       serviceAccountName: elasticsearch-admin    
       terminationGracePeriodSeconds: 180
-      # Elasticsearch requires vm.max_map_count to be at least 262144.
-      # If your OS already sets up this number to a higher value, feel free
-      # to remove this init container.
+      # Elasticsearchにはvm.max_map_countが少なくとも262144である必要があります。
+      # OSがすでにこの数値をより高い値に設定している場合は、このinitコンテナを削除しても問題ありません。
       initContainers:
       - image: alpine:3.6
         command: ["/sbin/sysctl", "-w", "vm.max_map_count=262144"]
@@ -134,7 +131,7 @@ spec:
       - image: elasticsearch:6.5.0-plugin-in-remote-ik
         name: elasticsearch
         resources:
-          # need more cpu upon initialization, therefore burstable class
+          # 初期化時にCPUがより必要なので、バースト可能クラス
           limits:
             # cpu: 2
             memory: 4Gi
@@ -184,7 +181,7 @@ spec:
           value: "2"
         - name: "discovery.zen.ping_timeout"
           value: "5s"
-          #因为是测试,所以master,data,ingest都混用          
+          # テスト用なので、master、data、ingestがすべて混在しています
         - name: "node.master"
           value: "true"
         - name: "node.data"
@@ -229,10 +226,9 @@ spec:
   type: NodePort
 ```
 
-这个编排精髓的一点在于用了节点`affinity`使每一个节点最多会运行一个容器,确保了高可用.
+このオーケストレーションの要点は、ノード`affinity`を使用して、各ノードが最大1つのコンテナを実行するようにし、高可用性を確保することです。
 
-如果要把节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
-
+ノードの役割をさらに抽出する場合は、相互検出用のサービスを抽出できます。
 
 ```yaml
 kind: Service
@@ -251,28 +247,28 @@ spec:
 ```
 
 
-1. [在Kubernetes上部署Elasticsearch集群](https://blog.csdn.net/chenleiking/article/details/79453460)
-1. [重要配置的修改](https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html)
-1. [Install Elasticsearch with Docker](https://www.elastic.co/guide/en/elasticsearch/reference/6.x/docker.html)
-1. [学习Elasticsearch之4：配置一个3节点Elasticsearch集群(不区分主节点和数据节点)](http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/)
-1. [谈一谈Elasticsearch的集群部署](https://blog.csdn.net/zwgdft/article/details/54585644)
-1. [官方docker镜像构建项目](https://github.com/elastic/elasticsearch-docker/tree/master/templates)
-1. [Elasticsearch模块功能之-自动发现（Discovery）](https://blog.csdn.net/changong28/article/details/38377863)
-1. [订阅费用](https://www.elastic.co/subscriptions)
-2. [故障转移](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
-3. [节点配置](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
-4. [Elasticsearch 5.X集群多节点角色配置深入详解](https://blog.csdn.net/laoyang360/article/details/78290484)
+1. [KubernetesでElasticsearchクラスターをデプロイ](https://blog.csdn.net/chenleiking/article/details/79453460)
+1. [重要な設定の変更](https://www.elastic.co/guide/cn/elasticsearch/guide/current/important-configuration-changes.html)
+1. [DockerでElasticsearchをインストール](https://www.elastic.co/guide/en/elasticsearch/reference/6.x/docker.html)
+1. [Elasticsearchを学ぶ4：3ノードElasticsearchクラスターの設定（マスターノードとデータノードを区別しない）](http://ethancai.github.io/2016/08/06/configure-smallest-elasticsearch-cluster/)
+1. [Elasticsearchクラスターのデプロイメントについて](https://blog.csdn.net/zwgdft/article/details/54585644)
+1. [公式Dockerイメージビルドプロジェクト](https://github.com/elastic/elasticsearch-docker/tree/master/templates)
+1. [Elasticsearchモジュール機能-自動検出（Discovery）](https://blog.csdn.net/changong28/article/details/38377863)
+1. [サブスクリプション料金](https://www.elastic.co/subscriptions)
+2. [フェイルオーバー](https://es.xiaoleilu.com/020_Distributed_Cluster/20_Add_failover.html)
+3. [ノード設定](https://www.elastic.co/guide/en/elasticsearch/reference/current/modules-node.html#coordinating-node)
+4. [Elasticsearch 5.Xクラスターのマルチノード役割設定の詳細説明](https://blog.csdn.net/laoyang360/article/details/78290484)
 1. [elasticsearch-cloud-kubernetes](https://github.com/fabric8io/elasticsearch-cloud-kubernetes)
-1. [吃透Elasticsearch 堆内存](https://blog.csdn.net/laoyang360/article/details/79998974)
+1. [Elasticsearchヒープメモリを理解する](https://blog.csdn.net/laoyang360/article/details/79998974)
 
-### 安装插件
+### プラグインのインストール
 
 [elasticsearch-docker-plugin-management](https://www.elastic.co/blog/elasticsearch-docker-plugin-management)
 
 GET /_cat/plugins?v&s=component&h=name,component,version,description
 
 
-## 压力测试
+## ストレステスト
 
 ```
 esrally configure
@@ -288,13 +284,13 @@ datastore.secure = False
 ```
 
 
-通过 Elasticsearch 官方提供的 benchmark 脚本 rally
+Elasticsearch公式が提供するベンチマークスクリプトrallyを使用
 
 
-## ElasticSearch集群的维护
+## ElasticSearchクラスターのメンテナンス
 
 
-更新的时候务必使用灰度更新,从序号最大的镜像开始更新,不然分片丢失了,相信我,你会死的很惨
+更新する際は、必ずグレースケール更新を使用し、最大のシーケンス番号のイメージから開始してください。そうしないと、シャードが失われた場合、信じてください、大変なことになります。
 
 ```bash
 kubectl patch statefulset elasticsearch -p \

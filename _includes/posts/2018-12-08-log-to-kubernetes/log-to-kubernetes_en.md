@@ -1,19 +1,17 @@
-<!-- TODO: Translate to en -->
+## Requirements
 
-## 需求
+Files under `/var/log/containers` are actually symlinks.
 
-`/var/log/containers`下面的文件其实是软链接
+The actual log files are in the `/var/lib/docker/containers` directory.
 
-真正的日志文件在`/var/lib/docker/containers`这个目录
+Optional solutions:
 
-可选方案:
-
-1. Logstash(过于消耗内存,尽量不要用这个)
+1. Logstash (too memory-intensive, try not to use this)
 2. fluentd
 3. filebeat
-4. 不使用docker-driver
+4. Don't use docker-driver
 
-## 日志的格式
+## Log Format
 
 /var/log/containers
 
@@ -39,26 +37,26 @@
 filebeat:
   prospectors:
   - type: log
-    //开启监视，不开不采集
+    // Enable monitoring, won't collect if not enabled
     enable: true
-    paths:  # 采集日志的路径这里是容器内的path
+    paths:  # Path for collecting logs, this is the path inside the container
     - /var/log/elkTest/error/*.log
-    # 日志多行合并采集
+    # Multi-line log merging collection
     multiline.pattern: '^\['
     multiline.negate: true
     multiline.match: after
-    # 为每个项目标识,或者分组，可区分不同格式的日志
+    # Tag each project or group to distinguish logs of different formats
     tags: ["java-logs"]
-    # 这个文件记录日志读取的位置，如果容器重启，可以从记录的位置开始取日志
+    # This file records the log reading position. If the container restarts, it can start reading logs from the recorded position
     registry_file: /usr/share/filebeat/data/registry
 
 output:
-  # 输出到logstash中
+  # Output to logstash
   logstash:
     hosts: ["0.0.0.0:5044"]
 ```
 
-注：6.0以上该filebeat.yml需要挂载到/usr/share/filebeat/filebeat.yml,另外还需要挂载/usr/share/filebeat/data/registry 文件，避免filebeat容器挂了后，新起的重复收集日志。  
+Note: For version 6.0 and above, this filebeat.yml needs to be mounted to /usr/share/filebeat/filebeat.yml. Additionally, you need to mount the /usr/share/filebeat/data/registry file to avoid duplicate log collection when the filebeat container restarts.
 
 
 - logstash.conf
@@ -82,7 +80,7 @@ filter {
 	#if ([message] =~ "^\[") {
     #    drop {}
     #}
-	# 不匹配正则，匹配正则用=~
+	# For non-matching regex, use =~ for matching regex
 	if [level] !~ "(ERROR|WARN|INFO)" {
         drop {}
     }
@@ -100,9 +98,9 @@ output {
 
 ## fluentd
 
-[fluentd-es-image镜像](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
+[fluentd-es-image](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
 
-[Kubernetes-基于EFK进行统一的日志管理](https://www.kubernetes.org.cn/4278.html)
+[Kubernetes - Unified Log Management Based on EFK](https://www.kubernetes.org.cn/4278.html)
 
 
 [Docker Logging via EFK (Elasticsearch + Fluentd + Kibana) Stack with Docker Compose](https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose)
@@ -111,9 +109,9 @@ output {
 ## filebeat+ES pipeline
 
 
-### 定义pipeline
+### Define pipeline
 
-- 定义java专用的管道
+- Define Java-specific pipeline
 
 ```
 
@@ -348,7 +346,7 @@ metadata:
     k8s-app: filebeat
 ```
 
-如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
+If the output is a single-node elasticsearch, you can set the exported filebeat* to 0 replicas by modifying the template
 
 ```
 curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: application/json' -d'
@@ -364,31 +362,31 @@ curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: applicat
 
 
 
-参考链接:
+Reference Links:
 1. [running-on-kubernetes](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html)
-1. [ELK+Filebeat 集中式日志解决方案详解](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
-2. [filebeat.yml（中文配置详解）](http://www.cnblogs.com/zlslch/p/6622079.html)
-3. [Elasticsearch Pipeline 详解](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
-4. [es number_of_shards和number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
+1. [ELK+Filebeat Centralized Logging Solution Explained](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
+2. [filebeat.yml (Chinese Configuration Explained)](http://www.cnblogs.com/zlslch/p/6622079.html)
+3. [Elasticsearch Pipeline Explained](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
+4. [es number_of_shards and number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
 
 
 
-## 其他方案
+## Other Solutions
 
-有些是sidecar模式,sidecar模式可以做得比较细致.
+Some use sidecar mode, which can be done more finely.
 
-1. [使用filebeat收集kubernetes中的应用日志](https://jimmysong.io/posts/kubernetes-filebeat/)
-1. [使用Logstash收集Kubernetes的应用日志](https://jimmysong.io/posts/kubernetes-logstash/)
+1. [Using filebeat to collect application logs in kubernetes](https://jimmysong.io/posts/kubernetes-filebeat/)
+1. [Using Logstash to collect Kubernetes application logs](https://jimmysong.io/posts/kubernetes-logstash/)
 2. 
 
 
-### 阿里云的方案
+### Alibaba Cloud Solution
 
-1. [Kubernetes日志采集流程](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
+1. [Kubernetes Log Collection Process](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
 
 
-### 跟随docker启动
-1. [docker驱动](https://www.fluentd.org/guides/recipes/docker-logging)
+### Follow Docker Startup
+1. [docker driver](https://www.fluentd.org/guides/recipes/docker-logging)
 2. 
 
 

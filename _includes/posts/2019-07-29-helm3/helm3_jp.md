@@ -1,26 +1,23 @@
-<!-- TODO: Translate to jp -->
+## 理由
 
-## 缘由
+阿里雲が[クラウドネイティブアプリケーションコンテスト](https://developer.aliyun.com/special/apphubchallenge)を開催し、Helm v3を使用してコードを提出する必要がありました。機会を利用して、いくつかのHelmチャートを提出し、同時にHelmの構文を学びました。
 
-阿里云搞了个 [云原生应用大赛](https://developer.aliyun.com/special/apphubchallenge) ,要求用 helm v3 提交代码,我就顺便提交几个 helm chart ,同时学学的 helm 的语法
+## 構文
 
-## 语法
+現在（2019-07-26）v3はまだ正式にリリースされておらず、ドキュメントは少ないです。学習する際は、古いドキュメントと比較して、落とし穴を踏むしかありません。
 
-目前(2019-07-26) v3还没正式 release,文档很少,学习的时候只能拿旧的文档对照踩坑.
+v2とv3の違いは大きいです：
 
-v2 跟 v3 的差别不小:
+1. サーバー側コンポーネントが削除されました；
+2. helm listはシークレットを使用するようになりました；
+3. 多くのコマンドが互換性がなくなり、変更されました。
 
-1. 取消了服务端;
-2. helm list 改用secret;
-3. 很多命令已经不兼容,发生变化
-
-
-学习 helm 的蛋疼之处在于要弄明白他们的模板语法,模板语法包含一些内置函数,还有 `go template` 相关的一类东西.
+Helmを学習する際の痛みは、テンプレート構文を理解することです。テンプレート構文には、いくつかの組み込み関数と`go template`に関連するものが含まれます。
 
 [Variables](https://v3.helm.sh/docs/topics/chart_template_guide/variables/)
 [Chart Development Tips and Tricks](https://helm.sh/docs/charts_tips_and_tricks/#using-the-include-function)
 
-## 提交的几个 chart
+## 提出したチャート
 
 [jekyll](https://github.com/cloudnativeapp/charts/pull/34)
 
@@ -28,15 +25,14 @@ v2 跟 v3 的差别不小:
 
 [codis](https://github.com/cloudnativeapp/charts/pull/39)
 
-codis 花了比较多心血,大家给个辛苦费帮我在pr页面点赞吧~
+codisには多くの努力を費やしました。PRページでいいねを押して、チップをください〜
 
+## [kustomize](https://kustomize.io/)との違い
 
-## 与[kustomize](https://kustomize.io/) 的不同
+kustomizeは最初から軽量のYAMLジェネレーターとして設計されているため、サーバー側コンポーネントはありません；
 
-kustomize 一开始就是做成轻量级的 yaml 生成器,所以不存在服务端;
+kustomizeの変数置換はより面倒で、JSONパッチを使用する必要があります。
 
-kustomize 的变量替换比较麻烦,需要用 json patch.
+kustomizeには制御フローがないため、高度なカスタマイズがより困難です。
 
-kustomize 没有控制流程,要高度定制比较麻烦.
-
-`Helm 3` 把已安装的 chart 信息存作 `type:helm.sh/release` 的 secret ,于是乎, `Helm 3` 支持在多个 namespace 安装相同名称的 release
+`Helm 3`は、インストールされたチャート情報を`type:helm.sh/release`タイプのシークレットとして保存するため、`Helm 3`は複数のネームスペースで同じ名前のリリースをインストールすることをサポートします。

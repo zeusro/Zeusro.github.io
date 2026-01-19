@@ -1,18 +1,15 @@
-<!-- TODO: Translate to jp -->
+## 並行関連
 
-## 并发相关
+### まとめ
 
-### 总结
-
-
-type | 作用
----|---
-Cond|发令枪,一般预设一个条件让子任务等待,发出的信号可以是单个(Signal)也可集体广播(Broadcast)
-Locker|简单接口
-Mutex|互斥锁
-Once|并发运行,只允许一次
-RWMutex|读写锁,多读少写,同时读锁,读写互斥.
-WaitGroup|分发任务,主线程等待所有任务完成
+| type | 目的 |
+|---|---|
+| Cond | スタートガン、通常、サブタスクが待機する条件を事前に設定し、信号は単一（Signal）または集団ブロードキャスト（Broadcast）にすることができます |
+| Locker | シンプルなインターフェース |
+| Mutex | 相互排他ロック |
+| Once | 並行実行、1回のみ許可 |
+| RWMutex | 読み書きロック、多数の読み取りと少数の書き込み、同時読み取りロック、読み書き相互排他。 |
+| WaitGroup | タスクを分散し、メインスレッドがすべてのタスクの完了を待機 |
 
 
 ### Cond 
@@ -25,11 +22,11 @@ type Cond
     func (c *Cond) Wait()
 ```
 
-加入到通知列表 -> 解锁 L -> 等待通知 -> 锁定 L
+通知リストに追加 -> Lをアンロック -> 通知を待機 -> Lをロック
 
-虽然放在最前面,但我花了最长的时间去理解这玩意.
+最初に配置されていますが、このことを理解するのに最も長い時間を費やしました。
 
-按照我的理解,`Cond`就好比一个发令枪.比如我同时养了5条狗,并同时准备了5份食物,但是没有我的口令,我不准它们吃.示例代码如下:
+私の理解によると、`Cond`はスタートガンのようなものです。たとえば、5匹の犬を同時に飼い、5食分の食べ物を同時に準備しましたが、私の命令なしでは食べさせません。サンプルコードは次のとおりです。
 
 
 ```go
@@ -38,28 +35,28 @@ func useCondBroadcast() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// 新しいcondを作成
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// 相互排他ロックのロックを競う
 			cond.L.Lock()
-			// 条件是否达成
+			// 条件が満たされているか確認
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("通知を受信しました goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d 実行終了\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// すべてのgoroutineが起動したことを確認
 	time.Sleep(time.Millisecond * 20)
 
 	fmt.Println("broadcast...")
@@ -78,28 +75,28 @@ func useCondSignal() {
 	var count int = 5
 	ch := make(chan struct{}, 5)
 
-	// 新建 cond
+	// 新しいcondを作成
 	var l sync.Mutex
 	cond := sync.NewCond(&l)
 
 	for i := 0; i < 5; i++ {
 		go func(i int) {
-			// 争抢互斥锁的锁定
+			// 相互排他ロックのロックを競う
 			cond.L.Lock()
-			// 条件是否达成
+			// 条件が満たされているか確認
 			for count > i {
 				cond.Wait()
-				fmt.Printf("收到一个通知 goroutine%d\n", i)
+				fmt.Printf("通知を受信しました goroutine%d\n", i)
 			}
 
-			fmt.Printf("goroutine%d 执行结束\n", i)
+			fmt.Printf("goroutine%d 実行終了\n", i)
 			cond.L.Unlock()
 			ch <- struct{}{}
 
 		}(i)
 	}
 
-	// 确保所有 goroutine 启动完成
+	// すべてのgoroutineが起動したことを確認
 	time.Sleep(time.Millisecond * 20)
 
 	time.Sleep(time.Second)
@@ -117,41 +114,41 @@ func useCondSignal() {
 
 ```
 
-这时
+この時点で
 
-场景:喂狗
+シナリオ：犬に餌を与える
 
-goroutine:每一条狗吃饭的行为
+goroutine：各犬が食べる行為
 
-Broadcast()方法:通知所有狗吃饭
+Broadcast()メソッド：すべての犬に食べることを通知
 
-Signal()方法:通知随机一条狗吃饭
+Signal()メソッド：ランダムな1匹の犬に食べることを通知
 
-例子中count变量: 指示狗吃饭的信号
+例の`count`変数：犬が食べる信号を示す
 
-例子中的ch变量:狗拉的便便
+例の`ch`変数：犬が引っ張るうんち
 
-`useCondBroadcast()`和`useCondSignal`这2个例子,差别只在于最后管道的读取游标(i).
+`useCondBroadcast()`と`useCondSignal`の2つの例の違いは、最後のパイプの読み取りカーソル（i）だけです。
 
-`Broadcast`方法通知的对象是所有的狗,所以最后所有的狗都顺利开吃(i=4).
+`Broadcast`メソッドはすべての犬に通知するため、すべての犬が正常に食べ始めます（i=4）。
 
-`Signal`只通知了一条狗,所以最后只有一条狗拉出了便便(i=0)
+`Signal`は1匹の犬にのみ通知するため、最後に1匹の犬だけがうんちを出します（i=0）
 
-所以如果只有一条狗,那么使用`Signal`效果等同于`Broadcast`.
+したがって、犬が1匹しかいない場合、`Signal`を使用すると`Broadcast`と同じ効果があります。
 
-用`Signal`和`Broadcast`方法都好,如果设置了管道(ch := make(chan struct{}, 5))去接收最后的结果,要注意设置的临界值变化导致的最后出来的结果数量.
+`Signal`と`Broadcast`の両方のメソッドは問題ありません。チャネル（ch := make(chan struct{}, 5)）を設定して最終結果を受信する場合、しきい値の変化に注意してください。これは結果の数に影響します。
 
-取少了没关系,取多了会出现`fatal error: all goroutines are asleep - deadlock!`这个`panic`(比如,在`useCondSignal`这个例子里面,把`i<1`改成`i<2`),后果不堪设想.
+少なく取るのは問題ありませんが、多すぎると`fatal error: all goroutines are asleep - deadlock!`パニックが発生します（たとえば、`useCondSignal`の例で、`i<1`を`i<2`に変更）、想像を絶する結果になります。
 
-关于`Cond`实际的使用场景,我觉得把`Cond`应用于最优解.比如说我要爬取同一个网页,可能有ABCD四种方案,我只需要其中一个方案最快完成即可.那么只要其中一个任务完成,在主线程发起`Broadcast`,这样其他方案就不用白忙活了,可以退出舞台.
+`Cond`の実際の使用ケースについては、`Cond`を最適解に適用するのが最善だと思います。たとえば、同じWebページをクロールする場合、A、B、C、Dの4つのスキームがある可能性があり、そのうちの1つが最も速く完了すれば十分です。その後、1つのタスクが完了するとすぐに、メインスレッドで`Broadcast`が開始されるため、他のスキームは無駄に作業する必要がなく、ステージを退出できます。
 
-暂时没想到`Signal`的实际用法,以后有机会再补充吧.
+`Signal`の実際の使用法はまだ考えていません。機会があれば後で追加します。
 
-真正理解了`Cond`锁的争抢方式之后,`Broadcast`和`Signal`交替使用也就不再有什么问题.
+`Cond`ロックの競合メカニズムを本当に理解したら、`Broadcast`と`Signal`を交互に使用しても問題はなくなります。
 
 ### [Locker](https://golang.org/pkg/sync/#Locker)
 
-只是一个简单的接口.
+単純なインターフェースです。
 
 ```go
 type Locker interface {
@@ -168,7 +165,7 @@ type Mutex
     func (m *Mutex) Unlock()
 ```
 
-互斥锁
+相互排他ロック
 
 ```go
 func useMutex() {
@@ -178,21 +175,21 @@ func useMutex() {
 	go func() {
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine1: 我会锁定大概 2s")
+		fmt.Println("goroutine1: 約2秒間ロックします")
 		time.Sleep(time.Second * 2)
-		fmt.Println("goroutine1: 我解锁了，你们去抢吧")
+		fmt.Println("goroutine1: ロックを解除しました。取りに行ってください")
 		ch <- struct{}{}
 	}()
 
 	go func() {
-		fmt.Println("groutine2: 等待解锁")
+		fmt.Println("groutine2: ロック解除を待機中")
 		l.Lock()
 		defer l.Unlock()
-		fmt.Println("goroutine2: 哈哈，我锁定了")
+		fmt.Println("goroutine2: はは、ロックしました")
 		ch <- struct{}{}
 	}()
 
-	// 等待 goroutine 执行结束
+	// goroutineの実行終了を待機
 	for i := 0; i < 2; i++ {
 		<-ch
 	}
@@ -207,7 +204,7 @@ type Once
     func (o *Once) Do(f func())
 ```    
 
-如其名,Once里的Do函数只会运行一次
+その名のとおり、OnceのDo関数は1回だけ実行されます。
 
 ```go
 func useOnce() {
@@ -239,13 +236,13 @@ type RWMutex
     func (rw *RWMutex) Unlock()
 ```    
 
-RWMutex是基于Mutex实现的.
+RWMutexはMutexに基づいて実装されています。
 
-读写锁,一般用在大量读操作、少量写操作的情况
+読み書きロック、一般的に大量の読み取り操作と少数の書き込み操作のシナリオで使用されます。
 
-1. 同时只能有一个 goroutine 能够获得写锁定。
-1. 同时可以有任意多个 gorouinte 获得读锁定。
-1. 同时只能存在写锁定或读锁定（读和写互斥）。
+1. 同時に1つのgoroutineのみが書き込みロックを取得できます。
+1. 任意の数のgoroutineが同時に読み取りロックを取得できます。
+1. 書き込みロックまたは読み取りロックのみが同時に存在できます（読み取りと書き込みは相互排他的）。
 
 ```go
 func useRWMutex() {
@@ -267,19 +264,19 @@ var rw sync.RWMutex
 
 func read(n int, ch chan struct{}) {
 	rw.RLock()
-	fmt.Printf("goroutine %d 进入读操作...\n", n)
+	fmt.Printf("goroutine %d 読み取り操作に入っています...\n", n)
 	v := count
-	fmt.Printf("goroutine %d 读取结束，值为：%d\n", n, v)
+	fmt.Printf("goroutine %d 読み取り終了、値は：%d\n", n, v)
 	rw.RUnlock()
 	ch <- struct{}{}
 }
 
 func write(n int, ch chan struct{}) {
 	rw.Lock()
-	fmt.Printf("goroutine %d 进入写操作...\n", n)
+	fmt.Printf("goroutine %d 書き込み操作に入っています...\n", n)
 	v := rand.Intn(1000)
 	count = v
-	fmt.Printf("goroutine %d 写入结束，新值为：%d\n", n, v)
+	fmt.Printf("goroutine %d 書き込み終了、新しい値は：%d\n", n, v)
 	rw.Unlock()
 	ch <- struct{}{}
 }
@@ -296,11 +293,11 @@ Examples(Expand All)
 
 ```
 
-简单的多任务分发
+シンプルなマルチタスク分散
 
 ```go
 func useWaitGroup() {
-	// 通过sync包中的WaitGroup 实现并发控制
+	// syncパッケージのWaitGroupを使用して並行制御を実現
 
 	var wg sync.WaitGroup
 
@@ -320,11 +317,11 @@ func useWaitGroup() {
 	wg.Wait()
 	fmt.Println("handle2 done")
 
-	// 在 sync 包中，提供了 WaitGroup ，它会等待它收集的所有 goroutine 任务全部完成，在主 goroutine 中 Add(delta int) 索要等待goroutine 的数量。在每一个 goroutine 完成后 Done() 表示这一个goroutine 已经完成，当所有的 goroutine 都完成后，在主 goroutine 中 WaitGroup 返回。
+	// syncパッケージはWaitGroupを提供し、収集したすべてのgoroutineタスクが完了するのを待機します。メインgoroutineでは、Add(delta int)を使用して待機するgoroutineの数を指定します。各goroutineが完了すると、Done()はこのgoroutineが完了したことを示します。すべてのgoroutineが完了すると、WaitGroupはメインgoroutineで返されます。
 }
 ```
 
-## 数据结构
+## データ構造
 
 ### Map
 
@@ -337,28 +334,22 @@ type Map
     func (m *Map) Store(key, value interface{})
 ```    
 
-#### 适用场景
+#### 適用シナリオ
 
-线程安全集合,在2个场景做了优化
+スレッドセーフなコレクション、2つのシナリオで最適化：
 
-1. 只写1次,多次读
-2. 多个goroutines读写互不相同的键(比如goroutines1读写key1,goroutines2读写key2)
+1. 1回書き込み、複数回読み取り
+2. 複数のgoroutineが異なるキーを読み書き（たとえば、goroutine1がkey1を読み書き、goroutine2がkey2を読み書き）
 
-#### 方法介绍
+#### メソッドの紹介
 
-Load 读取
+Load：読み取り
+LoadOrStore：読み取り、見つからない場合は書き込み
+Store：書き込み
+Range：直接反復できない、コールバック方式で反復する必要がある
 
-LoadOrStore 读取不到则写入
-
-Store 写入
-
-Range 无法直接遍历,得通过回调的方式遍历
-
-具体用法见
-
+具体的な使用方法は以下を参照：
 [Go 1.9 sync.Map揭秘](https://colobu.com/2017/07/11/dive-into-sync-Map/)
-
-
 
 ### Pool
 
@@ -377,20 +368,20 @@ var bufPool = sync.Pool{
 }
 
 func usePool(key, val string) {
-	// 获取临时对象，没有的话会自动创建
+	// 一時オブジェクトを取得、利用できない場合は自動的に作成
 	b := bufPool.Get().(*bytes.Buffer)
 	b.Reset()
 	b.WriteString(key)
 	b.WriteByte('=')
 	b.WriteString(val)
 	os.Stdout.Write(b.Bytes())
-	// 将临时对象放回到 Pool 中
+	// 一時オブジェクトをPoolに戻す
 	bufPool.Put(b)
 }
 ```
 
 
-## 参考链接:
+## 参考リンク：
 
-1. [浅谈 Golang sync 包的相关使用方法](https://deepzz.com/post/golang-sync-package-usage.html)
-2. [map性能对比](https://medium.com/@deckarep/the-new-kid-in-town-gos-sync-map-de24a6bf7c2c)
+1. [Golang syncパッケージの関連使用方法について](https://deepzz.com/post/golang-sync-package-usage.html)
+2. [mapパフォーマンス比較](https://medium.com/@deckarep/the-new-kid-in-town-gos-sync-map-de24a6bf7c2c)

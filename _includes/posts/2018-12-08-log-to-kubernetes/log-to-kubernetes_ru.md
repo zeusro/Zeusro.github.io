@@ -1,19 +1,17 @@
-<!-- TODO: Translate to ru -->
+## Требования
 
-## 需求
+Файлы под `/var/log/containers` на самом деле являются символическими ссылками.
 
-`/var/log/containers`下面的文件其实是软链接
+Фактические файлы логов находятся в директории `/var/lib/docker/containers`.
 
-真正的日志文件在`/var/lib/docker/containers`这个目录
+Опциональные решения:
 
-可选方案:
-
-1. Logstash(过于消耗内存,尽量不要用这个)
+1. Logstash (слишком ресурсоемкий по памяти, старайтесь не использовать это)
 2. fluentd
 3. filebeat
-4. 不使用docker-driver
+4. Не использовать docker-driver
 
-## 日志的格式
+## Формат логов
 
 /var/log/containers
 
@@ -39,26 +37,26 @@
 filebeat:
   prospectors:
   - type: log
-    //开启监视，不开不采集
+    // Включить мониторинг, не будет собирать, если не включено
     enable: true
-    paths:  # 采集日志的路径这里是容器内的path
+    paths:  # Путь для сбора логов, это путь внутри контейнера
     - /var/log/elkTest/error/*.log
-    # 日志多行合并采集
+    # Многострочное объединение логов
     multiline.pattern: '^\['
     multiline.negate: true
     multiline.match: after
-    # 为每个项目标识,或者分组，可区分不同格式的日志
+    # Тегировать каждый проект или группу, чтобы различать логи разных форматов
     tags: ["java-logs"]
-    # 这个文件记录日志读取的位置，如果容器重启，可以从记录的位置开始取日志
+    # Этот файл записывает позицию чтения логов. Если контейнер перезапускается, можно начать читать логи с записанной позиции
     registry_file: /usr/share/filebeat/data/registry
 
 output:
-  # 输出到logstash中
+  # Вывод в logstash
   logstash:
     hosts: ["0.0.0.0:5044"]
 ```
 
-注：6.0以上该filebeat.yml需要挂载到/usr/share/filebeat/filebeat.yml,另外还需要挂载/usr/share/filebeat/data/registry 文件，避免filebeat容器挂了后，新起的重复收集日志。  
+Примечание: Для версии 6.0 и выше этот filebeat.yml нужно монтировать в /usr/share/filebeat/filebeat.yml. Кроме того, нужно монтировать файл /usr/share/filebeat/data/registry, чтобы избежать дублирования сбора логов при перезапуске контейнера filebeat.
 
 
 - logstash.conf
@@ -82,13 +80,13 @@ filter {
 	#if ([message] =~ "^\[") {
     #    drop {}
     #}
-	# 不匹配正则，匹配正则用=~
+	# Для несоответствия регулярному выражению, используйте =~ для соответствия регулярному выражению
 	if [level] !~ "(ERROR|WARN|INFO)" {
         drop {}
     }
 }
 
-## Add your filters / logstash plugins configuration here
+## Добавьте ваши фильтры / конфигурацию плагинов logstash здесь
 
 output {
 	elasticsearch {
@@ -100,20 +98,20 @@ output {
 
 ## fluentd
 
-[fluentd-es-image镜像](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
+[образ fluentd-es-image](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
 
-[Kubernetes-基于EFK进行统一的日志管理](https://www.kubernetes.org.cn/4278.html)
+[Kubernetes - Унифицированное управление логами на основе EFK](https://www.kubernetes.org.cn/4278.html)
 
 
-[Docker Logging via EFK (Elasticsearch + Fluentd + Kibana) Stack with Docker Compose](https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose)
+[Логирование Docker через стек EFK (Elasticsearch + Fluentd + Kibana) с Docker Compose](https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose)
 
 
 ## filebeat+ES pipeline
 
 
-### 定义pipeline
+### Определение pipeline
 
-- 定义java专用的管道
+- Определение Java-специфичного pipeline
 
 ```
 
@@ -186,13 +184,13 @@ data:
   filebeat.yml: |-
     filebeat.config:
         inputs:
-          # Mounted `filebeat-inputs` configmap:
+          # Смонтированный configmap `filebeat-inputs`:
           path: ${path.config}/inputs.d/*.yml
-          # Reload inputs configs as they change:
+          # Перезагружать конфигурации входов при их изменении:
           reload.enabled: false
         modules:
           path: ${path.config}/modules.d/*.yml
-          # Reload module configs as they change:
+          # Перезагружать конфигурации модулей при их изменении:
           reload.enabled: false
     setup.template.settings:
         index.number_of_replicas: 0
@@ -278,7 +276,7 @@ spec:
           #   value:
           securityContext:
             runAsUser: 0
-            # If using Red Hat OpenShift uncomment this:
+            # Если используете Red Hat OpenShift, раскомментируйте это:
             #privileged: true
           resources:
             limits:
@@ -304,7 +302,7 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
-      # data folder stores a registry of read status for all files, so we don't send everything again on a Filebeat pod restart
+      # папка data хранит реестр статуса чтения для всех файлов, поэтому мы не отправляем все снова при перезапуске pod Filebeat
       - name: data
         hostPath:
           path: /var/lib/filebeat-data
@@ -330,7 +328,7 @@ metadata:
   labels:
     k8s-app: filebeat
 rules:
-- apiGroups: [""] # "" indicates the core API group
+- apiGroups: [""] # "" указывает на основную API группу
   resources:
   - namespaces
   - pods
@@ -348,7 +346,7 @@ metadata:
     k8s-app: filebeat
 ```
 
-如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
+Если вывод - это одноузловой elasticsearch, можно установить экспортированные filebeat* в 0 реплик, изменив шаблон
 
 ```
 curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: application/json' -d'
@@ -364,31 +362,31 @@ curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: applicat
 
 
 
-参考链接:
+Ссылки:
 1. [running-on-kubernetes](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html)
-1. [ELK+Filebeat 集中式日志解决方案详解](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
-2. [filebeat.yml（中文配置详解）](http://www.cnblogs.com/zlslch/p/6622079.html)
-3. [Elasticsearch Pipeline 详解](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
-4. [es number_of_shards和number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
+1. [Подробное объяснение централизованного решения для логирования ELK+Filebeat](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
+2. [filebeat.yml (подробное объяснение конфигурации на китайском)](http://www.cnblogs.com/zlslch/p/6622079.html)
+3. [Подробное объяснение Elasticsearch Pipeline](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
+4. [es number_of_shards и number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
 
 
 
-## 其他方案
+## Другие решения
 
-有些是sidecar模式,sidecar模式可以做得比较细致.
+Некоторые используют режим sidecar, который можно сделать более тонко.
 
-1. [使用filebeat收集kubernetes中的应用日志](https://jimmysong.io/posts/kubernetes-filebeat/)
-1. [使用Logstash收集Kubernetes的应用日志](https://jimmysong.io/posts/kubernetes-logstash/)
+1. [Использование filebeat для сбора логов приложений в kubernetes](https://jimmysong.io/posts/kubernetes-filebeat/)
+1. [Использование Logstash для сбора логов приложений Kubernetes](https://jimmysong.io/posts/kubernetes-logstash/)
 2. 
 
 
-### 阿里云的方案
+### Решение Alibaba Cloud
 
-1. [Kubernetes日志采集流程](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
+1. [Процесс сбора логов Kubernetes](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
 
 
-### 跟随docker启动
-1. [docker驱动](https://www.fluentd.org/guides/recipes/docker-logging)
+### Следовать запуску Docker
+1. [драйвер docker](https://www.fluentd.org/guides/recipes/docker-logging)
 2. 
 
 

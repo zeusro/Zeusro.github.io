@@ -1,39 +1,35 @@
-<!-- TODO: Translate to jp -->
-
-##  Bean Validation 规范内嵌的约束注解定义
+## Bean Validation仕様に組み込まれた制約アノテーション定義
 ```
-约束注解名称	约束注解说明
-@Null	验证对象是否为空
-@NotNull	验证对象是否为非空
-@AssertTrue	验证 Boolean 对象是否为 true
-@AssertFalse	验证 Boolean 对象是否为 false
-@Min	验证 Number 和 String 对象是否大等于指定的值
-@Max	验证 Number 和 String 对象是否小等于指定的值
-@DecimalMin	验证 Number 和 String 对象是否大等于指定的值，小数存在精度
-@DecimalMax	验证 Number 和 String 对象是否小等于指定的值，小数存在精度
-@Size	验证对象（Array,Collection,Map,String）长度是否在给定的范围之内
-@Digits	验证 Number 和 String 的构成是否合法
-@Past	验证 Date 和 Calendar 对象是否在当前时间之前
-@Future	验证 Date 和 Calendar 对象是否在当前时间之后
-@Pattern	验证 String 对象是否符合正则表达式的规则
+制約アノテーション名	制約アノテーション説明
+@Null	オブジェクトがnullかどうかを検証
+@NotNull	オブジェクトが非nullかどうかを検証
+@AssertTrue	Booleanオブジェクトがtrueかどうかを検証
+@AssertFalse	Booleanオブジェクトがfalseかどうかを検証
+@Min	NumberおよびStringオブジェクトが指定された値以上かどうかを検証
+@Max	NumberおよびStringオブジェクトが指定された値以下かどうかを検証
+@DecimalMin	NumberおよびStringオブジェクトが指定された値以上かどうかを検証（小数の精度が存在）
+@DecimalMax	NumberおよびStringオブジェクトが指定された値以下かどうかを検証（小数の精度が存在）
+@Size	オブジェクト（Array、Collection、Map、String）の長さが指定された範囲内かどうかを検証
+@Digits	NumberおよびStringの構成が有効かどうかを検証
+@Past	DateおよびCalendarオブジェクトが現在時刻より前かどうかを検証
+@Future	DateおよびCalendarオブジェクトが現在時刻より後かどうかを検証
+@Pattern	Stringオブジェクトが正規表現の規則に準拠しているかどうかを検証
 ```
 
-## querystring接收参数/ POST Form接收参数
-这两种合在一起写是因为他们接收的方式都是一样的,可以用多个字段分开接收
+## querystringでパラメータを受信 / POST Formでパラメータを受信
+これら2つを一緒に書くのは、受信方法が同じで、複数のフィールドを個別に受信できるためです。
 
-
-
-* 典型的POST Multi Form 示例
+* 典型的なPOST Multi Formの例
 
 ```JAVA
 @Validated
 @RestController
 public class PictureAPIs {
     public ApiResult add(@RequestParam("file") MultipartFile file,
-                         @NotNull(message = "xxx不得为空!")
-                         @Size(min = 32, max = 32, message = "必须是32位的字符串")
+                         @NotNull(message = "xxxは空にできません!")
+                         @Size(min = 32, max = 32, message = "32文字の文字列である必要があります")
                          @RequestParam String gidUnique,                         
-                         @Pattern(regexp = "^(taobao_picture_upload|taobao_product_img_upload|taobao_item_img_upload|taobao_product_add)$",message = "type可选值:XXX")
+                         @Pattern(regexp = "^(taobao_picture_upload|taobao_product_img_upload|taobao_item_img_upload|taobao_product_add)$",message = "typeのオプション値:XXX")
                          @RequestParam("type") String type,                         
                          @RequestParam("i") String i) {
                          }
@@ -41,22 +37,21 @@ public class PictureAPIs {
 ```
 
 * @Validated
-@Validated是最重要的,在每个需要验证控制器参数的 API 上面都需要加上这个注解
+@Validatedは最も重要です。コントローラーパラメータの検証が必要なすべてのAPIにこのアノテーションを追加する必要があります。
 
 * @RequestParam
-这个是很重要的,每个提交的参数都需要加上这个标签`@RequestParam("file")`表示接收 name=file 的参数提交.
+これは非常に重要です。送信されたすべてのパラメータにこのタグを追加する必要があります。`@RequestParam("file")`は、name=fileのパラメータ送信を受信することを意味します。
 
 * @NotNull
-非空验证,这个很常见
+非null検証、これは非常に一般的です
 
 * @Size
-字符串长度上下限
+文字列の長さの上限と下限
 
 * @Pattern
-正则
+正規表現
 
-
-## 接收JSON参数
+## JSONパラメータの受信
 
 ```java
 @RequestMapping(value = "/api/picture/add/base64",method = RequestMethod.POST, produces = "application/json;charset=UTF-8")
@@ -71,7 +66,7 @@ public class PictureAPIs {
 public class PictureAddBase64RequestBody extends PictureAddBaseRequestBody {
 
     private static final long serialVersionUID = 6185318090948651724L;
-    @NotNull(message = "base64不得为空!")
+    @NotNull(message = "base64は空にできません!")
     String base64;
 
     public String getBase64() {
@@ -84,24 +79,23 @@ public class PictureAddBase64RequestBody extends PictureAddBaseRequestBody {
 
 }
 ```
-以这个为例,参数的校验标签放在PictureAddBase64RequestBody的字段上面
+この例では、パラメータ検証タグはPictureAddBase64RequestBodyのフィールドに配置されます。
 
+## その他
 
-## 其他
-
-* 验证方法
+* 検証メソッド
 
 ```java
- //验证 
+ //検証 
  public static<T> void validate(T t){ 
      Validator validator = factory.getValidator();
       Set<ConstraintViolation<T>> constraintViolations = validator.validate(t); 
       for(ConstraintViolation<T> constraintViolation : constraintViolations) { System.out.println(constraintViolation.getMessage()); } }
 ```
 
-参考链接:
-1. [自定义注解与参数验证](https://www.jianshu.com/p/2e71656aa88c)
-1. [Java注解 + 基于注解 & 拦截器实现登录验证 / 权限控制](https://www.jianshu.com/p/f9f9490a0924)
+参考リンク:
+1. [カスタムアノテーションとパラメータ検証](https://www.jianshu.com/p/2e71656aa88c)
+1. [Javaアノテーション + アノテーションとインターセプターベースのログイン検証 / 権限制御](https://www.jianshu.com/p/f9f9490a0924)
 1. [Bean Validation constraints](https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#validator-defineconstraints-spec)
-1. [Bean Validation 技术规范特性概述](https://www.ibm.com/developerworks/cn/java/j-lo-beanvalid/)
-1. [SpringMVC数据验证——第七章 注解式控制器的数据验证、类型转换及格式化——跟着开涛学SpringMVC](http://jinnianshilongnian.iteye.com/blog/1733708)
+1. [Bean Validation技術仕様の特徴概要](https://www.ibm.com/developerworks/cn/java/j-lo-beanvalid/)
+1. [SpringMVCデータ検証 - 第7章 アノテーションベースのコントローラーのデータ検証、型変換およびフォーマット - Kaitaoと一緒にSpringMVCを学ぶ](http://jinnianshilongnian.iteye.com/blog/1733708)

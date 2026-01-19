@@ -1,10 +1,8 @@
-<!-- TODO: Translate to ru -->
+## Базовые запросы
 
-## 基本查询
+ES имеет ограничение параллелизма по умолчанию 1000. Если предыдущие запросы застревают или слишком много мгновенных запросов, возникнут исключения.
 
-ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,就会出现异常.
-
-### 创建
+### Создание
 
 ```
 POST /a/_doc/2
@@ -14,9 +12,9 @@ POST /a/_doc/1
 
 ```
 
-### 查询
+### Запрос
 
-- 返回文档的一部分
+- Вернуть часть документа
 
 ?_source=title,text
 
@@ -27,18 +25,18 @@ get /a/text/1
 get /a/text/2
 ```
 
-### 更新
+### Обновление
 
-- 部分更新
+- Частичное обновление
 
 /_update
 
-- 取回多个文档
+- Получить несколько документов
 
 /_mget
 
 
-- 分析
+- Анализ
 
 ```
 GET _analyze
@@ -48,7 +46,7 @@ GET _analyze
 }
 ```
 
-## 分片
+## Шарды
 
 ```
 PUT test
@@ -67,17 +65,17 @@ GET /_all/_search?q=tag:wow
 GET _cat/indices
 ```
 
-## 系统查询
+## Системные запросы
 
-- 健康检查
+- Проверка здоровья
 
 GET /_cluster/health
 
-## 基于插件的查询
+## Запросы на основе плагинов
 
 ### [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik)
 
-使用该插件,要注意**mappings要在创建index时创建**,不能后期修改/添加
+При использовании этого плагина обратите внимание, что **mappings должны быть созданы при создании индекса**, их нельзя изменить/добавить позже.
 
 ```
 PUT /a
@@ -96,13 +94,13 @@ PUT /a
 }
 ```
 
-使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词,这种需求是无法实现的.
+Есть проблема с использованием интерфейса онлайн горячего обновления: старые данные нужно переиндексировать (reindex). Поэтому идея добавления новых слов для сегментации старых данных не может быть достигнута.
 
-热更新的词语存在内存中,不会更新dic文件
+Горячее обновленные слова хранятся в памяти и не обновляют dic файлы.
 
-## 分片管理
+## Управление шардами
 
-### 默认模板设置
+### Настройки шаблона по умолчанию
 
 ```
 POST _template/default
@@ -115,7 +113,7 @@ POST _template/default
 }
 ```
 
-### 自定义模板-设置副本数默认为0
+### Пользовательский шаблон - установить количество реплик по умолчанию в 0
 
 ```bash
 curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/json' -d '
@@ -127,7 +125,7 @@ curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/js
 }'
 ```
 
-### 缩容
+### Масштабирование вниз
 
 ```
 put */_settings
@@ -142,13 +140,13 @@ put */_settings
 }
 ```
 
-## ingest/pipeline 用法
+## Использование ingest/pipeline
 
-ingest 是 elasticsearch 的节点角色。在ingest里面定义pipeline。
+ingest — это роль узла в elasticsearch. В ingest определяются pipeline.
 
-pipeline是预处理器。什么是预处理器呢，可以勉强理解为数据清洗，在入库前对数据进行处理。
+pipeline — это препроцессор. Что такое препроцессор? Его можно грубо понять как очистку данных, обработку данных перед хранением.
 
-比如下面这个pipeline的定义
+Например, определение этого pipeline:
 
 ```
 PUT _ingest/pipeline/monthlyindex
@@ -189,28 +187,28 @@ PUT _ingest/pipeline/monthlyindex
 }
 ```
 
-意思是把写入"servicelog-test" index 的数据按月分片处理。
+Это означает, что данные, записанные в индекс "servicelog-test", обрабатываются по месяцам.
 
-原始写入"servicelog-test"的请求，最终最写入到 `servicelog-test_2020-02-01`(当前月份的自动分片)
+Исходные запросы, записывающие в "servicelog-test", в конечном итоге будут записаны в `servicelog-test_2020-02-01` (автоматическое шардирование для текущего месяца).
 
-这个 `pipeline` 解决了我们写入单一elasticsearch index 的问题。以后再也不需要 delete by query 了，直接删过往的index，这也是elasticsearch推荐的方式。
+Этот `pipeline` решает нашу проблему записи в один индекс elasticsearch. Нам больше не нужен delete by query. Просто напрямую удаляйте прошлые индексы, что также является рекомендуемым способом elasticsearch.
 
-参考链接：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
+Ссылка: [Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
 
-## 付费功能(_xpack)
+## Платные функции (_xpack)
 
-es默认没有密码,需要用户授权功能的话买商业版的许可.
+ES по умолчанию не имеет пароля. Если вам нужны функции авторизации пользователей, купите коммерческую лицензию.
 
 - [security-api-users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html)
 
 
 GET /_xpack/security/user
 
-## 7.0废弃的查询
+## Устаревшие запросы в 7.0
 
-As of version 7.0 Elasticsearch will require that a [field] parameter is provided when a [seed] is set
+Начиная с версии 7.0 Elasticsearch потребует, чтобы параметр [field] был предоставлен, когда установлен [seed]
 
-改为
+Изменить на:
 
 ```
  "random_score": {
@@ -218,7 +216,7 @@ As of version 7.0 Elasticsearch will require that a [field] parameter is provide
                 "field": "_seq_no"
             }
 ```
-Deprecation: Deprecated field [inline] used, expected [source] instead
+Устаревание: Использовано устаревшее поле [inline], ожидается [source] вместо этого
 
 ```
 		"_script": {
@@ -228,8 +226,8 @@ Deprecation: Deprecated field [inline] used, expected [source] instead
 ```
 inline
 
-## 参考链接:
+## Ссылки:
 
-1. [基础入门](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
-1. [文档元数据](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
-2. [es 的常用查询语法](https://blog.csdn.net/qingmoruoxi/article/details/77221602)
+1. [Основы](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
+1. [Метаданные документа](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
+2. [Общий синтаксис запросов es](https://blog.csdn.net/qingmoruoxi/article/details/77221602)

@@ -1,20 +1,18 @@
-<!-- TODO: Translate to jp -->
+api-serverへの接続は、一般的に3つのケースに分かれます：
 
-连接api-server一般分3种情况：
-
-1. Kubernetes Node通过kubectl proxy中转连接
-2. 通过授权验证,直接连接(kubectl和各种client就是这种情况)
-  - `kubectl`加载`~/.kube/config`作为授权信息,请求远端的`api-server`的resetful API.`api-server`根据你提交的授权信息判断有没有权限,有权限的话就将对应的结果返回给你。
-3. 容器内部通过`ServiceAccount`连接
+1. Kubernetes Nodeがkubectl proxyを介して中継接続
+2. 認証検証を介して直接接続（kubectlとさまざまなクライアントがこのケース）
+  - `kubectl`は`~/.kube/config`を認証情報として読み込み、リモートの`api-server`のRESTful APIをリクエストします。`api-server`は、送信された認証情報に基づいて権限があるかどうかを判断し、権限がある場合は対応する結果を返します。
+3. コンテナが`ServiceAccount`を介して接続
 
 
-## 容器请求api-server
+## コンテナがapi-serverをリクエスト
 
 ![img](https://d33wubrfki0l68.cloudfront.net/673dbafd771491a080c02c6de3fdd41b09623c90/50100/images/docs/admin/access-control-overview.svg)
 
-`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
+`Kubernetes`のこのRBACメカニズムは[以前の記事](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)で言及されました。ここでは説明しません。
 
-为了方便起见,我直接使用`kube-system`的`admin`作为例子.
+便宜上、`kube-system`の`admin`を直接例として使用します。
 
 ```yaml
 # {% raw %}
@@ -73,24 +71,24 @@ subjects:
 # {% endraw %}
 ```
 
-简单地说,容器通过`ServiceAccount`配合RBAC这套机制,让容器拥有访问`api-server`的权限.
+簡単に言えば、コンテナは`ServiceAccount`とRBACメカニズムを組み合わせて、`api-server`にアクセスする権限を持ちます。
 
-原本我打算在`kube-system`下面创建一个nginx容器,去访问,但是curl失败了,后来我找了个centos的镜像去测试.大家记得配置好`serviceAccount`就行
+もともと`kube-system`の下にnginxコンテナを作成してアクセスしようとしましたが、curlが失敗しました。後でcentosイメージを見つけてテストしました。皆さんは`serviceAccount`を適切に設定するだけです。
 
 
     metadata.spec.template.spec.serviceAccount: admin
 
 
 
-### deploy声明sa(`ServiceAccount`)的本质
+### deployがsa（`ServiceAccount`）を宣言する本質
 
-在deploy声明sa的本质是把sa的对应的secret挂载到`/var/run/secrets/kubernetes.io/serviceaccount`目录中.
+deployでsaを宣言する本質は、saの対応するsecretを`/var/run/secrets/kubernetes.io/serviceaccount`ディレクトリにマウントすることです。
 
-不声明sa,则把`default`作为sa挂载进去
+saを宣言しない場合、`default`がsaとしてマウントされます。
 
 ```bash
 # k edit secret admin-token-wggwk
-# 用edit加载的secret内容都会以base64形式表示
+# editで読み込まれたsecretの内容はすべてbase64形式で表示されます
 # base64(kube-system):a3ViZS1zeXN0ZW0=
 apiVersion: v1
 data:
@@ -108,8 +106,8 @@ metadata:
 type: kubernetes.io/service-account-token
 ```
 
-所以deploy衍生的每一个pod里面的容器,
-`/var/run/secrets/kubernetes.io/serviceaccount`目录下面都会有这3个文件
+したがって、deployから派生したすべてのpod内のコンテナには、
+`/var/run/secrets/kubernetes.io/serviceaccount`ディレクトリの下にこの3つのファイルがあります：
 
 ```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -l
@@ -119,7 +117,7 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-虽然这3个文件都是软链接而且最终指向了下面那个带日期的文件夹,但是我们不用管它.
+これらの3つのファイルはすべてシンボリックリンクで、最終的に下の日付付きフォルダーを指していますが、気にする必要はありません。
 
 ```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -a -l
@@ -133,11 +131,11 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-## curl请求api-server
+## curlでapi-serverをリクエスト
 
-集群就绪之后,在`default`这个命名空间下会有`kubernetes`这个svc,容器透过ca.crt作为证书去请求即可.跨ns的访问方式为`https://kubernetes.default.svc:443`
+クラスターが準備できたら、`default`名前空間に`kubernetes`というsvcがあります。コンテナはca.crtを証明書として使用してリクエストできます。nsをまたぐアクセス方法は`https://kubernetes.default.svc:443`です。
 
-### 前期准备
+### 前提条件
 
 ```bash
 kubectl exec -it $po sh -n kube-system
@@ -147,7 +145,7 @@ APISERVER=https://kubernetes.default.svc:443
 
 ```
 
-### 先伪装成一个流氓去访问`api-server`
+### まず悪役を装って`api-server`にアクセス
 
 ```bash
 sh-4.2# curl -voa  -s  $APISERVER/version
@@ -168,9 +166,9 @@ sh-4.2# curl -voa  -s  $APISERVER/version
 * Closing connection 0
 ```
 
-可以看到,用默认的`/etc/pki/tls/certs/ca-bundle.crt`公钥去访问,直接就报证书对不上了(Peer's Certificate issuer is not recognized.)
+見てのとおり、デフォルトの`/etc/pki/tls/certs/ca-bundle.crt`公開鍵を使用してアクセスすると、証明書が一致しないと直接報告されます（Peer's Certificate issuer is not recognized.）。
 
-### 带证书去访问`api-server`
+### 証明書を持って`api-server`にアクセス
 
 ```bash
 curl -s $APISERVER/version  \
@@ -189,13 +187,13 @@ curl -s $APISERVER/version  \
 }
 ```
 
-那这样思路就很明确了,curl的时候带上正确的证书(ca.crt)和请求头就行了.
+このように、アプローチは明確です。curlする際に、正しい証明書（ca.crt）とリクエストヘッダーを持参します。
 
-## 使用curl访问常见API
+## curlを使用して一般的なAPIにアクセス
 
-这里先要介绍一个概念`selfLink`.在`kubernetes`里面,所有事物皆资源/对象.`selfLink`就是每一个资源对应的`api-server`地址.`selfLink`跟资源是一一对应的.
+ここで`selfLink`という概念を紹介する必要があります。`kubernetes`では、すべてのものがリソース/オブジェクトです。`selfLink`は各リソースに対応する`api-server`アドレスです。`selfLink`はリソースと1対1の対応関係があります。
 
-`selfLink`是有规律的,由`namespace`,`type`,`apiVersion`,`name`等组成.
+`selfLink`にはパターンがあり、`namespace`、`type`、`apiVersion`、`name`などで構成されます。
 
 
 ### [get node](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#list-node-v1-core)
@@ -234,12 +232,12 @@ curl \
 --cacert  ca.crt
 ```
 
-完整API见[kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)
+完全なAPIについては[kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)を参照してください。
 
 
-## 使用JavaScript客户端访问 api-server
+## JavaScriptクライアントを使用してapi-serverにアクセス
 
-2019-08-23，我在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
+2019-08-23、kubeflowをデプロイしていたとき、内部にnodejsを使用してapiサービスをリクエストするコンポーネントがあることに気づきました。コードを観察したところ、設定を読み込む場所はおおよそ次のとおりです。
 
 ```ts
 
@@ -330,13 +328,13 @@ public loadFromDefault() {
     }
 ```
 
-可以看到,加载配置是有先后顺序的. sa 排在比较靠后的优先级.
+見てのとおり、設定の読み込みには優先順位があります。saは比較的低い優先順位にランクされています。
 
-host 和 port 通过读取相应 env 得出(实际上,就算在yaml没有配置ENV, kubernetes 本身也会注入大量ENV,这些ENV大多是svc的ip地址和端口等)
+hostとportは、対応するenvを読み取ることによって得られます（実際、yamlでENVが設定されていなくても、kubernetes自体が大量のENVを注入します。これらのENVのほとんどはsvcのIPアドレスとポートなどです）。
 
-而且默认的客户端 `skipTLSVerify: false,`
+そしてデフォルトのクライアント`skipTLSVerify: false,`
 
-那么使用默认的客户端,要取消SSL验证咋办呢?这里提供一个比较蠢但是万无一失的办法:
+では、デフォルトのクライアントを使用する場合、SSL検証をキャンセルするにはどうすればよいでしょうか？ここに、愚かですが確実な方法を提供します：
 
 ```ts
 import * as k8s from '@kubernetes/client-node';
@@ -361,6 +359,6 @@ import { Cluster } from '@kubernetes/client-node/dist/config_types';
       this.kubeConfig.makeApiClient(k8s.Custom_objectsApi);
 ```
 
-## 参考链接
-1. [Access Clusters Using the Kubernetes API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
-2. [cURLing the Kubernetes API server](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)
+## 参考リンク
+1. [Kubernetes APIを使用してクラスターにアクセス](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
+2. [Kubernetes APIサーバーをcURLする](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)

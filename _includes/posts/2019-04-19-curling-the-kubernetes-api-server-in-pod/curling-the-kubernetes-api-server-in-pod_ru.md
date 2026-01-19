@@ -1,20 +1,18 @@
-<!-- TODO: Translate to ru -->
+Подключение к api-server обычно делится на 3 случая:
 
-连接api-server一般分3种情况：
-
-1. Kubernetes Node通过kubectl proxy中转连接
-2. 通过授权验证,直接连接(kubectl和各种client就是这种情况)
-  - `kubectl`加载`~/.kube/config`作为授权信息,请求远端的`api-server`的resetful API.`api-server`根据你提交的授权信息判断有没有权限,有权限的话就将对应的结果返回给你。
-3. 容器内部通过`ServiceAccount`连接
+1. Kubernetes Node подключается через ретрансляцию kubectl proxy
+2. Прямое подключение через проверку авторизации (kubectl и различные клиенты попадают в этот случай)
+  - `kubectl` загружает `~/.kube/config` как информацию об авторизации, запрашивает RESTful API удаленного `api-server`. `api-server` судит, есть ли у вас разрешение, на основе информации об авторизации, которую вы отправляете. Если у вас есть разрешение, он возвращает соответствующий результат вам.
+3. Контейнеры подключаются через `ServiceAccount`
 
 
-## 容器请求api-server
+## Контейнер запрашивает api-server
 
 ![img](https://d33wubrfki0l68.cloudfront.net/673dbafd771491a080c02c6de3fdd41b09623c90/50100/images/docs/admin/access-control-overview.svg)
 
-`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
+Механизм RBAC `Kubernetes` упоминался в [предыдущей статье](https://www.zeusro.com/2019/01/17/kubernetes-rbac/). Здесь я не буду объяснять.
 
-为了方便起见,我直接使用`kube-system`的`admin`作为例子.
+Для удобства я буду напрямую использовать `admin` из `kube-system` в качестве примера.
 
 ```yaml
 # {% raw %}
@@ -73,24 +71,24 @@ subjects:
 # {% endraw %}
 ```
 
-简单地说,容器通过`ServiceAccount`配合RBAC这套机制,让容器拥有访问`api-server`的权限.
+Проще говоря, контейнеры имеют доступ к `api-server` через `ServiceAccount` в сочетании с механизмом RBAC.
 
-原本我打算在`kube-system`下面创建一个nginx容器,去访问,但是curl失败了,后来我找了个centos的镜像去测试.大家记得配置好`serviceAccount`就行
+Изначально я планировал создать контейнер nginx под `kube-system` для доступа, но curl не удался. Позже я нашел образ centos для тестирования. Все просто помните правильно настроить `serviceAccount`.
 
 
     metadata.spec.template.spec.serviceAccount: admin
 
 
 
-### deploy声明sa(`ServiceAccount`)的本质
+### Суть объявления sa (`ServiceAccount`) в deploy
 
-在deploy声明sa的本质是把sa的对应的secret挂载到`/var/run/secrets/kubernetes.io/serviceaccount`目录中.
+Суть объявления sa в deploy заключается в монтировании соответствующего секрета sa в каталог `/var/run/secrets/kubernetes.io/serviceaccount`.
 
-不声明sa,则把`default`作为sa挂载进去
+Если sa не объявлен, `default` монтируется как sa.
 
 ```bash
 # k edit secret admin-token-wggwk
-# 用edit加载的secret内容都会以base64形式表示
+# Секреты, загруженные с помощью edit, будут представлены в форме base64
 # base64(kube-system):a3ViZS1zeXN0ZW0=
 apiVersion: v1
 data:
@@ -108,8 +106,8 @@ metadata:
 type: kubernetes.io/service-account-token
 ```
 
-所以deploy衍生的每一个pod里面的容器,
-`/var/run/secrets/kubernetes.io/serviceaccount`目录下面都会有这3个文件
+Таким образом, в каждом контейнере в подах, производных от deploy,
+в каталоге `/var/run/secrets/kubernetes.io/serviceaccount` будут эти 3 файла:
 
 ```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -l
@@ -119,7 +117,7 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-虽然这3个文件都是软链接而且最终指向了下面那个带日期的文件夹,但是我们不用管它.
+Хотя эти 3 файла являются символическими ссылками и в конечном итоге указывают на датированную папку ниже, нам не нужно об этом беспокоиться.
 
 ```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -a -l
@@ -133,11 +131,11 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-## curl请求api-server
+## curl запрашивает api-server
 
-集群就绪之后,在`default`这个命名空间下会有`kubernetes`这个svc,容器透过ca.crt作为证书去请求即可.跨ns的访问方式为`https://kubernetes.default.svc:443`
+После готовности кластера в пространстве имен `default` будет svc `kubernetes`. Контейнеры могут запрашивать, используя ca.crt в качестве сертификата. Способ доступа между ns: `https://kubernetes.default.svc:443`
 
-### 前期准备
+### Предварительные требования
 
 ```bash
 kubectl exec -it $po sh -n kube-system
@@ -147,7 +145,7 @@ APISERVER=https://kubernetes.default.svc:443
 
 ```
 
-### 先伪装成一个流氓去访问`api-server`
+### Сначала притвориться негодяем для доступа к `api-server`
 
 ```bash
 sh-4.2# curl -voa  -s  $APISERVER/version
@@ -168,9 +166,9 @@ sh-4.2# curl -voa  -s  $APISERVER/version
 * Closing connection 0
 ```
 
-可以看到,用默认的`/etc/pki/tls/certs/ca-bundle.crt`公钥去访问,直接就报证书对不上了(Peer's Certificate issuer is not recognized.)
+Как видно, использование публичного ключа по умолчанию `/etc/pki/tls/certs/ca-bundle.crt` для доступа напрямую сообщает, что сертификат не совпадает (Peer's Certificate issuer is not recognized.).
 
-### 带证书去访问`api-server`
+### Доступ к `api-server` с сертификатом
 
 ```bash
 curl -s $APISERVER/version  \
@@ -189,13 +187,13 @@ curl -s $APISERVER/version  \
 }
 ```
 
-那这样思路就很明确了,curl的时候带上正确的证书(ca.crt)和请求头就行了.
+Так что подход ясен: при curl приносите правильный сертификат (ca.crt) и заголовок запроса.
 
-## 使用curl访问常见API
+## Использование curl для доступа к общим API
 
-这里先要介绍一个概念`selfLink`.在`kubernetes`里面,所有事物皆资源/对象.`selfLink`就是每一个资源对应的`api-server`地址.`selfLink`跟资源是一一对应的.
+Здесь нужно ввести концепцию `selfLink`. В `kubernetes` все является ресурсом/объектом. `selfLink` — это адрес `api-server`, соответствующий каждому ресурсу. `selfLink` имеет взаимно однозначное соответствие с ресурсами.
 
-`selfLink`是有规律的,由`namespace`,`type`,`apiVersion`,`name`等组成.
+`selfLink` имеет закономерность, состоящую из `namespace`, `type`, `apiVersion`, `name` и т.д.
 
 
 ### [get node](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#list-node-v1-core)
@@ -234,12 +232,12 @@ curl \
 --cacert  ca.crt
 ```
 
-完整API见[kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)
+Полный API см. [kubernetes API](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/)
 
 
-## 使用JavaScript客户端访问 api-server
+## Использование клиента JavaScript для доступа к api-server
 
-2019-08-23，我在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
+2019-08-23, когда я развертывал kubeflow, я обнаружил, что внутри есть компонент, который использует nodejs для запроса api-сервиса. Я наблюдал код, и место, где загружается конфигурация, примерно такое.
 
 ```ts
 
@@ -330,13 +328,13 @@ public loadFromDefault() {
     }
 ```
 
-可以看到,加载配置是有先后顺序的. sa 排在比较靠后的优先级.
+Как видно, загрузка конфигурации имеет порядок приоритета. sa занимает относительно низкий приоритет.
 
-host 和 port 通过读取相应 env 得出(实际上,就算在yaml没有配置ENV, kubernetes 本身也会注入大量ENV,这些ENV大多是svc的ip地址和端口等)
+host и port получаются путем чтения соответствующего env (на самом деле, даже если ENV не настроен в yaml, kubernetes сам внедрит большое количество ENV, эти ENV в основном IP-адреса и порты svc и т.д.)
 
-而且默认的客户端 `skipTLSVerify: false,`
+И клиент по умолчанию `skipTLSVerify: false,`
 
-那么使用默认的客户端,要取消SSL验证咋办呢?这里提供一个比较蠢但是万无一失的办法:
+Так как же отменить проверку SSL при использовании клиента по умолчанию? Вот глупый, но надежный метод:
 
 ```ts
 import * as k8s from '@kubernetes/client-node';
@@ -361,6 +359,6 @@ import { Cluster } from '@kubernetes/client-node/dist/config_types';
       this.kubeConfig.makeApiClient(k8s.Custom_objectsApi);
 ```
 
-## 参考链接
-1. [Access Clusters Using the Kubernetes API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
-2. [cURLing the Kubernetes API server](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)
+## Ссылки
+1. [Доступ к кластерам с использованием Kubernetes API](https://kubernetes.io/docs/tasks/administer-cluster/access-cluster-api/)
+2. [cURLing сервера Kubernetes API](https://medium.com/@nieldw/curling-the-kubernetes-api-server-d7675cfc398c)

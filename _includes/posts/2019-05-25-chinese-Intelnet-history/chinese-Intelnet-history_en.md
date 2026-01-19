@@ -1,91 +1,87 @@
-<!-- TODO: Translate to en -->
+## My Impression of Chinese Internet
 
-## 印象中的中国互联网
+### The Barbaric Era
 
-### 野蛮时代
+More than 10 years ago, chat rooms and BBS were popular. Various pirated software, from operating systems down to winrar, many were pirated. Computer hardware was expensive and had low configuration. Dial-up internet, very slow speeds.
 
-10年以前,当时流行的是聊天室和BBS，各种盗版软件，上至操作系统，下至winrar很多都是盗版，电脑硬件的价格贵，配置又低。拨号上网，网速很慢。
+### The E-commerce Era
 
-### 电商时代
+The popularization of high-speed networks and smart devices made information flow faster and faster. When information flows faster, making profits through information asymmetry becomes difficult. In plain language, when we go shopping, we find that the structure of many shopping malls has changed significantly. Core life services (dining, beauty, haircuts, etc.) content is increasing, while other auxiliary content (phones, digital products, appliances, clothing) is decreasing. Those that survive, foot traffic is also precarious. Offline has gradually become a place for subsistence consumption.
 
-高速网络和智能设备的普及化,让信息的流动变得越来越快.而当信息的流动变快,通过信息的不对称产生利润就变得困难.说句人话,当我们逛街的时候,会发现很多商场的结构都发生了显著变化,核心生活服务(餐饮,美容,理发这类)的内容在增多,其他附属的内容(手机,数码产品,电器,服装)在减少,苟活的,人流量也岌岌可危.线下逐渐变成了一个生存资料消费的场所
+Rapid information flow has strangled the survival space of traditional distributors/traditional retailers.
 
-信息的快速流动,扼杀了传统经销商/传统零售商的存活空间.
+E-commerce development has also gone through a series of stages.
 
-电商的发展也是经历过一系列阶段的.
+#### Taobao (C-shop) Era
 
-#### 淘宝(C店)时代
+Initially, C-shops were just offline merchants trying something new. Later, offline became increasingly unviable, so these people had to move to pure online. Early C-shops can be simply understood as version 1.0 of Pinduoduo.
 
-刚开始的C店就是线下的商家们图个新鲜玩一玩,后来没想到线下越来越活不下去了,这拨人就只能往纯线上发展了.早期的C店,可以简单理解为拼多多的1.0版.
+#### Tmall (B-shop) Era
 
-#### 天猫(B店)时代
-
-随着人民生活水平的提高,品牌意识的增强,中国的电商玩家们也顺应了这种趋势,推出了淘宝商城(现在叫天猫商城)/京东商城等.
+As people's living standards improved and brand awareness increased, Chinese e-commerce players also followed this trend, launching Taobao Mall (now called Tmall)/JD Mall, etc.
 
 
-#### 微商时代
+#### WeChat Commerce Era
 
-电商的划时代意义其实挺多的,除了上文提到的"去经销商","近乎无限的信息传输半径",还有人人皆可参与.
+E-commerce's epoch-making significance is actually quite many. Besides the "removal of distributors" and "near-infinite information transmission radius" mentioned above, there's also that everyone can participate.
 
-就算后来随着监管的要求,淘宝给卖家设定了各种各样的规则和门槛,但无可否认的是,电商不断吸引了人员参与进来,整个商城从蓝海变成一片新的红海.
+Even though later, as regulatory requirements, Taobao set various rules and thresholds for sellers, it's undeniable that e-commerce continuously attracted people to participate, and the entire mall changed from a blue ocean to a new red ocean.
 
-全民淘金,挣钱的必定是那个卖铲子的人.对于广大卖家也不过如此.当渠道/推广的费用远大于净利润,不得不让他们重新思考人生.部分人扶起了拼多多.部分人找到一个新的思路,通过网红/公众号广告给自己引流,或者让自己成为网红,然后去兜售各种资源.
+Everyone is panning for gold, those who make money are definitely those selling shovels. For the vast number of sellers, it's no different. When channel/promotion costs far exceed net profit, they have to rethink life. Some people picked up Pinduoduo. Some found a new approach, using influencers/public account ads to drive traffic to themselves, or becoming influencers themselves, then selling various resources.
 
-到了后微商时代,这种资源已经不再是看得见摸得着的商品.兜售资源变成了更模糊的一种商业手段.比如兜售付费课程,带无知小青年进富士康自己领中介费,新品"评测"(其实就是水文),空气币,中年焦虑.
+By the late WeChat commerce era, these resources were no longer tangible goods. Selling resources became a more ambiguous business method. For example, selling paid courses, bringing ignorant young people into Foxconn to collect referral fees, new product "reviews" (actually just paid articles), air coins, middle-aged anxiety.
 
-说难听点,就是骗/挣智商税.
+To put it harshly, it's scamming/earning IQ tax.
 
-### 社交网络时代
+### The Social Network Era
 
-其实社交网络一直都是互联网的大主线,在不同的时代中以不同的形式存在而已.
+Actually, social networks have always been the main thread of the internet, existing in different forms in different eras.
 
-1. BBS/聊天室
-2. 博客/qq空间
-3. Facebook/微博
-4. 直播
+1. BBS/Chat rooms
+2. Blogs/QQ Space
+3. Facebook/Weibo
+4. Live streaming
 
-现在的社交网络,变得非常地去中心化,去中心化带来的后果就是纸媒的衰落以及个人网红的崛起.
+Today's social networks have become very decentralized. The consequence of decentralization is the decline of print media and the rise of individual influencers.
 
-另一个去中心化的特征是信息孤岛的林立.社群的崛起某种程度上也是互联网发展的一种倒退。他们把信息的产生和传播圈定在自己的系统中，不对整个互联网开放，违背了互联网开放的初衷。这种模式，间接导致了百度搜索的衰落。
+Another feature of decentralization is the proliferation of information silos. The rise of communities is somewhat a regression in internet development. They confine information generation and dissemination within their own systems, not open to the entire internet, violating the internet's original intention of openness. This model indirectly led to Baidu Search's decline.
 
-但说到百度搜索，他们的衰落纯粹是咎由自取。他们追求短期的财务数据，一味讨好广告主，漠视用户对于高价值信息的需求。
+But speaking of Baidu Search, their decline is purely self-inflicted. They pursued short-term financial data, blindly pleasing advertisers, ignoring users' needs for high-value information.
 
-### 资本时代
+### The Capital Era
 
 ```
-资本来到世间，从头到脚，每个毛孔都滴着血和肮脏的东西。
+Capital comes into the world dripping blood and filth from head to toe, from every pore.
 ```
 
-经过这么些年的发展，有些东西蒸发了，但资本沉淀了下来。资本通过风险资金的形式一步步稀释着创业者的股权，让他们最终沦为了资本的看门狗。
+After so many years of development, some things have evaporated, but capital has settled. Capital, in the form of venture capital, gradually dilutes entrepreneurs' equity, making them ultimately become capital's watchdogs.
 
-资本对我们生活的渗透是及其广泛的，小至租房，外卖，生鲜食品，新闻资讯，机票电影票，医疗美容，大至房地产，金融。每一个有利可图的毛细血管，资本都要插钻个孔进去吸食其中血液。
+Capital's penetration into our lives is extremely extensive, from small things like renting, takeout, fresh food, news, plane tickets, movie tickets, medical beauty, to big things like real estate, finance. Every profitable capillary, capital wants to drill a hole and suck the blood.
 
-看着掐派送时间不惜逆行的外卖小哥，终日不见晚霞的程序员，包装靓丽但价格昂贵的水果，在广告中发新闻的APP，就差帮我凑首付的房地产中介，我觉得这个社会真好懂，“钱”这个字写在了每个人的头上。
+Looking at delivery riders risking their lives by going against traffic to meet delivery times, programmers who never see the sunset, beautifully packaged but expensive fruits, apps that publish news in ads, real estate agents who almost help me with down payments, I think this society is really easy to understand, the word "money" is written on everyone's head.
 
-表面上，我们享受着所谓便利的生活，但其实默许了巨头们的垄断，并顺便接受了他们的剥削。
+On the surface, we enjoy so-called convenient lives, but in fact we've tacitly allowed the giants' monopolies and incidentally accepted their exploitation.
 
-醒醒吧，无产阶级们，你们的信用卡还没还呢！
+Wake up, proletarians, your credit cards aren't paid off yet!
 
-## 我的愿景：信用网络
+## My Vision: Credit Network
 
-基于信用的开放互联网，而不是基于资本的垄断互联网。
+An open internet based on credit, not a monopolistic internet based on capital.
 
-这是一种广泛的社会设想。基于信用的互联网，核心在于开放和信用。
+This is a broad social vision. A credit-based internet, with openness and credit at its core.
 
-1. 开放：去审查，信息公开化。
-2. 个人用户作为互联网第一公民，不再依托于离散的数字账号，而是一种“带上面纱”的信用主体（为了确保个人隐私）
-2. 去中心化，企业/社会组织/营业主体将进化为一种独立的信用主体。
-3. 信用主体的信用评分由核心系统提供，任何人无法修改
-4. 根据社会成员的评价和纠纷对信用主体进行动态评分
+1. Openness: Remove censorship, information transparency.
+2. Individual users as first-class citizens of the internet, no longer relying on discrete digital accounts, but a "veiled" credit entity (to ensure personal privacy).
+2. Decentralization, enterprises/social organizations/business entities will evolve into independent credit entities.
+3. Credit entity credit scores are provided by the core system, no one can modify them.
+4. Dynamically score credit entities based on social member evaluations and disputes.
 
-比如日常的一个场景，我需要找到一家好吃的餐馆。这时，我可以根据“他人评价”，“个人口味”，“远近距离”搜索到对应的餐厅（信用主体），然后我再决定是否去那里吃饭。
+For example, in a daily scenario, I need to find a good restaurant. At this time, I can search for the corresponding restaurant (credit entity) based on "others' evaluations", "personal taste", "distance", then I decide whether to go there to eat.
 
-评分都是可以回溯的，如果我诬告某个人，致使他评分降低，那么当权威机构仲裁得出真相后，我的评分也会降低。
+Scores are all traceable. If I falsely accuse someone, causing their score to drop, then when authoritative institutions arbitrate and find the truth, my score will also drop.
 
-以信用作为基石的社会，信用会约束个人的不合理行为。
+In a society with credit as the foundation, credit will constrain individuals' unreasonable behavior.
 
-当信息的传递变得更为有效时，社会组织会有新的变化，不再强求所有人都在同一个写字楼办公。写字楼会变成举行定期会议的产所。
+When information transmission becomes more effective, social organizations will have new changes, no longer forcing everyone to work in the same office building. Office buildings will become places for holding regular meetings.
 
-大城市只剩下交通枢纽和大零售中心这一功能。
-
-。。。。。。
+Big cities will only retain the functions of transportation hubs and large retail centers.

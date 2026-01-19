@@ -1,14 +1,12 @@
-<!-- TODO: Translate to ru -->
+Я немного ленился в последнее время. Я писал статьи, но они не были отполированы, поэтому я их не публиковал.
 
-最近有点划水,文章还是有写的,只是没成型,所以没发出来.
+Сегодня я расскажу, как монтировать некоторые часто используемые ресурсы в k8s.
 
-今天介绍下用k8s挂载一些常用的资源
-
-当前版本Kubernetes版本:1.12.2
+Текущая версия Kubernetes: 1.12.2
 
 ## env
 
-###  env
+### env
 
 ```
           env:
@@ -16,7 +14,7 @@
               value: 'ssh://git@127.0.0.1:22/a/b.git'
 ```
 
-### 嵌套env
+### Вложенный env
 
 ```
           env:
@@ -32,7 +30,7 @@
 
 ### configMap
 
-**注意一下,修改configmap不会导致容器里的挂载的configmap文件/环境变量发生改变;删除configmap也不会影响到容器内部的环境变量/文件,但是删除configmap之后,被挂载的pod上面会出现一个warnning的事件**
+**Обратите внимание: изменение configmap не приведет к изменению смонтированных файлов/переменных окружения configmap в контейнерах; удаление configmap также не повлияет на переменные окружения/файлы внутри контейнеров, но после удаления configmap на смонтированном pod появится предупреждающее событие**
 
 ```
 Events:
@@ -41,11 +39,11 @@ Events:
   Warning  FailedMount  64s (x13 over 11m)  kubelet, cn-shenzhen.i-wz9498k1n1l7sx8bkc50  MountVolume.SetUp failed for volume "nginx" : configmaps "nginx" not found
 ```
 
-[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)写的很清楚了,这里恬不知耻得copy一下
+Документация [config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data) очень ясна, поэтому я бесстыдно скопирую ее здесь.
 
-**注意,configmap有1M的限制,一般用来挂载小型配置,大量配置建议上配置中心**
+**Обратите внимание: configmap имеет ограничение в 1M, обычно используется для монтирования небольших конфигураций. Для больших конфигураций рекомендуется использовать центр конфигурации.**
 
-### 挂载单一项
+### Монтирование одного элемента
 ```
 apiVersion: v1
 kind: Pod
@@ -57,21 +55,20 @@ spec:
       image: k8s.gcr.io/busybox
       command: [ "/bin/sh", "-c", "env" ]
       env:
-        # Define the environment variable
+        # Определить переменную окружения
         - name: SPECIAL_LEVEL_KEY
           valueFrom:
             configMapKeyRef:
-              # The ConfigMap containing the value you want to assign to SPECIAL_LEVEL_KEY
+              # ConfigMap, содержащий значение, которое вы хотите присвоить SPECIAL_LEVEL_KEY
               name: special-config
-              # Specify the key associated with the value
+              # Указать ключ, связанный со значением
               key: special.how
   restartPolicy: Never
 ```
 
-表示挂载`special-config`这个configmap的`special.how`项
+Это монтирует элемент `special.how` из configmap `special-config`.
 
-
-### 挂载整个configmap
+### Монтирование всего ConfigMap
 
 ```
 apiVersion: v1
@@ -89,14 +86,14 @@ spec:
   restartPolicy: Never
 ```
 
-参考:
+Ссылки:
 
 1. [Add nginx.conf to Kubernetes cluster](https://stackoverflow.com/questions/42078080/add-nginx-conf-to-kubernetes-cluster)
 2. [Configure a Pod to Use a ConfigMap](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)
 
-###  fieldRef
+### fieldRef
 
-可以挂载pod的一些属性
+Может монтировать некоторые свойства pod
 
 ```
           env:
@@ -107,16 +104,16 @@ spec:
 
 ```
 
-Selects a field of the pod: supports metadata.name, metadata.namespace, metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP.
+Выбирает поле pod: поддерживает metadata.name, metadata.namespace, metadata.labels, metadata.annotations, spec.nodeName, spec.serviceAccountName, status.hostIP, status.podIP.
 
 
 ### resourceFieldRef
 
-Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
+Выбирает ресурс контейнера: в настоящее время поддерживаются только ограничения и запросы ресурсов (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory и requests.ephemeral-storage).
 
-英文介绍得很明白,用来挂载当前yaml里面container的资源(CPU/内存)限制,用得比较少啦其实.此外还可以结合`downloadAPI`
+Английская документация объясняет это ясно - используется для монтирования ограничений ресурсов (CPU/память) контейнеров в текущем yaml. На самом деле используется реже. Кроме того, может быть объединен с `downloadAPI`.
 
-注意`containerName`不能配错,不然pod状态会变成`CreateContainerConfigError`
+Обратите внимание, что `containerName` не может быть неправильно настроен, иначе статус pod станет `CreateContainerConfigError`.
 
 ```
           env:  
@@ -131,7 +128,7 @@ Selects a resource of the container: only resources limits and requests (limits.
 
 ### secretKeyRef
 
-Selects a key of a secret in the pod's namespace
+Выбирает ключ секрета в пространстве имен pod
 
 ```
         env:
@@ -147,27 +144,27 @@ Selects a key of a secret in the pod's namespace
               key: password
 ```
 
-参考:
-1. [Kubernetes中Secret使用详解](https://blog.csdn.net/yan234280533/article/details/77018640)
+Ссылки:
+1. [Подробное объяснение использования Secret в Kubernetes](https://blog.csdn.net/yan234280533/article/details/77018640)
 2. https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#envvarsource-v1-core
 
 
-## 目录/文件类挂载
+## Монтирование директорий/файлов
 
-k8s可以挂载的资源实在是太多,这里挑一些比较有代表性的来讲一下
+k8s может монтировать слишком много ресурсов, поэтому я выберу несколько представительных для обсуждения.
 
-这一类资源一般要先在spec层级定义`volumes`,然后在`containers`定义`volumeMounts`,有种先声明,再使用的意思
+Этот тип ресурса обычно должен сначала определить `volumes` на уровне spec, а затем определить `volumeMounts` в `containers`, что имеет смысл сначала объявить, а затем использовать.
 
-### hostPath(宿主机目录/文件)
+### hostPath (Директория/файл хоста)
 
-1. 既有目录/文件用`Directory`/`File`+nodeSelector
-  但是用了`nodeSelector`之后,以后的伸缩都会在匹配的节点上,如果节点只有1个,副本集设置得超出实际节点可承受空间,最终将导致单点问题,这个要注意下
-1. 应用启用时读写空文件用`DirectoryOrCreate`或者`FileOrCreate`
+1. Для существующих директорий/файлов используйте `Directory`/`File` + nodeSelector
+  Но после использования `nodeSelector` будущее масштабирование будет на соответствующих узлах. Если есть только 1 узел, и набор реплик превышает то, что фактический узел может обработать, это в конечном итоге приведет к проблеме единой точки отказа. Это требует внимания.
+1. Для приложений, которые читают/пишут пустые файлы при запуске, используйте `DirectoryOrCreate` или `FileOrCreate`
 
-以下演示第一种方案
+Ниже демонстрируется первый подход.
 
 
-    #给节点打上标签(这里省略)
+    # Пометьте узел (здесь опущено)
     kubectl get node --show-labels
 
 ```
@@ -227,9 +224,9 @@ spec:
 ### configMap
 
 
-#### 单项挂载(第1种)
+#### Монтирование одного элемента (Метод 1)
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+Это монтирование поддерживает горячее обновление. Изменения будут видны примерно через 10 секунд после изменения.
 
 ```
       volumeMounts:
@@ -244,9 +241,9 @@ spec:
             path: log_level
 ```
 
-#### 单项挂载(第2种)
+#### Монтирование одного элемента (Метод 2)
 
-这种挂载方式不会热更新
+Этот метод монтирования не поддерживает горячее обновление.
 
 ```
           volumeMounts:                  
@@ -259,9 +256,9 @@ spec:
               name: amiba-nginx 
 ```
 
-#### 完全挂载
+#### Полное монтирование
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+Это монтирование поддерживает горячее обновление. Изменения будут видны примерно через 10 секунд после изменения.
 
 ```
       volumeMounts:
@@ -275,7 +272,7 @@ spec:
 
 ### secret
 
-#### 单项挂载
+#### Монтирование одного элемента
 
 ```
   volumes:
@@ -292,9 +289,9 @@ spec:
 ```
 
 
-#### 完全挂载
+#### Полное монтирование
 
-这里用了特定权限去挂载文件,默认好像是777
+Здесь используются определенные разрешения для монтирования файлов. По умолчанию, похоже, 777.
 
 ```
           volumeMounts:
@@ -313,11 +310,11 @@ spec:
 --from-file=id_rsa.pub=/Volumes/D/temp/id_rsa.pub  \
 --from-file=known_hosts=/Volumes/D/temp/known_hosts \
 ```
-比如这个模式创建出来的secret,容器里面/root/.ssh目录就会有`id_rsa`,`id_rsa.pub`,`known_hosts`3个文件
+Например, секрет, созданный с этим паттерном, будет иметь файлы `id_rsa`, `id_rsa.pub` и `known_hosts` в директории `/root/.ssh` внутри контейнера.
 
 ### downwardAPI
 
 
-参考链接:
+Ссылки:
 1. [volumes](https://kubernetes.io/docs/concepts/storage/volumes/)
 1. [kubernetes-api/v1.12](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.12/#hostpathvolumesource-v1-core)

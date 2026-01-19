@@ -1,5 +1,3 @@
-<!-- TODO: Translate to jp -->
-
 ```
 graph TB
 e(Executor<V>)-->es(ExecutorService)
@@ -15,15 +13,15 @@ se-->ste
 
 ### ExecutorService
 
-一个运行新任务的简单接口。
+新しいタスクを実行するためのシンプルなインターフェース。
 
-ExecutorService，扩展了Executor接口。添加了一些用来管理执行器生命周期和任务生命周期的方法。
+ExecutorServiceはExecutorインターフェースを拡張します。エグゼキューターのライフサイクルとタスクのライフサイクルを管理するためのいくつかのメソッドを追加します。
 
-可以通过`java.util.concurrent.Executors`类,提供了多个实例化线程的简易静态工厂方法,来创造ExecutorService的子类(一般是创建ThreadPoolExecutor/ScheduledExecutorService/ScheduledThreadPoolExecutor)
+`java.util.concurrent.Executors`クラスを使用して、スレッドをインスタンス化するための複数の簡単な静的ファクトリメソッドを提供し、ExecutorServiceのサブクラス（通常はThreadPoolExecutor/ScheduledExecutorService/ScheduledThreadPoolExecutorを作成）を作成できます。
 
 ### ScheduledExecutorService
 
-继承了ExecutorService和Executor。支持Future和定期执行任务。
+ExecutorServiceとExecutorを継承します。Futureと定期的なタスク実行をサポートします。
 
 ### AbstractExecutorService
 
@@ -32,7 +30,7 @@ ExecutorService，扩展了Executor接口。添加了一些用来管理执行器
 
 ### ThreadPoolExecutor
 
-实现了ExecutorService,所以才能够这么玩
+ExecutorServiceを実装しているため、このように使用できます。
 
 ```java
         //guava
@@ -47,7 +45,7 @@ ExecutorService，扩展了Executor接口。添加了一些用来管理执行器
 
 ### ScheduledThreadPoolExecutor
 
-从上图的继承树就可以看出,ScheduledThreadPoolExecutor通过继承`ScheduledExecutorService`接口实现了其特性,多出了一个`awaitTermination`方法
+上の図の継承ツリーから、ScheduledThreadPoolExecutorが`ScheduledExecutorService`インターフェースを継承することでその機能を実装し、`awaitTermination`メソッドを追加していることがわかります。
 
 ```java
         Runnable runnabledelayedTask = new Runnable() {

@@ -1,33 +1,31 @@
-<!-- TODO: Translate to en -->
+When reading kubernetes documentation, it happened to mention some Go considerations.
 
-在翻阅kubernetes的文档时，里面刚好谈到go一些注意事项。
+Combined with previously encountered problematic APIs, compiled into this article.
 
-结合以前遇过的坑爹API,汇成此文.
+## Language Features
 
-## 语言特性
+### Data Slicing
 
-### 数据切片
-
-原则是取下标,不取上标
+The principle is to take the lower index, not the upper index.
 
 ```go
 	a:=[]int{0,1,2,3,4}
 	a=a[:]
-	a=a[2:4] //从第[2]位起取,直至[4-1]位,所以结果只有2个元素
+	a=a[2:4] //Start from position [2], up to position [4-1], so the result only has 2 elements
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	//len(a):2 ; cap(a):3; values:[2 3]
 ```
 
-数组切片是一种指针,所以才会引申出len/cap/append的问题
+Array slicing is a pointer, which is why len/cap/append issues arise.
 
-### len/cap/append的问题
+### len/cap/append Issues
 
-关于len/cap的问题可以看下面2篇文章
+For len/cap issues, see the following 2 articles:
 
 1. [Slice length and capacity](https://tour.golang.org/moretypes/11)
 1. [Go Slices: usage and internals](https://blog.golang.org/go-slices-usage-and-internals)
 
-简单地说,len就是当前数组/切片实际元素的计数,cap是底层数组的长度,砍头不砍尾
+Simply put, len is the count of actual elements in the current array/slice, cap is the length of the underlying array, cut head not tail.
 
 ```go
 	a :=make([]int,2,3) 
@@ -35,7 +33,7 @@
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	// len(a):2 ; cap(a):3; values:[0 0] 
 	a=a[1:]
-	// 第0位没了,但是后面的还在,所以cap=3-1
+	// Position 0 is gone, but the rest remains, so cap=3-1
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	// len(a):1 ; cap(a):2; values:[0] 
 	a=append(a,2)
@@ -49,20 +47,20 @@
 	// len(b):4 ; cap(b):4; values:[0 2 3 4]
 ```
 
-`append`是在数组末尾追加元素,返回一个新的数组,原数组不会发生改变.
+`append` appends elements at the end of the array, returns a new array, the original array does not change.
 
-len=cap时,继续`append`,cap会翻倍
+When len=cap, continuing `append`, cap will double.
 
-### 不会用defer就别瞎装逼
+### Don't Show Off If You Don't Know How to Use defer
 
-`defer`是倒序执行,而且后定义的`defer`先执行(这个很好理解,先定义A变量,然后定义B变量，A的作用域比B长，先清理B是正确选择).
+`defer` executes in reverse order, and later defined `defer` executes first (this is easy to understand, define variable A first, then define variable B, A's scope is longer than B, cleaning up B first is the correct choice).
 
 
 ```go
 	for i := 0; i < 10; i++ {
 		defer fmt.Println(i)              // OK; prints 9 ... 0
 		defer func() { fmt.Println(i) }() // WRONG; prints "10" 10 times
-		defer fmt.Println(i) //跟下面一行结果一样
+		defer fmt.Println(i) //Same result as the line below
 		defer func(i int) { fmt.Println(i) }(i) // OK  prints 0 ... 9 in
 		defer print(&i)                         // WRONG; prints "10" 10 times unpredictable order
 		go func() { fmt.Println(i) }()          // WRONG; totally unpredictable.
@@ -70,12 +68,12 @@ len=cap时,继续`append`,cap会翻倍
 
 ```
 
-这个例子是[The Three Go Landmines.markdown](https://gist.github.com/lavalamp/4bd23295a9f32706a48f)提出来的。要理解其实不难，把for拆解出来就行了。注意for只是控制了循环的边界,循环结束后,i=10.
+This example was proposed by [The Three Go Landmines.markdown](https://gist.github.com/lavalamp/4bd23295a9f32706a48f). It's not hard to understand, just break down the for loop. Note that for only controls the loop boundary, after the loop ends, i=10.
 
-需要分清的传入参数的情况
+Need to distinguish cases of passing parameters:
 
 `defer func() { fmt.Println(i) }()`
-相当于
+is equivalent to
 
 ```go
 i:=0
@@ -88,11 +86,11 @@ defer func() { fmt.Println(i) }()
 i=10
 ```
 
-所以`defer func() { fmt.Println(i) }()`的结果为打印10次10
+So the result of `defer func() { fmt.Println(i) }()` is printing 10 ten times.
 
-而`defer fmt.Println(i)`等价于`defer func(i int) { fmt.Println(i) }(i)`
+And `defer fmt.Println(i)` is equivalent to `defer func(i int) { fmt.Println(i) }(i)`
 
-把局部变量传入,defer内部获得的是值的复制,所以实际上是
+Passing local variables, defer internally gets a copy of the value, so actually:
 
 ```go
 i:=0
@@ -106,7 +104,7 @@ i=10
 ```
 
 
-还有无法定义变量获取defer函数的返回值，defer函数带返回值根本毫无意义
+Also cannot define variables to get return values from defer functions. Defer functions with return values are completely meaningless.
 
 ```go
 
@@ -119,9 +117,9 @@ i=10
 ```
 
 
-### if变量作用域
+### if Variable Scope
 
-if 里面定义的变量，即便是跟已定义变量同名，在if中对其赋值，对已经被定义的变量不会有影响。
+Variables defined inside if, even if they have the same name as already defined variables, assigning to them inside if will not affect the already defined variables.
 
 ```go
 var ErrDidNotWork = errors.New("did not work")
@@ -137,15 +135,15 @@ func DoTheThing(reallyDoIt bool) (err error) {
 }
 ```
 
-### 半新不旧变量
+### Half-New Half-Old Variables
 
-常见于err和多重返回值函数，针对这种情况，可以通过if作用域强制覆盖，或者命名一个新变量解决
+Common with err and multi-return functions. For this situation, you can force override through if scope, or name a new variable to solve it.
 
 ```go
 var e error
 
 func main() {
-	s, e := a() //无法编译
+	s, e := a() //Cannot compile
 	s, err2 := a() //OK
 	if s, e := a(); e != nil { //OK
 	}
@@ -158,7 +156,7 @@ func a() (str string, err error) {
 }
 ```
 
-### goroutine 机制
+### goroutine Mechanism
 
 ```go
 package main
@@ -182,32 +180,32 @@ func main() {
 }
 ```
 
-1. 问题1: 运行的结果
-1. 问题2: 去掉`runtime.GC()`之后的结果
-1. 问题3: 如果你是goruntime,去掉`fmt.Println(i)`之后要怎么优化编译
+1. Question 1: The running result
+1. Question 2: The result after removing `runtime.GC()`
+1. Question 3: If you were goruntime, how would you optimize compilation after removing `fmt.Println(i)`
 
-答案:
+Answers:
 
-Gosched() 让出了CPU时间片,让 goroutine 有机会运行
+Gosched() yields the CPU time slice, giving goroutine a chance to run.
 
-Goroutine采用的是半抢占式的协作调度，只有在当前Goroutine发生阻塞时才会导致调度
+Goroutine uses semi-preemptive cooperative scheduling, only when the current Goroutine blocks will it cause scheduling.
 
-GC()需要stop the world,所以会等待协程运行完
+GC() needs stop the world, so it will wait for the coroutine to finish running.
 
-如果没有 GC()这个方法,则运行结果完全不可控
+If there's no GC() method, the running result is completely unpredictable.
 
-for 里面一堆废话,最合理的优化,应该是连协程都不创建,哈哈哈哈哈
+There's a bunch of nonsense in the for loop. The most reasonable optimization should be not even creating the coroutine, hahahaha.
 
-## 坑爹API
+## Problematic APIs
 
 
-### 获取字符串长度:
+### Getting String Length:
 
 ```go
 len([]rune("文件夹,子文件夹,"))
 ```
 
-### Split的坑
+### Split Pitfall
 
 ```go
 	s := strings.Split("shit,", ",")
@@ -217,15 +215,15 @@ len([]rune("文件夹,子文件夹,"))
 	}
 ```
 
-strings.Split的字符串,如果用来分割的字符串恰好出现完整字符串的最后面,获得的数组长度会+1,这个数组的最后一个元素会是一个空白
+For strings.Split, if the string used for splitting happens to appear at the very end of the complete string, the obtained array length will be +1, and the last element of this array will be a blank.
 
 
-### 时间转换函数
+### Time Conversion Function
 
-golang的字符串转日期函数非常不灵活,并且格式化的字符串是一个魔术变量,代表golang的面世时间...
+golang's string to date function is very inflexible, and the formatted string is a magic variable, representing golang's birth time...
 
 ```go
-// ToTime 字符串转golang内置当地时间
+// ToTime String to golang built-in local time
 func ToTime(str string) (time.Time, error) {
     var err error
     format1 := "2006-01-02 15:04:05"    
@@ -251,7 +249,7 @@ func ToTime(str string) (time.Time, error) {
 }
 ```
 
-### 值类型不会溢出
+### Value Types Don't Overflow
 
 ```go
 	var s int32 = 5120
@@ -270,11 +268,11 @@ func ToTime(str string) (time.Time, error) {
 */
 ```
 
-以前用C#的时候,如果定义一个值类型变量,赋予它一个超出范围的值的话是会出异常的,然而到了golang,直接变成这个类型无符号最大值
+When I used C# before, if you defined a value type variable and assigned it a value beyond its range, it would throw an exception. However, in golang, it directly becomes the unsigned maximum value of that type.
 
-## 构建篇
+## Build Section
 
-启用了`go module`之后，对依赖的拉取变得更加频繁。但是基于中国有中国特色的互联网，我们有时候很难get到我们需要的依赖源代码，进而导致项目编译失败，CI失败。于是，我们需要一个proxy。
+After enabling `go module`, dependency pulling becomes more frequent. But based on China's unique internet, we sometimes have difficulty getting the dependency source code we need, which leads to project compilation failure and CI failure. So, we need a proxy.
 
 ```bash
 export GOPROXY=https://goproxy.io
@@ -284,18 +282,18 @@ export GOPROXY=https://goproxy.io
 
 
 
-## 开发建议
+## Development Recommendations
 
 1. [CodeReviewComments](https://github.com/golang/go/wiki/CodeReviewComments)
 1. [Effective Go](https://golang.org/doc/effective_go.html)
 
 
-其他语言的可看
+For other languages, see:
 [Google Style Guides](https://google.github.io/styleguide/)
 
-论喷子，还是没[王垠](http://www.yinwang.org/blog-cn/2014/04/18/golang)强
+In terms of trolling, still not as strong as [Wang Yin](http://www.yinwang.org/blog-cn/2014/04/18/golang)
 
-## 课后作业
+## Homework
 
 ```go
 
@@ -333,4 +331,4 @@ func a() (str string) {
 
 ```
 
-注释掉里面的`defer`，观察一下不同组合下的函数的结果，看懂了，就算理解defer了
+Comment out the `defer` inside, observe the function's result under different combinations. Once you understand, you've understood defer.

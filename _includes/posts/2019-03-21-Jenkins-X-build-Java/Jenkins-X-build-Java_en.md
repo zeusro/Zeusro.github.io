@@ -1,12 +1,10 @@
-<!-- TODO: Translate to en -->
+`Jenkins-X` provides [various examples](https://jenkins.io/doc/pipeline/tour/hello-world/#examples) for different languages by default. We first learn the default examples, then adapt them according to our own situation.
 
-`Jenkins-X`默认提供了不同语言的[各种例子](https://jenkins.io/doc/pipeline/tour/hello-world/#examples),我们先学习默认的例子,再按照自身情况做一些适配.
+First, let's understand the build process:
 
-先梳理一下构建流程
+Pull code from git server (GitHub/gitea) -> Build docker image -> Push to image registry
 
-从git server(GitHub/gitea)拉取代码->构建docker镜像->推送到镜像仓库
-
-建议一开始用[jx create](https://jenkins-x.io/commands/jx_create_quickstart/)创建官方的例子,推送到  GitHub,熟悉以后再慢慢修改
+It's recommended to use [jx create](https://jenkins-x.io/commands/jx_create_quickstart/) to create official examples at the beginning, push to GitHub, and then slowly modify after getting familiar.
 
 ```
 jx create spring -d web -d actuator
@@ -24,22 +22,22 @@ jx create quickstart \
  --project-name  java-abcde
 ```
 
-## 前置准备
+## Prerequisites
 
 ### Disable https certificate check
 
-域名没证书的得勾上,路径在`Manage Jenkins`-`Configure System`
+For domains without certificates, check this. Path: `Manage Jenkins`-`Configure System`
 
-### 修改 Kubernetes Pod Template
+### Modify Kubernetes Pod Template
 
-`Jenkins`是拉取到Jenkins的工作目录(服务器),而`Jenkins-X`是根据设置的模板启动启动一个pod,这个pod有2个容器,一个是`jnlp-slave`,另外一个是构建工具的镜像,如果是`gradle`构建的话镜像就是`gcr.io/jenkinsxio/builder-gradle`.
+`Jenkins` pulls to Jenkins' working directory (server), while `Jenkins-X` starts a pod based on the configured template. This pod has 2 containers, one is `jnlp-slave`, and the other is the build tool image. If it's a `gradle` build, the image is `gcr.io/jenkinsxio/builder-gradle`.
 
-所以需要一下模板.路径在`Manage Jenkins`-`Configure System`-`Images`-`Kubernetes Pod Template`,按照特定构建语言迁移,修改.
+So you need the following template. Path: `Manage Jenkins`-`Configure System`-`Images`-`Kubernetes Pod Template`, migrate and modify according to specific build language.
 
 
-### 依赖项加速
+### Dependency Acceleration
 
-- maven加速
+- maven acceleration
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -58,7 +56,7 @@ jx create quickstart \
 </settings>
 ```
 
-- gradle加速
+- gradle acceleration
 
 ```
 allprojects {
@@ -95,38 +93,38 @@ allprojects {
 ```
 
 
-## 构建前置依赖
+## Build Prerequisites
 
-有3种思路,任选一种即可.推荐第一种
+There are 3 approaches, choose any one. The first is recommended.
 
-### [推荐]交付到mvn local
+### [Recommended] Deliver to mvn local
 
-这个思路是在我构建缓存时想到的.普通的pipeline构建流程,每次构建都是一个从零开始的沙箱,需要重新下载包再去构建.非常浪费流量.因此如果把mvnlocal挂载到容器内部,那么直接在本地还原即可,有问题时再从网络拉取.
+This idea came to me when building cache. In a normal pipeline build process, each build is a sandbox from scratch, requiring re-downloading packages before building. Very wasteful of traffic. So if mvnlocal is mounted inside the container, then directly restore locally, and pull from network when there are problems.
 
-这样就能同时解决`构建前置依赖`和`开源依赖拉取`的问题
+This can solve both the `build prerequisites` and `open source dependency pulling` problems.
 
-目前支持的volume有
+Currently supported volumes are:
 
 1. PVC
 1. NFS
 1. hostpath
 
-推荐用NFS.
+NFS is recommended.
 
-gradle:挂载到`/root/.gradle/caches`
+gradle: Mount to `/root/.gradle/caches`
 
-maven:挂载到`/root/.mvnrepository`
+maven: Mount to `/root/.mvnrepository`
 
 
-### 交付给Nexus
-
-todo
-
-### 关联其他pipeline
+### Deliver to Nexus
 
 todo
 
-## 从其他git server(gitea)拉取代码
+### Associate Other Pipelines
+
+todo
+
+## Pull Code from Other git server (gitea)
 
 ```bash
 jx create git server gitea http://xxx:1080
@@ -134,30 +132,30 @@ jx create git server gitea http://xxx:1080
 jx get git
 ```
 
-目前删除的命令还比较蠢,只能按类型删除,如果加了2个gitea类型的git server,删除的时候会先删除最早创建的那个gitea server
+Currently the delete command is still quite stupid, can only delete by type. If 2 gitea-type git servers are added, when deleting, it will delete the earliest created gitea server first.
 
 
 
 
-## 构建docker镜像
+## Build docker Image
 
-构建依赖于项目内的`Jenkinsfile`和`Dockerfile`
+Build depends on `Jenkinsfile` and `Dockerfile` in the project.
 
-关于`Jenkinsfile`的语法,另写一篇文章讲解
+Regarding `Jenkinsfile` syntax, I'll write another article to explain.
 
 
-## 推送docker镜像到自定义源
+## Push docker Image to Custom Registry
 
-- 修改DOCKER_REGISTR
+- Modify DOCKER_REGISTR
 
-默认的设定是推送到创建`Jenkins-X`时建立的docker REGISTRY,要把它改成我们自己的服务器
+The default setting is to push to the docker REGISTRY established when creating `Jenkins-X`. We need to change it to our own server.
 
-配置路径: `Manage Jenkins`-`Global properties`
+Configuration path: `Manage Jenkins`-`Global properties`
 
-修改DOCKER_REGISTRY这个变量
+Modify the DOCKER_REGISTRY variable
 
 ```
-# 阿里云深圳vpc
+# Alibaba Cloud Shenzhen vpc
 registry-vpc.cn-shenzhen.aliyuncs.com/
 ```
 
@@ -170,7 +168,7 @@ jx create docker auth \
 --email "fakeemail@gmail.com"
 ```
 
-之后在部署该`Jenkins-X`实例的kubernetes 命名空间,会出现`jenkins-docker-cfg`的secret,这个secret是一个json
+After that, in the kubernetes namespace where this `Jenkins-X` instance is deployed, a secret named `jenkins-docker-cfg` will appear. This secret is a json.
 
 ```json
 {
@@ -183,18 +181,18 @@ jx create docker auth \
 }
 ```
 
-要让容器通过这个json里面的auth字段,实现对docker registry的登录.
+To let containers log into the docker registry through the auth field in this json.
 
-所以还需要把这个secret挂载到容器内部,还好这一步默认的pod template已经设置了.
+So this secret also needs to be mounted inside the container. Fortunately, the default pod template has already set this step.
 
 ![Image](/img/in-post/jenkins-x-build-java/volume-jenkins-docker-cfg.png)
 
 
-除此以外,还有其他的[授权方法](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/docker-registry.md)
+Besides this, there are other [authorization methods](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/docker-registry.md)
 
 
-## 参考链接:
+## Reference Links:
 
-1. [Jenkins X构建例子](https://github.com/jenkins-x-buildpacks/jenkins-x-kubernetes/tree/master/packs)
+1. [Jenkins X Build Examples](https://github.com/jenkins-x-buildpacks/jenkins-x-kubernetes/tree/master/packs)
 1. [pod-templates](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/pod-templates.md)
-1. [基于 Kubernetes 实践弹性的 CI/CD 系统](https://yq.aliyun.com/articles/690403)
+1. [Practicing Elastic CI/CD Systems Based on Kubernetes](https://yq.aliyun.com/articles/690403)

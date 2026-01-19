@@ -1,10 +1,8 @@
-<!-- TODO: Translate to ru -->
+## Инфраструктура
 
-## 基础设施
+centos 7.6 64-бит
 
-centos 7.6 64位
-
-内核版本:5.1.3-1.el7.elrepo.x86_64(手动升级,可免)
+Версия ядра: 5.1.3-1.el7.elrepo.x86_64 (обновлено вручную, опционально)
 
 kubeadm
 
@@ -13,21 +11,21 @@ kubelet
 node*3
 
 
-## 初始准备
+## Начальная подготовка
 
-### repo镜像
+### репозиторий Mirror
 
 ```bash
 wget -O /etc/yum.repos.d/CentOS-Base.repo http://mirrors.aliyun.com/repo/Centos-7.repo
 ```
 
-### 升级内核
+### Обновление ядра
 
 ```bash
 rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
 rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
 yum --enablerepo=elrepo-kernel install -y kernel-ml
-# 改引导
+# Изменить загрузку
 # awk -F\' '$1=="menuentry " {print $2}' /etc/grub2.cfg
 sed -i 's/GRUB_DEFAULT=saved/GRUB_DEFAULT=0/g' /etc/default/grub
 grub2-mkconfig -o /boot/grub2/grub.cfg
@@ -35,23 +33,23 @@ reboot
 uname -sr
 ```
 
-### 系统设置
+### Настройки системы
 
 ```bash
-# 禁用交换区
+# Отключить swap
 swapoff -a
-# 关闭防火墙
+# Остановить файрвол
 systemctl stop firewalld
 systemctl disable firewalld
 setenforce 0
-# 开启forward
-# Docker从1.13版本开始调整了默认的防火墙规则
-# 禁用了iptables filter表中FOWARD链
-# 这样会引起Kubernetes集群中跨Node的Pod无法通信
+# Включить forward
+# Docker скорректировал правила файрвола по умолчанию, начиная с версии 1.13
+# Отключил цепочку FOWARD в таблице фильтров iptables
+# Это вызовет невозможность связи подов между узлами в кластере Kubernetes
 iptables -P FORWARD ACCEPT
 ```
 
-### 启用IPVS
+### Включить IPVS
 
 
 ```bash
@@ -61,7 +59,7 @@ net.bridge.bridge-nf-call-iptables = 1
 EOF
 
 # https://github.com/easzlab/kubeasz/issues/374
-# 4.18内核将nf_conntrack_ipv4更名为nf_conntrack
+# Ядро 4.18 переименовало nf_conntrack_ipv4 в nf_conntrack
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
 #!/bin/bash
 ipvs_modules="ip_vs ip_vs_lc ip_vs_wlc ip_vs_rr ip_vs_wrr ip_vs_lblc ip_vs_lblcr ip_vs_dh ip_vs_sh ip_vs_fo ip_vs_nq ip_vs_sed ip_vs_ftp nf_conntrack"
@@ -80,9 +78,10 @@ lsmod | grep ip_vs
 
 
 
-###  装18.06.2的docker
 
-按照[kubernetes源代码](https://github.com/kubernetes/kops/blob/master/nodeup/pkg/model/docker.go#L57-L485)安装特定docker版本
+### Установить Docker 18.06.2
+
+Установить конкретную версию docker согласно [исходному коду kubernetes](https://github.com/kubernetes/kops/blob/master/nodeup/pkg/model/docker.go#L57-L485)
 
 ```bash
 # http://mirror.azure.cn/docker-ce/linux/centos/7/x86_64/stable/
@@ -97,7 +96,7 @@ EOF
 
 yum install -y docker-ce-18.06.2.ce-3.el7.x86_64
 
-# 配置docker加速
+# Настроить ускорение docker
 sudo mkdir -p /etc/docker
 sudo tee /etc/docker/daemon.json <<-'EOF'
 {
@@ -110,7 +109,7 @@ sudo systemctl start docker
 systemctl enable docker.service
 ```
 
-### 安装其他依赖
+### Установить другие зависимости
 
 
 ```bash
@@ -122,7 +121,7 @@ yum update -y
 
 ### install-kubeadm
 
-配置k8s的镜像
+Настроить зеркало k8s
 
 ```bash
 sudo tee /etc/yum.repos.d/kubernetes.repo <<-'EOF'
@@ -142,11 +141,11 @@ systemctl enable kubelet
 # && systemctl start kubelet
 ```
 
-## 安装集群
+## Установить кластер
 
-接下来要根据实际情况选择单master还是奇数台master了
+Далее выберите один master или нечетное количество masters в зависимости от фактической ситуации.
 
-kubeadm的默认配置文件"藏"在`kubeadm config print init-defaults`和`kubeadm config print join-defaults`中,这里要根据中国特色社会主义的实际情况进行修改.
+Файл конфигурации по умолчанию kubeadm "скрыт" в `kubeadm config print init-defaults` и `kubeadm config print join-defaults`. Здесь измените в соответствии с фактической ситуацией с китайской спецификой.
 
 
 ```
@@ -154,18 +153,18 @@ kubeadm config print join-defaults --component-configs KubeProxyConfiguration //
 kubeadm config print join-defaults --component-configs KubeletConfiguration // JoinConfiguration KubeletConfiguration
 ```
 
-一般来说`serviceSubnet`范围要比`podSubnet`小
+Как правило, диапазон `serviceSubnet` должен быть меньше, чем `podSubnet`.
 
-`podSubnet: 10.66.0.0/16`注定了最多只能有65534个pod,serviceSubnet同理.
+`podSubnet: 10.66.0.0/16` означает максимум 65534 пода, то же самое для serviceSubnet.
 
-### 高可用型(生产用)
+### Тип высокой доступности (для production)
 
-高可用性的特点在于N个etcd,kube-apiserver,kube-scheduler,kube-controller-manager,以组件的冗余作为高可用的基础.
+Высокая доступность характеризуется N etcd, kube-apiserver, kube-scheduler, kube-controller-manager, используя избыточность компонентов в качестве основы высокой доступности.
 
 
-api-server以负载均衡作为对外的入口.
+api-server использует балансировку нагрузки в качестве внешней точки входа.
 
-[设置master](https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/)
+[Настройка master](https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/)
 
 ```
 # https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta1#ClusterConfiguration
@@ -197,10 +196,10 @@ kind: ClusterConfiguration
 # kubernetesVersion: stable
 kubernetesVersion: v1.14.2
 imageRepository: gcr.azk8s.cn/google_containers
-# 这里配置了一个阿里云内网负载均衡作为入口,如果没有的话请自行忽略
+# Здесь настроен внутренний балансировщик нагрузки Alibaba Cloud в качестве точки входа, если у вас его нет, пожалуйста, проигнорируйте
 # controlPlaneEndpoint: "172.18.221.7:6443"
 networking:
-# 规划pod CIDR
+# Планировать CIDR пода
   podSubnet: 10.66.0.0/16
   serviceSubnet: 10.88.0.0/16
 etcd:
@@ -236,7 +235,7 @@ kubeadm join 172.18.221.35:6443 --token l0ei3n.rqqqseno29oo564z \
 ```
 
 
-### 单master型(实验用)
+### Тип с одним master (для экспериментов)
 
 ```
 sudo tee kubeadm-config.yaml <<-'EOF'
@@ -252,11 +251,11 @@ apiVersion: kubeadm.k8s.io/v1beta1
 kind: ClusterConfiguration
 # kubernetesVersion: stable
 kubernetesVersion: v1.14.2
-# 这里配置了一个阿里云内网负载均衡作为入口,如果没有的话请自行忽略
+# Здесь настроен внутренний балансировщик нагрузки Alibaba Cloud в качестве точки входа, если у вас его нет, пожалуйста, проигнорируйте
 # controlPlaneEndpoint: "172.18.221.7:6443"
 imageRepository: gcr.azk8s.cn/google_containers
 networking:
-# 规划pod CIDR
+# Планировать CIDR пода
   podSubnet: 10.66.0.0/16
   serviceSubnet: 10.88.0.0/16
 EOF
@@ -265,7 +264,7 @@ kubeadm config images pull --config=kubeadm-config.yaml
 sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
 ```
 
-### 配置kubelet客户端
+### Настроить клиент kubelet
 
 ```bash
   mkdir -p $HOME/.kube
@@ -273,19 +272,19 @@ sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```
 
-### [配置网络插件](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network)
+### [Настроить сетевой плагин](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network)
 
-这里我选择`quay.io/coreos/flannel:v0.11.0-amd64`,因为架构比较齐全
+Здесь я выбрал `quay.io/coreos/flannel:v0.11.0-amd64`, потому что архитектура относительно полная
 
-### 引入其他master节点(高可用版)
+### Добавить другие узлы master (версия высокой доступности)
 
-在`kubeadm init`的输出中,有一行是
+В выводе `kubeadm init` есть строка:
 
 ```
 [upload-certs] Using certificate key: 05ae8e3c139a960c6e4e01aebf26869ce5f9abd9fa5cf4ce347e8308b9c276f9
 ```
 
-复制起来,在别的master上面运行命令
+Скопируйте ее, запустите команду на других masters:
 
 ```
 kubeadm join 172.18.221.35:6443 \
@@ -299,7 +298,7 @@ kubeadm join 172.18.221.35:6443 \
 
 
 
-## 工作节点加入集群
+## Рабочие узлы присоединяются к кластеру
 
 ```bash
 kubeadm join 172.18.221.35:6443 --token c63abt.45sn8bhyxxo2lh0r \
@@ -309,7 +308,8 @@ kubeadm join 172.18.221.35:6443 --token c63abt.45sn8bhyxxo2lh0r \
 
 
 
-## 收尾工作
+
+## Заключительная работа
 
 
 ```
@@ -317,7 +317,7 @@ kubeadm join 172.18.221.35:6443 --token c63abt.45sn8bhyxxo2lh0r \
 ```
 
 
-## 其他参考
+## Другие ссылки
 
 ### [kubelet-check] Initial timeout of 40s passed.
 
@@ -325,22 +325,22 @@ kubeadm join 172.18.221.35:6443 --token c63abt.45sn8bhyxxo2lh0r \
 systemctl status kubelet
 journalctl -xeu kubelet
 ```
-通过以上任意一个命令看到,kubernetes服务虽然启动中,但是提示节点找不到.
+Через любую из вышеуказанных команд видно, что хотя служба kubernetes запускается, она указывает, что узел не может быть найден.
 
 ```
 May 20 14:55:22 xxx kubelet[3457]: E0520 14:55:22.095536    3457 kubelet.go:2244] node "xxx" not found
 ```
 
-最后发现是一开始指定了负载均衡,负载均衡连接不上导致超时
+Наконец выяснилось, что в начале был указан балансировщик нагрузки, и тайм-аут подключения балансировщика нагрузки вызвал тайм-аут.
 
  --ignore-preflight-errors=all
 
 
-### 修改driver之后的注意事项
+### Примечания после изменения драйвера
 
-如果docker是之前安装的,改一下配置然后重启服务即可
+Если docker был установлен ранее, просто измените конфигурацию и перезапустите службу.
 
-改成systemd要在kubelet的服务上要加多一个参数,不然服务无法启动
+Чтобы изменить на systemd, нужно добавить еще один параметр в службу kubelet, иначе служба не может запуститься.
 
 
 ```bash
@@ -351,20 +351,20 @@ vi /etc/docker/daemon.json
 ```
 
 ```
-# Restart docker.
+# Перезапустить docker.
 systemctl daemon-reload
 systemctl restart docker
 systemctl restart kubelet
 ```
 
-### master参与调度
+### Master участвует в планировании
 
 ```bash
-# 去掉master污点,让其参与调度
+# Удалить taint master, чтобы позволить ему участвовать в планировании
 kubectl taint $node --all node-role.kubernetes.io/master-
 ```
 
-### 重置
+### Сброс
 
 
 ```bash
@@ -372,7 +372,7 @@ kubeadm reset
 ipvsadm --clear
 ```
 
-### 重新计算discovery-token-ca-cert-hash
+### Пересчитать discovery-token-ca-cert-hash
 
 ```
 openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
@@ -383,19 +383,19 @@ openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outfor
 
 https://github.com/kubernetes/kubeadm/issues/1331
 
-[证书轮换](https://kubernetes.io/docs/tasks/tls/certificate-rotation/)
+[Ротация сертификатов](https://kubernetes.io/docs/tasks/tls/certificate-rotation/)
 
 [setup-ha-etcd-with-kubeadm](https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/)
 
-## 参考链接
+## Ссылки
 
-1. [Overview of kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/)
-1. [阿里云镜像仓库](https://opsx.alibaba.com/mirror/search?q=kubelet&lang=zh-CN)
-2. [官方安装指南](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
-1. [使用kubeadm安装kubernetes](http://bazingafeng.com/2017/11/20/using-kubeadm-install-kubernetes/)
-2. [centos7安装kubeadm](http://www.maogx.win/posts/15/)
-3. [centos7使用kubeadm安装k8s-1.11版本多主高可用](http://www.maogx.win/posts/33/)
-4. [centos7使用kubeadm安装k8s集群](http://www.maogx.win/posts/16/)
-5. [kubernetes集群的安装异常汇总](https://juejin.im/post/5bbf7dd05188255c652d62fe)
-6. [kubeadm 设置工具参考指南](https://k8smeetup.github.io/docs/admin/kubeadm/)
+1. [Обзор kubeadm](https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/)
+1. [Репозиторий зеркал Alibaba Cloud](https://opsx.alibaba.com/mirror/search?q=kubelet&lang=zh-CN)
+2. [Официальное руководство по установке](https://kubernetes.io/docs/setup/independent/install-kubeadm/)
+1. [Использование kubeadm для установки kubernetes](http://bazingafeng.com/2017/11/20/using-kubeadm-install-kubernetes/)
+2. [centos7 Установить kubeadm](http://www.maogx.win/posts/15/)
+3. [centos7 Использовать kubeadm для установки k8s-1.11 версии мульти-мастер высокой доступности](http://www.maogx.win/posts/33/)
+4. [centos7 Использовать kubeadm для установки кластера k8s](http://www.maogx.win/posts/16/)
+5. [Сводка исключений установки кластера kubernetes](https://juejin.im/post/5bbf7dd05188255c652d62fe)
+6. [Справочное руководство по инструменту настройки kubeadm](https://k8smeetup.github.io/docs/admin/kubeadm/)
 7. [ipvs](https://github.com/kubernetes/kubernetes/tree/master/pkg/proxy/ipvs)

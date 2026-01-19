@@ -1,33 +1,31 @@
-<!-- TODO: Translate to jp -->
+kubernetesのドキュメントを読んでいると、Goのいくつかの注意事項について言及されていました。
 
-在翻阅kubernetes的文档时，里面刚好谈到go一些注意事项。
+以前に遭遇した問題のあるAPIと組み合わせて、この記事にまとめました。
 
-结合以前遇过的坑爹API,汇成此文.
+## 言語特性
 
-## 语言特性
+### データスライス
 
-### 数据切片
-
-原则是取下标,不取上标
+原則は、下のインデックスを取り、上のインデックスは取りません。
 
 ```go
 	a:=[]int{0,1,2,3,4}
 	a=a[:]
-	a=a[2:4] //从第[2]位起取,直至[4-1]位,所以结果只有2个元素
+	a=a[2:4] //位置[2]から開始し、位置[4-1]まで、したがって結果には2つの要素しかありません
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	//len(a):2 ; cap(a):3; values:[2 3]
 ```
 
-数组切片是一种指针,所以才会引申出len/cap/append的问题
+配列スライスはポインターであるため、len/cap/appendの問題が発生します。
 
-### len/cap/append的问题
+### len/cap/appendの問題
 
-关于len/cap的问题可以看下面2篇文章
+len/capの問題については、次の2つの記事を参照してください：
 
-1. [Slice length and capacity](https://tour.golang.org/moretypes/11)
-1. [Go Slices: usage and internals](https://blog.golang.org/go-slices-usage-and-internals)
+1. [スライスの長さと容量](https://tour.golang.org/moretypes/11)
+1. [Goスライス：使用方法と内部構造](https://blog.golang.org/go-slices-usage-and-internals)
 
-简单地说,len就是当前数组/切片实际元素的计数,cap是底层数组的长度,砍头不砍尾
+簡単に言えば、lenは現在の配列/スライスの実際の要素のカウントで、capは基になる配列の長さで、頭を切って尾を切らない。
 
 ```go
 	a :=make([]int,2,3) 
@@ -35,7 +33,7 @@
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	// len(a):2 ; cap(a):3; values:[0 0] 
 	a=a[1:]
-	// 第0位没了,但是后面的还在,所以cap=3-1
+	// 位置0がなくなりましたが、残りは残っているため、cap=3-1
 	fmt.Printf("len(a):%d ; cap(a):%d; values:%v \n",len(a),cap(a),a) 
 	// len(a):1 ; cap(a):2; values:[0] 
 	a=append(a,2)
@@ -49,20 +47,20 @@
 	// len(b):4 ; cap(b):4; values:[0 2 3 4]
 ```
 
-`append`是在数组末尾追加元素,返回一个新的数组,原数组不会发生改变.
+`append`は配列の末尾に要素を追加し、新しい配列を返します。元の配列は変更されません。
 
-len=cap时,继续`append`,cap会翻倍
+len=capの場合、`append`を続けると、capは2倍になります。
 
-### 不会用defer就别瞎装逼
+### deferの使い方がわからない場合は見せびらかさない
 
-`defer`是倒序执行,而且后定义的`defer`先执行(这个很好理解,先定义A变量,然后定义B变量，A的作用域比B长，先清理B是正确选择).
+`defer`は逆順で実行され、後で定義された`defer`が先に実行されます（これは理解しやすいです。まず変数Aを定義し、次に変数Bを定義すると、AのスコープがBより長いため、Bを先にクリーンアップするのが正しい選択です）。
 
 
 ```go
 	for i := 0; i < 10; i++ {
 		defer fmt.Println(i)              // OK; prints 9 ... 0
 		defer func() { fmt.Println(i) }() // WRONG; prints "10" 10 times
-		defer fmt.Println(i) //跟下面一行结果一样
+		defer fmt.Println(i) //次の行と同じ結果
 		defer func(i int) { fmt.Println(i) }(i) // OK  prints 0 ... 9 in
 		defer print(&i)                         // WRONG; prints "10" 10 times unpredictable order
 		go func() { fmt.Println(i) }()          // WRONG; totally unpredictable.
@@ -70,12 +68,12 @@ len=cap时,继续`append`,cap会翻倍
 
 ```
 
-这个例子是[The Three Go Landmines.markdown](https://gist.github.com/lavalamp/4bd23295a9f32706a48f)提出来的。要理解其实不难，把for拆解出来就行了。注意for只是控制了循环的边界,循环结束后,i=10.
+この例は[The Three Go Landmines.markdown](https://gist.github.com/lavalamp/4bd23295a9f32706a48f)によって提案されました。理解するのは難しくありません。forループを分解するだけです。forはループの境界を制御するだけであることに注意してください。ループが終了すると、i=10になります。
 
-需要分清的传入参数的情况
+パラメータを渡す場合を区別する必要があります：
 
 `defer func() { fmt.Println(i) }()`
-相当于
+は以下と同等です
 
 ```go
 i:=0
@@ -88,11 +86,11 @@ defer func() { fmt.Println(i) }()
 i=10
 ```
 
-所以`defer func() { fmt.Println(i) }()`的结果为打印10次10
+したがって、`defer func() { fmt.Println(i) }()`の結果は、10を10回印刷することです。
 
-而`defer fmt.Println(i)`等价于`defer func(i int) { fmt.Println(i) }(i)`
+そして`defer fmt.Println(i)`は`defer func(i int) { fmt.Println(i) }(i)`と同等です
 
-把局部变量传入,defer内部获得的是值的复制,所以实际上是
+ローカル変数を渡すと、defer内部は値のコピーを取得するため、実際には：
 
 ```go
 i:=0
@@ -106,7 +104,7 @@ i=10
 ```
 
 
-还有无法定义变量获取defer函数的返回值，defer函数带返回值根本毫无意义
+また、defer関数の戻り値を取得する変数を定義することはできません。戻り値を持つdefer関数は完全に意味がありません。
 
 ```go
 
@@ -119,9 +117,9 @@ i=10
 ```
 
 
-### if变量作用域
+### if変数スコープ
 
-if 里面定义的变量，即便是跟已定义变量同名，在if中对其赋值，对已经被定义的变量不会有影响。
+if内で定義された変数は、既に定義された変数と同じ名前であっても、if内でそれに代入しても、既に定義された変数には影響しません。
 
 ```go
 var ErrDidNotWork = errors.New("did not work")
@@ -137,15 +135,15 @@ func DoTheThing(reallyDoIt bool) (err error) {
 }
 ```
 
-### 半新不旧变量
+### 半新半旧変数
 
-常见于err和多重返回值函数，针对这种情况，可以通过if作用域强制覆盖，或者命名一个新变量解决
+errと複数の戻り値を持つ関数で一般的です。この状況では、ifスコープで強制的にオーバーライドするか、新しい変数に名前を付けて解決できます。
 
 ```go
 var e error
 
 func main() {
-	s, e := a() //无法编译
+	s, e := a() //コンパイルできません
 	s, err2 := a() //OK
 	if s, e := a(); e != nil { //OK
 	}
@@ -158,7 +156,7 @@ func a() (str string, err error) {
 }
 ```
 
-### goroutine 机制
+### goroutineメカニズム
 
 ```go
 package main
@@ -182,32 +180,32 @@ func main() {
 }
 ```
 
-1. 问题1: 运行的结果
-1. 问题2: 去掉`runtime.GC()`之后的结果
-1. 问题3: 如果你是goruntime,去掉`fmt.Println(i)`之后要怎么优化编译
+1. 問題1：実行結果
+1. 問題2：`runtime.GC()`を削除した後の結果
+1. 問題3：goruntimeの場合、`fmt.Println(i)`を削除した後、コンパイルをどのように最適化しますか
 
-答案:
+答え：
 
-Gosched() 让出了CPU时间片,让 goroutine 有机会运行
+Gosched()はCPUタイムスライスを譲り、goroutineが実行される機会を与えます。
 
-Goroutine采用的是半抢占式的协作调度，只有在当前Goroutine发生阻塞时才会导致调度
+Goroutineは半プリエンプティブな協調スケジューリングを採用しており、現在のGoroutineがブロックした場合にのみスケジューリングが発生します。
 
-GC()需要stop the world,所以会等待协程运行完
+GC()はstop the worldが必要なため、コルーチンの実行が完了するまで待機します。
 
-如果没有 GC()这个方法,则运行结果完全不可控
+GC()メソッドがない場合、実行結果は完全に予測不可能です。
 
-for 里面一堆废话,最合理的优化,应该是连协程都不创建,哈哈哈哈哈
+forループ内に多くの無駄があります。最も合理的な最適化は、コルーチンさえ作成しないことです、はははは。
 
-## 坑爹API
+## 問題のあるAPI
 
 
-### 获取字符串长度:
+### 文字列の長さを取得：
 
 ```go
 len([]rune("文件夹,子文件夹,"))
 ```
 
-### Split的坑
+### Splitの落とし穴
 
 ```go
 	s := strings.Split("shit,", ",")
@@ -217,15 +215,15 @@ len([]rune("文件夹,子文件夹,"))
 	}
 ```
 
-strings.Split的字符串,如果用来分割的字符串恰好出现完整字符串的最后面,获得的数组长度会+1,这个数组的最后一个元素会是一个空白
+strings.Splitの文字列の場合、分割に使用される文字列が完全な文字列の最後に正確に出現する場合、取得された配列の長さは+1になり、この配列の最後の要素は空白になります。
 
 
-### 时间转换函数
+### 時間変換関数
 
-golang的字符串转日期函数非常不灵活,并且格式化的字符串是一个魔术变量,代表golang的面世时间...
+golangの文字列から日付への関数は非常に柔軟性がなく、フォーマットされた文字列はマジック変数で、golangの誕生時間を表しています...
 
 ```go
-// ToTime 字符串转golang内置当地时间
+// ToTime 文字列をgolang組み込み現地時間に変換
 func ToTime(str string) (time.Time, error) {
     var err error
     format1 := "2006-01-02 15:04:05"    
@@ -251,7 +249,7 @@ func ToTime(str string) (time.Time, error) {
 }
 ```
 
-### 值类型不会溢出
+### 値型はオーバーフローしない
 
 ```go
 	var s int32 = 5120
@@ -270,32 +268,32 @@ func ToTime(str string) (time.Time, error) {
 */
 ```
 
-以前用C#的时候,如果定义一个值类型变量,赋予它一个超出范围的值的话是会出异常的,然而到了golang,直接变成这个类型无符号最大值
+以前C#を使用していたとき、値型変数を定義し、範囲を超える値を割り当てると、例外が発生していました。しかし、golangでは、その型の符号なし最大値に直接なります。
 
-## 构建篇
+## ビルドセクション
 
-启用了`go module`之后，对依赖的拉取变得更加频繁。但是基于中国有中国特色的互联网，我们有时候很难get到我们需要的依赖源代码，进而导致项目编译失败，CI失败。于是，我们需要一个proxy。
+`go module`を有効にした後、依存関係の取得がより頻繁になります。しかし、中国の独特のインターネットに基づいて、必要な依存関係のソースコードを取得することが困難な場合があり、プロジェクトのコンパイル失敗とCI失敗につながります。したがって、プロキシが必要です。
 
 ```bash
 export GOPROXY=https://goproxy.io
 ```
 
-[goproxy.io for Go modules](https://cloud.tencent.com/developer/news/308442)
+[Goモジュール用のgoproxy.io](https://cloud.tencent.com/developer/news/308442)
 
 
 
-## 开发建议
+## 開発の推奨事項
 
 1. [CodeReviewComments](https://github.com/golang/go/wiki/CodeReviewComments)
 1. [Effective Go](https://golang.org/doc/effective_go.html)
 
 
-其他语言的可看
+他の言語については、以下を参照：
 [Google Style Guides](https://google.github.io/styleguide/)
 
-论喷子，还是没[王垠](http://www.yinwang.org/blog-cn/2014/04/18/golang)强
+トローリングに関しては、[王垠](http://www.yinwang.org/blog-cn/2014/04/18/golang)ほど強くはありません
 
-## 课后作业
+## 宿題
 
 ```go
 
@@ -333,4 +331,4 @@ func a() (str string) {
 
 ```
 
-注释掉里面的`defer`，观察一下不同组合下的函数的结果，看懂了，就算理解defer了
+内部の`defer`をコメントアウトし、異なる組み合わせでの関数の結果を観察してください。理解できれば、deferを理解したことになります。

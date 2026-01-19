@@ -1,10 +1,8 @@
-<!-- TODO: Translate to en -->
+I impulsively bought a [new domain](www.zeusro.com), so I had to change the blog settings. Since I had been using Alibaba Cloud DNS before, I'm now transferring it to Cloudflare.
 
-手贱买了个[新域名](www.zeusro.com),于是博客也要改下设置.由于之前一直用阿里云解析,现在顺带转移给 cloudflare.
-
-1. 修改GitHub page 的setting,custom domain 改成新域名,并取消掉 enforce https (cloudflare自带证书)
-1. 找个服务器监听80端口,把旧域名的流量全部301到新域名,这里我用了docker nginx 来做
-1. 设置搜索引擎,迁移站点.如果之前还监听了HTTPS,HTTPS也要301跳转
+1. Modify GitHub Pages settings, change the custom domain to the new domain, and disable enforce HTTPS (Cloudflare has its own certificate)
+1. Find a server to listen on port 80, redirect all traffic from the old domain to the new domain with 301. I used Docker Nginx for this.
+1. Set up search engines, migrate the site. If HTTPS was also being listened to before, HTTPS also needs 301 redirect.
 
 ```yaml
 version: '2.2'

@@ -1,33 +1,29 @@
-<!-- TODO: Translate to en -->
+CIDR is a tool for representing network segments, with a relatively concise format.
 
-CIDR是一种表示网段的工具,格式比较简洁.
+CIDR notation: IP address / number of network ID bits
 
-CIDR表示方法：IP地址/网络ID的位数
+At first, I always didn't understand the relationship of that last number, and later I was confused by CIDR's IP addresses.
 
-一开始我总是不懂最后那位数字的关系,后来又被CIDR的IP地址给迷惑了,
+Later I understood that the number after the slash represents **the number of IP bits that remain unchanged**.
 
-后来我明白了,斜杆后面的数字表示**保持不变的IP位数**
+IPv4 is 8*4=32 bits. For example, 192.168.15.0/19 (equivalent to 192.168.0.0/19) represents the network segment 192.168.0.0-192.168.31.255.
 
-IPV4是8*4=32位的.举个例子,192.168.15.0/19(等价于192.168.0.0/19)表示192.168.0.0-192.168.31.255这个网段
+Taking the third segment IP 15 from 192.168.15.0, in binary it's 1111.
 
-192.168.15.0取第三段IP15,二进制为1111
+Taking the third segment 31 from 192.168.31.255, in binary it's 11111.
 
-192.168.31.255取第三段31,二进制为11111
-
-补齐到8位,就是
+Padded to 8 bits, it's:
 
 00001111
 
 00011111
 
+19 means keeping the first 19 IP bits unchanged. The first 2 segments are 19-8*2=3. The starting IP 15 converted to binary doesn't reach 5 bits, so it's equivalent to 0. The maximum value of a 5-bit binary number is 11111, so the maximum network segment is 31.
 
+The smallest 6-length binary number is 32, so 192.168.32.0/19 is equivalent to 192.168.32.0-192.168.63.255.
 
-19的意思就是保留前19位IP不变,前2段那么19-8*2=3,起始的IP15换成二进制都不达到5位,所以等价于0.而五位数的二进制最大值是11111,所以最大网段就是31.
+192.168.1.0/19, 192.168.2.0/19......192.168.31.0/19 are all equivalent to 192.168.0.0/19
 
-最小的6个长度的二进制数是32,所以192.168.32.0/19等同于192.168.32.0-192.168.63.255
-
-192.168.1.0/19,192.168.2.0/19......192.168.31.0/19都等同于192.168.0.0/19
-
-参考链接:
-1. [CIDR在线换算](http://ip.chacuo.net/ipconvert)
-1. [CIDR计算](https://cloud.tencent.com/developer/article/1151790)
+Reference Links:
+1. [CIDR Online Conversion](http://ip.chacuo.net/ipconvert)
+1. [CIDR Calculation](https://cloud.tencent.com/developer/article/1151790)

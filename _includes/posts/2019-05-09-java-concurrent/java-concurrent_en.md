@@ -1,35 +1,34 @@
-<!-- TODO: Translate to en -->
+The `java.util.concurrent` package defines various thread-related collections, classes, and interfaces. After peeling back the layers, I have a deeper understanding of that phrase "passing my ancestral java package to you". This inheritance tree looks quite painful.
 
-`java.util.concurrent`这个包里面定义了各种线程相关的集合和类,接口.抽丝剥茧之后,我对那句"把我祖传的java包传给你"有了更深的理解.这个继承树看起来非常蛋疼.
-不过最后我还是剥离分解,整理得出此文.
+But in the end, I still stripped it down, decomposed it, and organized it into this article.
 
 
-写到一半本来想放弃来着,因为[这个网站](https://examples.javacodegeeks.com/category/core-java/util/concurrent/)提供了大量例子
+I wanted to give up halfway through writing, because [this website](https://examples.javacodegeeks.com/category/core-java/util/concurrent/) provides many examples.
 
-## 导航
+## Navigation
 
-1. [可能是最全的java线程指南(1-1)[任务调度类_Callable系]](/2019/05/09/java-concurrent(1-1)/)
-1. [可能是最全的java线程指南(1-2)[任务调度类_Executor系]](/2019/05/09/java-concurrent(1-2)/)
-1. [可能是最全的java线程指南(1-3)[任务调度类_CompletionService系]](/2019/05/10/java-concurrent(1-3)/)
+1. [Possibly the Most Complete Java Thread Guide (1-1)[Task Scheduling Classes_Callable Series]](/2019/05/09/java-concurrent(1-1)/)
+1. [Possibly the Most Complete Java Thread Guide (1-2)[Task Scheduling Classes_Executor Series]](/2019/05/09/java-concurrent(1-2)/)
+1. [Possibly the Most Complete Java Thread Guide (1-3)[Task Scheduling Classes_CompletionService Series]](/2019/05/10/java-concurrent(1-3)/)
 1. []()
 1. []()
 
 
-## 没介绍到但比较重要的成员
+## Members Not Introduced But Relatively Important
 
 ### RejectedExecutionHandler
 
-ThreadPoolExecutor实现了该接口
+ThreadPoolExecutor implements this interface.
 
-提供了一种失败重试的事件机制.参考[这里](https://examples.javacodegeeks.com/core-java/util/concurrent/rejectedexecutionhandler/java-util-concurrent-rejectedexecutionhandler-example/)
+Provides a failure retry event mechanism. Reference [here](https://examples.javacodegeeks.com/core-java/util/concurrent/rejectedexecutionhandler/java-util-concurrent-rejectedexecutionhandler-example/)
 
 
 
 ### ThreadFactory
 
-这个一般用Guava的ThreadFactoryBuilder创建,比较少自己实现
+This is generally created using Guava's ThreadFactoryBuilder, rarely implemented yourself.
 
-### 异常
+### Exceptions
 
 ```java
 
@@ -48,12 +47,12 @@ TimeoutException
 ```
 
 
-## 参考链接:
-1. [40个Java多线程问题总结](http://www.importnew.com/18459.html#comment-651217)
-2. [[翻译][Java]ExecutorService的正确关闭方法](https://blog.csdn.net/zaozi/article/details/38854561)
-3. [Java并发编程：CountDownLatch、CyclicBarrier和Semaphore](https://www.cnblogs.com/dolphin0520/p/3920397.html)
-4. [Java并发教程（Oracle官方资料）](http://www.iteye.com/magazines/131-Java-Concurrency)
-5. [如何在 Java 中正确使用 wait, notify 和 notifyAll – 以生产者消费者模型为例](http://www.importnew.com/16453.html)
+## Reference Links:
+1. [Summary of 40 Java Multithreading Questions](http://www.importnew.com/18459.html#comment-651217)
+2. [[Translation][Java]Correct Way to Shut Down ExecutorService](https://blog.csdn.net/zaozi/article/details/38854561)
+3. [Java Concurrency Programming: CountDownLatch, CyclicBarrier and Semaphore](https://www.cnblogs.com/dolphin0520/p/3920397.html)
+4. [Java Concurrency Tutorial (Oracle Official Material)](http://www.iteye.com/magazines/131-Java-Concurrency)
+5. [How to Correctly Use wait, notify and notifyAll in Java – Using Producer Consumer Model as Example](http://www.importnew.com/16453.html)
 6. [Lesson: Concurrency](https://docs.oracle.com/javase/tutorial/essential/concurrency/index.html)
 7. [Package java.util.concurrent](https://docs.oracle.com/javase/8/docs/api/?java/util/concurrent/package-summary.html)
-8. [ava并发编程：Callable、Future和FutureTask](https://www.cnblogs.com/dolphin0520/p/3949310.html)
+8. [Java Concurrency Programming: Callable, Future and FutureTask](https://www.cnblogs.com/dolphin0520/p/3949310.html)

@@ -1,10 +1,8 @@
-<!-- TODO: Translate to jp -->
+## 基本クエリ
 
-## 基本查询
+ESはデフォルトで同時実行制限が1000です。前のクエリがスタックしたり、瞬間的なリクエストが多すぎたりすると、例外が発生します。
 
-ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,就会出现异常.
-
-### 创建
+### 作成
 
 ```
 POST /a/_doc/2
@@ -14,9 +12,9 @@ POST /a/_doc/1
 
 ```
 
-### 查询
+### クエリ
 
-- 返回文档的一部分
+- ドキュメントの一部を返す
 
 ?_source=title,text
 
@@ -33,7 +31,7 @@ get /a/text/2
 
 /_update
 
-- 取回多个文档
+- 複数のドキュメントを取得
 
 /_mget
 
@@ -48,7 +46,7 @@ GET _analyze
 }
 ```
 
-## 分片
+## シャード
 
 ```
 PUT test
@@ -67,17 +65,17 @@ GET /_all/_search?q=tag:wow
 GET _cat/indices
 ```
 
-## 系统查询
+## システムクエリ
 
-- 健康检查
+- ヘルスチェック
 
 GET /_cluster/health
 
-## 基于插件的查询
+## プラグインベースのクエリ
 
 ### [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik)
 
-使用该插件,要注意**mappings要在创建index时创建**,不能后期修改/添加
+このプラグインを使用する場合、**mappingsはインデックス作成時に作成する必要がある**ことに注意してください。後で変更/追加することはできません。
 
 ```
 PUT /a
@@ -96,13 +94,13 @@ PUT /a
 }
 ```
 
-使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词,这种需求是无法实现的.
+オンラインホットアップデートインターフェースを使用する場合、古いデータは再インデックス（reindex）する必要があるという問題があります。そのため、新しい単語を追加して古いデータを分かち書きするという要求は実現できません。
 
-热更新的词语存在内存中,不会更新dic文件
+ホットアップデートされた単語はメモリに保存され、dicファイルは更新されません。
 
-## 分片管理
+## シャード管理
 
-### 默认模板设置
+### デフォルトテンプレート設定
 
 ```
 POST _template/default
@@ -115,7 +113,7 @@ POST _template/default
 }
 ```
 
-### 自定义模板-设置副本数默认为0
+### カスタムテンプレート-レプリカ数をデフォルトで0に設定
 
 ```bash
 curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/json' -d '
@@ -127,7 +125,7 @@ curl -XPUT 0.0.0.0:9200/_template/zeroreplicas  -H 'Content-Type: application/js
 }'
 ```
 
-### 缩容
+### スケールダウン
 
 ```
 put */_settings
@@ -142,13 +140,13 @@ put */_settings
 }
 ```
 
-## ingest/pipeline 用法
+## ingest/pipelineの用法
 
-ingest 是 elasticsearch 的节点角色。在ingest里面定义pipeline。
+ingestはelasticsearchのノードロールです。ingest内でpipelineを定義します。
 
-pipeline是预处理器。什么是预处理器呢，可以勉强理解为数据清洗，在入库前对数据进行处理。
+pipelineはプリプロセッサです。プリプロセッサとは何か？データクリーニングと理解でき、保存前にデータを処理します。
 
-比如下面这个pipeline的定义
+たとえば、このpipelineの定義：
 
 ```
 PUT _ingest/pipeline/monthlyindex
@@ -189,28 +187,28 @@ PUT _ingest/pipeline/monthlyindex
 }
 ```
 
-意思是把写入"servicelog-test" index 的数据按月分片处理。
+これは"servicelog-test"インデックスに書き込まれるデータを月ごとに処理することを意味します。
 
-原始写入"servicelog-test"的请求，最终最写入到 `servicelog-test_2020-02-01`(当前月份的自动分片)
+"servicelog-test"に書き込む元のリクエストは、最終的に`servicelog-test_2020-02-01`（現在の月の自動シャード）に書き込まれます。
 
-这个 `pipeline` 解决了我们写入单一elasticsearch index 的问题。以后再也不需要 delete by query 了，直接删过往的index，这也是elasticsearch推荐的方式。
+この`pipeline`は、単一のelasticsearchインデックスに書き込む問題を解決します。今後、delete by queryは不要です。過去のインデックスを直接削除するだけで、これもelasticsearchが推奨する方法です。
 
-参考链接：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
+参考リンク：[Date Index Name Processor](https://www.elastic.co/guide/en/elasticsearch/reference/master/date-index-name-processor.html)
 
-## 付费功能(_xpack)
+## 有料機能(_xpack)
 
-es默认没有密码,需要用户授权功能的话买商业版的许可.
+esはデフォルトでパスワードがありません。ユーザー認証機能が必要な場合は、商業版のライセンスを購入してください。
 
 - [security-api-users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html)
 
 
 GET /_xpack/security/user
 
-## 7.0废弃的查询
+## 7.0で非推奨のクエリ
 
-As of version 7.0 Elasticsearch will require that a [field] parameter is provided when a [seed] is set
+バージョン7.0以降、Elasticsearchでは[seed]が設定されている場合に[field]パラメータが必要になります
 
-改为
+変更：
 
 ```
  "random_score": {
@@ -218,7 +216,7 @@ As of version 7.0 Elasticsearch will require that a [field] parameter is provide
                 "field": "_seq_no"
             }
 ```
-Deprecation: Deprecated field [inline] used, expected [source] instead
+非推奨：非推奨フィールド[inline]が使用されました。[source]が期待されます
 
 ```
 		"_script": {
@@ -228,8 +226,8 @@ Deprecation: Deprecated field [inline] used, expected [source] instead
 ```
 inline
 
-## 参考链接:
+## 参考リンク：
 
-1. [基础入门](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
-1. [文档元数据](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
-2. [es 的常用查询语法](https://blog.csdn.net/qingmoruoxi/article/details/77221602)
+1. [基礎入門](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/getting-started.html)
+1. [ドキュメントメタデータ](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/_Document_Metadata.html)
+2. [esの一般的なクエリ構文](https://blog.csdn.net/qingmoruoxi/article/details/77221602)

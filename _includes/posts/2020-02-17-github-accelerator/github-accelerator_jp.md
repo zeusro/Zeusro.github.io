@@ -1,14 +1,12 @@
-<!-- TODO: Translate to jp -->
+最近、パンデミックの問題により、GitHubにアクセスする際、ユーザーのアバターが表示されないだけでなく、`raw.githubusercontent.com`（GitHubの静的ファイルホスティングドメイン）上のリモートコードを実行すると直接443が爆発します。皆の作業が非常に不便になっています。
 
-最近因为疫情的问题，访问GitHub的时候人物头像不显示就算了，执行 `raw.githubusercontent.com`( GitHub 静态文件托管域名) 上面的远程代码直接爆 443 。搞得大家工作都不太方便。
+そこで、現在の解決策を収集し、整理して、根本から問題を解決しようとしました。
 
-于是我收集整理了目前现行的解决方案，试图从源头解决问题。
+## 問題の認識
 
-## 认识问题
+### GitHub関連ドメイン
 
-### GitHub相关域名
-
-**HOST 里的 IP 是错的，请勿直接复制粘贴！**
+**HOST内のIPは間違っています。直接コピー＆ペーストしないでください！**
 
 ```host
 # GitHub Start
@@ -32,9 +30,9 @@
 # GitHub End
 ```
 
-### 问题根源
+### 問題の根本原因
 
-大规模 DNS挟持污染，解析到的日本IP 151.101.228.133 丢包严重
+大規模なDNSハイジャック汚染、解決された日本のIP 151.101.228.133は深刻なパケット損失があります。
 
 ```bash
 ping 151.101.228.133
@@ -44,13 +42,13 @@ ping 151.101.228.133
 round-trip min/avg/max/stddev = 69.550/117.602/230.267/21.696 ms
 ```
 
-## 代理方案
+## プロキシソリューション
 
-### 自行修改 pac 文件
+### 自分でPACファイルを変更
 
-#### 修改本地pac
+#### ローカルPACを変更
 
-由上可得出，GitHub 相关的域名有
+上記から、GitHub関連のドメインは：
 
 ```
 github.com
@@ -58,126 +56,122 @@ github.com
 *.githubusercontent.com
 ```
 
-Windows 端的纸飞机 pac 是个本地文件；
+Windows側の紙飛行機PACはローカルファイルです。
 
-mac 端的纸飞机 可以直接编辑，一行一个域名，原理都类似，不懂就复制粘贴 ~
+mac側の紙飛行機は直接編集でき、1行に1つのドメイン、原理は似ています。理解できない場合はコピー＆ペーストしてください〜
 
-[V2rayU](https://github.com/yanue/V2rayU) 同理
+[V2rayU](https://github.com/yanue/V2rayU)も同様です
 
-#### 更新本地 DNS 解析
+#### ローカルDNS解決を更新
 
 ```bash
-#  MAC （OS X 10.11+ ）
+# MAC（OS X 10.11+）
 sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 # window
 ipconfig /flushdns
 ```
 
-### SwitchyOmega 自动切换模式 (适用于V2rayU)
+### SwitchyOmega自動切り替えモード（V2rayUに適用）
 
-用"PAC情景模式" 设置一个v2的情景模式
+「PACシナリオモード」を使用してv2のシナリオモードを設定します。
 
-之后再设置自动切换模式并使用就好了
+その後、自動切り替えモードを設定して使用します。
 
 ![img](/img/in-post/github/SwitchyOmega.png)
 
 
-换用
-[V2RayX](https://github.com/Cenmrev/V2RayX/releases)
-的话就不用这么麻烦了，可以直接编辑pac，不过作者最近不怎么更新了。
+[V2RayX](https://github.com/Cenmrev/V2RayX/releases)に切り替える場合は、これほど面倒な必要はなく、pacを直接編集できますが、作者は最近あまり更新していません。
 
 
-## 无代理方案
+## プロキシなしソリューション
 
-### 修改 host
+### hostを変更
 
-在
 https://www.ipaddress.com/
-找到 github.com 等域名的美国的IP，然后绑定HOST就行。
-**这是一个体力活**。
+でgithub.comなどのドメインの米国のIPを見つけ、HOSTにバインドします。
+**これは手作業です**。
 
-国内的不一定准，但可供参考
+国内のものは正確ではないかもしれませんが、参考にできます：
 1. https://tool.lu/dns/index.html
 1. http://tool.chinaz.com/dns/
 
-window 系统文件位置在 `C:/windows/system32/drivers/etc/hosts`
+Windowsシステムファイルの場所は`C:/windows/system32/drivers/etc/hosts`です
 
-mac 系统文件位于 /etc/hosts
+macシステムファイルは/etc/hostsにあります
 
-建议用 [SwitchHosts](https://github.com/oldj/SwitchHosts/releases)
-管理 host 文件
+[SwitchHosts](https://github.com/oldj/SwitchHosts/releases)を使用してhostファイルを管理することをお勧めします
 
-进阶方案是写程序用调用web接口动态更新HOST
+高度なソリューションは、Webインターフェースを呼び出してHOSTを動的に更新するプログラムを書くことです。
 
 ```host
-# raw.githubusercontent.com 是 GitHub 的静态文件托管域名
+# raw.githubusercontent.comはGitHubの静的ファイルホスティングドメインです
 199.232.28.133 raw.githubusercontent.com
 ```
 
-我当时是急着用`raw.githubusercontent.com`上面的代码，所以我改成一个美国的IP，然后通过代理访问上了。
+私は`raw.githubusercontent.com`上のコードを急いで使用していたため、米国のIPに変更し、プロキシ経由でアクセスしました。
 
-### Chrome浏览器插件
+### Chromeブラウザ拡張機能
 
-搜索安装 **GitHub加速** 即可，他们用一个中转的国内域名来 clone ，规避了 DNS解析的问题。
+**GitHub加速**を検索してインストールするだけで完了です。彼らは中継された国内ドメインを使用してクローンし、DNS解決の問題を回避しています。
 
-## git 加速
+## git加速
 
-参考自[chuyik](https://gist.github.com/chuyik)的解决方案
+[chuyik](https://gist.github.com/chuyik)のソリューションを参照
 
 
-### SSH协议使用 SSH 隧道进行代理（mac，Linux）
+### SSHプロトコルでSSHトンネルを使用してプロキシ（mac、Linux）
 
-把自己的 ssh 加到海外的机器，xx.xx.xx.xx为机器的公网IP
+自分のsshを海外のマシンに追加し、xx.xx.xx.xxはマシンのパブリックIPです。
 
-然后把该机器的IP加到ssh配置 `~/.ssh/config` 里面
+その後、マシンのIPをssh設定`~/.ssh/config`に追加します：
 
 ```
 Host github.com raw.githubusercontent.com
     ProxyCommand  ssh root@xx.xx.xx.xx nc %h %p
 ```
 
-之后把自己客户端的公钥加到远程GitHub，克隆仓库时用ssh协议才会生效
+その後、クライアントの公開鍵をリモートGitHubに追加します。SSHプロトコルを使用してリポジトリをクローンする場合にのみ有効になります。
 
     git clone git@github.com:owner/git.git
 
-### http(s)协议时用本地代理 + git config
+### http(s)プロトコルでローカルプロキシ+git configを使用
 
 ```bash
-#  走 HTTP 代理
+# HTTPプロキシを使用
 git config --global http.proxy "http://127.0.0.1:8080"
 git config --global https.proxy "http://127.0.0.1:8080"
-# 走 socks5 代理（如 Shadowsocks）
+# socks5プロキシを使用（Shadowsocksなど）
 git config --global http.proxy "socks5://127.0.0.1:1080"
 git config --global https.proxy "socks5://127.0.0.1:1080"
-# 取消设置
+# 設定をキャンセル
 git config --global --unset http.proxy
 git config --global --unset https.proxy
-# 最后检查下配置
+# 最後に設定を確認
 git config --list --global
 git config --list --system
 ```
 
      git clone https://github.com/owner/git.git
 
-## ssh over flclash
+## flclash経由のssh
 
-在你的 SSH 配置 (~/.ssh/config) 中写这样一段：
+SSH設定（~/.ssh/config）に次のように記述します：
 
 ```
 Host github.com
     HostName ssh.github.com
     Port 443
     User git
-    # 如果你使用 socks5 代理
+    # socks5プロキシを使用する場合
     ProxyCommand nc -x 127.0.0.1:7890 %h %p
 ```
 
-这里 ssh.github.com 是 GitHub 支持 SSH-over-443 的地址。  ￼
+ここでssh.github.comはGitHubのSSH-over-443アドレスです。  ￼
 
-nc -x 主机:端口 %h %p 是使用 nc (netcat) 通过 SOCKS5 代理转发 SSH。 -x 指定代理类型 (socks)，具体根据你 flclash 本地代理端口改。SSH Config 的 ProxyCommand 可以让 SSH 流量走代理。  ￼
+nc -x ホスト:ポート %h %pはnc（netcat）を使用してSOCKS5プロキシ経由でSSHを転送します。-xはプロキシタイプ（socks）を指定します。flclashのローカルプロキシポートに応じて変更します。SSH ConfigのProxyCommandは、SSHトラフィックをプロキシ経由で送信できます。  ￼
 
-ServerAliveInterval 等参数也可以加，防止连接空闲被中断。
+ServerAliveIntervalなどのパラメータも追加して、接続のアイドル中断を防ぐことができます。
 
 ```bash
 git config --global url."https://github.com/".insteadOf "git@github.com:"
@@ -186,21 +180,21 @@ Please type 'yes', 'no' or the fingerprint: yes
 Warning: Permanently added '[ssh.github.com]:443' (ED25519) to the list of known hosts.
 ```
 
-为了躲过封锁 SSH 22 端口，GitHub 额外提供一个 443 端口的 SSH 服务，因此它的公钥指纹也不一样。
-输入yes之后，git push就不会再出现断流了。
+SSHポート22のブロックを回避するため、GitHubは追加で443ポートのSSHサービスを提供しているため、その公開鍵フィンガープリントも異なります。
+yesを入力すると、git pushで切断の問題が発生しなくなります。
 
-## 终极解决方案
+## 究極のソリューション
 
-美国绿卡
+米国グリーンカード
 
 ![img](/img/逃.jpg)
 
-最后多说一句，
-[最近有人还原了ss协议客户端的整个攻击过程](https://www.leadroyal.cn/?p=1036)
+最後にもう一言、
+[最近、ssプロトコルクライアントの攻撃プロセス全体を復元した人がいます](https://www.leadroyal.cn/?p=1036)
 
-## 参考链接
+## 参考リンク
 
-1. [修改Hosts临时解决GitHub的raw.githubusercontent.com无法链接的问题](https://www.ioiox.com/archives/62.html)
-1. [解决Github国内访问出现的问题](http://rovo98.coding.me/posts/7e3029b3/)
-1. [如何为 Git 设置代理？](https://segmentfault.com/q/1010000000118837)
-1. [macOS 给 Git(Github) 设置代理（HTTP/SSH）](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)
+1. [Hostsを変更してGitHubのraw.githubusercontent.com接続問題を一時的に解決](https://www.ioiox.com/archives/62.html)
+1. [中国でのGitHubアクセスで発生する問題の解決](http://rovo98.coding.me/posts/7e3029b3/)
+1. [Gitにプロキシを設定する方法は？](https://segmentfault.com/q/1010000000118837)
+1. [macOSでGit(Github)にプロキシ（HTTP/SSH）を設定](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)

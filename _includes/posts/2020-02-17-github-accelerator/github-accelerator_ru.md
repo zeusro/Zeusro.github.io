@@ -1,14 +1,12 @@
-<!-- TODO: Translate to ru -->
+Недавно из-за проблемы с эпидемией при доступе к GitHub не только аватары пользователей не отображаются, но и выполнение кода с `raw.githubusercontent.com` (домен хостинга статических файлов GitHub) напрямую взрывается с 443. Это делает работу всех довольно неудобной.
 
-最近因为疫情的问题，访问GitHub的时候人物头像不显示就算了，执行 `raw.githubusercontent.com`( GitHub 静态文件托管域名) 上面的远程代码直接爆 443 。搞得大家工作都不太方便。
+Поэтому я собрал и организовал текущие решения, пытаясь решить проблему из источника.
 
-于是我收集整理了目前现行的解决方案，试图从源头解决问题。
+## Понимание проблемы
 
-## 认识问题
+### Домены, связанные с GitHub
 
-### GitHub相关域名
-
-**HOST 里的 IP 是错的，请勿直接复制粘贴！**
+**IP-адреса в HOST неверны, пожалуйста, не копируйте и не вставляйте напрямую!**
 
 ```host
 # GitHub Start
@@ -32,9 +30,9 @@
 # GitHub End
 ```
 
-### 问题根源
+### Корневая причина
 
-大规模 DNS挟持污染，解析到的日本IP 151.101.228.133 丢包严重
+Крупномасштабное загрязнение DNS-хайджекинга, разрешенный японский IP 151.101.228.133 имеет серьезную потерю пакетов.
 
 ```bash
 ping 151.101.228.133
@@ -44,13 +42,13 @@ ping 151.101.228.133
 round-trip min/avg/max/stddev = 69.550/117.602/230.267/21.696 ms
 ```
 
-## 代理方案
+## Решения с прокси
 
-### 自行修改 pac 文件
+### Самостоятельно изменить файл PAC
 
-#### 修改本地pac
+#### Изменить локальный PAC
 
-由上可得出，GitHub 相关的域名有
+Из вышеизложенного, домены, связанные с GitHub:
 
 ```
 github.com
@@ -58,126 +56,126 @@ github.com
 *.githubusercontent.com
 ```
 
-Windows 端的纸飞机 pac 是个本地文件；
+PAC Paper Airplane на стороне Windows — это локальный файл;
 
-mac 端的纸飞机 可以直接编辑，一行一个域名，原理都类似，不懂就复制粘贴 ~
+Paper Airplane на стороне mac можно редактировать напрямую, один домен на строку, принцип аналогичен, если не понимаете, просто скопируйте и вставьте ~
 
-[V2rayU](https://github.com/yanue/V2rayU) 同理
+[V2rayU](https://github.com/yanue/V2rayU) аналогично
 
-#### 更新本地 DNS 解析
+#### Обновить локальное разрешение DNS
 
 ```bash
-#  MAC （OS X 10.11+ ）
+# MAC (OS X 10.11+ )
 sudo dscacheutil -flushcache
 sudo killall -HUP mDNSResponder
 # window
 ipconfig /flushdns
 ```
 
-### SwitchyOmega 自动切换模式 (适用于V2rayU)
+### Режим автоматического переключения SwitchyOmega (применимо к V2rayU)
 
-用"PAC情景模式" 设置一个v2的情景模式
+Используйте "режим сценария PAC" для настройки режима сценария v2.
 
-之后再设置自动切换模式并使用就好了
+Затем установите режим автоматического переключения и используйте его.
 
 ![img](/img/in-post/github/SwitchyOmega.png)
 
 
-换用
+Если переключиться на
 [V2RayX](https://github.com/Cenmrev/V2RayX/releases)
-的话就不用这么麻烦了，可以直接编辑pac，不过作者最近不怎么更新了。
+, не нужно так много хлопот, можно напрямую редактировать pac, но автор не обновлял много недавно.
 
 
-## 无代理方案
+## Решения без прокси
 
-### 修改 host
+### Изменить host
 
-在
+На
 https://www.ipaddress.com/
-找到 github.com 等域名的美国的IP，然后绑定HOST就行。
-**这是一个体力活**。
+найдите IP-адреса США для github.com и других доменов, затем привяжите их к HOST.
+**Это ручная работа**.
 
-国内的不一定准，但可供参考
+Внутренние могут быть неточными, но могут служить справочной информацией:
 1. https://tool.lu/dns/index.html
 1. http://tool.chinaz.com/dns/
 
-window 系统文件位置在 `C:/windows/system32/drivers/etc/hosts`
+Расположение файла системы Windows: `C:/windows/system32/drivers/etc/hosts`
 
-mac 系统文件位于 /etc/hosts
+Файл системы mac находится в /etc/hosts
 
-建议用 [SwitchHosts](https://github.com/oldj/SwitchHosts/releases)
-管理 host 文件
+Рекомендуется использовать [SwitchHosts](https://github.com/oldj/SwitchHosts/releases)
+для управления файлами host
 
-进阶方案是写程序用调用web接口动态更新HOST
+Продвинутое решение — написать программу для динамического обновления HOST путем вызова веб-интерфейсов.
 
 ```host
-# raw.githubusercontent.com 是 GitHub 的静态文件托管域名
+# raw.githubusercontent.com — это домен хостинга статических файлов GitHub
 199.232.28.133 raw.githubusercontent.com
 ```
 
-我当时是急着用`raw.githubusercontent.com`上面的代码，所以我改成一个美国的IP，然后通过代理访问上了。
+Я спешил использовать код с `raw.githubusercontent.com`, поэтому изменил его на IP США, затем получил доступ через прокси.
 
-### Chrome浏览器插件
+### Расширение браузера Chrome
 
-搜索安装 **GitHub加速** 即可，他们用一个中转的国内域名来 clone ，规避了 DNS解析的问题。
+Найдите и установите **GitHub Accelerator**, и все готово. Они используют транзитный внутренний домен для клонирования, избегая проблемы разрешения DNS.
 
-## git 加速
+## Ускорение git
 
-参考自[chuyik](https://gist.github.com/chuyik)的解决方案
+Ссылается на решение [chuyik](https://gist.github.com/chuyik)
 
 
-### SSH协议使用 SSH 隧道进行代理（mac，Linux）
+### Протокол SSH с использованием SSH-туннеля для прокси (mac, Linux)
 
-把自己的 ssh 加到海外的机器，xx.xx.xx.xx为机器的公网IP
+Добавьте свой ssh на зарубежную машину, xx.xx.xx.xx — это публичный IP машины.
 
-然后把该机器的IP加到ssh配置 `~/.ssh/config` 里面
+Затем добавьте IP машины в конфигурацию ssh `~/.ssh/config`:
 
 ```
 Host github.com raw.githubusercontent.com
     ProxyCommand  ssh root@xx.xx.xx.xx nc %h %p
 ```
 
-之后把自己客户端的公钥加到远程GitHub，克隆仓库时用ssh协议才会生效
+После этого добавьте публичный ключ вашего клиента на удаленный GitHub. Это вступит в силу только при клонировании репозиториев с использованием протокола ssh.
 
     git clone git@github.com:owner/git.git
 
-### http(s)协议时用本地代理 + git config
+### Протокол http(s) с использованием локального прокси + git config
 
 ```bash
-#  走 HTTP 代理
+# Использовать HTTP-прокси
 git config --global http.proxy "http://127.0.0.1:8080"
 git config --global https.proxy "http://127.0.0.1:8080"
-# 走 socks5 代理（如 Shadowsocks）
+# Использовать socks5-прокси (например, Shadowsocks)
 git config --global http.proxy "socks5://127.0.0.1:1080"
 git config --global https.proxy "socks5://127.0.0.1:1080"
-# 取消设置
+# Отменить настройки
 git config --global --unset http.proxy
 git config --global --unset https.proxy
-# 最后检查下配置
+# Наконец проверьте конфигурацию
 git config --list --global
 git config --list --system
 ```
 
      git clone https://github.com/owner/git.git
 
-## ssh over flclash
+## ssh через flclash
 
-在你的 SSH 配置 (~/.ssh/config) 中写这样一段：
+Напишите это в вашей конфигурации SSH (~/.ssh/config):
 
 ```
 Host github.com
     HostName ssh.github.com
     Port 443
     User git
-    # 如果你使用 socks5 代理
+    # Если вы используете socks5-прокси
     ProxyCommand nc -x 127.0.0.1:7890 %h %p
 ```
 
-这里 ssh.github.com 是 GitHub 支持 SSH-over-443 的地址。  ￼
+Здесь ssh.github.com — это адрес GitHub для SSH-over-443.  ￼
 
-nc -x 主机:端口 %h %p 是使用 nc (netcat) 通过 SOCKS5 代理转发 SSH。 -x 指定代理类型 (socks)，具体根据你 flclash 本地代理端口改。SSH Config 的 ProxyCommand 可以让 SSH 流量走代理。  ￼
+nc -x хост:порт %h %p использует nc (netcat) для пересылки SSH через SOCKS5-прокси. -x указывает тип прокси (socks), измените в соответствии с вашим локальным портом прокси flclash. ProxyCommand SSH Config может заставить SSH-трафик проходить через прокси.  ￼
 
-ServerAliveInterval 等参数也可以加，防止连接空闲被中断。
+ServerAliveInterval и другие параметры также можно добавить, чтобы предотвратить прерывание простоя соединения.
 
 ```bash
 git config --global url."https://github.com/".insteadOf "git@github.com:"
@@ -186,21 +184,21 @@ Please type 'yes', 'no' or the fingerprint: yes
 Warning: Permanently added '[ssh.github.com]:443' (ED25519) to the list of known hosts.
 ```
 
-为了躲过封锁 SSH 22 端口，GitHub 额外提供一个 443 端口的 SSH 服务，因此它的公钥指纹也不一样。
-输入yes之后，git push就不会再出现断流了。
+Чтобы избежать блокировки SSH-порта 22, GitHub дополнительно предоставляет SSH-службу на порту 443, поэтому отпечаток его публичного ключа также отличается.
+После ввода yes git push больше не будет иметь проблем с разрывом соединения.
 
-## 终极解决方案
+## Окончательное решение
 
-美国绿卡
+Грин-карта США
 
 ![img](/img/逃.jpg)
 
-最后多说一句，
-[最近有人还原了ss协议客户端的整个攻击过程](https://www.leadroyal.cn/?p=1036)
+Последнее слово,
+[Недавно кто-то восстановил весь процесс атаки клиента протокола ss](https://www.leadroyal.cn/?p=1036)
 
-## 参考链接
+## Ссылки
 
-1. [修改Hosts临时解决GitHub的raw.githubusercontent.com无法链接的问题](https://www.ioiox.com/archives/62.html)
-1. [解决Github国内访问出现的问题](http://rovo98.coding.me/posts/7e3029b3/)
-1. [如何为 Git 设置代理？](https://segmentfault.com/q/1010000000118837)
-1. [macOS 给 Git(Github) 设置代理（HTTP/SSH）](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)
+1. [Изменить Hosts для временного решения проблемы подключения raw.githubusercontent.com GitHub](https://www.ioiox.com/archives/62.html)
+1. [Решение проблем с доступом к GitHub в Китае](http://rovo98.coding.me/posts/7e3029b3/)
+1. [Как установить прокси для Git?](https://segmentfault.com/q/1010000000118837)
+1. [macOS Установить прокси (HTTP/SSH) для Git(Github)](https://gist.github.com/chuyik/02d0d37a49edc162546441092efae6a1)

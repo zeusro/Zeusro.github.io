@@ -1,12 +1,10 @@
-<!-- TODO: Translate to en -->
+## Environment:
 
-## 环境:
+1. kubernetes version: Alibaba Cloud v1.11.5
+1. Node system: CentOS Linux 7 (Core)
+1. Node container version: docker://17.6.2
 
-1. kubernetes版本: 阿里云v1.11.5
-1. 节点系统 CentOS Linux 7 (Core)
-1. 节点容器版本 docker://17.6.2
-
-## 概念介绍
+## Concept Introduction
 
 ### X-Forwarded-For
 
@@ -16,20 +14,20 @@ X-Forwarded-For: <client>, <proxy1>, <proxy2>
 
 ### remote_addr
 
-remote_addr代表客户端的IP，但它的值不是由客户端提供的，而是服务端根据客户端的ip指定的，当你的浏览器访问某个网站时，假设中间没有任何代理，那么网站的web服务器（Nginx，Apache等）就会把remote_addr设为你的机器IP，如果你用了某个代理，那么你的浏览器会先访问这个代理，然后再由这个代理转发到网站，这样web服务器就会把remote_addr设为这台代理机器的IP。
+remote_addr represents the client's IP, but its value is not provided by the client. Instead, it's specified by the server based on the client's IP. When your browser accesses a website, assuming there are no proxies in between, the website's web server (Nginx, Apache, etc.) will set remote_addr to your machine's IP. If you use a proxy, your browser will first access the proxy, then the proxy forwards to the website. In this case, the web server will set remote_addr to that proxy machine's IP.
 
-## 内部请求(Pod对Pod请求)
+## Internal Requests (Pod to Pod Requests)
 
 ```
 podA-->podB
 ```
 
-这时只有`getRemoteAddr`能够获取IP,其余header全空.podB获得的clientIP为podA的podIP(虚拟IP)
+At this time, only `getRemoteAddr` can get the IP, all other headers are empty. The clientIP obtained by podB is podA's podIP (virtual IP).
 
-The client_address is always the client pod’s IP address, whether the client pod and server pod are in the same node or in different nodes.
+The client_address is always the client pod's IP address, whether the client pod and server pod are in the same node or in different nodes.
 
 
-## 外部请求
+## External Requests
 
 ### Nodeport svc
 
@@ -39,7 +37,7 @@ client-->svc-->pod
 
 #### externalTrafficPolicy: Cluster
 
-svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动`kube-proxy`,外部流量可能转发多1次.
+Setting `externalTrafficPolicy: Cluster` in svc.spec means all nodes will start `kube-proxy`, and external traffic may be forwarded one more time.
 
 ```
           client
@@ -53,11 +51,11 @@ svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动
  endpoint
 ```
 
-这时流量通过node2的转发,app 获得的clientIP不定,有可能是`node 2` 的IP,也有可能是客户端的IP
+At this time, traffic goes through node2's forwarding. The clientIP obtained by the app is uncertain. It could be `node 2`'s IP, or it could be the client's IP.
 
 #### externalTrafficPolicy: Local
 
-svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube-proxy`,外部流量直达节点.
+Setting `externalTrafficPolicy: Local` in svc.spec starts `kube-proxy` on nodes running pods. External traffic goes directly to the node.
 
 ```
         client
@@ -71,14 +69,14 @@ svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube
  endpoint
 ```
 
-这时,只有运行了pod的节点才会有对应的proxy,避免了中间商(node 2)挣差价
+At this time, only nodes running pods will have the corresponding proxy, avoiding the middleman (node 2) making a profit.
 
-`clientIP`为`remote_addr`
+`clientIP` is `remote_addr`.
 
 
 ### LoadBalancer svc
 
-svc.spec设置`externalTrafficPolicy: Local`.
+Set `externalTrafficPolicy: Local` in svc.spec.
 
 ```
                       client
@@ -94,11 +92,11 @@ health check --->   node 1   node 2 <--- health check
 
 ![image](/img/in-post/get-client-ip-in-kubernetes/15450327712333_zh-CN.png)
 
-SLB监听HTTP:取`X-Forwarded-For`即可(从SLB获得客户端IP).
+SLB listening on HTTP: Take `X-Forwarded-For` (get client IP from SLB).
 
-SLB监听TCP,则取`remote_addr`
+SLB listening on TCP: Take `remote_addr`.
 
-`externalTrafficPolicy: Cluster`的情况就不用说了,没有意义.
+The case of `externalTrafficPolicy: Cluster` doesn't need to be mentioned, it's meaningless.
 
 ### ingress
 
@@ -106,18 +104,18 @@ SLB监听TCP,则取`remote_addr`
 client-->slb-->ingress svc-->ingress pod-->app svc-->pod
 ```
 
-首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`,并且`externalTrafficPolicy: Local`
+First, you need to set the `ingress` svc type to `Nodeport`/`LoadBalancer`, and `externalTrafficPolicy: Local`.
 
-app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
+The app svc type can be `ClusterIP`/`NodePort`/`LoadBalancer`, it doesn't matter.
 
-这个时候,`X-Forwarded-For`的值即为`clientIP`
+At this time, the value of `X-Forwarded-For` is the `clientIP`.
 
-`remote_addr`为`ingress pod` Virtual IP
+`remote_addr` is the `ingress pod` Virtual IP.
 
-## 参考链接:
+## Reference Links:
 
 1. [source-ip](https://kubernetes.io/docs/tutorials/services/source-ip/)
-1. [HTTP 请求头中的 X-Forwarded-For](https://imququ.com/post/x-forwarded-for-header-in-http.html)
-1. [如何获取客户端真实IP](https://help.aliyun.com/document_detail/54007.html?spm=5176.11065259.1996646101.searchclickresult.610a1293EtcJUu)
-1. [源地址审计：追踪 kubernetes 服务的SNAT](https://ieevee.com/tech/2017/09/18/k8s-svc-src.html)
-1. [谈谈kubernets的service组件的Virtual IP](https://ieevee.com/tech/2017/01/20/k8s-service.html)
+1. [X-Forwarded-For in HTTP Request Headers](https://imququ.com/post/x-forwarded-for-header-in-http.html)
+1. [How to Get Client Real IP](https://help.aliyun.com/document_detail/54007.html?spm=5176.11065259.1996646101.searchclickresult.610a1293EtcJUu)
+1. [Source Address Auditing: Tracking SNAT of Kubernetes Services](https://ieevee.com/tech/2017/09/18/k8s-svc-src.html)
+1. [Talking About the Virtual IP of Kubernetes Service Components](https://ieevee.com/tech/2017/01/20/k8s-service.html)

@@ -15,21 +15,29 @@ def get_filename_base(post_file):
         return match.group(1)
     return post_file.stem
 
-def has_translations(folder_name, filename_base):
-    """检查是否已有翻译文件"""
+def get_available_languages(folder_name, filename_base):
+    """获取可用的翻译语言列表"""
     include_dir = Path('_includes/posts') / folder_name
     if not include_dir.exists():
-        return False
+        return []
     
-    # 检查至少有一个非中文的翻译文件存在且不是TODO占位符
-    for lang in ['en', 'jp', 'ru']:
-        lang_file = include_dir / f"{filename_base}_{lang}.md"
-        if lang_file.exists():
-            content = lang_file.read_text(encoding='utf-8')
-            # 检查不是TODO占位符
-            if f'TODO: Translate to {lang}' not in content and content.strip() != '':
-                return True
-    return False
+    available_langs = []
+    for lang in ['zh', 'en', 'jp', 'ru']:
+        # 尝试不同的文件名格式
+        possible_files = [
+            include_dir / f"{filename_base}_{lang}.md",
+            include_dir / f"{lang}.md",  # 有些文章使用这种格式
+        ]
+        
+        for lang_file in possible_files:
+            if lang_file.exists():
+                content = lang_file.read_text(encoding='utf-8')
+                # 检查不是TODO占位符且有实际内容
+                if f'TODO: Translate to {lang}' not in content and content.strip() != '':
+                    available_langs.append((lang, lang_file.name))
+                    break
+    
+    return available_langs
 
 def update_post_to_multilingual(post_file):
     """更新文章为多语言模式"""
@@ -47,17 +55,22 @@ def update_post_to_multilingual(post_file):
     folder_name = post_file.stem
     filename_base = get_filename_base(post_file)
     
-    # 检查是否已有翻译
-    if not has_translations(folder_name, filename_base):
-        print(f"  No translations found, skipping...")
-        return False
+    # 获取可用的翻译语言
+    available_langs = get_available_languages(folder_name, filename_base)
     
-    # 检查是否有中文版本
-    include_dir = Path('_includes/posts') / folder_name
-    zh_file = include_dir / f"{filename_base}_zh.md"
-    if not zh_file.exists():
+    # 必须至少有中文版本
+    zh_langs = [lang for lang, _ in available_langs if lang == 'zh']
+    if not zh_langs:
         print(f"  No Chinese version found, skipping...")
         return False
+    
+    # 至少需要有一个非中文的翻译
+    non_zh_langs = [lang for lang, _ in available_langs if lang != 'zh']
+    if not non_zh_langs:
+        print(f"  No non-Chinese translations found, skipping...")
+        return False
+    
+    print(f"  Found translations: {', '.join([lang for lang, _ in available_langs])}")
     
     # 更新front matter，添加 multilingual: true
     # 找到front matter的结束位置
@@ -92,31 +105,22 @@ def update_post_to_multilingual(post_file):
         front_matter = re.sub(r'multilingual:\s*false', 'multilingual: true', front_matter, flags=re.IGNORECASE)
         front_matter = re.sub(r'multilingual:\s*true', 'multilingual: true', front_matter, flags=re.IGNORECASE)
     
-    # 构建多语言include部分
-    multilingual_section = f"""
-
-<!-- Chinese Version -->
-<div class="zh post-container">
-    {{% capture about_zh %}}{{% include posts/{folder_name}/{filename_base}_zh.md %}}{{% endcapture %}}
-    {{{{ about_zh | markdownify }}}}
-</div>
-
-<!-- English Version -->
-<div class="en post-container">
-    {{% capture about_en %}}{{% include posts/{folder_name}/{filename_base}_en.md %}}{{% endcapture %}}
-    {{{{ about_en | markdownify }}}}
-</div>
-
-<!-- Japanese Version -->
-<div class="jp post-container">
-    {{% capture about_jp %}}{{% include posts/{folder_name}/{filename_base}_jp.md %}}{{% endcapture %}}
-    {{{{ about_jp | markdownify }}}}
-</div>
-
-<!-- Russian Version -->
-<div class="ru post-container">
-    {{% capture about_ru %}}{{% include posts/{folder_name}/{filename_base}_ru.md %}}{{% endcapture %}}
-    {{{{ about_ru | markdownify }}}}
+    # 构建多语言include部分（只包含实际存在的翻译）
+    lang_sections = {
+        'zh': ('Chinese', 'zh'),
+        'en': ('English', 'en'),
+        'jp': ('Japanese', 'jp'),
+        'ru': ('Russian', 'ru'),
+    }
+    
+    multilingual_section = "\n"
+    for lang, filename in available_langs:
+        lang_name, lang_class = lang_sections[lang]
+        multilingual_section += f"""
+<!-- {lang_name} Version -->
+<div class="{lang_class} post-container">
+    {{% capture about_{lang} %}}{{% include posts/{folder_name}/{filename} %}}{{% endcapture %}}
+    {{{{ about_{lang} | markdownify }}}}
 </div>
 """
     
@@ -142,21 +146,25 @@ def main():
     # 获取所有需要处理的文件
     posts_to_update = []
     for file in sorted(posts_dir.glob('*.md')):
-        # 跳过特定文件
-        if file.name == '2020-08-07-fuck-microsoft.md':
-            continue
-        
         # 读取文件检查 published 状态
         content = file.read_text(encoding='utf-8')
         if re.search(r'published:\s*false', content, re.IGNORECASE):
+            print(f"Skipping {file.name} (published: false)")
+            continue
+        
+        # 检查是否已有多语言支持
+        if 'multilingual: true' in content:
             continue
         
         folder_name = file.stem
+        filename_base = get_filename_base(file)
         
-        # 检查是否已有多语言版本文件夹
-        if folder_name in existing_multilingual:
-            # 检查是否还没有 multilingual: true
-            if 'multilingual: true' not in content:
+        # 检查是否有翻译文件
+        available_langs = get_available_languages(folder_name, filename_base)
+        if len(available_langs) > 1:  # 至少要有中文和一个其他语言
+            zh_langs = [lang for lang, _ in available_langs if lang == 'zh']
+            non_zh_langs = [lang for lang, _ in available_langs if lang != 'zh']
+            if zh_langs and non_zh_langs:
                 posts_to_update.append(file)
     
     print(f"Found {len(posts_to_update)} posts to update")

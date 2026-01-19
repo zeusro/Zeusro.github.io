@@ -1,19 +1,17 @@
-<!-- TODO: Translate to jp -->
+## 要件
 
-## 需求
+`/var/log/containers`の下のファイルは実際にはシンボリックリンクです。
 
-`/var/log/containers`下面的文件其实是软链接
+実際のログファイルは`/var/lib/docker/containers`ディレクトリにあります。
 
-真正的日志文件在`/var/lib/docker/containers`这个目录
+オプションのソリューション：
 
-可选方案:
-
-1. Logstash(过于消耗内存,尽量不要用这个)
+1. Logstash（メモリ消費が多すぎるため、これを使用しないでください）
 2. fluentd
 3. filebeat
-4. 不使用docker-driver
+4. docker-driverを使用しない
 
-## 日志的格式
+## ログの形式
 
 /var/log/containers
 
@@ -39,26 +37,26 @@
 filebeat:
   prospectors:
   - type: log
-    //开启监视，不开不采集
+    // 監視を有効にする、有効にしないと収集されない
     enable: true
-    paths:  # 采集日志的路径这里是容器内的path
+    paths:  # ログを収集するパス、これはコンテナ内のパスです
     - /var/log/elkTest/error/*.log
-    # 日志多行合并采集
+    # ログの複数行マージ収集
     multiline.pattern: '^\['
     multiline.negate: true
     multiline.match: after
-    # 为每个项目标识,或者分组，可区分不同格式的日志
+    # 各プロジェクトにタグを付ける、またはグループ化し、異なる形式のログを区別できる
     tags: ["java-logs"]
-    # 这个文件记录日志读取的位置，如果容器重启，可以从记录的位置开始取日志
+    # このファイルはログ読み取り位置を記録します。コンテナが再起動した場合、記録された位置からログの読み取りを開始できます
     registry_file: /usr/share/filebeat/data/registry
 
 output:
-  # 输出到logstash中
+  # logstashに出力
   logstash:
     hosts: ["0.0.0.0:5044"]
 ```
 
-注：6.0以上该filebeat.yml需要挂载到/usr/share/filebeat/filebeat.yml,另外还需要挂载/usr/share/filebeat/data/registry 文件，避免filebeat容器挂了后，新起的重复收集日志。  
+注：6.0以上の場合、このfilebeat.ymlは/usr/share/filebeat/filebeat.ymlにマウントする必要があります。さらに、/usr/share/filebeat/data/registryファイルをマウントして、filebeatコンテナが再起動したときにログの重複収集を避ける必要があります。
 
 
 - logstash.conf
@@ -82,13 +80,13 @@ filter {
 	#if ([message] =~ "^\[") {
     #    drop {}
     #}
-	# 不匹配正则，匹配正则用=~
+	# 正規表現に一致しない場合、正規表現に一致するには=~を使用
 	if [level] !~ "(ERROR|WARN|INFO)" {
         drop {}
     }
 }
 
-## Add your filters / logstash plugins configuration here
+## ここにフィルター/ logstashプラグインの設定を追加
 
 output {
 	elasticsearch {
@@ -100,20 +98,20 @@ output {
 
 ## fluentd
 
-[fluentd-es-image镜像](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
+[fluentd-es-imageイメージ](https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/fluentd-elasticsearch/fluentd-es-image)
 
-[Kubernetes-基于EFK进行统一的日志管理](https://www.kubernetes.org.cn/4278.html)
+[Kubernetes-EFKベースの統一ログ管理](https://www.kubernetes.org.cn/4278.html)
 
 
-[Docker Logging via EFK (Elasticsearch + Fluentd + Kibana) Stack with Docker Compose](https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose)
+[Docker Composeを使用したEFK（Elasticsearch + Fluentd + Kibana）スタックによるDockerロギング](https://docs.fluentd.org/v0.12/articles/docker-logging-efk-compose)
 
 
 ## filebeat+ES pipeline
 
 
-### 定义pipeline
+### パイプラインの定義
 
-- 定义java专用的管道
+- Java専用パイプラインの定義
 
 ```
 
@@ -186,13 +184,13 @@ data:
   filebeat.yml: |-
     filebeat.config:
         inputs:
-          # Mounted `filebeat-inputs` configmap:
+          # マウントされた`filebeat-inputs` configmap：
           path: ${path.config}/inputs.d/*.yml
-          # Reload inputs configs as they change:
+          # 変更時に入力設定をリロード：
           reload.enabled: false
         modules:
           path: ${path.config}/modules.d/*.yml
-          # Reload module configs as they change:
+          # 変更時にモジュール設定をリロード：
           reload.enabled: false
     setup.template.settings:
         index.number_of_replicas: 0
@@ -278,7 +276,7 @@ spec:
           #   value:
           securityContext:
             runAsUser: 0
-            # If using Red Hat OpenShift uncomment this:
+            # Red Hat OpenShiftを使用している場合は、これをコメント解除：
             #privileged: true
           resources:
             limits:
@@ -304,7 +302,7 @@ spec:
       - name: varlibdockercontainers
         hostPath:
           path: /var/lib/docker/containers
-      # data folder stores a registry of read status for all files, so we don't send everything again on a Filebeat pod restart
+      # dataフォルダはすべてのファイルの読み取りステータスのレジストリを保存するため、Filebeat podの再起動時にすべてを再度送信することはありません
       - name: data
         hostPath:
           path: /var/lib/filebeat-data
@@ -330,7 +328,7 @@ metadata:
   labels:
     k8s-app: filebeat
 rules:
-- apiGroups: [""] # "" indicates the core API group
+- apiGroups: [""] # ""はコアAPIグループを示します
   resources:
   - namespaces
   - pods
@@ -348,7 +346,7 @@ metadata:
     k8s-app: filebeat
 ```
 
-如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
+出力が単一ノードのelasticsearchの場合、テンプレートを変更してエクスポートされたfilebeat*を0レプリカに設定できます
 
 ```
 curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: application/json' -d'
@@ -364,31 +362,31 @@ curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: applicat
 
 
 
-参考链接:
+参考リンク：
 1. [running-on-kubernetes](https://www.elastic.co/guide/en/beats/filebeat/current/running-on-kubernetes.html)
-1. [ELK+Filebeat 集中式日志解决方案详解](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
-2. [filebeat.yml（中文配置详解）](http://www.cnblogs.com/zlslch/p/6622079.html)
-3. [Elasticsearch Pipeline 详解](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
-4. [es number_of_shards和number_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
+1. [ELK+Filebeat集中ログソリューションの詳細説明](https://www.ibm.com/developerworks/cn/opensource/os-cn-elk-filebeat/index.html)
+2. [filebeat.yml（中国語設定の詳細説明）](http://www.cnblogs.com/zlslch/p/6622079.html)
+3. [Elasticsearch Pipelineの詳細説明](https://www.felayman.com/articles/2017/11/24/1511527532643.html)
+4. [es number_of_shardsとnumber_of_replicas](https://www.cnblogs.com/mikeluwen/p/8031813.html)
 
 
 
-## 其他方案
+## その他のソリューション
 
-有些是sidecar模式,sidecar模式可以做得比较细致.
+一部はサイドカーモードを使用しており、サイドカーモードはより細かく行うことができます。
 
-1. [使用filebeat收集kubernetes中的应用日志](https://jimmysong.io/posts/kubernetes-filebeat/)
-1. [使用Logstash收集Kubernetes的应用日志](https://jimmysong.io/posts/kubernetes-logstash/)
+1. [filebeatを使用してkubernetesのアプリケーションログを収集](https://jimmysong.io/posts/kubernetes-filebeat/)
+1. [Logstashを使用してKubernetesのアプリケーションログを収集](https://jimmysong.io/posts/kubernetes-logstash/)
 2. 
 
 
-### 阿里云的方案
+### 阿里云のソリューション
 
-1. [Kubernetes日志采集流程](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
+1. [Kubernetesログ収集プロセス](https://help.aliyun.com/document_detail/66654.html?spm=5176.8665266.sug_det.5.bbdc9gVU9gVUmc)
 
 
-### 跟随docker启动
-1. [docker驱动](https://www.fluentd.org/guides/recipes/docker-logging)
+### Docker起動に従う
+1. [dockerドライバー](https://www.fluentd.org/guides/recipes/docker-logging)
 2. 
 
 

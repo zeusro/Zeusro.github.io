@@ -1,5 +1,3 @@
-<!-- TODO: Translate to ru -->
-
 ```
 graph TB
 g(Comparable<Delayed>)-->A
@@ -23,35 +21,35 @@ fjt-->rtt(RecursiveTask<V>)
 
 ### Future<V>
 
-上图可以看出`Future<V>`地位超凡,基本上很多成员都是他"儿子"
+Из диаграммы выше видно, что `Future<V>` имеет исключительный статус, в основном многие члены являются его "детьми".
 
-Future<V>表示异步运算的结果
+Future<V> представляет результат асинхронного вычисления.
 
 ### ScheduledFuture<V>
 
-代表了一种预期的任务,比如可以用`ScheduledFuture`配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate),延迟作业(scheduleWithFixedDelay)
+Представляет запланированную задачу. Например, `ScheduledFuture` можно использовать с ScheduledExecutorService для выполнения периодических повторяющихся задач (scheduleAtFixedRate), отложенных задач (scheduleWithFixedDelay).
 
 ### RunnableScheduledFuture<V>
 
-这是个接口,得自己实现.
+Это интерфейс, вам нужно реализовать его самостоятельно.
 
-可用于一次性任务或者周期性任务.
+Может использоваться для одноразовых задач или периодических задач.
 
-这里可以参考他的子接口.ScheduledFuture的用法
+Здесь вы можете обратиться к его подынтерфейсу. Использование ScheduledFuture.
 
 ### RunnableFuture
 
-这是个接口,得自己实现.
+Это интерфейс, вам нужно реализовать его самостоятельно.
 
 ### FutureTask
 
-可用`Callable<V>`和`Runnable`初始化.`Callable<V>`带返回值.
+Может быть инициализирован с `Callable<V>` и `Runnable`. `Callable<V>` имеет возвращаемое значение.
 
-可配合ExecutorService实现多线程任务分发
+Может использоваться с ExecutorService для реализации распределения многопоточных задач.
 
 ### CompletableFuture<T>
 
-可以用来创建链式服务(1启动多任务)
+Может использоваться для создания цепочечных сервисов (1 запускает несколько задач).
 
 
 ```java
@@ -70,7 +68,7 @@ int i = 1;
         });
 
         future.thenApply((s) -> {
-            //把上个任务的结果传递到子任务中
+            // Передать результат предыдущей задачи в дочернюю задачу
             out.println(s);
             out.println("end 2");
             i = i << 1;
@@ -85,10 +83,10 @@ int i = 1;
             }
             out.println("CompletableFutureExample end");
         });
-        //通过这个信号,持续等待子线程运行完毕
+        // Через этот сигнал, непрерывно ждать завершения выполнения дочерних потоков
         while (i != 8) {
             Thread.sleep(500);
-            out.println("继续等待");
+            out.println("Продолжать ждать");
         }
 //        future.join();
 //        CompletableFuture.allOf(future).join();
@@ -97,20 +95,20 @@ int i = 1;
 
 ### CountedCompleter<T>
 
-CountedCompleter:任务可能产生结果，也可能不产生结果。
+CountedCompleter: Задачи могут производить результаты или могут не производить результаты.
 
-CountedCompleter 在任务完成执行后会触发执行一个自定义的钩子函数。
+CountedCompleter запустит выполнение пользовательской функции-хука после завершения выполнения задачи.
 
 
 ### RecursiveAction
 
-跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`,但是`RecursiveAction`不产生结果.
+Как CountedCompleter<T>, наследуется от `ForkJoinTask<V>`, но `RecursiveAction` не производит результатов.
 
 ### RecursiveTask<V>
 
-RecursiveTask类的实例表示产生结果的任务。
+Экземпляры класса RecursiveTask представляют задачи, которые производят результаты.
 
-特点在于可递归执行.
+Характеристика в том, что он может выполняться рекурсивно.
 
 ```
 public class RecursiveTaskExample extends RecursiveTask<Integer> {
@@ -138,6 +136,6 @@ public class RecursiveTaskExample extends RecursiveTask<Integer> {
 }
 ```
 
-参考链接:
+Ссылки:
 
-1. [JUC源码分析-线程池篇（五）：ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)
+1. [Анализ исходного кода JUC - Часть пула потоков (Пять): ForkJoinPool - 2](https://www.jianshu.com/p/6a14d0b54b8d)

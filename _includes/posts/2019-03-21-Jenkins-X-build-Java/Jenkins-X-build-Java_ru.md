@@ -1,12 +1,10 @@
-<!-- TODO: Translate to ru -->
+`Jenkins-X` по умолчанию предоставляет [различные примеры](https://jenkins.io/doc/pipeline/tour/hello-world/#examples) для разных языков. Сначала мы изучаем примеры по умолчанию, затем адаптируем их согласно нашей собственной ситуации.
 
-`Jenkins-X`默认提供了不同语言的[各种例子](https://jenkins.io/doc/pipeline/tour/hello-world/#examples),我们先学习默认的例子,再按照自身情况做一些适配.
+Сначала давайте разберемся с процессом сборки:
 
-先梳理一下构建流程
+Получить код с git-сервера (GitHub/gitea) -> Собрать docker-образ -> Отправить в реестр образов
 
-从git server(GitHub/gitea)拉取代码->构建docker镜像->推送到镜像仓库
-
-建议一开始用[jx create](https://jenkins-x.io/commands/jx_create_quickstart/)创建官方的例子,推送到  GitHub,熟悉以后再慢慢修改
+Рекомендуется использовать [jx create](https://jenkins-x.io/commands/jx_create_quickstart/) для создания официальных примеров в начале, отправить в GitHub, а затем медленно изменять после ознакомления.
 
 ```
 jx create spring -d web -d actuator
@@ -24,22 +22,22 @@ jx create quickstart \
  --project-name  java-abcde
 ```
 
-## 前置准备
+## Предварительные требования
 
-### Disable https certificate check
+### Отключить проверку https-сертификата
 
-域名没证书的得勾上,路径在`Manage Jenkins`-`Configure System`
+Для доменов без сертификатов установите это. Путь: `Manage Jenkins`-`Configure System`
 
-### 修改 Kubernetes Pod Template
+### Изменить Kubernetes Pod Template
 
-`Jenkins`是拉取到Jenkins的工作目录(服务器),而`Jenkins-X`是根据设置的模板启动启动一个pod,这个pod有2个容器,一个是`jnlp-slave`,另外一个是构建工具的镜像,如果是`gradle`构建的话镜像就是`gcr.io/jenkinsxio/builder-gradle`.
+`Jenkins` получает в рабочий каталог Jenkins (сервер), в то время как `Jenkins-X` запускает под на основе настроенного шаблона. Этот под имеет 2 контейнера, один — `jnlp-slave`, а другой — образ инструмента сборки. Если это сборка `gradle`, образ — `gcr.io/jenkinsxio/builder-gradle`.
 
-所以需要一下模板.路径在`Manage Jenkins`-`Configure System`-`Images`-`Kubernetes Pod Template`,按照特定构建语言迁移,修改.
+Поэтому вам нужен следующий шаблон. Путь: `Manage Jenkins`-`Configure System`-`Images`-`Kubernetes Pod Template`, мигрируйте и изменяйте в соответствии с конкретным языком сборки.
 
 
-### 依赖项加速
+### Ускорение зависимостей
 
-- maven加速
+- ускорение maven
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -58,7 +56,7 @@ jx create quickstart \
 </settings>
 ```
 
-- gradle加速
+- ускорение gradle
 
 ```
 allprojects {
@@ -95,38 +93,38 @@ allprojects {
 ```
 
 
-## 构建前置依赖
+## Предпосылки сборки
 
-有3种思路,任选一种即可.推荐第一种
+Есть 3 подхода, выберите любой. Первый рекомендуется.
 
-### [推荐]交付到mvn local
+### [Рекомендуется] Доставить в mvn local
 
-这个思路是在我构建缓存时想到的.普通的pipeline构建流程,每次构建都是一个从零开始的沙箱,需要重新下载包再去构建.非常浪费流量.因此如果把mvnlocal挂载到容器内部,那么直接在本地还原即可,有问题时再从网络拉取.
+Эта идея пришла мне в голову при сборке кэша. В обычном процессе сборки pipeline каждая сборка — это песочница с нуля, требующая повторной загрузки пакетов перед сборкой. Очень расточительно по трафику. Поэтому, если mvnlocal смонтирован внутри контейнера, то можно напрямую восстановить локально, а при проблемах загрузить из сети.
 
-这样就能同时解决`构建前置依赖`和`开源依赖拉取`的问题
+Это может решить как проблему `предпосылок сборки`, так и проблему `загрузки зависимостей с открытым исходным кодом`.
 
-目前支持的volume有
+В настоящее время поддерживаемые тома:
 
 1. PVC
 1. NFS
 1. hostpath
 
-推荐用NFS.
+Рекомендуется NFS.
 
-gradle:挂载到`/root/.gradle/caches`
+gradle: Монтировать в `/root/.gradle/caches`
 
-maven:挂载到`/root/.mvnrepository`
+maven: Монтировать в `/root/.mvnrepository`
 
 
-### 交付给Nexus
-
-todo
-
-### 关联其他pipeline
+### Доставить в Nexus
 
 todo
 
-## 从其他git server(gitea)拉取代码
+### Связать с другими pipeline
+
+todo
+
+## Получить код с другого git-сервера (gitea)
 
 ```bash
 jx create git server gitea http://xxx:1080
@@ -134,30 +132,30 @@ jx create git server gitea http://xxx:1080
 jx get git
 ```
 
-目前删除的命令还比较蠢,只能按类型删除,如果加了2个gitea类型的git server,删除的时候会先删除最早创建的那个gitea server
+В настоящее время команда удаления все еще довольно глупа, может удалять только по типу. Если добавлено 2 git-сервера типа gitea, при удалении сначала удалится самый ранний созданный gitea-сервер.
 
 
 
 
-## 构建docker镜像
+## Собрать docker-образ
 
-构建依赖于项目内的`Jenkinsfile`和`Dockerfile`
+Сборка зависит от `Jenkinsfile` и `Dockerfile` в проекте.
 
-关于`Jenkinsfile`的语法,另写一篇文章讲解
+Что касается синтаксиса `Jenkinsfile`, я напишу другую статью для объяснения.
 
 
-## 推送docker镜像到自定义源
+## Отправить docker-образ в пользовательский реестр
 
-- 修改DOCKER_REGISTR
+- Изменить DOCKER_REGISTR
 
-默认的设定是推送到创建`Jenkins-X`时建立的docker REGISTRY,要把它改成我们自己的服务器
+Настройка по умолчанию — отправка в docker REGISTRY, созданный при создании `Jenkins-X`. Нужно изменить на наш собственный сервер.
 
-配置路径: `Manage Jenkins`-`Global properties`
+Путь конфигурации: `Manage Jenkins`-`Global properties`
 
-修改DOCKER_REGISTRY这个变量
+Изменить переменную DOCKER_REGISTRY
 
 ```
-# 阿里云深圳vpc
+# Alibaba Cloud Shenzhen vpc
 registry-vpc.cn-shenzhen.aliyuncs.com/
 ```
 
@@ -170,7 +168,7 @@ jx create docker auth \
 --email "fakeemail@gmail.com"
 ```
 
-之后在部署该`Jenkins-X`实例的kubernetes 命名空间,会出现`jenkins-docker-cfg`的secret,这个secret是一个json
+После этого в пространстве имен kubernetes, где развернут этот экземпляр `Jenkins-X`, появится секрет с именем `jenkins-docker-cfg`. Этот секрет — это json.
 
 ```json
 {
@@ -183,18 +181,18 @@ jx create docker auth \
 }
 ```
 
-要让容器通过这个json里面的auth字段,实现对docker registry的登录.
+Чтобы контейнеры могли войти в docker-реестр через поле auth в этом json.
 
-所以还需要把这个secret挂载到容器内部,还好这一步默认的pod template已经设置了.
+Поэтому этот секрет также нужно смонтировать внутри контейнера. К счастью, шаблон пода по умолчанию уже установил этот шаг.
 
 ![Image](/img/in-post/jenkins-x-build-java/volume-jenkins-docker-cfg.png)
 
 
-除此以外,还有其他的[授权方法](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/docker-registry.md)
+Кроме этого, есть другие [методы авторизации](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/docker-registry.md)
 
 
-## 参考链接:
+## Ссылки:
 
-1. [Jenkins X构建例子](https://github.com/jenkins-x-buildpacks/jenkins-x-kubernetes/tree/master/packs)
+1. [Примеры сборки Jenkins X](https://github.com/jenkins-x-buildpacks/jenkins-x-kubernetes/tree/master/packs)
 1. [pod-templates](https://github.com/jenkins-x/jx-docs/blob/master/content/architecture/pod-templates.md)
-1. [基于 Kubernetes 实践弹性的 CI/CD 系统](https://yq.aliyun.com/articles/690403)
+1. [Практика эластичных систем CI/CD на основе Kubernetes](https://yq.aliyun.com/articles/690403)

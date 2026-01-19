@@ -1,6 +1,4 @@
-<!-- TODO: Translate to jp -->
-
-## 常用命令
+## よく使うコマンド
 
 ```bash
 iftop -i eth0 -nNB -m 10M
@@ -8,7 +6,7 @@ iftop -i eth0 -nNB -m 10M
 
 ![image](/img/in-post/ss/1.png)
 
-查看不同状态的连接数数量
+異なる状態の接続数を確認
 
 ```bash
 netstat -an | awk '/^tcp/ {++y[$NF]} END {for(w in y) print w, y[w]}'
@@ -29,24 +27,24 @@ INET      198       43        155
 FRAG      0         0         0
 ```
 
-这个是 closed 状态较多。
+これは`closed`状態が多いことを示しています。
 
-closed 状态只是表示连接恢复到初始的状态，这个socket 还在使用中， 而这样的话，后面程序有通信的话会继续使用这个socket ，不用重新分配，效率会有提高的。 不然重复创建销毁socket会带来很多消耗的。
+`closed`状態は、接続が初期状態に戻ったことを意味するだけです。このソケットはまだ使用中なので、プログラムが後で通信する必要がある場合、再割り当てなしでこのソケットを引き続き使用し、効率が向上します。そうでなければ、ソケットを繰り返し作成および破棄すると、多くのオーバーヘッドが発生します。
 
 
-## 补充知识
+## 補足知識
 
 net.ipv4.tcp_retries2
 
-默认是 15 ，即 linux 系统会监测一个 tcp 连接，如果没有数据量传输，最长要等到 15m 后才会释放
+デフォルトは15で、LinuxシステムがTCP接続を監視することを意味します。データ転送がない場合、最大15分待機してから解放します。
 
-意思是 php 的服务，产生了大量没有关闭的连接
+これは、PHPサービスが大量の閉じられていない接続を生成していることを意味します。
 
-好像是 TIME_WAIT 状态的比较多
+`TIME_WAIT`状態の接続が多いようです。
 
 
-## 参考链接
+## 参考リンク
 
-1. [浅谈iptables防SYN Flood攻击和CC攻击](https://www.cnblogs.com/harlanzhang/p/6189491.html)
-1. [ss命令和Recv-Q和Send-Q状态](https://www.cnblogs.com/leezhxing/p/5329786.html)
-2. [每天一个linux命令（57）：ss命令](https://www.cnblogs.com/peida/archive/2013/03/11/2953420.html)
+1. [iptablesによるSYN Flood攻撃とCC攻撃の防止について](https://www.cnblogs.com/harlanzhang/p/6189491.html)
+1. [ssコマンドとRecv-QとSend-Q状態](https://www.cnblogs.com/leezhxing/p/5329786.html)
+2. [毎日1つのlinuxコマンド（57）：ssコマンド](https://www.cnblogs.com/peida/archive/2013/03/11/2953420.html)

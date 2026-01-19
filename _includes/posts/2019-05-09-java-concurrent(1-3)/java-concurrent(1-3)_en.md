@@ -1,5 +1,3 @@
-<!-- TODO: Translate to en -->
-
 ```
 graph TB
 A(CompletionService<V>)-->B(ExecutorCompletionService)
@@ -9,41 +7,41 @@ A(CompletionService<V>)-->B(ExecutorCompletionService)
 
 ### CompletionService<V>
 
-可自行实现该接口.这是一个任务队列.
+You can implement this interface yourself. This is a task queue.
 
-取出队列元素的poll和take方法
+poll and take methods for retrieving queue elements.
 
-take会阻塞知道队列出现结果
+take will block until a result appears in the queue.
 
-poll使用的前提是确保队列已经有结果,不然贸贸然使用会出现空指针.可以指定一个超时等待时间,避免长时间卡死.
+poll should be used on the premise that the queue already has results, otherwise using it rashly will cause null pointer. You can specify a timeout wait time to avoid long blocking.
 
 
 ### ExecutorCompletionService
 
-一般都是声明`CompletionService<V>`,实例化ExecutorCompletionService
+Generally declare `CompletionService<V>`, instantiate ExecutorCompletionService.
 
 ```java
     int TOTAL_TASK = 2;
 
     public void run() throws InterruptedException, ExecutionException {
-        // 创建线程池
+        // Create thread pool
         ExecutorService pool = Executors.newFixedThreadPool(TOTAL_TASK);
         CompletionService<Integer> cService = new ExecutorCompletionService<>(pool);
 
-        // 向里面扔任务
+        // Throw tasks into it
         for (int i = 0; i < TOTAL_TASK; i++) {
             cService.submit(new CallableExample());
-            //重载的这个submit(Runnable task, V result)方法,是自行把结果传入
+            //This overloaded submit(Runnable task, V result) method passes the result in yourself
         }
-        // 检查线程池任务执行结果
+        // Check thread pool task execution results
         for (int i = 0; i < TOTAL_TASK; i++) {
             Future<Integer> future = cService.take();
             System.out.println("method:" + future.get());
         }
-        // 关闭线程池
+        // Shutdown thread pool
         pool.shutdown();
     }
 ```    
 
 
-[其他例子](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)
+[Other Examples](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)
