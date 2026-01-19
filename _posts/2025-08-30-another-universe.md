@@ -28,3 +28,15 @@ tags:
     {% capture about_en %}{% include posts/2025-08-30-another-universe/another-universe_en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
+
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2025-08-30-another-universe/another-universe_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2025-08-30-another-universe/another-universe_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

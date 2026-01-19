@@ -29,3 +29,9 @@ tags:
     {% capture about_jp %}{% include posts/2018-11-20-learn-kubernetes/learn-kubernetes_jp.md %}{% endcapture %}
     {{ about_jp | markdownify }}
 </div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2018-11-20-learn-kubernetes/learn-kubernetes_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>
