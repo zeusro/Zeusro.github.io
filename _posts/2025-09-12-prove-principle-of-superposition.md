@@ -28,3 +28,15 @@ tags:
     {% capture about_en %}{% include posts/2025-09-12-prove-principle-of-superposition/prove-principle-of-superposition_en.md %}{% endcapture %}
     {{ about_en | markdownify }}
 </div>
+
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2025-09-12-prove-principle-of-superposition/prove-principle-of-superposition_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2025-09-12-prove-principle-of-superposition/prove-principle-of-superposition_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

@@ -34,3 +34,9 @@ tags:
     {{ about_jp | markdownify }}
 </div>
 
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2025-11-17-quantum-sport/quantum-sport_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>
+
