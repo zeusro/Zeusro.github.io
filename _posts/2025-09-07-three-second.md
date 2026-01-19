@@ -9,7 +9,7 @@ header-mask:  0.3
 # 目录
 catalog:      true
 # 多语言
-multilingual: false
+multilingual: true
 published:    false
 tags:
     - time
@@ -17,38 +17,14 @@ tags:
 ---
 
 
-在 September 6, 2025，我提出了“[时间序列复杂度](https://www.zeusro.com/2025/09/06/time-series-complexity/)（Time Series Complexity）”的概念。在时间复杂度和空间复杂度的基础上，补齐了衡量函数计算效率的拼图。
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include posts/2025-09-07-three-second/three-second_zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
 
-## 前言
-
-很多学计算机的书呆子，喜欢按照传统计算机的定义去思考分析问题。但他们没有认识到问题的本身来源于生活。
-
-因此，通过蜉蝣交配这个非常简单的例子，就能解答“时间序列复杂度”这一概念。
-
-## 蜉蝣的空中交配
-
-抓握：雄性成功接近雌性后，会用其细长的前足紧紧抓住雌性的胸部。
-
-体位调整：雄性然后弯曲其腹部末端长长的抱握器，牢牢地箍住雌性的腹部末端。
-
-连接：此时，两只蜉蝣呈现“雄上雌下”的 tandem position（串联姿势），共同飞行。
-
-授精：在连接飞行中，雄性的阴茎会与雌性的受精囊孔对接，将精包（精囊）注入雌性体内。整个交配过程完全在飞行中完成，持续时间从几秒到几分钟不等。
-
-## 3秒真男人
-
-![image](/img/in-post/three-second/free-m.jpg)
-
-假设它只有3秒就没了，那么这个函数的横轴区间就是[0,3]，0是相对的瞬时概念，表示“现在”。
-
-3秒后，`free -m` 就归零了，表示“一滴都不剩”了。
-
-单纯从时间角度分析，它们的交配过程可谓是相当效率。但如果把它换成我的好邻居，那我一般建议他们去看一下男科。
-
-如果他们对象不是很丑的话，我可以考虑顺便照顾一下。
-
-![image](/img/in-post/three-second/forgive.jpg)
-
-## 结论
-
-蜉蝣之羽，衣裳楚楚。心之憂矣，於我歸楚
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include posts/2025-09-07-three-second/three-second_en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
