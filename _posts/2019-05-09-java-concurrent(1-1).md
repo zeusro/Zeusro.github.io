@@ -6,51 +6,32 @@ date:         2019-05-09
 author:       "Zeusro"
 header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
+multilingual: true
 catalog:      true
 tags:
     - Java
 ---
 
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include posts/2019-05-09-java-concurrent(1-1)/java-concurrent(1-1)_zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
 
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include posts/2019-05-09-java-concurrent(1-1)/java-concurrent(1-1)_en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
 
-```
-graph TB
-A(Callable<V>)-->B(DocumentationTool.DocumentationTask)
-A-->C(JavaCompiler.CompilationTask)
-```
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2019-05-09-java-concurrent(1-1)/java-concurrent(1-1)_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
 
-![image](/img/in-post/java-concurrent/Callable.png)
-
-一般情况下是配合ExecutorService来使用的，在ExecutorService接口中声明了若干个submit方法的重载版本：
-
-```java
-<T> Future<T> submit(Callable<T> task);
-<T> Future<T> submit(Runnable task, T result);
-Future<?> submit(Runnable task);
-```
-
-```java
-import java.util.Random;
-import java.util.concurrent.Callable;
-
-public class CallableExample implements Callable {
-
-    @Override
-    public Object call() throws Exception {
-        // Create random number generator
-        Random generator = new Random();
-
-        Integer randomNumber = generator.nextInt(5);
-
-        // To simulate a heavy computation,
-        // we delay the thread for some random time
-        Thread.sleep(randomNumber * 1000);
-
-        return randomNumber;
-    }
-}
-```
-
-
-
-
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2019-05-09-java-concurrent(1-1)/java-concurrent(1-1)_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>

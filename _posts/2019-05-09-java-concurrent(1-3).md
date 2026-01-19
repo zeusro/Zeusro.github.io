@@ -6,57 +6,32 @@ date:         2019-05-10
 author:       "Zeusro"
 header-img:   "img/b/2019/Silver-Days.jpg"
 header-mask:  0.3
+multilingual: true
 catalog:      true
 tags:
     - Java
 ---
 
+<!-- Chinese Version -->
+<div class="zh post-container">
+    {% capture about_zh %}{% include posts/2019-05-09-java-concurrent(1-3)/java-concurrent(1-3)_zh.md %}{% endcapture %}
+    {{ about_zh | markdownify }}
+</div>
 
+<!-- English Version -->
+<div class="en post-container">
+    {% capture about_en %}{% include posts/2019-05-09-java-concurrent(1-3)/java-concurrent(1-3)_en.md %}{% endcapture %}
+    {{ about_en | markdownify }}
+</div>
 
-```
-graph TB
-A(CompletionService<V>)-->B(ExecutorCompletionService)
-```
+<!-- Japanese Version -->
+<div class="jp post-container">
+    {% capture about_jp %}{% include posts/2019-05-09-java-concurrent(1-3)/java-concurrent(1-3)_jp.md %}{% endcapture %}
+    {{ about_jp | markdownify }}
+</div>
 
-![image](/img/in-post/java-concurrent/CompletionService.png)
-
-### CompletionService<V>
-
-可自行实现该接口.这是一个任务队列.
-
-取出队列元素的poll和take方法
-
-take会阻塞知道队列出现结果
-
-poll使用的前提是确保队列已经有结果,不然贸贸然使用会出现空指针.可以指定一个超时等待时间,避免长时间卡死.
-
-
-### ExecutorCompletionService
-
-一般都是声明`CompletionService<V>`,实例化ExecutorCompletionService
-
-```java
-    int TOTAL_TASK = 2;
-
-    public void run() throws InterruptedException, ExecutionException {
-        // 创建线程池
-        ExecutorService pool = Executors.newFixedThreadPool(TOTAL_TASK);
-        CompletionService<Integer> cService = new ExecutorCompletionService<>(pool);
-
-        // 向里面扔任务
-        for (int i = 0; i < TOTAL_TASK; i++) {
-            cService.submit(new CallableExample());
-            //重载的这个submit(Runnable task, V result)方法,是自行把结果传入
-        }
-        // 检查线程池任务执行结果
-        for (int i = 0; i < TOTAL_TASK; i++) {
-            Future<Integer> future = cService.take();
-            System.out.println("method:" + future.get());
-        }
-        // 关闭线程池
-        pool.shutdown();
-    }
-```    
-
-
-[其他例子](https://examples.javacodegeeks.com/core-java/util/concurrent/completionservice/java-completionservice-example/)
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2019-05-09-java-concurrent(1-3)/java-concurrent(1-3)_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>
