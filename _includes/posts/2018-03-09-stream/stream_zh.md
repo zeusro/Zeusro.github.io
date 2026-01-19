@@ -1,0 +1,583 @@
+1. [前期准备](#前期准备)
+    * 定义实体
+    * 定义集合
+1. [stream的其他用法](#stream的其他用法)
+    - [用于校验集合](#用于校验集合(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
+    - [自己生成流](#自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/)))
+    - Stream.iterate
+1. [stream的注意事项](#stream的注意事项)
+    * 流只能用一次,重复使用会导致以下异常
+    * filter
+1. [完整代码](#完整代码)
+1. [参考链接](#参考链接)
+
+<script src="https://gist.github.com/zeusro/da21cde9fd1ad4b7aaeb5d3a1c9bdb98.js"></script>
+
+## 前期准备
+
+* 定义实体
+
+```java
+// {% raw %}
+package com.zeusro;
+
+
+import java.util.Date;
+import java.util.List;
+
+/**
+ * The type Person <p/>
+ * author: <a href="http://zeusro.github.io/">Zeusro</a> <p/>
+ *
+ * @date Created in 2018.03.08 <p/>
+ */
+public class Person implements Cloneable {
+
+    // 身高
+    private int height;
+    //体重-
+    private int weight;
+    //身份证号
+    private String identifier;
+    //地址
+    private String address;
+    //生日
+    private Date birthday;
+    //爱好
+    private List<String> hobbies;
+
+    //性别
+    private Sex sex;
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return (Person) super.clone();
+    }
+
+    public Sex getSex() {
+        return sex;
+    }
+
+    public void setSex(Sex sex) {
+        this.sex = sex;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Date getBirthday() {
+        return birthday;
+    }
+
+    public void setBirthday(Date birthday) {
+        this.birthday = birthday;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public void setHeight(int height) {
+        this.height = height;
+    }
+
+    public List<String> getHobbies() {
+        return hobbies;
+    }
+
+    public void setHobbies(List<String> hobbies) {
+        this.hobbies = hobbies;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public void setIdentifier(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public int getWeight() {
+        return weight;
+    }
+
+    public void setWeight(int weight) {
+        this.weight = weight;
+    }
+
+
+}
+//{% endraw %}
+```
+
+```java
+
+package com.zeusro;
+
+public enum Sex {
+    //男
+    Male,
+    //女
+    Female,
+    //第三性 https://zh.wikipedia.org/wiki/%E7%AC%AC%E4%B8%89%E6%80%A7
+    X,
+}
+```
+
+* 定义集合
+
+```java
+// {% raw %}
+            // LocalDate.of(2018, 02, 29);
+            //java.time.DateTimeException: Invalid date 'February 29' as '2018' is not a leap year
+            final Person female = new Person();
+            female.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1981, 1, 1)));
+            female.setHeight(165);
+            female.setWeight(50);
+            female.setSex(Sex.Female);
+            female.setAddress("北京");
+            female.setIdentifier("1");
+            female.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("逛街");
+            }});
+
+            final Person male = new Person();
+            male.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1982, 2, 1)));
+            male.setHeight(170);
+            male.setWeight(50);
+            male.setSex(Sex.Male);
+            male.setAddress("北京");
+            male.setIdentifier("2");
+            male.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("看電影");
+            }});
+
+            final Person x = new Person();
+            x.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1983, 3, 1)));
+            x.setHeight(170);
+            x.setWeight(50);
+            x.setSex(Sex.X);
+            x.setAddress("北京");
+            x.setIdentifier("3");
+            x.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("上網");
+            }});
+
+            final Person male2 = new Person();
+            male2.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1984, 1, 1)));
+            male2.setHeight(150);
+            male2.setWeight(35);
+            male2.setSex(Sex.Male);
+            male2.setAddress("北京");
+            male2.setIdentifier("4");
+            male2.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("看電影");
+            }});
+
+            List<Person> list1 = new ArrayList<Person>() {
+                {
+                    add(female);
+                    add(male);
+                    add(x);
+                }
+            };
+            List<Person> list2 = new ArrayList<Person>() {
+                {
+                    add(female);
+                    add(male2);
+                }
+            };
+//{% endraw %}
+```
+
+## stream的其他用法
+
+### 用于校验集合(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
+
+> allMatch：Stream 中全部元素符合传入的 predicate，返回 true
+> 
+> anyMatch：Stream 中只要有一个元素符合传入的 predicate，返回 true
+> 
+> noneMatch：Stream 中没有一个元素符合传入的 predicate，返回 true
+  
+
+### 自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/))
+
+* Stream.generate
+
+通过实现 Supplier 接口，你可以自己来控制流的生成。这种情形通常用于随机数、常量的 Stream，或者需要前后元素间维持着某种状态信息的 Stream。把 Supplier 实例传递给 Stream.generate() 生成的 Stream，默认是串行（相对 parallel 而言）但无序的（相对 ordered 而言）。由于它是无限的，在管道中，必须利用 limit 之类的操作限制 Stream 大小。
+
+```java
+Random seed = new Random();
+Supplier<Integer> random = seed::nextInt;
+Stream.generate(random).limit(10).forEach(System.out::println);
+//Another way
+IntStream.generate(() -> (int) (System.nanoTime() % 100)).
+limit(10).forEach(System.out::println);
+```
+
+Stream.generate() 还接受自己实现的 Supplier。例如在构造海量测试数据的时候，用某种自动的规则给每一个变量赋值；或者依据公式计算 Stream 的每个元素值。这些都是维持状态信息的情形。
+
+```java
+Stream.generate(new PersonSupplier()).
+limit(10).
+forEach(p -> System.out.println(p.getName() + ", " + p.getAge()));
+private class PersonSupplier implements Supplier<Person> {
+ private int index = 0;
+ private Random random = new Random();
+ @Override
+ public Person get() {
+ return new Person(index++, "StormTestUser" + index, random.nextInt(100));
+ }
+}
+```
+
+```
+# 输出结果：
+StormTestUser1, 9
+StormTestUser2, 12
+StormTestUser3, 88
+StormTestUser4, 51
+StormTestUser5, 22
+StormTestUser6, 28
+StormTestUser7, 81
+StormTestUser8, 51
+StormTestUser9, 4
+StormTestUser10, 76
+```
+
+* Stream.iterate
+
+iterate 跟 reduce 操作很像，接受一个种子值，和一个 UnaryOperator（例如 f）。然后种子值成为 Stream 的第一个元素，f(seed) 为第二个，f(f(seed)) 第三个，以此类推。
+
+```java
+Stream.iterate(0, n -> n + 3).limit(10). forEach(x -> System.out.print(x + " "));.
+```
+
+```
+# 输出结果：
+0 3 6 9 12 15 18 21 24 27
+```
+
+**与 Stream.generate 相仿，在 iterate 时候管道必须有 limit 这样的操作来限制 Stream 大小。**
+
+
+
+## stream的注意事项
+
+* 流只能用一次,重复使用会导致以下异常
+
+```java
+Stream<Person> list1Stream = list1.stream();
+list1Stream.filter(o -> o.getBirthday().equals(time1)).count();
+list1Stream.filter(o -> !o.getBirthday().equals(time1)).count();//java.lang.IllegalStateException: stream has already been operated upon or closed
+```
+
+所以我建议每次需要集合操作的时候都直接新建一个 stream, 而不是使用`Stream<Person> list1Stream = list1.stream();`去定义
+
+```java
+list1.stream().filter(o -> o.getBirthday().equals(time1)).count();
+list1.stream().filter(o -> !o.getBirthday().equals(time1)).count();
+```
+
+* filter
+
+一般有filter 操作时，不用并行流parallelStream ,如果用的话可能会导致线程安全问题
+
+
+## 完整代码
+
+```java
+// {% raw %}
+
+import com.google.gson.Gson;
+import com.zeusro.Person;
+import com.zeusro.Sex;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.lang.System.out;
+
+
+/**
+ * The type Main <p/>
+ * author: <a href="http://zeusro.github.io/">Zeusro</a> <p/>
+ *
+ * @date Created in 2018.03.09 <p/>
+ */
+public class Main {
+
+
+    private static Date convertLocalDateToTimeZone(LocalDate localDate) {
+        ZoneId zoneID = ZoneId.systemDefault();
+        return Date.from(localDate.atStartOfDay(zoneID).toInstant());
+    }
+
+    public static void main(String[] args) {
+
+        try {
+            // LocalDate.of(2018, 02, 29);
+            //java.time.DateTimeException: Invalid date 'February 29' as '2018' is not a leap year
+            final Person female = new Person();
+            female.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1981, 1, 1)));
+            female.setHeight(165);
+            female.setWeight(50);
+            female.setSex(Sex.Female);
+            female.setAddress("北京");
+            female.setIdentifier("1");
+            female.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("逛街");
+            }});
+
+            final Person male = new Person();
+            male.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1982, 2, 1)));
+            male.setHeight(170);
+            male.setWeight(50);
+            male.setSex(Sex.Male);
+            male.setAddress("北京");
+            male.setIdentifier("2");
+            male.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("看電影");
+            }});
+
+            final Person x = new Person();
+            x.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1983, 3, 1)));
+            x.setHeight(170);
+            x.setWeight(50);
+            x.setSex(Sex.X);
+            x.setAddress("北京");
+            x.setIdentifier("3");
+            x.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("上網");
+            }});
+
+            final Person male2 = new Person();
+            male2.setBirthday(convertLocalDateToTimeZone(LocalDate.of(1984, 1, 1)));
+            male2.setHeight(150);
+            male2.setWeight(35);
+            male2.setSex(Sex.Male);
+            male2.setAddress("北京");
+            male2.setIdentifier("4");
+            male2.setHobbies(new ArrayList<String>() {{
+                add("吃飯");
+                add("看電影");
+            }});
+
+            List<Person> list1 = new ArrayList<Person>() {
+                {
+                    add(female);
+                    add(male);
+                    add(x);
+                }
+            };
+            List<Person> list2 = new ArrayList<Person>() {
+                {
+                    add(female);
+                    add(male2);
+                }
+            };
+            //流只能用一次,重复使用会导致以下异常
+            //java.lang.IllegalStateException: stream has already been operated upon or closed
+            Stream<Person> list1Stream = list1.stream();
+            Date time1 = convertLocalDateToTimeZone(LocalDate.of(1990, 1, 1));
+            //0
+            Long count1 = list1.stream().filter(o -> o.getBirthday().equals(time1)).count();
+            Map<Sex, List<Person>> group1 = list1.stream().collect(Collectors.groupingBy(Person::getSex));
+            Iterator it = group1.entrySet().iterator();
+            while (it.hasNext()) {
+                Map.Entry<Sex, List<Person>> groupByItem = (Map.Entry) it.next();
+                Sex sex = groupByItem.getKey();
+                out.println(sex);
+                groupByItem.getValue().forEach(person -> {
+                    out.println(new Gson().toJson(person));
+                });
+            }
+/*
+输出结果:
+Male
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
+Female
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"Female"}
+X
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+ */
+            //stream没有RemoveAll的操作
+            Person after90 = list1.stream()
+                    .filter(o -> o.getBirthday().after(convertLocalDateToTimeZone(LocalDate.of(1990, 1, 1))))
+                    .findFirst()
+                    .orElse(null);
+            // null
+            list1.stream().forEach(o -> {
+                //在ForEach當中可對集合進行操作
+                o.setSex(Sex.X);
+            });
+            list1.forEach(o -> {
+                out.println(new Gson().toJson(o));
+            });
+/*
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+ */
+            //IntStream的max方法返回的是OptionalInt,要先判断有没有值再读取值.isPresent=false 时直接getAsInt会报错.mapToLong,mapToDouble同理
+            OptionalInt maxHeightOption = list1.stream().mapToInt(Person::getHeight).max();
+            //字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。
+            //当集合为长度0的集合时会返回起始值Integer.MIN_VALUE,起始值也不能乱传,个中缘由我暂不清楚
+            int maxHeight = list1.stream().mapToInt(Person::getHeight).reduce(Integer.MIN_VALUE, Integer::max);
+            out.println(maxHeight);
+            //170
+            if (maxHeightOption.isPresent()) {
+                maxHeight = maxHeightOption.getAsInt();
+                out.println(maxHeight);
+                //170
+            }
+            //mapToInt参数的2种写法都一样,我比较喜欢以下写法,但是 idea 会报 warning
+            OptionalInt minWeightOption = list1.stream().mapToInt(o -> o.getHeight()).min();
+            int minWeight = list1.stream().mapToInt(o -> o.getHeight()).reduce(Integer.MAX_VALUE, Integer::min);
+            list1.stream().map(Person::getIdentifier).distinct();
+            //skip和 limit参数都是long, 这个要注意
+            list1.stream().skip(1L).limit(2L);
+            out.println("------------------------------------|升序|------------------------------------");
+            list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday)).collect(Collectors.toList());
+            out.println(new Gson().toJson(list1));
+            list1 = list1.stream().sorted((left, right) -> left.getBirthday().compareTo(right.getBirthday())).collect(Collectors.toList());
+            out.println(new Gson().toJson(list1));
+            /*
+[{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]
+[{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}]            
+             */
+            out.println("------------------------------------|降序|------------------------------------");
+            list1 = list1.stream().sorted(Comparator.comparing(Person::getBirthday).reversed()).collect(Collectors.toList());
+            out.println(new Gson().toJson(list1));
+            list1 = list1.stream().sorted((left, right) -> right.getBirthday().compareTo(left.getBirthday())).collect(Collectors.toList());
+            out.println(new Gson().toJson(list1));
+/*
+[{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
+[{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"},{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"},{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}]
+ */
+            out.println("------------------------------------|交集 list1 ∩ list2|------------------------------------");
+            list1.stream().filter(o -> list2.contains(o)).collect(Collectors.toList());
+            out.println("------------------------------------|并集list1 ∪ list2 |------------------------------------");
+            list1.addAll(list2);
+            list1.stream().distinct().collect(Collectors.toList());
+            out.println("------------------------------------|差集list1 - list2|------------------------------------");
+            list1.stream().filter(item1 -> !list2.contains(item1)).collect(Collectors.toList());
+            out.println("------------------------------------|数据结构转换|------------------------------------");
+            List<Person> list3 = list1.stream().filter(o -> true).collect(Collectors.toList());
+            ArrayList<Person> list4 = list1.stream().filter(o -> true).collect(Collectors.toCollection(ArrayList::new));
+            Set<Person> list5 = list1.stream().filter(o -> true).collect(Collectors.toSet());
+            Object[] list6 = list1.stream().toArray();
+            Person[] list7 = list1.stream().toArray(Person[]::new);
+            out.println("------------------------------------|其他需要注意的地方|------------------------------------");
+            //2个数组合并用这种方法的话, list2会为空
+            Stream.of(list1, list2).collect(Collectors.toList());
+            //以下才是正确用法
+            Stream.of(list1, list2).flatMap(List::stream).collect(Collectors.toList());
+            out.println("------------------------------------|reduce|------------------------------------");
+            //字符串拼接、数值的 sum、min、max、average 都是特殊的 reduce。
+            maxHeight = list1.stream().mapToInt(Person::getHeight).reduce(Integer.MIN_VALUE, Integer::max);
+            minWeight = list1.stream().mapToInt(o -> o.getHeight()).reduce(Integer.MAX_VALUE, Integer::min);
+            int sumWeight = -1;
+            OptionalInt sumWeightOption = list1.stream().mapToInt(Person::getHeight).reduce(Integer::sum);
+            if (sumWeightOption.isPresent()) {
+                sumWeight = sumWeightOption.getAsInt();
+            }
+            sumWeight = list1.stream().mapToInt(Person::getHeight).reduce(0, (a, b) -> a + b);
+            sumWeight = list1.stream().mapToInt(Person::getHeight).reduce(0, Integer::sum);
+
+            out.println("------------------------------------|peek ,forEach ,forEachOrdered |------------------------------------");
+            out.println("forEach后面无法继续执行方法");
+            list1.stream().forEach(o -> {
+                out.println(new Gson().toJson(o));
+            });
+            /*
+forEach后面无法继续执行方法
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}            
+             */
+            out.println("先排序,然后遍历");
+            list1.stream().forEachOrdered(o -> {
+                out.println(new Gson().toJson(o));
+            });
+/*
+先排序,然后遍历
+{"height":170,"weight":50,"identifier":"3","address":"北京","birthday":"Mar 1, 1983 12:00:00 AM","hobbies":["吃飯","上網"],"sex":"X"}
+{"height":170,"weight":50,"identifier":"2","address":"北京","birthday":"Feb 1, 1982 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":165,"weight":50,"identifier":"1","address":"北京","birthday":"Jan 1, 1981 12:00:00 AM","hobbies":["吃飯","逛街"],"sex":"X"}
+{"height":150,"weight":35,"identifier":"4","address":"北京","birthday":"Jan 1, 1984 12:00:00 AM","hobbies":["吃飯","看電影"],"sex":"Male"}
+ */
+            out.println("peek*2");
+            List<Integer> l = Stream.iterate(0, (Integer n) -> n + 1) //生成一个每次递增1的等差数列
+                    .peek(n -> out.println("number generated:" + n))
+                    .filter(n -> (n % 2 == 0))
+                    .peek(n -> out.println("Even number filter passed for" + n)) //遇到偶数时继续输出
+                    .limit(5).collect(Collectors.toList());
+            out.println(new Gson().toJson(l));
+            //可以看到在生成到9时,这个操作结束了,是因为设置了limit
+            /*
+peek*2
+number generated:0
+Even number filter passed for0
+number generated:1
+number generated:2
+Even number filter passed for2
+number generated:3
+number generated:4
+Even number filter passed for4
+number generated:5
+number generated:6
+Even number filter passed for6
+number generated:7
+number generated:8
+Even number filter passed for8
+[0,2,4,6,8]            
+             */
+        } catch (Exception e) {
+            out.println(e);
+        } finally {
+            out.println("done");
+        }
+    }
+
+
+}
+
+// {% endraw %}
+
+```
+
+
+## 参考链接:
+
+1. [Java 8 中的 Streams API 详解](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/)
+1. [Introduction to the Java 8 Date/Time API](http://www.baeldung.com/java-8-date-time-intro)
+1. [Convert java.time.LocalDate into java.util.Date type](https://stackoverflow.com/questions/22929237/convert-java-time-localdate-into-java-util-date-type)
+1. [Java 8之Stream API](http://irusist.github.io/2015/12/30/Java-8%E4%B9%8BStream-API/)
+1. [Comparator.comparing(…) throwing non-static reference exception while taking String::compareTo](https://stackoverflow.com/questions/43274306/comparator-comparing-throwing-non-static-reference-exception-while-taking-s)
+1. [采用java8 lambda表达式 实现java list 交集/并集/差集/去重并集](http://blog.csdn.net/gzt19881123/article/details/78327465)
+1. [详解Java中的clone方法 -- 原型模式](http://blog.csdn.net/zhangjg_blog/article/details/18369201)
+1. [Collection to stream to a new collection
+](https://stackoverflow.com/questions/21522341/collection-to-stream-to-a-new-collection)
+1. [Java parallel stream用法](http://www.cnblogs.com/huangzifu/p/7631164.html)
+1. [Java 8 – How to ‘peek’ into a running Stream| Stream.peek method tutorial with examples](https://www.javabrahman.com/java-8/java-8-how-to-peek-into-a-running-stream-peek-method-tutorial-with-examples/)
+1. [JDK8函数式接口Function、Consumer、Predicate、Supplier](https://blog.csdn.net/z834410038/article/details/77370785)

@@ -1,0 +1,28 @@
+<!-- TODO: Translate to ru -->
+
+## 问题
+
+2020-03-05 星期四,下午一点.百度流量异常地高,超过了200Mbps.
+
+![](/img/in-post/baidu/cloudmonitor.jpg)
+
+联系了网宿那边的技术,说是百度的爬虫在捣鬼.
+
+![](/img/in-post/baidu/rip.png)
+
+让他们导出了一系列IP
+
+切换到阿里云之后,发现百度竟然还把我网宿的IP给记住了,真是666.
+
+![](/img/in-post/baidu/17B782EA19C50DCFD14A4493ABEF6E5A.png)
+
+然后我查看了站长后台,抓取的频次确实高了些.
+
+![](/img/in-post/baidu/baidu-spider.png)
+
+## 结论
+
+1. 123.125 xxx xxx
+1. 220.181 xxx xxx
+
+这2个网段都是百度那边的IP,原则上要放行.而且他们喜欢在周四更新.

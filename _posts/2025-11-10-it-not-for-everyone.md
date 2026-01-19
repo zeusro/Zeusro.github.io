@@ -33,3 +33,9 @@ tags:
     {% capture about_jp %}{% include posts/2025-11-11-no-computer/no-computer_jp.md %}{% endcapture %}
     {{ about_jp | markdownify }}
 </div>
+
+<!-- Russian Version -->
+<div class="ru post-container">
+    {% capture about_ru %}{% include posts/2025-11-11-no-computer/no-computer_ru.md %}{% endcapture %}
+    {{ about_ru | markdownify }}
+</div>
