@@ -1,0 +1,1 @@
+根据 update_multilingual.py ，跳过不发表的文章，根据已经翻译好的文章，更新 _posts 下面的文章。
