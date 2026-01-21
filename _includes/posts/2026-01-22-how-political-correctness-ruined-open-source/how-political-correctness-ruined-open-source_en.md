@@ -18,7 +18,7 @@ The popularity of LGBT culture in the open source community is, in my opinion, a
 
 Moral police were particularly evident during the Black Lives Matter movement. I remember that at the end of 2020, when viewing Kubernetes web documentation, there suddenly appeared BLM support advertisements.
 
-Looking at the history, it was added by #25173 https://github.com/kubernetes/website/pull/25173/files. But later on Jan 8, 2021, https://github.com/kubernetes/website/pull/25769, it was removed, and the reason for removal was very vague, as if it never existed.
+Looking at the history, it was added by #25173 [https://github.com/kubernetes/website/pull/25173/files](https://github.com/kubernetes/website/pull/25173/files). But later on Jan 8, 2021, [https://github.com/kubernetes/website/pull/25769](https://github.com/kubernetes/website/pull/25769), it was removed, and the reason for removal was very vague, as if it never existed.
 
 Patrisse Cullors, co-founder of the BLM movement, resigned from her position as executive director of BLMGNF in 2021. Tax documents showed that she did not receive a salary during the fiscal year, but served as an "unpaid volunteer." However, her associated companies and family members received large sums of money: her brother Paul Cullors' company (Cullors Protection or Black Ties LLC) received approximately $840,000 for "professional security services" (2022 tax documents). Total income since 2021 has exceeded $4.2 million.
 
@@ -34,7 +34,7 @@ As time passed, we discovered that those who supported this movement were the re
 
 Their income has nothing to do with the Kubernetes project. It reminds me of those parasitic classmates in middle and high school, who only think about wasting your resources to achieve their own goals.
 
-It's like the previous https://github.com/tailwindlabs/tailwindcss. Current LLM-assisted programming tools can integrate into users' projects without them even reading the documentation. https://github.com/zeusro/tool This project of mine integrates tailwindcss using Cursor.
+It's like the previous [https://github.com/tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss). Current LLM-assisted programming tools can integrate into users' projects without them even reading the documentation. [https://github.com/zeusro/tool](https://github.com/zeusro/tool) This project of mine integrates tailwindcss using Cursor.
 
 To be honest, this makes me a bit horrified. On one hand, developers work diligently, projects get more and more stars, and users keep increasing; however, the reality is that these virtual accolades cannot cover the team's daily expenses, and even basic survival becomes a problem.
 
@@ -60,6 +60,6 @@ Instead of holding million-dollar annual salaries all day, writing code that mak
 
 If Kubernetes doesn't change, then I will change Kubernetes.
 
-I have decided to use https://github.com/p-program/kube-killer and https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes as starting points to launch a White Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
+I have decided to use [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) and [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) as starting points to launch a White Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."

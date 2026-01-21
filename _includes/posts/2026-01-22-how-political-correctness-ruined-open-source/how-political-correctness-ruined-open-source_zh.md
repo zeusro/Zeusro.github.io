@@ -17,7 +17,7 @@ LGBT文化在开源社区的流行，个人认为是一种历史的倒退。就�
 
 道德警察在Black Lives Matter运动中特别明显。我记得在2020年底的时候，查看kubernetes网页文档突然多了声援BLM的牛皮癣广告。
 
-查阅历史发现是 #25173 https://github.com/kubernetes/website/pull/25173/files 添加的。但后来在Jan 8, 2021，https://github.com/kubernetes/website/pull/25769 的时候就被移除了，而且移除的理由非常隐晦，仿佛一切都没存在过。
+查阅历史发现是 #25173 [https://github.com/kubernetes/website/pull/25173/files](https://github.com/kubernetes/website/pull/25173/files) 添加的。但后来在Jan 8, 2021，[https://github.com/kubernetes/website/pull/25769](https://github.com/kubernetes/website/pull/25769) 的时候就被移除了，而且移除的理由非常隐晦，仿佛一切都没存在过。
 
 BLM运动的联合发起人Patrisse Cullors，于2021年辞去BLMGNF执行董事职务，税务文件显示她在财政年度内未领取薪水，而是作为"无薪志愿者"，但她与基金的关联公司和家人收到大笔资金：她的兄弟Paul Cullors的公司（Cullors Protection 或 Black Ties LLC）收到约84万美元用于"专业安全服务"（2022年税务文件）。 自2021年收入总计以来超过420万美元。 
 
@@ -33,7 +33,7 @@ Cullors还被指使用基金购买洛杉矶一处约600万美元的豪宅，用�
 
 他们的收入跟kubernetes这个项目根本毫无关系。它让我又想起了初高中那些寄生虫同学，他们只想着浪费你的资源，去实现自己的目的。
 
-就好像之前的 https://github.com/tailwindlabs/tailwindcss 。现在的LLM辅助编程工具，可以在用户不读懂文档的前提下直接集成到自己的项目中。https://github.com/zeusro/tool 我这个项目就是用Cursor集成tailwindcss 的。
+就好像之前的 [https://github.com/tailwindlabs/tailwindcss](https://github.com/tailwindlabs/tailwindcss) 。现在的LLM辅助编程工具，可以在用户不读懂文档的前提下直接集成到自己的项目中。[https://github.com/zeusro/tool](https://github.com/zeusro/tool) 我这个项目就是用Cursor集成tailwindcss 的。
 
 说实话，这让我有点毛骨悚然。一方面，开发者兢兢业业地工作，项目的star越来越多，用户也越来越多；然而真实的一面却是，获得的这些虚拟赞誉，完全无法覆盖团队的日常开支，甚至连基本的生存都成为问题。
 
@@ -59,6 +59,6 @@ crd是kubernetes的资源，而cr和controller是crd的下游。因此不管第�
 
 如果kubernetes不改变，那就由我来改变kubernetes。
 
-我决定以 https://github.com/p-program/kube-killer 和https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes 作为起点，在全球互联网发起 White lives matter运动，抗议 kubernetes 组织这种国籍歧视和道德偏见。
+我决定以 [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) 和 [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) 作为起点，在全球互联网发起 White lives matter运动，抗议 kubernetes 组织这种国籍歧视和道德偏见。
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
