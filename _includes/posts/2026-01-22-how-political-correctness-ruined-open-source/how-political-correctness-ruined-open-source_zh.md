@@ -55,10 +55,10 @@ crd是kubernetes的资源，而cr和controller是crd的下游。因此不管第�
 
 而不是整天拿着百万年薪，写出来的代码却狗屁不通，连资源占用的ROI和边际收益，都无法跟喜欢零元购的小老板们说清楚。
 
-## White Lives Matter
+## Yellow Lives Matter
 
 如果kubernetes不改变，那就由我来改变kubernetes。
 
-我决定以 [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) 和 [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) 作为起点，在全球互联网发起 White lives matter运动，抗议 kubernetes 组织这种国籍歧视和道德偏见。
+我决定以 [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) 和 [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) 作为起点，在全球互联网发起 Yellow lives matter运动，抗议 kubernetes 组织这种国籍歧视和道德偏见。
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
