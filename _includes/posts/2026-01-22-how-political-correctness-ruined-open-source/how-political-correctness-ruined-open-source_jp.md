@@ -60,6 +60,8 @@ CRDはKubernetesのリソースであり、CRとcontrollerはCRDの下流です�
 
 Kubernetesが変わらないなら、私がKubernetesを変えます。
 
+![Yellow Lives Matter](/img/in-post/how-political-correctness-ruined-open-source/yellow-lives-matter.gif)
+
 私は [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) と [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) を起点として、グローバルインターネットで Yellow Lives Matter運動を開始し、Kubernetes組織の国籍差別と道徳的偏見に抗議することを決定しました。
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."

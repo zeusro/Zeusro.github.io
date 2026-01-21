@@ -60,6 +60,8 @@ Instead of holding million-dollar annual salaries all day, writing code that mak
 
 If Kubernetes doesn't change, then I will change Kubernetes.
 
-I have decided to use [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) and [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) as starting points to launch a White Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
+![Yellow Lives Matter](/img/in-post/how-political-correctness-ruined-open-source/yellow-lives-matter.gif)
+
+I have decided to use [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) and [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) as starting points to launch a Yellow Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
