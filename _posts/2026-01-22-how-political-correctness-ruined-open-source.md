@@ -1,7 +1,7 @@
 ---
 layout:       post
 title:        "政治正确是如何毁了开源社区"
-subtitle:     "White Lives Matter"
+subtitle:     "Yellow Lives Matter"
 date:         2026-01-22
 author:       "Zeusro"
 header-img:   "img/b/black/blackmyth_wukong_screenshot_017.947f4ae0.jpg"

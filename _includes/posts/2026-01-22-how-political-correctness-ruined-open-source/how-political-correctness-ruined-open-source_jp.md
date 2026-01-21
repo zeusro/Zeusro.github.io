@@ -56,10 +56,10 @@ CRDはKubernetesのリソースであり、CRとcontrollerはCRDの下流です�
 
 百万ドルの年俸を一日中持っていながら、意味のないコードを書き、リソース使用のROIと限界利益を、ゼロコストショッピングが好きな小さなボスに説明することさえできないのではなく。
 
-## White Lives Matter
+## Yellow Lives Matter
 
 Kubernetesが変わらないなら、私がKubernetesを変えます。
 
-私は [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) と [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) を起点として、グローバルインターネットでWhite Lives Matter運動を開始し、Kubernetes組織の国籍差別と道徳的偏見に抗議することを決定しました。
+私は [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) と [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) を起点として、グローバルインターネットで Yellow Lives Matter運動を開始し、Kubernetes組織の国籍差別と道徳的偏見に抗議することを決定しました。
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
