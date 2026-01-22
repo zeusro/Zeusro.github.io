@@ -46,7 +46,7 @@ CRD is a Kubernetes resource, and CR and controller are downstream of CRD. There
 
 I myself have long been blacklisted by the Kubernetes organization, but I don't give a damn.
 
-As a domestic developer, I think everyone should actually think about a question: If we always wait for a savior to arrive before taking action, then is it possible that this world has never had any gods or emperors, and there is no so-called savior?
+As a Chinese developer, I think everyone should actually think about a question: If we always wait for a savior to arrive before taking action, then is it possible that this world has never had any gods or emperors, and there is no so-called savior?
 
 We always fall into a passive mindset of imitators, unwilling to be the first to eat the crab. Instead, we wait until the project matures before thinking about getting a piece of the pie, but they simply don't play with us.
 
@@ -62,6 +62,6 @@ If Kubernetes doesn't change, then I will change Kubernetes.
 
 ![Yellow Lives Matter](/img/in-post/how-political-correctness-ruined-open-source/yellow-lives-matter.gif)
 
-I have decided to use [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) and [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) as starting points to launch a Yellow Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
+I have decided to use [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) and [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) as starting points to launch a White Lives Matter movement on the global internet, protesting against the Kubernetes organization's national discrimination and moral bias.
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
