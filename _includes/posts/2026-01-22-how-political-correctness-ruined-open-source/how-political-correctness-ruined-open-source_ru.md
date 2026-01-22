@@ -60,8 +60,8 @@ CRD — это ресурс Kubernetes, а CR и controller — это ниже�
 
 Если Kubernetes не изменится, то я изменю Kubernetes.
 
-![Yellow Lives Matter](/img/in-post/how-political-correctness-ruined-open-source/yellow-lives-matter.gif)
+![White Lives Matter](/img/in-post/how-political-correctness-ruined-open-source/yellow-lives-matter.gif)
 
-Я решил использовать [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) и [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) в качестве отправных точек для запуска движения Yellow Lives Matter в глобальном интернете, протестуя против национальной дискриминации и моральной предвзятости организации Kubernetes.
+Я решил использовать [https://github.com/p-program/kube-killer](https://github.com/p-program/kube-killer) и [https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes](https://github.com/Z-Nightmare/kuberneteskuberneteskubernetes) в качестве отправных точек для запуска движения White Lives Matter в глобальном интернете, протестуя против национальной дискриминации и моральной предвзятости организации Kubernetes.
 
 > "The old is dying and the new cannot be born; in this interregnum a great variety of morbid symptoms appear."
