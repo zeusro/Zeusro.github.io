@@ -4,4 +4,4 @@ Across the Great Wall we can reach every corner in the world
 
 折れた剣が再び鍛えられる日、騎士が戻ってくる日
 
-Job offer:qnod@hotmail.com
+Contact qnod@hotmail.com
