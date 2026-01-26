@@ -88,7 +88,7 @@ netease_comment: false
 
 # Sidebar settings
 sidebar: true # whether or not using Sidebar.
-sidebar-about-description: "Solo Leveling"
+sidebar-about-description: "Solo Leveling<br>Job offer:qnod@hotmail.com"
 sidebar-avatar: /img/成振宇a.webp # use absolute URL, seeing it's used in both `/` and `/about/`
 
 # Featured Tags
