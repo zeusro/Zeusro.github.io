@@ -12,7 +12,9 @@ They don't even have time to look at where the error stack trace starts, always 
 
 Or they bring completely unrelated ideologies into the open source community, such as LGBT.
 
-The popularity of LGBT culture in the open source community is, in my opinion, a historical regression. It's like the female fighters within our circles, who leverage the gender advantage of more men than women to make all kinds of outrageous statements. But when you examine their theoretical foundation, it's a black void. Their ultimate demands are nothing more than asking for more money before marriage, or splitting the other party's assets after divorce, or being petty about trivial matters (like demanding others to be environmentally friendly while constantly wasting food themselves). In this regard, China and the West have achieved perfect unity.
+The popularity of LGBT culture in the open source community is, in my opinion, a historical regression. It's like the female fighters in China, who leverage the gender advantage of there being more men than women to make all kinds of outrageous statements.
+
+But when you examine their theoretical foundation, it's a black hole. Their ultimate demands are nothing more than asking for more money before marriage, preventing the other party from transferring assets during marriage, splitting the other party's assets after divorce, or being petty about trivial matters (like demanding others to be environmentally friendly while constantly wasting food themselves), and extracting "emotional value" from the other party through various so‑called "tests of feelings". In this regard, China and the West have achieved perfect unity.
 
 ## Black Lives Matter & LLM Parasites
 
