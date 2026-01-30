@@ -141,17 +141,19 @@ Incentive(t) = TeacherPayoff(средняя успеваемость, доля �
 
 Запуск: в указанном каталоге `go run .` или `go build` и запуск бинарника.
 
-## Файлы реализации (тот же каталог)
+## Файлы реализации
+
+**Расположение исходного кода**: [zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)
 
 | Файл | Содержимое |
 |------|------------|
-| `model.go` | Временные типы: Factor, Event, Point, NLine; время — первый член (Birth/T) |
-| `roles.go` | Роли и стратегии (перечисления); Agent (Birth первый), NewAgent; Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
-| `incentive.go` | IncentiveParams; Incentive(t,...), IncentiveAt; TeacherPayoff; GaokaoScore(ScoreHistory); StudentPayoff |
-| `strategy.go` | ChooseStrategy(t, agent, ctx) по ролям; Consequence; ApplyStrategy(t, strategy, ...) |
-| `sim.go` | SimContext, SimState; LogTS, UpdateContext, Run; pickStudentTarget |
-| `y.go` | Главный вход Y(...); newNamedAgents; вывод лога, сэмпла стимула, итоговой статистики, совета по C13 |
-| `y_test.go` | TestY (полный прогон, -short для пропуска); TestY_shortParams, TestY_shortRun |
+| [model.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/model.go) | Временные типы: Factor, Event, Point, NLine; время — первый член (Birth/T) |
+| [roles.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/roles.go) | Роли и стратегии (перечисления); Agent (Birth первый), NewAgent; Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
+| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams; Incentive(t,...), IncentiveAt; TeacherPayoff; GaokaoScore(ScoreHistory); StudentPayoff |
+| [strategy.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/strategy.go) | ChooseStrategy(t, agent, ctx) по ролям; Consequence; ApplyStrategy(t, strategy, ...) |
+| [sim.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/sim.go) | SimContext, SimState; LogTS, UpdateContext, Run; pickStudentTarget |
+| [y.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go) | Главный вход Y(...); newNamedAgents; вывод лога, сэмпла стимула, итоговой статистики, совета по C13 |
+| [y_test.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y_test.go) | TestY (полный прогон, -short для пропуска); TestY_shortParams, TestY_shortRun |
 
 ## Ссылка
 

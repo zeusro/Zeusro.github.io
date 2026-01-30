@@ -141,17 +141,19 @@ Under the above payoffs and strategy sets, the equilibrium and recommendations (
 
 Run: `go run .` or `go build` then run the binary in that directory.
 
-## Implementation Files (same directory)
+## Implementation Files
+
+**Source code location**: [zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)
 
 | File | Content |
 |------|---------|
-| `model.go` | Time-series types: Factor, Event, Point, NLine; time first member (Birth/T) |
-| `roles.go` | Role and Strategy enums; Agent (Birth first), NewAgent; Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
-| `incentive.go` | IncentiveParams; Incentive(t,...), IncentiveAt; TeacherPayoff; GaokaoScore(ScoreHistory); StudentPayoff |
-| `strategy.go` | ChooseStrategy(t, agent, ctx) by role; Consequence; ApplyStrategy(t, strategy, ...) |
-| `sim.go` | SimContext, SimState; LogTS, UpdateContext, Run; pickStudentTarget |
-| `y.go` | Main entry Y(...); newNamedAgents; outputs log, incentive sample, final stats, C13 advice |
-| `y_test.go` | TestY (full run, -short to skip); TestY_shortParams, TestY_shortRun |
+| [model.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/model.go) | Time-series types: Factor, Event, Point, NLine; time first member (Birth/T) |
+| [roles.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/roles.go) | Role and Strategy enums; Agent (Birth first), NewAgent; Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
+| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams; Incentive(t,...), IncentiveAt; TeacherPayoff; GaokaoScore(ScoreHistory); StudentPayoff |
+| [strategy.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/strategy.go) | ChooseStrategy(t, agent, ctx) by role; Consequence; ApplyStrategy(t, strategy, ...) |
+| [sim.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/sim.go) | SimContext, SimState; LogTS, UpdateContext, Run; pickStudentTarget |
+| [y.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go) | Main entry Y(...); newNamedAgents; outputs log, incentive sample, final stats, C13 advice |
+| [y_test.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y_test.go) | TestY (full run, -short to skip); TestY_shortParams, TestY_shortRun |
 
 ## Reference
 
