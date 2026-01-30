@@ -9,6 +9,7 @@ header-mask:  0.3
 catalog:      true
 multilingual: true
 published:    true
+mathjax:      true
 tags:
     - n
 ---
