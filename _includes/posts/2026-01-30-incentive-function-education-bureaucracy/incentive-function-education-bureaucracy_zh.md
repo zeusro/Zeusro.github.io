@@ -140,8 +140,6 @@ Incentive(t) = TeacherPayoff(平均成绩, 本科升学率) = 0.6 × 平均成�
 - **每步**：先根据当前状态更新聚合指标（学生数、参考数、升学率、平均压力等），再对每个在册成员按角色调用 `ChooseStrategy(t, agent, ctx)`，得到策略后调用 `ApplyStrategy(t, strategy, ...)` 得到后果，将后果施加于行为者或目标学生，并追加「时间+内容」日志。
 - **输出**：① **时间序列**日志（每一条为「时间+内容」）；② **激励函数**采样序列（时间→**政绩**）；③ 终态统计（在校人数、参考人数、本科录取数、平均成绩、本科升学率、**政绩**）。
 
-运行方式：在本目录执行 `go run .` 或 `go build` 后运行生成的可执行文件。
-
 ## 实现文件
 
 **源代码位置**：[zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)

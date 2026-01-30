@@ -133,8 +133,6 @@ Under the above **payoff functions** and strategy sets, the equilibrium and reco
 - **Per step**: Update aggregates (student count, exam takers, rate, avg stress); for each agent call `ChooseStrategy(t, agent, ctx)`, then `ApplyStrategy(t, strategy, ...)`, apply consequences, append “time + content” log.
 - **Output**: (1) **Time-series** log; (2) **incentive function** sample (time → **performance**); (3) final stats (in-school, exam takers, admits, avg score, rate, **performance**).
 
-Run: `go run .` or `go build` then run the binary in that directory.
-
 ## Implementation Files
 
 **Source code location**: [zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)

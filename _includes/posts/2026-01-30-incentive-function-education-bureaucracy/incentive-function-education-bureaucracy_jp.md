@@ -133,8 +133,6 @@ Incentive(t) = TeacherPayoff(平均成績, 本科進学率) = 0.6 × 平均成�
 - **各ステップ**：現状態で集約指標（生徒数・受験者数・進学率・平均圧力等）を更新し、在籍メンバーごとに役割で `ChooseStrategy(t, agent, ctx)` を呼び、得た戦略で `ApplyStrategy(t, strategy, ...)` を呼んで結果を適用し、「時間+内容」ログを追加。
 - **出力**：① **時系列**ログ；② **激励関数**サンプル（時間→**業績**）；③ 終状態統計（在籍数・受験者数・本科合格数・平均成績・進学率・**業績**）。
 
-実行：当該ディレクトリで `go run .` または `go build` 後に実行ファイルを実行。
-
 ## 実装ファイル
 
 **ソースコードの場所**：[zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)
