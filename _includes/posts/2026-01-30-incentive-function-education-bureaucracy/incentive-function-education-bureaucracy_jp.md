@@ -141,17 +141,19 @@ Incentive(t) = TeacherPayoff(平均成績, 本科進学率) = 0.6 × 平均成�
 
 実行：当該ディレクトリで `go run .` または `go build` 後に実行ファイルを実行。
 
-## 実装ファイル（同ディレクトリ）
+## 実装ファイル
+
+**ソースコードの場所**：[zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)
 
 | ファイル | 内容 |
 |----------|------|
-| `model.go` | 時系列型：Factor, Event, Point, NLine。時間第一メンバ（Birth/T） |
-| `roles.go` | Role・Strategy 列挙。Agent（Birth第一）、NewAgent。Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
-| `incentive.go` | IncentiveParams。Incentive(t,...), IncentiveAt。TeacherPayoff。GaokaoScore(ScoreHistory)。StudentPayoff |
-| `strategy.go` | ChooseStrategy(t, agent, ctx) を役割で分派。Consequence。ApplyStrategy(t, strategy, ...) |
-| `sim.go` | SimContext, SimState。LogTS, UpdateContext, Run。pickStudentTarget |
-| `y.go` | メイン入口 Y(...)。newNamedAgents。ログ・激励サンプル・終状態・C13アドバイスを出力 |
-| `y_test.go` | TestY（本番長、-shortでスキップ可）。TestY_shortParams, TestY_shortRun |
+| [model.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/model.go) | 時系列型：Factor, Event, Point, NLine。時間第一メンバ（Birth/T） |
+| [roles.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/roles.go) | Role・Strategy 列挙。Agent（Birth第一）、NewAgent。Factor, InSchool, InExamPool, Score, ScoreHistory, Stress, LegalRisk, StrategyCount, LastStrategy |
+| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams。Incentive(t,...), IncentiveAt。TeacherPayoff。GaokaoScore(ScoreHistory)。StudentPayoff |
+| [strategy.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/strategy.go) | ChooseStrategy(t, agent, ctx) を役割で分派。Consequence。ApplyStrategy(t, strategy, ...) |
+| [sim.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/sim.go) | SimContext, SimState。LogTS, UpdateContext, Run。pickStudentTarget |
+| [y.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go) | メイン入口 Y(...)。newNamedAgents。ログ・激励サンプル・終状態・C13アドバイスを出力 |
+| [y_test.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y_test.go) | TestY（本番長、-shortでスキップ可）。TestY_shortParams, TestY_shortRun |
 
 ## 参考
 

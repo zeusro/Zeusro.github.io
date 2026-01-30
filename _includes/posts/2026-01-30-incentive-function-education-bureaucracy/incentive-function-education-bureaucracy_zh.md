@@ -148,17 +148,19 @@ Incentive(t) = TeacherPayoff(平均成绩, 本科升学率) = 0.6 × 平均成�
 
 运行方式：在本目录执行 `go run .` 或 `go build` 后运行生成的可执行文件。
 
-## 实现文件（本目录）
+## 实现文件
+
+**源代码位置**：[zeusro/system — function/local/n/china/shantou/y](https://github.com/zeusro/system/tree/main/function/local/n/china/shantou/y)
 
 | 文件 | 内容 |
 |------|------|
-| `model.go` | 时间序列对象：Factor、Event、Point、NLine；时间第一成员（Birth/T） |
-| `roles.go` | 角色 Role 与策略 Strategy 枚举；Agent 构造（Birth 第一成员）、NewAgent；Agent 含 Factor、InSchool、InExamPool、Score、ScoreHistory、Stress、LegalRisk、StrategyCount、LastStrategy |
-| `incentive.go` | IncentiveParams（时间第一成员）；时间激励函数 Incentive(t, ...)、IncentiveAt；教师收益 TeacherPayoff(平均成绩, 升学率)；高考成绩预测 GaokaoScore(ScoreHistory)；学生收益 StudentPayoff(GaokaoScore, InExamPool) |
-| `strategy.go` | ChooseStrategy(t, agent, ctx) 按角色分派；各角色策略函数（教师Y/F、犹大、黑曼巴、P、Y、C13、普通学生、心理老师、领导）；Consequence 后果结构；ApplyStrategy(t, strategy, agent, ctx, rng) 及后果量化 |
-| `sim.go` | SimContext（聚合状态含 StepsRemaining、LastRoundTeacherDefection）；SimState（Birth、Current、Agents、Events、Points、Duration）；LogTS、UpdateContext、Run（步进、每年末更新 ScoreHistory、激励采样、重复博弈两阶段选策略与施加后果）；pickStudentTarget |
-| `y.go` | 主仿真入口 Y(base, end, randomCount, seed)；newNamedAgents 构造教师与命名学生；输出时间序列日志、激励采样、终态统计、收益函数采样、学生策略分组统计、C13 建议 |
-| `y_test.go` | TestY 完整仿真（可 -short 跳过）；TestY_shortParams、TestY_shortRun 短仿真与 Run 单元测试 |
+| [model.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/model.go) | 时间序列对象：Factor、Event、Point、NLine；时间第一成员（Birth/T） |
+| [roles.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/roles.go) | 角色 Role 与策略 Strategy 枚举；Agent 构造（Birth 第一成员）、NewAgent；Agent 含 Factor、InSchool、InExamPool、Score、ScoreHistory、Stress、LegalRisk、StrategyCount、LastStrategy |
+| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams（时间第一成员）；时间激励函数 Incentive(t, ...)、IncentiveAt；教师收益 TeacherPayoff(平均成绩, 升学率)；高考成绩预测 GaokaoScore(ScoreHistory)；学生收益 StudentPayoff(GaokaoScore, InExamPool) |
+| [strategy.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/strategy.go) | ChooseStrategy(t, agent, ctx) 按角色分派；各角色策略函数（教师Y/F、犹大、黑曼巴、P、Y、C13、普通学生、心理老师、领导）；Consequence 后果结构；ApplyStrategy(t, strategy, agent, ctx, rng) 及后果量化 |
+| [sim.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/sim.go) | SimContext（聚合状态含 StepsRemaining、LastRoundTeacherDefection）；SimState（Birth、Current、Agents、Events、Points、Duration）；LogTS、UpdateContext、Run（步进、每年末更新 ScoreHistory、激励采样、重复博弈两阶段选策略与施加后果）；pickStudentTarget |
+| [y.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go) | 主仿真入口 Y(base, end, randomCount, seed)；newNamedAgents 构造教师与命名学生；输出时间序列日志、激励采样、终态统计、收益函数采样、学生策略分组统计、C13 建议 |
+| [y_test.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y_test.go) | TestY 完整仿真（可 -short 跳过）；TestY_shortParams、TestY_shortRun 短仿真与 Run 单元测试 |
 
 ## 参考
 
