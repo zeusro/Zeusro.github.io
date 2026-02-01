@@ -8,6 +8,9 @@
     {% if site.sidebar-about-description %}
     <p>{{site.sidebar-about-description}}</p>
     {% endif %}
+    {% if site.sidebar-email %}
+    <a href="mailto:{{site.sidebar-email}}">{{site.sidebar-email}}</a>
+    {% endif %}    
     <!-- SNS Link -->
     {% include sns-links.html %}
   </div>
