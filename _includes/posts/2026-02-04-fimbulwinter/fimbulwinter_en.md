@@ -1,3 +1,8 @@
+## Summary
+
+This article starts from formal logic and definitions (network effect, law of entropy increase, anti-dependency, and the “zero” philosophy of zero marginal benefit), systematically reviews major outages of mainstream public clouds and infrastructure—Alibaba Cloud, Google Cloud, Azure, Cloudflare, Tencent Cloud—from 2014 to 2025, and compares their fault transparency. On this basis, it analyzes the “causes of death” of public cloud: software entropy and zero marginal benefit make legacy code and architecture hard to govern; network effects amplify cascading failures; and SLA compensation is severely misaligned with actual losses for enterprises and government. The author recommends that large enterprises and government agencies prioritize “anti-dependency” on any single public cloud and proposes a “small-concurrency high-availability system”—reducing single-point risk and blast radius through storage redundancy and traffic distribution (e.g., multi-region, multi-cluster DNS resolution).
+
+![Fimbulwinter](/img/in-post/fimbulwinter/fimbulwinter.jpeg)
 
 ## Formal Logic and Definitions
 
