@@ -1,4 +1,4 @@
-時間序列ライブラリの元論文（http://github.com/zeusro/data）は失われており、限られた記憶から時間序列の部分を少しずつ再構成するしかない。
+時間序列ライブラリの元論文（[http://github.com/zeusro/data](http://github.com/zeusro/data)）は失われており、限られた記憶から時間序列の部分を少しずつ再構成するしかない。
 
 時間をかけた実践によってのみ、プログラムの正しさは検証できる。そこで時間序列メタプログラミングモデルを提唱する。現実世界をモデル化するための新しいプログラムのパラダイムであり、プログラミング言語に依存しない設計哲学である。
 
@@ -98,3 +98,9 @@ Y 軸は必要に応じて、CPU/GPU の全体利用率など別の指標を用�
 ## 時間序列空間
 
 時間序列からなる 2 次元以上の空間。
+
+OOOS（[https://github.com/zeusro/system](https://github.com/zeusro/system)）では、このプログラミングパラダイムを可能な限り用いる。
+
+例：
+- 制約付きリソースへの無ロック並行アクセスの並行時空アルゴリズム（[https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md](https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md)）
+- Y 関数（[https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73)）
