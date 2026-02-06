@@ -1,4 +1,4 @@
-Оригинальная статья по библиотеке временных рядов (http://github.com/zeusro/data) утрачена, поэтому я могу лишь по обрывочным воспоминаниям восстановить часть, касающуюся временных рядов.
+Оригинальная статья по библиотеке временных рядов [http://github.com/zeusro/data](http://github.com/zeusro/data) утрачена, поэтому я могу лишь по обрывочным воспоминаниям восстановить часть, касающуюся временных рядов.
 
 Только практика во времени способна проверить корректность программы. Поэтому я предлагаю модель метапрограммирования временных рядов — новую программную парадигму для моделирования реального мира, философию проектирования, не привязанную к языку программирования.
 
@@ -98,3 +98,9 @@ func SleepAndReturnNewTime(inputTime time.Time) time.Time {
 ## Пространство временных рядов
 
 Пространство размерности два и выше, состоящее из временных рядов.
+
+В OOOS [https://github.com/zeusro/system](https://github.com/zeusro/system) я буду по возможности применять эту программную парадигму.
+
+Например:
+- Алгоритм параллельного пространства-времени с неблокирующим доступом к ограниченным ресурсам ([https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md](https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md))
+- Функция Y ([https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73))

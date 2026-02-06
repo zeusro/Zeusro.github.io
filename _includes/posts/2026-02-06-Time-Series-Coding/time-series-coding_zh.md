@@ -1,5 +1,5 @@
 
-由于时间序列库原始的论文(http://github.com/zeusro/data)已经丢失了，我只能按照有限的回忆一点点拼凑起时间序列那部分的内容。
+由于时间序列库原始的论文[http://github.com/zeusro/data](http://github.com/zeusro/data)已经丢失了，我只能按照有限的回忆一点点拼凑起时间序列那部分的内容。
 
 只有经过时间的实践，才能验证程序的正确性。因此我提出时间序列元编程模型。这是一种对现实世界提出建模的新程序范式，是编程语言无关的设计哲学。
 
@@ -100,3 +100,9 @@ Y轴可以按照实际需要，使用其他的标准，比如CPU/GPU的整体利
 ## 时间序列空间
 
 由时间序列组成的2维以上空间。
+
+在OOOS[https://github.com/zeusro/system](https://github.com/zeusro/system)中，我将会尽可能地使用这种编程范式。
+
+比如
+- 无锁并发访问受限资源的平行时空算法（[https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md](https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md)）
+- Y函数（[https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73)）

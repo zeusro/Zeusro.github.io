@@ -1,4 +1,4 @@
-The original paper for the time-series library (http://github.com/zeusro/data) has been lost, so I can only piece together the time-series part from limited memory.
+The original paper for the time-series library [http://github.com/zeusro/data](http://github.com/zeusro/data) has been lost, so I can only piece together the time-series part from limited memory.
 
 Only through practice over time can the correctness of a program be verified. I therefore propose the time-series meta-programming model—a new programming paradigm for modeling the real world, a design philosophy independent of programming language.
 
@@ -98,3 +98,9 @@ Time-series complexity requires observability analysis of the program.
 ## Time-Series Space
 
 A space of two or more dimensions composed of time series.
+
+In OOOS [https://github.com/zeusro/system](https://github.com/zeusro/system), I will use this programming paradigm as much as possible.
+
+For example:
+- Lock-free parallel spacetime algorithm for concurrent access to constrained resources ([https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md](https://github.com/zeusro/system/blob/main/function/local/n/china/shenzhen/szx/readme.md))
+- Y function ([https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go#L73))
