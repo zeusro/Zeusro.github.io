@@ -14,6 +14,29 @@ This article starts from formal logic and definitions (network effect, law of en
 
 **Zero**: Nobody wants to do refactoring whose marginal benefit is zero.
 
+## AWS Outages
+
+| Time              | Region / Scope             | Duration          | Main Impact & Consequences                                                                 | Official / Main Cause                              | Notes / Industry Evaluation                              |
+|-------------------|----------------------------|-------------------|--------------------------------------------------------------------------------------------|----------------------------------------------------|----------------------------------------------------------|
+| 2014-06-13       | us-east-1 (Northern Virginia) | Not specified     | Affected key components of Amazon SimpleDB, some users unable to access or operate databases. | Power-related system interruption.                 | Relatively small-scale; quick recovery; highlighted power redundancy issues. |
+| 2014-08-07       | EU West (Ireland)          | Not specified     | Impacted EC2, EBS, and RDS; some European users lost access to instances, storage, and databases. | Internal system event (root cause not detailed).   | Regional impact; showed early limitations in regional isolation. |
+| 2014-11-26       | Global (CloudFront DNS)    | ~2 hours          | DNS servers down, affected CDN; many websites and cloud services failed to resolve requests. | DNS server failure.                                | Short but broad impact; exposed DNS fragility of the world’s largest cloud. |
+| 2015-09-20       | us-east-1                  | Several hours     | DynamoDB outage caused internal service communication failure; affected Netflix, Reddit, IMDb, Amazon properties. | Internal service communication chain reaction.     | Serious incident; millions impacted; warned about tight internal dependencies. |
+| 2017-02-28       | us-east-1                  | 4–5 hours         | S3 control plane outage; Slack, Trello, GitHub Pages, Quora, many sites lost images/files.  | Engineer typo deleted critical configuration.      | One of the most famous outages ever; “most expensive typo in history”. |
+| 2020-11-25       | us-east-1                  | Several hours     | Kinesis and Cognito disruption; affected Roku, Adobe, Flickr; streaming & auth services down. | Capacity update issue.                             | Happened during pandemic; highlighted capacity planning challenges. |
+| 2022-12-05       | us-east-2 (Ohio)           | ~40 minutes       | Availability Zone outage; impacted multiple services in the region.                        | Not publicly detailed (likely network/power).      | Short but emphasized importance of multi-AZ architecture. |
+| 2023-06-13       | us-east-1                  | Not specified     | Lambda service disruption; affected large organizations (Boston Globe, NYC subway, AP, etc.). | Not publicly detailed.                             | Exposed fragility of serverless computing at scale. |
+| 2024-07-30       | us-east-1                  | Not specified     | Kinesis Data Streams outage; impacted real-time data processing applications.              | Not publicly detailed.                             | Highlighted risks in stream-processing dependencies. |
+| 2025-02          | eu-north-1 (Stockholm)     | Not specified     | Major network issue in one AZ; affected core services in Europe.                           | Major network failure.                             | Regional event; reflected challenges in European infrastructure expansion. |
+| 2025-10-19/20    | us-east-1                  | >15 hours         | DynamoDB API endpoint outage (DNS failure); impacted Slack, Reddit, Roblox, Fortnite, Coinbase, Venmo, Duolingo, Canva, PlayStation, banks, airlines (Delta/United delays), Amazon services; >3,500 companies, 60+ countries, >17 million user reports. | DNS resolution failure leading to cascading effect. | Largest cloud outage of 2025; called “the biggest cloud fragility exposure”; strongly pushed multi-cloud strategies. |
+
+**Analysis of the most severe incidents**  
+The most severe outages were 2015-09-20 (DynamoDB), 2017-02-28 (S3), and especially 2025-10-19/20 (DynamoDB DNS). All occurred in us-east-1, AWS’s oldest and busiest region.  
+Severity ranking:  
+- 2015: entertainment & social platforms heavily affected, but limited to consumer services.  
+- 2017: massive productivity and developer impact; huge economic loss due to human error.  
+- 2025: longest duration (>15h), broadest scope (finance, gaming, education, aviation, critical infrastructure), highest user impact — widely regarded as the most serious single cloud outage in recent years.  
+Common lessons: over-reliance on us-east-1, control-plane fragility, cascading failures. Industry increasingly recommends multi-region, multi-cloud, or hybrid architectures.
 
 ## Alibaba Cloud Outages
 
