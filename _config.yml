@@ -37,6 +37,7 @@ exclude:
     "template.md",
     "oracle.md",
     "change.md",
+    "history.md",
   ]
 anchorjs: true # if you want to customize anchor. check out line:181 of `post.html`
 
