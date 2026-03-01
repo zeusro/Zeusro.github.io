@@ -1,6 +1,6 @@
 ---
 layout:       post
-title:          ""
+title:        ""
 subtitle:     ""
 date:         0000-00-00
 author:       "Zeusro"
