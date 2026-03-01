@@ -2,7 +2,7 @@
 
 本文将以教育行政化体系作为论述的大环境背景，提取
 1 教师Y，教师F，教师D
-2 学生犹大，学生黑曼巴，学生P，学生Y,学生C13
+2 学生犹大，学生黑曼巴，学生P，学生Y，学生C13
 3 心理老师
 4 学校领导
 的家庭背景，性格特征，以及行为模式。把「人类决策」拆成可计算的变量 → 评分 → 概率 / 结果。并分析不同决策产生的政策风险和结果，
@@ -148,7 +148,7 @@ Incentive(t) = TeacherPayoff(平均成绩, 本科升学率) = 0.6 × 平均成�
 |------|------|
 | [model.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/model.go) | 时间序列对象：Factor、Event、Point、NLine；时间第一成员（Birth/T） |
 | [roles.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/roles.go) | 角色 Role 与策略 Strategy 枚举；Agent 构造（Birth 第一成员）、NewAgent；Agent 含 Factor、InSchool、InExamPool、Score、ScoreHistory、Stress、LegalRisk、StrategyCount、LastStrategy |
-| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams（时间第一成员）；时间激励函数 Incentive(t, ...)、IncentiveAt；教师收益 TeacherPayoff(平均成绩, 升学率)；高考成绩预测 GaokaoScore(ScoreHistory)；学生收益 StudentPayoff(GaokaoScore, InExamPool) |
+| [incentive.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/incentive.go) | IncentiveParams（时间第一成员）；时间激励函数 Incentive(t, ...)、IncentiveAt；教师收益 TeacherPayoff(平均成绩， 升学率)；高考成绩预测 GaokaoScore(ScoreHistory)；学生收益 StudentPayoff(GaokaoScore, InExamPool) |
 | [strategy.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/strategy.go) | ChooseStrategy(t, agent, ctx) 按角色分派；各角色策略函数（教师Y/F、犹大、黑曼巴、P、Y、C13、普通学生、心理老师、领导）；Consequence 后果结构；ApplyStrategy(t, strategy, agent, ctx, rng) 及后果量化 |
 | [sim.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/sim.go) | SimContext（聚合状态含 StepsRemaining、LastRoundTeacherDefection）；SimState（Birth、Current、Agents、Events、Points、Duration）；LogTS、UpdateContext、Run（步进、每年末更新 ScoreHistory、激励采样、重复博弈两阶段选策略与施加后果）；pickStudentTarget |
 | [y.go](https://github.com/zeusro/system/blob/main/function/local/n/china/shantou/y/y.go) | 主仿真入口 Y(base, end, randomCount, seed)；newNamedAgents 构造教师与命名学生；输出时间序列日志、激励采样、终态统计、收益函数采样、学生策略分组统计、C13 建议 |

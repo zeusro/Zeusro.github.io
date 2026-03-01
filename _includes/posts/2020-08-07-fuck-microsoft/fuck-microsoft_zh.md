@@ -9,7 +9,7 @@
 
 C#的泛型是一个很优美的设计。这个设计，直到今天，Java 还是在用类型擦除的方式去实现，至于 golang ，根本就是在纸上谈兵，到现在还没有实现。
 
-C#泛型(MSIL)的内部是怎么实现的? - RednaxelaFX的回答 - 知乎
+C#泛型(MSIL)的内部是怎么实现的？ - RednaxelaFX的回答 - 知乎
 https://www.zhihu.com/question/27634924/answer/40854909
 
 CLR天才论文

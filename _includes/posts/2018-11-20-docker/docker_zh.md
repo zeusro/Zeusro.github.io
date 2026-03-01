@@ -138,7 +138,7 @@ docker build -t runoob/ubuntu:v1 .
 
 ## 一些坑点
 
-### docker是有网络瓶颈的,这时可通过` --net=host`解决.
+### docker是有网络瓶颈的，这时可通过` --net=host`解决。
 >    Docker 支持的网络模式有：
 > 
 >    none。关闭容器内的网络连接  
@@ -171,7 +171,7 @@ entrypoint 通过 sh -c 执行，这会导致应用的pid!=1
 ## 要点:
 * 所有的文件写入操作，都应该使用 数据卷（Volume）、或者绑定宿主目录，在这些位置的读写会跳过容器存储层，直接对宿主（或网络存储）发生读写，其性能和稳定性更高。
 * 所以对于 CentOS/RHEL 的用户来说，在没有办法使用 UnionFS 的情况下，一定要配置 direct-lvm 给 devicemapper，无论是为了性能、稳定性还是空间利用率。
-* 构建镜像的时候用`&&`连接指令,最后需要清理多余的文件
+* 构建镜像的时候用`&&`连接指令，最后需要清理多余的文件
 * 应该会将 Dockerfile 置于一个空目录下，或者项目根目录下
 * 目录下有些东西确实不希望构建时传给 Docker 引擎，那么可以用 .gitignore 一样的语法写一个 .dockerignore
 * 
@@ -215,7 +215,7 @@ docker inspect <containerid>
 
 结果是一个json,`GraphDriver`字段里面的内容便是该容器读写层占用的空间
 
-[overlay2](https://docs.docker.com/storage/storagedriver/overlayfs-driver/#how-the-overlay2-driver-works)这种存储驱动,大概长这样
+[overlay2](https://docs.docker.com/storage/storagedriver/overlayfs-driver/#how-the-overlay2-driver-works)这种存储驱动，大概长这样
 
 ```
         "GraphDriver": {
@@ -226,7 +226,7 @@ docker inspect <containerid>
                 "WorkDir": "/var/lib/docker/overlay2/a37aa91098cae96ea46461786e1fe5e737e6a9f6659aaecae03cb1a6649f2ec5/work"
 ```
 
-关于存储驱动,[这篇文章](http://dockone.io/article/1765)讲的还行
+关于存储驱动，[这篇文章](http://dockone.io/article/1765)讲的还行
 
 ### 清理容器
 
@@ -304,7 +304,7 @@ Jul 30 08:11:33 izwz9hs52qcjvdljv2zxa2z kernel: oom_reaper: reaped process 26865
 
 ## [Dockerfile 技巧](https://mp.weixin.qq.com/s?__biz=MzI1OTY2MzMxOQ==&mid=2247486135&idx=2&sn=0136343fedfb03d18ecd52f4b0297250&chksm=ea743e0fdd03b719a4e31b0bf508d305c8ea95595fa6f94d1d149a1f39af950a97a08c21b831&mpshare=1&scene=23&srcid=0722hfZqf9tVS6zNAMxua63c#rd)
 
-变动的层数放最后,可缓存的层放前面
+变动的层数放最后，可缓存的层放前面
 
 ```
 apt-get -y install -–no-install-recommends
@@ -319,7 +319,7 @@ rm -rf /var/lib/apt/lists/*
 {% endraw %}
 ```
 
-PS: docker inspect 的命令结果是一个json,可以先不加 format ,然后自己定义格式
+PS: docker inspect 的命令结果是一个json，可以先不加 format ，然后自己定义格式
 
 参考链接:
 [CoreOS - get docker container name by PID?](https://stackoverflow.com/questions/24406743/coreos-get-docker-container-name-by-pid)
@@ -356,7 +356,7 @@ docker ps [--format="TEMPLATE"]
 
 ## 学不动啦
 
-学不动 docker 命令没关系, [lazydocker](https://github.com/jesseduffield/lazydocker) 帮你忙,哪里不会点哪里,妈妈再也不用担心我的 docker 问题.
+学不动 docker 命令没关系， [lazydocker](https://github.com/jesseduffield/lazydocker) 帮你忙，哪里不会点哪里，妈妈再也不用担心我的 docker 问题。
 
 ## 参考链接:
 

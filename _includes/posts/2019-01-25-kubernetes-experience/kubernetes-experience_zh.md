@@ -34,14 +34,14 @@ kubectl uncordon $node
 > 
 >   [配置 kubelet 垃圾收集](https://k8smeetup.github.io/docs/concepts/cluster-administration/kubelet-garbage-collection/)
 
-但是 kubelet 的垃圾回收有个问题,它只能回收那些未使用的镜像,有点像 `docker system prune`,然而观察发现,那些死掉的容器不是最大的问题,正在运行的容器才是更大的问题.如果ImageGCFailed一直发生,而容器使用的ephemeral-storage/hostpath(宿主目录)越发增多,最终将会导致更严重的DiskPressure问题,波及节点上所有容器.
+但是 kubelet 的垃圾回收有个问题，它只能回收那些未使用的镜像，有点像 `docker system prune`，然而观察发现，那些死掉的容器不是最大的问题，正在运行的容器才是更大的问题。如果ImageGCFailed一直发生，而容器使用的ephemeral-storage/hostpath(宿主目录)越发增多，最终将会导致更严重的DiskPressure问题，波及节点上所有容器。
 
 
 建议:
 
 1. 高配机器(4核32G以上)的docker目录配置100G SSD以上空间
 1. 配置[ResourceQuota](https://kubernetes.io/docs/concepts/policy/resource-quotas/#storage-resource-quota)限制整体资源限额
-1. 容器端禁用ephemeral-storage(本地文件写入),或者使用spec.containers[].resources.limits.ephemeral-storage限制,控制宿主目录写入
+1. 容器端禁用ephemeral-storage(本地文件写入)，或者使用spec.containers[].resources.limits.ephemeral-storage限制，控制宿主目录写入
 
 ### 节点出现磁盘压力(DiskPressure)
 
@@ -49,11 +49,11 @@ kubectl uncordon $node
 --eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%
 ```
 
-kubelet在启动时指定了磁盘压力,以阿里云为例,`imagefs.available<15%`意思是说容器的读写层少于15%的时候,节点会被驱逐.节点被驱逐的后果就是产生DiskPressure这种状况,并且节点上再也不能运行任何镜像,直至磁盘问题得到解决.如果节点上容器使用了宿主目录,这个问题将会是致命的.因为你不能把目录删除掉,但是真是这些宿主机的目录堆积,导致了节点被驱逐.
+kubelet在启动时指定了磁盘压力，以阿里云为例，`imagefs.available<15%`意思是说容器的读写层少于15%的时候，节点会被驱逐。节点被驱逐的后果就是产生DiskPressure这种状况，并且节点上再也不能运行任何镜像，直至磁盘问题得到解决。如果节点上容器使用了宿主目录，这个问题将会是致命的。因为你不能把目录删除掉，但是真是这些宿主机的目录堆积，导致了节点被驱逐。
 
-所以,平时要养好良好习惯,容器里面别瞎写东西(容器里面写文件会占用ephemeral-storage,ephemeral-storage过多pod会被驱逐),多使用无状态型容器,谨慎选择存储方式,尽量别用hostpath这种存储
+所以，平时要养好良好习惯，容器里面别瞎写东西(容器里面写文件会占用ephemeral-storage,ephemeral-storage过多pod会被驱逐)，多使用无状态型容器，谨慎选择存储方式，尽量别用hostpath这种存储
 
-出现状况时,真的有种欲哭无泪的感觉.
+出现状况时，真的有种欲哭无泪的感觉。
 
 ```
 Events:
@@ -71,11 +71,11 @@ Events:
   Warning  ImageGCFailed          3m4s                  kubelet, node.xxxx1     failed to garbage collect required amount of images. Wanted to free 4920913920 bytes, but freed 0 bytes
 ```
 
-ImageGCFailed 是很坑爹的状态,出现这个状态时,表示 kubelet 尝试回收磁盘失败,这时得考虑是否要手动上机修复了.
+ImageGCFailed 是很坑爹的状态，出现这个状态时，表示 kubelet 尝试回收磁盘失败，这时得考虑是否要手动上机修复了。
 
 建议:
 
-1. 镜像数量在200以上时,采购100G SSD存镜像
+1. 镜像数量在200以上时，采购100G SSD存镜像
 1. 少用临时存储(empty-dir,hostpath之类的)
 
 参考链接:
@@ -86,7 +86,7 @@ ImageGCFailed 是很坑爹的状态,出现这个状态时,表示 kubelet 尝试�
 
 ### 节点CPU彪高
 
-有可能是节点在进行GC(container GC/image GC),用`describe node`查查.我有次遇到这种状况,最后节点上的容器少了很多,也是有点郁闷
+有可能是节点在进行GC(container GC/image GC)，用`describe node`查查。我有次遇到这种状况，最后节点上的容器少了很多，也是有点郁闷
 
 ```
 Events:
@@ -109,11 +109,11 @@ Events:
   ----     ------             ----                ----                                         -------
   Warning  ContainerGCFailed  5s (x543 over 27h)  kubelet, cn-shenzhen.xxxx                    rpc error: code = DeadlineExceeded desc = context deadline exceeded
 ```
-ssh登录主机后发现,docker服务虽然还在运行,但`docker ps`卡住了.于是我顺便升级了内核到5.1,然后重启.
+ssh登录主机后发现，docker服务虽然还在运行，但`docker ps`卡住了。于是我顺便升级了内核到5.1，然后重启。
 
 后来发现是有个人上了一个问题镜像，无论在哪节点运行，都会把节点搞瘫，也是醉了。
 
-unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kubernetes master 自身不知道节点上面的容器是死是活,假如有一个非常重要的容器在 unknown 节点上面运行,而且他刚好又挂了,kubernetes是不会自动帮你另启一个容器的,这点要注意.
+unknown 是非常严重的问题，必须要予以重视。节点出现 unknown ,kubernetes master 自身不知道节点上面的容器是死是活，假如有一个非常重要的容器在 unknown 节点上面运行，而且他刚好又挂了，kubernetes是不会自动帮你另启一个容器的，这点要注意。
 
 参考链接:
 
@@ -122,11 +122,11 @@ unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kub
 
 ### SystemOOM
 
-`SystemOOM` 并不一定是机器内存用完了.有一种情况是docker 在控制容器的内存导致的.
+`SystemOOM` 并不一定是机器内存用完了。有一种情况是docker 在控制容器的内存导致的。
 
 默认情况下Docker的存放位置为：/var/lib/docker/containers/$id
 
-这个目录下面有个重要的文件: `hostconfig.json`,截取部分大概长这样:
+这个目录下面有个重要的文件: `hostconfig.json`，截取部分大概长这样:
 
 ```json
 	"MemorySwappiness": -1,
@@ -140,13 +140,13 @@ unknown 是非常严重的问题,必须要予以重视.节点出现 unknown ,kub
 }
 ```
 
-`"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器,而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
+`"OomKillDisable": false,` 禁止了 docker 服务通过杀进程/重启的方式去和谐使用资源超限的容器，而是以其他的方式去制裁(具体的可以看[这里](https://docs.docker.com/config/containers/resource_constraints/))
 
 ### docker daemon 卡住
 
-这种状况我出现过一次,原因是某个容器有毛病,坑了整个节点.
+这种状况我出现过一次，原因是某个容器有毛病，坑了整个节点。
 
-出现这个问题要尽快解决,因为节点上面所有的 pod 都会变成 unknown .
+出现这个问题要尽快解决，因为节点上面所有的 pod 都会变成 unknown .
 
 ```bash
 systemctl daemon-reexec
@@ -154,7 +154,7 @@ systemctl restart docker(可选视情况定)
 systemctl restart kubelet
 ```
 
-严重时只能重启节点,停止涉事容器.
+严重时只能重启节点，停止涉事容器。
 
 建议: `对于容器的liveness/readiness 使用tcp/httpget的方式，避免 高频率使用exec`
 ## pod
@@ -162,9 +162,9 @@ systemctl restart kubelet
 
 ### pod频繁重启
 
-原因有多种,不可一概而论
+原因有多种，不可一概而论
 
-有一种情况是,deploy配置了健康检查,节点运行正常,但是因为节点负载过高导致了健康检查失败(load15长期大于2以上),频繁Backoff.我调高了不健康阈值之后,降低节点负载之后,问题解决
+有一种情况是，deploy配置了健康检查，节点运行正常，但是因为节点负载过高导致了健康检查失败(load15长期大于2以上)，频繁Backoff.我调高了不健康阈值之后，降低节点负载之后，问题解决
 
 ```yaml
 
@@ -185,7 +185,7 @@ systemctl restart kubelet
 
 ### Readiness/Liveness connection refused
 
-Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是应用的问题,如果节点本身负载过重,也是会出现connection refused或者timeout
+Readiness检查失败的也会重启，但是`Readiness`检查失败不一定是应用的问题，如果节点本身负载过重，也是会出现connection refused或者timeout
 
 这个问题要上节点排查
 
@@ -198,7 +198,7 @@ Readiness检查失败的也会重启,但是`Readiness`检查失败不一定是�
     1. Container 的使用量（log，如果没有 overlay 分区，则包括 imagefs）超过了他的 limit，则这个 pod 会被驱逐
     1. Pod 对本地临时存储总的使用量（所有 emptydir 和 container）超过了 pod 中所有container 的 limit 之和，则 pod 被驱逐
 
-ephemeral-storage是一个pod用的临时存储.
+ephemeral-storage是一个pod用的临时存储。
 ```
 resources:
        requests: 
@@ -206,7 +206,7 @@ resources:
        limits:
            ephemeral-storage: "3Gi"
 ```
-节点被驱逐后通过get po还是能看到,用describe命令,可以看到被驱逐的历史原因
+节点被驱逐后通过get po还是能看到，用describe命令，可以看到被驱逐的历史原因
 
 > Message:            The node was low on resource: ephemeral-storage. Container codis-proxy was using 10619440Ki, which exceeds its request of 0.
 
@@ -218,7 +218,7 @@ resources:
 
 ### kubectl exec 进入容器失败
 
-这种问题我在搭建codis-server的时候遇到过,当时没有配置就绪以及健康检查.但获取pod描述的时候,显示running.其实这个时候容器以及不正常了.
+这种问题我在搭建codis-server的时候遇到过，当时没有配置就绪以及健康检查。但获取pod描述的时候，显示running.其实这个时候容器以及不正常了。
 
 ```
 ~ kex codis-server-3 sh
@@ -226,29 +226,29 @@ rpc error: code = 2 desc = containerd: container not found
 command terminated with exit code 126
 ```
 
-解决办法:删了这个pod,配置`livenessProbe`
+解决办法:删了这个pod，配置`livenessProbe`
 
 
 ### pod的virtual host name
 
 `Deployment`衍生的pod,`virtual host name`就是`pod name`.
 
-`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些.而且支持其他pod访问
+`StatefulSet`衍生的pod,`virtual host name`是`<pod name>.<svc name>.<namespace>.svc.cluster.local`.相比`Deployment`显得更有规律一些。而且支持其他pod访问
 
 
 ### pod接连Crashbackoff
 
-`Crashbackoff`有多种原因.
+`Crashbackoff`有多种原因。
 
-沙箱创建(FailedCreateSandBox)失败,多半是cni网络插件的问题
+沙箱创建(FailedCreateSandBox)失败，多半是cni网络插件的问题
 
-镜像拉取,有中国特色社会主义的问题,可能太大了,拉取较慢
+镜像拉取，有中国特色社会主义的问题，可能太大了，拉取较慢
 
-也有一种可能是容器并发过高,流量雪崩导致.
+也有一种可能是容器并发过高，流量雪崩导致。
 
-比如,现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃,继而`Crashbackoff`,那么a就会被`service`剔除出去,剩下的bc也承载不了那么多流量,接连崩溃,最终网站不可访问.这种情况,多见于高并发网站+低效率web容器.
+比如，现在有3个容器abc,a突然遇到流量洪峰导致内部奔溃，继而`Crashbackoff`，那么a就会被`service`剔除出去，剩下的bc也承载不了那么多流量，接连崩溃，最终网站不可访问。这种情况，多见于高并发网站+低效率web容器。
 
-在不改变代码的情况下,最优解是增加副本数,并且加上hpa,实现动态伸缩容.
+在不改变代码的情况下，最优解是增加副本数，并且加上hpa，实现动态伸缩容。
 
 ### DNS 效率低下
 
@@ -260,15 +260,15 @@ command terminated with exit code 126
 
 ### MinimumReplicationUnavailable
 
-如果`deploy`配置了SecurityContext,但是api-server拒绝了,就会出现这个情况,在api-server的容器里面,去掉`SecurityContextDeny`这个启动参数.
+如果`deploy`配置了SecurityContext，但是api-server拒绝了，就会出现这个情况，在api-server的容器里面，去掉`SecurityContextDeny`这个启动参数。
 
 具体见[Using Admission Controllers](https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
 
 ## service
 
-### 建了一个服务,但是没有对应的po,会出现什么情况?
+### 建了一个服务，但是没有对应的po，会出现什么情况？
 
-请求时一直不会有响应,直到request timeout
+请求时一直不会有响应，直到request timeout
 
 参考
 
@@ -279,7 +279,7 @@ command terminated with exit code 126
 
 原因可能有
 
-1. pod没有设置readinessProbe,请求到未就绪的pod
+1. pod没有设置readinessProbe，请求到未就绪的pod
 1. kube-proxy宕机了(kube-proxy负责转发请求)
 1. 网络过载
 
@@ -339,23 +339,23 @@ Address 1: 172.30.15.52 consul.default.svc.cluster.local
 
 ## ReplicationController不更新
 
-ReplicationController不是用apply去更新的,而是`kubectl rolling-update`,但是这个指令也废除了,取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段,或者懒一点,apply file之后,delete po.
+ReplicationController不是用apply去更新的，而是`kubectl rolling-update`，但是这个指令也废除了，取而代之的是`kubectl rollout`.所以应该使用`kubectl rollout`作为更新手段，或者懒一点，apply file之后，delete po.
 
-尽量使用deploy吧.
+尽量使用deploy吧。
 
 ## StatefulSet
 
 ### pod 更新失败
 
-StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有可能是这个容器导致更新卡住了,删掉即可.
+StatefulSet是逐一更新的，观察一下是否有`Crashbackoff`的容器，有可能是这个容器导致更新卡住了，删掉即可。
 
 ### unknown pod
 
-如果 StatefulSet 绑定 pod 状态变成 unknown ,这个时候是非常坑爹的,StatefulSet不会帮你重建pod.
+如果 StatefulSet 绑定 pod 状态变成 unknown ，这个时候是非常坑爹的，StatefulSet不会帮你重建pod.
 
-这时会导致外部请求一直失败.
+这时会导致外部请求一直失败。
 
-综合建议,不用 `StatefulSet` ,改用 operator 模式替换它.
+综合建议，不用 `StatefulSet` ，改用 operator 模式替换它。
 
 ## [kube-apiserver](https://kubernetes.io/zh/docs/reference/command-line-tools-reference/kube-apiserver/)
 
@@ -368,13 +368,13 @@ StatefulSet是逐一更新的,观察一下是否有`Crashbackoff`的容器,有�
 
 master 节点会自动监视这个目录里面文件的变化，视情况自动重启。
 
-所以修改 `api server` 的设置只需要修改`kube-apiserver.yaml`,保存退出，相应的容器就会重启。同理，如果你改错了配置，`api server` 就会启动失败，修改之前务必仔细看清楚[文档](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/)
+所以修改 `api server` 的设置只需要修改`kube-apiserver.yaml`，保存退出，相应的容器就会重启。同理，如果你改错了配置，`api server` 就会启动失败，修改之前务必仔细看清楚[文档](https://kubernetes.io/zh/docs/concepts/overview/kubernetes-api/)
 
 ## 阿里云Kubernetes问题
 
 ### 修改默认ingress
 
-新建一个指向ingress的负载均衡型svc,然后修改一下`kube-system`下`nginx-ingress-controller`启动参数.
+新建一个指向ingress的负载均衡型svc，然后修改一下`kube-system`下`nginx-ingress-controller`启动参数。
 
 ```
         - args:
@@ -397,7 +397,7 @@ NAME         TYPE           CLUSTER-IP      EXTERNAL-IP   PORT(S)         AGE
 consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m  
 ```
 
-这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关,`cloud-controller-manager`有3个组件,他们需要内部选主,可能哪里出错了,当时我把其中一个出问题的`pod`删了,就好了.
+这问题跟[Alibaba Cloud Provider](https://yq.aliyun.com/articles/626066)这个组件有关，`cloud-controller-manager`有3个组件，他们需要内部选主，可能哪里出错了，当时我把其中一个出问题的`pod`删了，就好了。
 
 ### 清理Statefulset动态PVC
 
@@ -409,11 +409,11 @@ consul-web   LoadBalancer   172.30.13.122   <pending>     443:32082/TCP   5m
 
 ### 升级到v1.12.6-aliyun.1之后节点可分配内存变少
 
-该版本每个节点保留了1Gi,相当于整个集群少了N GB(N为节点数)供Pod分配.
+该版本每个节点保留了1Gi，相当于整个集群少了N GB(N为节点数)供Pod分配。
 
-如果节点是4G的,Pod请求3G,极其容易被驱逐.
+如果节点是4G的，Pod请求3G，极其容易被驱逐。
 
-建议提高节点规格.
+建议提高节点规格。
 
 ```
 Server Version: version.Info{Major:"1", Minor:"12+", GitVersion:"v1.12.6-aliyun.1", GitCommit:"8cb561c", GitTreeState:"", BuildDate:"2019-04-22T11:34:20Z", GoVersion:"go1.10.8", Compiler:"gc", Platform:"linux/amd64"}
@@ -423,18 +423,18 @@ Server Version: version.Info{Major:"1", Minor:"12+", GitVersion:"v1.12.6-aliyun.
 
 RouteController failed to create a route
 
-看一下kubernetes events,是否出现了
+看一下kubernetes events，是否出现了
 
 ```
 timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9cpnsbt11hlelpoq2zh error, Aliyun API Error: RequestId: 7006BF4E-000B-4E12-89F2-F0149D6688E4 Status Code: 400 Code: QuotaExceeded Message: Route entry quota exceeded in this route table  
 ```
 
-出现这个问题是因为达到了[VPC的自定义路由条目限制](https://help.aliyun.com/document_detail/27750.html),默认是48,需要提高`vpc_quota_route_entrys_num`的配额
+出现这个问题是因为达到了[VPC的自定义路由条目限制](https://help.aliyun.com/document_detail/27750.html)，默认是48，需要提高`vpc_quota_route_entrys_num`的配额
 
 ### 访问LoadBalancer svc随机出现流量转发异常
 
 见
-[[bug]阿里云kubernetes版不检查loadbalancer service port,导致流量被异常转发](https://github.com/kubernetes/cloud-provider-alibaba-cloud/issues/57)
+[[bug]阿里云kubernetes版不检查loadbalancer service port，导致流量被异常转发](https://github.com/kubernetes/cloud-provider-alibaba-cloud/issues/57)
 简单的说，同SLB不能有相同的svc端口，不然会瞎转发。
 
 官方说法：
@@ -445,7 +445,7 @@ timed out waiting for the condition -> WaitCreate: ceate route for table vtb-wz9
 
 [Docker容器内存监控](https://xuxinkun.github.io/2016/05/16/memory-monitor-with-cgroup/)
 
-原因在于他们控制台用的是usage_in_bytes(cache+buffer),所以会比云监控看到的数字大
+原因在于他们控制台用的是usage_in_bytes(cache+buffer)，所以会比云监控看到的数字大
 
 
 ### Ingress Controller 玄学优化
@@ -466,7 +466,7 @@ client-header-timeout: "75"
 worker-processes: "16"
 ```
 
-注意,是一个项对应一个配置,而不是一个文件. 格式大概这样
+注意，是一个项对应一个配置，而不是一个文件。 格式大概这样
 
 ```
 ➜  ~ kg cm nginx-configuration -o yaml
@@ -486,16 +486,16 @@ data:
 Message: **Liveness probe failed: rpc error: code = 2 desc = oci runtime error: exec failed: container_linux.go:262: starting container process caused "process_linux.go:86: adding pid 30968 to cgroups caused \"failed to write 30968 to cgroup.procs: write /sys/fs/cgroup/cpu,cpuacct/kubepods.slice/kubepods-burstable.slice/kubepods-burstable-podfe4cc065_cc58_11e9_bf64_00163e08cd06.slice/docker-0447a362d2cf4719ae2a4f5ad0f96f702aacf8ee38d1c73b445ce41bdaa8d24a.scope/cgroup.procs: invalid argument\""
 ```
 
-阿里云初始化节点用的 centos 版本老旧,内核是3.1, Centos7.4的内核3.10还没有支持cgroup对于pid/fd限制,所以会出现这类问题.
+阿里云初始化节点用的 centos 版本老旧，内核是3.1, Centos7.4的内核3.10还没有支持cgroup对于pid/fd限制，所以会出现这类问题。
 
 建议:
 
-1. 手动维护节点,升级到5.x的内核(目前已有一些节点升级到5.x,但是docker版本还是 17.6.2 ,持续观察中~)
-1. 安装 [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer) ,利用事件机制提醒管理员手动维护
+1. 手动维护节点，升级到5.x的内核(目前已有一些节点升级到5.x，但是docker版本还是 17.6.2 ，持续观察中~)
+1. 安装 [NPD](https://github.com/AliyunContainerService/node-problem-detector) + [eventer](https://github.com/AliyunContainerService/kube-eventer) ，利用事件机制提醒管理员手动维护
 
 ### OSS PVC FailedMount
 
-可以通过PV制定access key,access secret +PVC的方式使用OSS.某天某个deploy遇到 FailedMount 的问题,联系到阿里云的开发工程师,说是 flexvolume 在初次运行的节点上面运行会有问题,要让他"重新注册"
+可以通过PV制定access key,access secret +PVC的方式使用OSS.某天某个deploy遇到 FailedMount 的问题，联系到阿里云的开发工程师，说是 flexvolume 在初次运行的节点上面运行会有问题，要让他"重新注册"
 
 影响到的版本: registry-vpc.cn-shenzhen.aliyuncs.com/acs/flexvolume:v1.12.6.16-1f4c6cb-aliyun
 

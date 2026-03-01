@@ -53,7 +53,7 @@ the Chinese Character is from E4 to E9
 
 ### 不要使用"utf-8"
 
-utf-8不是真正的UTF-8,应该使用`utf8mb4`作为替代。系统中有一个参数`character_set_server`,改为`utf8mb4`
+utf-8不是真正的UTF-8，应该使用`utf8mb4`作为替代。系统中有一个参数`character_set_server`，改为`utf8mb4`
 
 ### 显示数据库引擎
 
@@ -65,7 +65,7 @@ utf-8不是真正的UTF-8,应该使用`utf8mb4`作为替代。系统中有一个
 
 ### 暴力改表
 
-改表期间,运行
+改表期间，运行
 
 ```sql
 SELECT 
@@ -91,9 +91,9 @@ FROM
             AND i.trx_mysql_thread_id NOT IN (CONNECTION_ID() , p.id)) t;
 ```
 
-执行 alter 的同时, kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
+执行 alter 的同时， kill 掉除了 select * from   INFORMATION_SCHEMA.innodb_trx里面除了 alter 以外的进程
 
-`PS`:虽然mysql 5.7支持onlineDDL,但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html),例子见[pt-online-schema-change使用说明、限制与比较](http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/)
+`PS`:虽然mysql 5.7支持onlineDDL，但是实测修改数据类型的时候不支持DML.这个时候可以考虑使用[pt-online-schema-change](https://www.percona.com/doc/percona-toolkit/LATEST/pt-online-schema-change.html)，例子见[pt-online-schema-change使用说明、限制与比较](http://seanlook.com/2016/05/27/mysql-pt-online-schema-change/)
 
 参考:
 [pt-online-schema-change的原理解析与应用说明](https://www.cnblogs.com/xinysu/p/6758170.html)
@@ -193,7 +193,7 @@ sudo service mysql restart
 
 ### 磁盘已满
 
-阿里云的RDS,磁盘满了，会出现 `--rds-read-drop-only` 状态。此时只能读取数据或者删库（毕竟升级磁盘要重启）。
+阿里云的RDS，磁盘满了，会出现 `--rds-read-drop-only` 状态。此时只能读取数据或者删库（毕竟升级磁盘要重启）。
 
 此时最快的解决办法是删库。
 

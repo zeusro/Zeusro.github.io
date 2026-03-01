@@ -17,7 +17,7 @@
 ```
 
 ## querystring接收参数/ POST Form接收参数
-这两种合在一起写是因为他们接收的方式都是一样的,可以用多个字段分开接收
+这两种合在一起写是因为他们接收的方式都是一样的，可以用多个字段分开接收
 
 
 
@@ -39,13 +39,13 @@ public class PictureAPIs {
 ```
 
 * @Validated
-@Validated是最重要的,在每个需要验证控制器参数的 API 上面都需要加上这个注解
+@Validated是最重要的，在每个需要验证控制器参数的 API 上面都需要加上这个注解
 
 * @RequestParam
-这个是很重要的,每个提交的参数都需要加上这个标签`@RequestParam("file")`表示接收 name=file 的参数提交.
+这个是很重要的，每个提交的参数都需要加上这个标签`@RequestParam("file")`表示接收 name=file 的参数提交。
 
 * @NotNull
-非空验证,这个很常见
+非空验证，这个很常见
 
 * @Size
 字符串长度上下限
@@ -82,7 +82,7 @@ public class PictureAddBase64RequestBody extends PictureAddBaseRequestBody {
 
 }
 ```
-以这个为例,参数的校验标签放在PictureAddBase64RequestBody的字段上面
+以这个为例，参数的校验标签放在PictureAddBase64RequestBody的字段上面
 
 
 ## 其他

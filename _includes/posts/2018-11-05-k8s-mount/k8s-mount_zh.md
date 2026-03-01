@@ -1,4 +1,4 @@
-最近有点划水,文章还是有写的,只是没成型,所以没发出来.
+最近有点划水，文章还是有写的，只是没成型，所以没发出来。
 
 今天介绍下用k8s挂载一些常用的资源
 
@@ -30,7 +30,7 @@
 
 ### configMap
 
-**注意一下,修改configmap不会导致容器里的挂载的configmap文件/环境变量发生改变;删除configmap也不会影响到容器内部的环境变量/文件,但是删除configmap之后,被挂载的pod上面会出现一个warnning的事件**
+**注意一下，修改configmap不会导致容器里的挂载的configmap文件/环境变量发生改变;删除configmap也不会影响到容器内部的环境变量/文件，但是删除configmap之后，被挂载的pod上面会出现一个warnning的事件**
 
 ```
 Events:
@@ -39,9 +39,9 @@ Events:
   Warning  FailedMount  64s (x13 over 11m)  kubelet, cn-shenzhen.i-wz9498k1n1l7sx8bkc50  MountVolume.SetUp failed for volume "nginx" : configmaps "nginx" not found
 ```
 
-[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)写的很清楚了,这里恬不知耻得copy一下
+[config map](https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#define-container-environment-variables-using-configmap-data)写的很清楚了，这里恬不知耻得copy一下
 
-**注意,configmap有1M的限制,一般用来挂载小型配置,大量配置建议上配置中心**
+**注意，configmap有1M的限制，一般用来挂载小型配置，大量配置建议上配置中心**
 
 ### 挂载单一项
 ```
@@ -112,9 +112,9 @@ Selects a field of the pod: supports metadata.name, metadata.namespace, metadata
 
 Selects a resource of the container: only resources limits and requests (limits.cpu, limits.memory, limits.ephemeral-storage, requests.cpu, requests.memory and requests.ephemeral-storage) are currently supported.
 
-英文介绍得很明白,用来挂载当前yaml里面container的资源(CPU/内存)限制,用得比较少啦其实.此外还可以结合`downloadAPI`
+英文介绍得很明白，用来挂载当前yaml里面container的资源(CPU/内存)限制，用得比较少啦其实。此外还可以结合`downloadAPI`
 
-注意`containerName`不能配错,不然pod状态会变成`CreateContainerConfigError`
+注意`containerName`不能配错，不然pod状态会变成`CreateContainerConfigError`
 
 ```
           env:  
@@ -152,14 +152,14 @@ Selects a key of a secret in the pod's namespace
 
 ## 目录/文件类挂载
 
-k8s可以挂载的资源实在是太多,这里挑一些比较有代表性的来讲一下
+k8s可以挂载的资源实在是太多，这里挑一些比较有代表性的来讲一下
 
-这一类资源一般要先在spec层级定义`volumes`,然后在`containers`定义`volumeMounts`,有种先声明,再使用的意思
+这一类资源一般要先在spec层级定义`volumes`，然后在`containers`定义`volumeMounts`，有种先声明，再使用的意思
 
 ### hostPath(宿主机目录/文件)
 
 1. 既有目录/文件用`Directory`/`File`+nodeSelector
-  但是用了`nodeSelector`之后,以后的伸缩都会在匹配的节点上,如果节点只有1个,副本集设置得超出实际节点可承受空间,最终将导致单点问题,这个要注意下
+  但是用了`nodeSelector`之后，以后的伸缩都会在匹配的节点上，如果节点只有1个，副本集设置得超出实际节点可承受空间，最终将导致单点问题，这个要注意下
 1. 应用启用时读写空文件用`DirectoryOrCreate`或者`FileOrCreate`
 
 以下演示第一种方案
@@ -227,7 +227,7 @@ spec:
 
 #### 单项挂载(第1种)
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+这种挂载会热更新，更改后大约10秒后能看到变化
 
 ```
       volumeMounts:
@@ -259,7 +259,7 @@ spec:
 
 #### 完全挂载
 
-这种挂载会热更新,更改后大约10秒后能看到变化
+这种挂载会热更新，更改后大约10秒后能看到变化
 
 ```
       volumeMounts:
@@ -292,7 +292,7 @@ spec:
 
 #### 完全挂载
 
-这里用了特定权限去挂载文件,默认好像是777
+这里用了特定权限去挂载文件，默认好像是777
 
 ```
           volumeMounts:
@@ -311,7 +311,7 @@ spec:
 --from-file=id_rsa.pub=/Volumes/D/temp/id_rsa.pub  \
 --from-file=known_hosts=/Volumes/D/temp/known_hosts \
 ```
-比如这个模式创建出来的secret,容器里面/root/.ssh目录就会有`id_rsa`,`id_rsa.pub`,`known_hosts`3个文件
+比如这个模式创建出来的secret，容器里面/root/.ssh目录就会有`id_rsa`,`id_rsa.pub`,`known_hosts`3个文件
 
 ### downwardAPI
 

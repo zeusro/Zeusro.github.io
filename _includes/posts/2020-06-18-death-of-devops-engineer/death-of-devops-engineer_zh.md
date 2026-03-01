@@ -6,7 +6,7 @@
 
 上一任运维负责人是个天才，他给我留了一堆完全没有密码的服务器，涵盖了腾讯云和阿里云，此外还有一大堆无效的DNS记录，CDN域名，处理这些垃圾的善后工作，陆陆续续花了我一年多时间。
 
-2018年6月，因缘巧合之下，阿里云P8口授我 Kubernetes,我当天下午立即决定，无论遇到多大的困难，必定要将其落地。
+2018年6月，因缘巧合之下，阿里云P8口授我 Kubernetes，我当天下午立即决定，无论遇到多大的困难，必定要将其落地。
 
 当时我们的系统已经有一部分运行在阿里云的 docker swarm 上面，但我看了一下 release note ，觉得那玩意肯定是弃子。于是，在三个月左右的时间内，通过看英文版的《kubernetes in action》和参与社群，我从 0 docker 基础的渣渣升级为集团内部**首席云原生步道师**。并升级为社群的管理员。
 
@@ -17,11 +17,11 @@
 1. [容器镜像服务支持私有仓库海外机器构建](https://connect.console.aliyun.com/connect/detail/84361)
 1. [kubernetes web控制台:支持ephemeral-storage的设置](https://connect.console.aliyun.com/connect/detail/97716)
 1. [容器镜像服务:支持gcr.io等镜像的代理](https://connect.console.aliyun.com/connect/detail/78278)
-1. [kubernetes:尽快废弃 dashboard,并将其功能集成到阿里云控制台](https://connect.console.aliyun.com/connect/detail/77011)
+1. [kubernetes:尽快废弃 dashboard，并将其功能集成到阿里云控制台](https://connect.console.aliyun.com/connect/detail/77011)
 1. [Kubernetes:改进创建svc](https://connect.console.aliyun.com/connect/detail/75930)
 1. [kubernetes:改进RBAC](https://connect.console.aliyun.com/connect/detail/75929)
 1. [阿里云kubernetes：SchedulingDisabled节点会被自动剔除出虚拟服务器组](https://connect.console.aliyun.com/connect/detail/73467)
-1. [Kubernetes:扩充"节点不可调度"的功能,改为"维护节点"](https://connect.console.aliyun.com/connect/detail/70803)
+1. [Kubernetes:扩充"节点不可调度"的功能，改为"维护节点"](https://connect.console.aliyun.com/connect/detail/70803)
 1. [Kubernetes:改进创建集群选项](https://connect.console.aliyun.com/connect/detail/70665)
 1. [k8s:增强云盘数据卷](https://connect.console.aliyun.com/connect/detail/61986)
 1. [k8s:变更service的证书标签无法生效](https://connect.console.aliyun.com/connect/detail/57727)
@@ -41,7 +41,7 @@
 1. [k8s:改进LoadBalancer型服务和负载均衡的绑定](https://connect.console.aliyun.com/connect/detail/52594)
 1. [k8s-使用私有镜像创建部署(deployment)的时候会有问题](https://connect.console.aliyun.com/connect/detail/47147)
 1. [无意中发现 K8S的部署详情页面有 bug](https://connect.console.aliyun.com/connect/detail/47034)
-1. [希望阿里云的容器kubernetes界面不要强行翻译专有名词!!!](https://connect.console.aliyun.com/connect/detail/46590)
+1. [希望阿里云的容器kubernetes界面不要强行翻译专有名词！！！](https://connect.console.aliyun.com/connect/detail/46590)
 1. [K8S-创建应用页面的相关教程改进](https://connect.console.aliyun.com/connect/detail/43756)
 1. [优化K8S部署应用的用户体验](https://connect.console.aliyun.com/connect/detail/43736)
 1. [让用户灵活选择 K8S master 付费方式](https://connect.console.aliyun.com/connect/detail/43655)

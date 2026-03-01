@@ -22,7 +22,7 @@
 
 安装之后记得安装MSbuild,gitlab,gitlab-hook插件 
 
-服务器上面,需要安装.net环境,git
+服务器上面，需要安装.net环境，git
 
 ## 全局设置
 
@@ -32,7 +32,7 @@
 
 ## Global Tool Configuration
 
-不知道什么时候开始,插件的设置移动到了这个地方,这里需要设置几个地方
+不知道什么时候开始，插件的设置移动到了这个地方，这里需要设置几个地方
 
 - MSBuild
 
@@ -40,71 +40,71 @@
 
 - Git
 
-主要是设置git的可执行文件,由于我有加到path上,所以忽略
+主要是设置git的可执行文件，由于我有加到path上，所以忽略
 
 ## Credentials
 
 证书的设置比较奇葩
 
-需要点击(global),然后在弹出的内容里面点击add Credentials
+需要点击(global)，然后在弹出的内容里面点击add Credentials
 
 ## Job的配置
 
 - SSH的问题
 
-我们都知道每一个Windows命令其实有着角色附在上面的.以前用git的时候，发现自己是有加ssh私钥到服务器上面的,但是git push失败,那也其实就是因为我们用的角色有问题.
+我们都知道每一个Windows命令其实有着角色附在上面的。以前用git的时候，发现自己是有加ssh私钥到服务器上面的，但是git push失败，那也其实就是因为我们用的角色有问题。
 
-Jenkins用的是**Local System account**.在用ssh key连接我们gitlab上面的项目时,要把我们系统用户上面的.ssh复制到Jenkins使用的用户用的文件夹.
+Jenkins用的是**Local System account**.在用ssh key连接我们gitlab上面的项目时，要把我们系统用户上面的.ssh复制到Jenkins使用的用户用的文件夹。
 
-但是在这之前.需要ssh(在git的安装目录里面有这个exe)一下我们的gitlab主机
+但是在这之前。需要ssh(在git的安装目录里面有这个exe)一下我们的gitlab主机
 
 ```bash
 ssh.exe -T git@192.1.1.123
 ```
 
-确保known_hosts里面有了这个主机后,把整个.ssh文件夹复制到**C:\Windows\SysWOW64\config\systemprofile**,以及**C:\Windows\System32\config\systemprofile**这个目录
+确保known_hosts里面有了这个主机后，把整个.ssh文件夹复制到**C:\Windows\SysWOW64\config\systemprofile**，以及**C:\Windows\System32\config\systemprofile**这个目录
 
 **小技巧**
 
-看到permission denied的话,加多一句
+看到permission denied的话，加多一句
 
 ```bash
 ssh-keygen -t rsa -C "robot233@robot.com"
 ```
 
-看一下know host加到哪个目录,然后把自己生成的丢过去这个导致失败的目录就行.
+看一下know host加到哪个目录，然后把自己生成的丢过去这个导致失败的目录就行。
 
 - 源码管理
 
-在安装了上文提到的必备插件之后,源码里面就可以选择git,这里面我用了ssh,所以是下图这种格式
+在安装了上文提到的必备插件之后，源码里面就可以选择git，这里面我用了ssh，所以是下图这种格式
 
 ![Image](/img/in-post/net-ci/job里面的git设置1.png)
 
 **重点:**
 
-这个证书别用计算机用户那个SSH.我们知道,一个gitlab只允许一台机子一个ssh,同一个ssh不能添加到多个账户.这样就会有一个问题.我们这台编译机要连源码的项目,于是需要一个ssh key.但是它编译后的结果,在Windows中我是用git去做目录同步的,于是需要另外一个ssh 去连我的机器人账户,这2个ssh key一样的话,将会导致一个步骤失败.
+这个证书别用计算机用户那个SSH.我们知道，一个gitlab只允许一台机子一个ssh，同一个ssh不能添加到多个账户。这样就会有一个问题。我们这台编译机要连源码的项目，于是需要一个ssh key.但是它编译后的结果，在Windows中我是用git去做目录同步的，于是需要另外一个ssh 去连我的机器人账户，这2个ssh key一样的话，将会导致一个步骤失败。
 
-源码浏览器,其实是跳到我们的gitlab对应项目上,所以用http
+源码浏览器，其实是跳到我们的gitlab对应项目上，所以用http
 
 ![Image](/img/in-post/net-ci/job里面的git设置2.png)
 
 - 触发器
 
-这个很重要.我们根据自己的需要打勾以及选择之后
+这个很重要。我们根据自己的需要打勾以及选择之后
 
 ![Image](/img/in-post/net-ci/job里面的git设置3.png)
 
 复制Build when a change is pushed to GitLab. GitLab CI Service URL后面的url.
 
-回到这个项目对应gitlab项目设置,在setting→_→web hooks里面填上这个URL,并按需要打勾,确认无误后添加.
+回到这个项目对应gitlab项目设置，在setting→_→web hooks里面填上这个URL，并按需要打勾，确认无误后添加。
 
-这样当我们gitlab上面的源码有变动时,就会触发web hook.告诉我们的CI该干活了.
+这样当我们gitlab上面的源码有变动时，就会触发web hook.告诉我们的CI该干活了。
 
 ![Image](/img/in-post/net-ci/添加WebHook.png)
 
 - MSBuild
 
-这里主要需要学习MSBuild的文法.当初我建这个CI的目的.纯粹是为了编译网站.下面这个几个就是常用的,非常容易理解. 
+这里主要需要学习MSBuild的文法。当初我建这个CI的目的。纯粹是为了编译网站。下面这个几个就是常用的，非常容易理解。 
 
 ```text
 /p:PublishProfile="F:xxxxx.pubxml"
@@ -114,11 +114,11 @@ ssh-keygen -t rsa -C "robot233@robot.com"
 /property:TargetFrameworkVersion=v4.5
 ```
 
-pubxml文件在我们选择发布时就会生成一个.这个自己看,也非常容易理解.
+pubxml文件在我们选择发布时就会生成一个。这个自己看，也非常容易理解。
 
-我建议在自己开发的机器msbuild一遍.
+我建议在自己开发的机器msbuild一遍。
 
-一般来讲.我们的msbuild位于**cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319\**
+一般来讲。我们的msbuild位于**cd C:\Windows\Microsoft.NET\Framework64\v4.0.30319\**
 
 然后
 
@@ -149,13 +149,13 @@ MSBuild.exe "C:\xxxxx.sln" \
 
 通过编译后上服务器一遍来说没问题
 
-但是,我特么就是**有问题啊!!!!**
+但是，我特么就是**有问题啊！！！！**
 
 - nuget feed的问题
 
-因为我项目里面用了我私有的nuget包,这个包在nuget的官方源头是找不到的.所以我需要像在VS那样,在CI server上面配置自己的feed
+因为我项目里面用了我私有的nuget包，这个包在nuget的官方源头是找不到的。所以我需要像在VS那样，在CI server上面配置自己的feed
 
-在**C:\Windows\SysWOW64\config\systemprofile\AppData\Roaming\NuGet**中找到NuGet.Config,改为
+在**C:\Windows\SysWOW64\config\systemprofile\AppData\Roaming\NuGet**中找到NuGet.Config，改为
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -179,17 +179,17 @@ MSBuild.exe "C:\xxxxx.sln" \
 
 - 编译失败问题
 
-这个不能忍了.妹的在我的电脑一点问题都没有,在server上死活不给编译过去.后来重点排查了程序中的第三方dll和我的后宫nuget包,发现错误都出在那里.之所以在开发机上面没有发觉,是因为开发机上面的nuget依赖有本地缓存.编译的时候直接跳过去了.于是历经了35次后,本宝宝的程序终于在CI上面编译成功
+这个不能忍了。妹的在我的电脑一点问题都没有，在server上死活不给编译过去。后来重点排查了程序中的第三方dll和我的后宫nuget包，发现错误都出在那里。之所以在开发机上面没有发觉，是因为开发机上面的nuget依赖有本地缓存。编译的时候直接跳过去了。于是历经了35次后，本宝宝的程序终于在CI上面编译成功
 
 - git没有权限clone不了项目的问题
 
-这个是job的配置出错.job的git配置里面,选择SSH Username with private key,直接输入私钥，要完整复制 ~/.ssh/id_isa里面的内容。即是包括首尾那个没有意义的分割符!
+这个是job的配置出错.job的git配置里面，选择SSH Username with private key，直接输入私钥，要完整复制 ~/.ssh/id_isa里面的内容。即是包括首尾那个没有意义的分割符！
 
 ## 血泪教训
 
 - 不要使用gitlab的**test hook**
 
-当时我项目有2个分支,我要生成的是某个分支的,但是点了一下test hook.我擦,主分支的东西都被拉过去了.
+当时我项目有2个分支，我要生成的是某个分支的，但是点了一下test hook.我擦，主分支的东西都被拉过去了。
 
 ## 异常处理
 

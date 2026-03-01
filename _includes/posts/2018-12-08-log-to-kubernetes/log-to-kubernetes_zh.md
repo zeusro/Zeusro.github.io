@@ -6,7 +6,7 @@
 
 可选方案:
 
-1. Logstash(过于消耗内存,尽量不要用这个)
+1. Logstash(过于消耗内存，尽量不要用这个)
 2. fluentd
 3. filebeat
 4. 不使用docker-driver
@@ -56,7 +56,7 @@ output:
     hosts: ["0.0.0.0:5044"]
 ```
 
-注：6.0以上该filebeat.yml需要挂载到/usr/share/filebeat/filebeat.yml,另外还需要挂载/usr/share/filebeat/data/registry 文件，避免filebeat容器挂了后，新起的重复收集日志。  
+注：6.0以上该filebeat.yml需要挂载到/usr/share/filebeat/filebeat.yml，另外还需要挂载/usr/share/filebeat/data/registry 文件，避免filebeat容器挂了后，新起的重复收集日志。  
 
 
 - logstash.conf
@@ -346,7 +346,7 @@ metadata:
     k8s-app: filebeat
 ```
 
-如果output是单节点elasticsearch,可以通过修改模板把导出的filebeat*设置为0个副本
+如果output是单节点elasticsearch，可以通过修改模板把导出的filebeat*设置为0个副本
 
 ```
 curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: application/json' -d'
@@ -373,7 +373,7 @@ curl -X PUT "10.10.10.10:9200/_template/template_log" -H 'Content-Type: applicat
 
 ## 其他方案
 
-有些是sidecar模式,sidecar模式可以做得比较细致.
+有些是sidecar模式，sidecar模式可以做得比较细致。
 
 1. [使用filebeat收集kubernetes中的应用日志](https://jimmysong.io/posts/kubernetes-filebeat/)
 1. [使用Logstash收集Kubernetes的应用日志](https://jimmysong.io/posts/kubernetes-logstash/)

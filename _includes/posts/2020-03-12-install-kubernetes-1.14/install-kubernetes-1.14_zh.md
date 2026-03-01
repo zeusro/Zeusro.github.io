@@ -2,7 +2,7 @@
 
 centos 7.6 64位
 
-内核版本:5.1.3-1.el7.elrepo.x86_64(手动升级,可免)
+内核版本:5.1.3-1.el7.elrepo.x86_64(手动升级，可免)
 
 kubeadm
 
@@ -144,7 +144,7 @@ systemctl enable kubelet
 
 接下来要根据实际情况选择单master还是奇数台master了
 
-kubeadm的默认配置文件"藏"在`kubeadm config print init-defaults`和`kubeadm config print join-defaults`中,这里要根据中国特色社会主义的实际情况进行修改.
+kubeadm的默认配置文件"藏"在`kubeadm config print init-defaults`和`kubeadm config print join-defaults`中，这里要根据中国特色社会主义的实际情况进行修改。
 
 
 ```
@@ -154,14 +154,14 @@ kubeadm config print join-defaults --component-configs KubeletConfiguration // J
 
 一般来说`serviceSubnet`范围要比`podSubnet`小
 
-`podSubnet: 10.66.0.0/16`注定了最多只能有65534个pod,serviceSubnet同理.
+`podSubnet: 10.66.0.0/16`注定了最多只能有65534个pod,serviceSubnet同理。
 
 ### 高可用型(生产用)
 
-高可用性的特点在于N个etcd,kube-apiserver,kube-scheduler,kube-controller-manager,以组件的冗余作为高可用的基础.
+高可用性的特点在于N个etcd,kube-apiserver,kube-scheduler,kube-controller-manager，以组件的冗余作为高可用的基础。
 
 
-api-server以负载均衡作为对外的入口.
+api-server以负载均衡作为对外的入口。
 
 [设置master](https://kubernetes.io/docs/setup/independent/setup-ha-etcd-with-kubeadm/)
 
@@ -273,17 +273,17 @@ sudo kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs
 
 ### [配置网络插件](https://kubernetes.io/docs/setup/independent/create-cluster-kubeadm/#pod-network)
 
-这里我选择`quay.io/coreos/flannel:v0.11.0-amd64`,因为架构比较齐全
+这里我选择`quay.io/coreos/flannel:v0.11.0-amd64`，因为架构比较齐全
 
 ### 引入其他master节点(高可用版)
 
-在`kubeadm init`的输出中,有一行是
+在`kubeadm init`的输出中，有一行是
 
 ```
 [upload-certs] Using certificate key: 05ae8e3c139a960c6e4e01aebf26869ce5f9abd9fa5cf4ce347e8308b9c276f9
 ```
 
-复制起来,在别的master上面运行命令
+复制起来，在别的master上面运行命令
 
 ```
 kubeadm join 172.18.221.35:6443 \
@@ -323,22 +323,22 @@ kubeadm join 172.18.221.35:6443 --token c63abt.45sn8bhyxxo2lh0r \
 systemctl status kubelet
 journalctl -xeu kubelet
 ```
-通过以上任意一个命令看到,kubernetes服务虽然启动中,但是提示节点找不到.
+通过以上任意一个命令看到，kubernetes服务虽然启动中，但是提示节点找不到。
 
 ```
 May 20 14:55:22 xxx kubelet[3457]: E0520 14:55:22.095536    3457 kubelet.go:2244] node "xxx" not found
 ```
 
-最后发现是一开始指定了负载均衡,负载均衡连接不上导致超时
+最后发现是一开始指定了负载均衡，负载均衡连接不上导致超时
 
  --ignore-preflight-errors=all
 
 
 ### 修改driver之后的注意事项
 
-如果docker是之前安装的,改一下配置然后重启服务即可
+如果docker是之前安装的，改一下配置然后重启服务即可
 
-改成systemd要在kubelet的服务上要加多一个参数,不然服务无法启动
+改成systemd要在kubelet的服务上要加多一个参数，不然服务无法启动
 
 
 ```bash

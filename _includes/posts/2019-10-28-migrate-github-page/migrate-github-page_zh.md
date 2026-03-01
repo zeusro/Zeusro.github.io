@@ -1,8 +1,8 @@
-手贱买了个[新域名](www.zeusro.com),于是博客也要改下设置.由于之前一直用阿里云解析,现在顺带转移给 cloudflare.
+手贱买了个[新域名](www.zeusro.com)，于是博客也要改下设置。由于之前一直用阿里云解析，现在顺带转移给 cloudflare.
 
-1. 修改GitHub page 的setting,custom domain 改成新域名,并取消掉 enforce https (cloudflare自带证书)
-1. 找个服务器监听80端口,把旧域名的流量全部301到新域名,这里我用了docker nginx 来做
-1. 设置搜索引擎,迁移站点.如果之前还监听了HTTPS,HTTPS也要301跳转
+1. 修改GitHub page 的setting,custom domain 改成新域名，并取消掉 enforce https (cloudflare自带证书)
+1. 找个服务器监听80端口，把旧域名的流量全部301到新域名，这里我用了docker nginx 来做
+1. 设置搜索引擎，迁移站点。如果之前还监听了HTTPS,HTTPS也要301跳转
 
 ```yaml
 version: '2.2'

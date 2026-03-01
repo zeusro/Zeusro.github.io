@@ -21,29 +21,29 @@ fjt-->rtt(RecursiveTask<V>)
 
 ### Future<V>
 
-上图可以看出`Future<V>`地位超凡,基本上很多成员都是他"儿子"
+上图可以看出`Future<V>`地位超凡，基本上很多成员都是他"儿子"
 
 Future<V>表示异步运算的结果
 
 ### ScheduledFuture<V>
 
-代表了一种预期的任务,比如可以用`ScheduledFuture`配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate),延迟作业(scheduleWithFixedDelay)
+代表了一种预期的任务，比如可以用`ScheduledFuture`配合ScheduledExecutorService来做一个周期性的重复作业(scheduleAtFixedRate)，延迟作业(scheduleWithFixedDelay)
 
 ### RunnableScheduledFuture<V>
 
-这是个接口,得自己实现.
+这是个接口，得自己实现。
 
-可用于一次性任务或者周期性任务.
+可用于一次性任务或者周期性任务。
 
 这里可以参考他的子接口.ScheduledFuture的用法
 
 ### RunnableFuture
 
-这是个接口,得自己实现.
+这是个接口，得自己实现。
 
 ### FutureTask
 
-可用`Callable<V>`和`Runnable`初始化.`Callable<V>`带返回值.
+可用`Callable<V>`和`Runnable`初始化。`Callable<V>`带返回值。
 
 可配合ExecutorService实现多线程任务分发
 
@@ -102,13 +102,13 @@ CountedCompleter 在任务完成执行后会触发执行一个自定义的钩子
 
 ### RecursiveAction
 
-跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`,但是`RecursiveAction`不产生结果.
+跟CountedCompleter<T>一样继承于 `ForkJoinTask<V>`，但是`RecursiveAction`不产生结果。
 
 ### RecursiveTask<V>
 
 RecursiveTask类的实例表示产生结果的任务。
 
-特点在于可递归执行.
+特点在于可递归执行。
 
 ```
 public class RecursiveTaskExample extends RecursiveTask<Integer> {

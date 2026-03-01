@@ -14,11 +14,11 @@
 1. A temporary hiccup from your iSCSI target, which causes all the in-flight operations to block waiting for the disks to come back. It wouldn't take a big latency hiccup to seriously backup a busy cluster... ES generally expects disks to always be available.
 1. Heavy garbage collections could cause problems too. Check Node Stats to see if there are many/long old gen GCs running
 
-这段E文，无非就是说，你的机器太low，你查的过多, `Mysql` 的经验同样适用于ES。
+这段E文，无非就是说，你的机器太low，你查的过多， `Mysql` 的经验同样适用于ES。
 
 ## 节点的选择
 
-自己玩就别整那么多节点了,`Elasticsearch`是内存杀手.
+自己玩就别整那么多节点了，`Elasticsearch`是内存杀手。
 
 资源紧张的话，`coordinating` , `data` 和 `ingest` 可以合起来。
 
@@ -34,7 +34,7 @@ node.ingest:false
 
 ### master
 
-选主,决定分片位置
+选主，决定分片位置
 
 ```
 node.master:true
@@ -78,7 +78,7 @@ indices:
     max_bytes_per_sec:
 ```
 
-queue_size 是并发查询的限制,默认是1000,不同的版本名称可能略有区别,线程池的参数可以直接附在启动参数里面(毕竟挂载配置文件对我来说也是一种麻烦)
+queue_size 是并发查询的限制，默认是1000，不同的版本名称可能略有区别，线程池的参数可以直接附在启动参数里面(毕竟挂载配置文件对我来说也是一种麻烦)
 
 参考:
 
@@ -106,7 +106,7 @@ shard的个数（包括副本）要尽可能匹配节点数，等于节点数，
 
 ### 只选取必须的字段
 
-就像在关系型数据库里面,不要`select * `一样.
+就像在关系型数据库里面，不要`select * `一样。
 
 ```
 GET /product/goods/109524071?filter_path=_source.zdid
@@ -117,7 +117,7 @@ GET /product/goods/109524071?filter_path=_source.zdid
 }
 ```
 
-类似的用法还有`_source`,但是与`filter_path`不同的在于,返回的结果会带上文档本身的默认字段
+类似的用法还有`_source`，但是与`filter_path`不同的在于，返回的结果会带上文档本身的默认字段
 
 ```
 GET /product/goods/109524071?_source_include=zdid
@@ -147,13 +147,13 @@ _source_exclude
 
 ## 其他经验
 
-按照实际经验,elasticsearch多半是index的时候少,search的时候多,所以针对search去做优化比较合适.
+按照实际经验，elasticsearch多半是index的时候少，search的时候多，所以针对search去做优化比较合适。
 
 ### 日志的最佳实践
 
-如果日志丢了也无所谓,建议用1节点0副本分片储存日志.
+如果日志丢了也无所谓，建议用1节点0副本分片储存日志。
 
-日志 index 用 `xx-<date>` ,这样删除的时候直接删 index 就行
+日志 index 用 `xx-<date>` ，这样删除的时候直接删 index 就行
 
 delete by query 的我表示每次都想死...
 
@@ -177,7 +177,7 @@ GET /_tasks?&actions=*delete*
 
 ### Unassigned Shards
 
-`解决方案:`新建一个`number_of_replicas`为0的新index,然后用`_reindex`.迁移完成之后,把`number_of_replicas`改回去.`reindex`有个`size`的参数,按需配置或许更快些.
+`解决方案:`新建一个`number_of_replicas`为0的新index，然后用`_reindex`.迁移完成之后，把`number_of_replicas`改回去。`reindex`有个`size`的参数，按需配置或许更快些。
 
 **注意**可以通过`GET _tasks?actions=indices:data/write/reindex?detailed`查看相关任务
 
@@ -220,11 +220,11 @@ curl -XPUT 0.0.0.0:9200/geonames/_settings -H 'Content-Type: application/json' -
 [2019-01-04T08:41:09,538][INFO ][o.e.m.j.JvmGcMonitorService] [elasticsearch-onekey-3] [gc][159] overhead, spent [276ms] collecting in the last [1s]
 ```
 
-`解决方案/问题根源:`集群负荷过重,宕机了
+`解决方案/问题根源:`集群负荷过重，宕机了
 
 - index长时间yellow
 
-`解决方案/问题根源:`先把`number_of_replicas`调成0,再调回去,手动触发同步.
+`解决方案/问题根源:`先把`number_of_replicas`调成0，再调回去，手动触发同步。
 
 ```
 put geonames/_settings
@@ -245,7 +245,7 @@ put geonames/_settings
 
 - 慢日志分析
 
-慢日志分搜索和索引两种,并且可以从index,或者cluster级别进行设置
+慢日志分搜索和索引两种，并且可以从index，或者cluster级别进行设置
 
 ```bash
 PUT _settings

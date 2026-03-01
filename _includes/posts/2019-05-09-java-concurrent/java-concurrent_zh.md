@@ -1,8 +1,8 @@
-`java.util.concurrent`这个包里面定义了各种线程相关的集合和类,接口.抽丝剥茧之后,我对那句"把我祖传的java包传给你"有了更深的理解.这个继承树看起来非常蛋疼.
-不过最后我还是剥离分解,整理得出此文.
+`java.util.concurrent`这个包里面定义了各种线程相关的集合和类，接口。抽丝剥茧之后，我对那句"把我祖传的java包传给你"有了更深的理解。这个继承树看起来非常蛋疼。
+不过最后我还是剥离分解，整理得出此文。
 
 
-写到一半本来想放弃来着,因为[这个网站](https://examples.javacodegeeks.com/category/core-java/util/concurrent/)提供了大量例子
+写到一半本来想放弃来着，因为[这个网站](https://examples.javacodegeeks.com/category/core-java/util/concurrent/)提供了大量例子
 
 ## 导航
 
@@ -19,13 +19,13 @@
 
 ThreadPoolExecutor实现了该接口
 
-提供了一种失败重试的事件机制.参考[这里](https://examples.javacodegeeks.com/core-java/util/concurrent/rejectedexecutionhandler/java-util-concurrent-rejectedexecutionhandler-example/)
+提供了一种失败重试的事件机制。参考[这里](https://examples.javacodegeeks.com/core-java/util/concurrent/rejectedexecutionhandler/java-util-concurrent-rejectedexecutionhandler-example/)
 
 
 
 ### ThreadFactory
 
-这个一般用Guava的ThreadFactoryBuilder创建,比较少自己实现
+这个一般用Guava的ThreadFactoryBuilder创建，比较少自己实现
 
 ### 异常
 

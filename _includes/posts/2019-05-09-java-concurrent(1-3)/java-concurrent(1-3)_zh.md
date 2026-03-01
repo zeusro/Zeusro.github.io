@@ -7,18 +7,18 @@ A(CompletionService<V>)-->B(ExecutorCompletionService)
 
 ### CompletionService<V>
 
-可自行实现该接口.这是一个任务队列.
+可自行实现该接口。这是一个任务队列。
 
 取出队列元素的poll和take方法
 
 take会阻塞知道队列出现结果
 
-poll使用的前提是确保队列已经有结果,不然贸贸然使用会出现空指针.可以指定一个超时等待时间,避免长时间卡死.
+poll使用的前提是确保队列已经有结果，不然贸贸然使用会出现空指针。可以指定一个超时等待时间，避免长时间卡死。
 
 
 ### ExecutorCompletionService
 
-一般都是声明`CompletionService<V>`,实例化ExecutorCompletionService
+一般都是声明`CompletionService<V>`，实例化ExecutorCompletionService
 
 ```java
     int TOTAL_TASK = 2;

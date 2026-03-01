@@ -40,7 +40,7 @@ func (obj ResourceRequirementsP) Value() (driver.Value, error) {
 }
 ```
 
-如果结构体使用了第三方包，我们不方便直接修改这个类型。如果原本的类型是对象数组，那么把原本的\[]OBJECT,调成 NEWTYPE 即可，在NEWTYPE中实现2个方法。
+如果结构体使用了第三方包，我们不方便直接修改这个类型。如果原本的类型是对象数组，那么把原本的\[]OBJECT，调成 NEWTYPE 即可，在NEWTYPE中实现2个方法。
 
 type NEWTYPE \[]OBJECT
 

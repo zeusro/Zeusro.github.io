@@ -2,7 +2,7 @@
 
 1. [kompose](https://github.com/kubernetes/kompose)
 
-可用于转化docker-compose文件,对于初学kubernetes的人很有帮助
+可用于转化docker-compose文件，对于初学kubernetes的人很有帮助
 
 ## 安装类工具
 
@@ -14,7 +14,7 @@
 
 ## 进阶调度
 
-每一种亲和度都有2种语境:preferred,required.preferred表示倾向性,required则是强制.
+每一种亲和度都有2种语境:preferred,required.preferred表示倾向性，required则是强制。
 
 ### 使用亲和度确保节点在目标节点上运行
 
@@ -69,7 +69,7 @@
 
 ### tolerations 和 taint
 
- tolerations 和 taint 总是结对存在, taint 就像是"虽然我刁莽,抽烟,月光,但我还是一个好女人",这种污点(taint)一般会让一般男性(pod)敬而远之,但总有几个老实人能够容忍(tolerations).
+ tolerations 和 taint 总是结对存在， taint 就像是"虽然我刁莽，抽烟，月光，但我还是一个好女人"，这种污点(taint)一般会让一般男性(pod)敬而远之，但总有几个老实人能够容忍(tolerations).
 
 #### taint
 
@@ -78,9 +78,9 @@ kubectl taint nodes xx  elasticsearch-test-ready=true:NoSchedule
 kubectl taint nodes xx  elasticsearch-test-ready:NoSchedule-
 ```
 
-master节点本身就自带taint,所以才会导致我们发布的容器不会在master节点上面跑.但是如果自定义`taint`的话就要注意了!所有`DaemonSet`和kube-system,都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器,甚至包括网络插件,kube-proxy,后果相当严重,请注意
+master节点本身就自带taint，所以才会导致我们发布的容器不会在master节点上面跑。但是如果自定义`taint`的话就要注意了！所有`DaemonSet`和kube-system，都需要带上相应的`tolerations`.不然该节点会驱逐所有不带这个`tolerations`的容器，甚至包括网络插件，kube-proxy，后果相当严重，请注意
 
-`taint`跟`tolerations`是结对对应存在的,操作符也不能乱用
+`taint`跟`tolerations`是结对对应存在的，操作符也不能乱用
 
 #### tolerations
 
@@ -97,9 +97,9 @@ master节点本身就自带taint,所以才会导致我们发布的容器不会�
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoExecute
 
-NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务必先行确认系统组件有对应配置tolerations.
+NoExecute是立刻驱逐不满足容忍条件的pod，该操作非常凶险，请务必先行确认系统组件有对应配置tolerations.
 
-特别注意用`Exists`这个操作符是无效的,必须用`Equal`
+特别注意用`Exists`这个操作符是无效的，必须用`Equal`
 
 ##### NoSchedule
 
@@ -116,11 +116,11 @@ NoExecute是立刻驱逐不满足容忍条件的pod,该操作非常凶险,请务
 
   kubectl taint node cn-shenzhen.xxxx  elasticsearch-exclusive=true:NoSchedule
 
-是尽量不往这上面调度,但实际上还是会有pod在那上面跑
+是尽量不往这上面调度，但实际上还是会有pod在那上面跑
 
-`Exists`和`Exists`随意使用,不是很影响
+`Exists`和`Exists`随意使用，不是很影响
 
-值得一提的是,同一个key可以同时存在多个effect
+值得一提的是，同一个key可以同时存在多个effect
 
 ```yml
 Taints:             elasticsearch-exclusive=true:NoExecute
@@ -137,7 +137,7 @@ Taints:             elasticsearch-exclusive=true:NoExecute
 
 ### wait-for-it
 
-k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制,建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
+k8s目前没有没有类似docker-compose的`depends_on`依赖启动机制，建议使用[wait-for-it](https://blog.giantswarm.io/wait-for-it-using-readiness-probes-for-service-dependencies-in-kubernetes/)重写镜像的command.
 
 ### 在cmd中使用双引号的办法
 
@@ -240,7 +240,7 @@ The kubelet uses liveness probes to know when to restart a Container.
 
 The kubelet uses readiness probes to know when a Container is ready to start accepting traffic. 
 
-- 问题：如果删除一个pod 是先从endpoint里移除pod ip,还是 pod 先删除
+- 问题：如果删除一个pod 是先从endpoint里移除pod ip，还是 pod 先删除
 
 个人见解：
 
@@ -253,7 +253,7 @@ The kubelet uses readiness probes to know when a Container is ready to start acc
    3.3 超过30s等待时间 发送 sigkill 信号强制pod关闭
 4. nodecontroller中的endpoint controller从endpoint中删除此pod
 
-3 4 步骤同时进行 一般情况下4肯定会先于3完成,由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod,而endpoint controller仍然存在此pod,会导致svc请求会转发到已经删除的pod上,从而导致调用svc出错
+3 4 步骤同时进行 一般情况下4肯定会先于3完成，由于 3 4 顺序不定  极端情况下可能存在 kubelet已经删除了pod，而endpoint controller仍然存在此pod，会导致svc请求会转发到已经删除的pod上，从而导致调用svc出错
 
 参考链接 https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
 
@@ -358,7 +358,7 @@ storage (we’ll talk about them in the last section of this chapter).
 
 ### ConfigMap
 
-ConfigMap是用来存储配置文件的kubernetes资源对象，所有的配置内容都存储在etcd中.
+ConfigMap是用来存储配置文件的kubernetes资源对象，所有的配置内容都存储在etcd中。
 
 实践证明修改 ConfigMap 无法更新容器中已注入的环境变量信息。
 
@@ -376,19 +376,19 @@ ConfigMap是用来存储配置文件的kubernetes资源对象，所有的配置�
 
 - ClusterIP
 
-集群内部访问用,外部可直接访问
+集群内部访问用，外部可直接访问
 
-当type不指定时,创建的就是这一类型的服务
+当type不指定时，创建的就是这一类型的服务
 
-clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service),特点是没有clusterIP
+clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/docs/concepts/services-networking/service/#headless-service)，特点是没有clusterIP
 
 - NodePort
 
-每个节点都会开相同的端口,所以叫NodePort.有数量限制.外部可直接访问
+每个节点都会开相同的端口，所以叫NodePort.有数量限制。外部可直接访问
 
 - LoadBalancer
 
-特定云产商的服务.如果是阿里云,就是在NodePort的基础上,帮你自动绑定负载均衡的后端服务器而已
+特定云产商的服务。如果是阿里云，就是在NodePort的基础上，帮你自动绑定负载均衡的后端服务器而已
 
 - ExternalName
 
@@ -399,7 +399,7 @@ clusterIP: None是一种特殊的[headless-service](https://kubernetes.io/zh/doc
 
     The Horizontal Pod Autoscaler automatically scales the number of pods in a replication controller, deployment or replica set based on observed CPU utilization (or, with custom metrics support, on some other application-provided metrics).
 
-配合metrics APIs以及resource 里面的 request 资源进行调整.
+配合metrics APIs以及resource 里面的 request 资源进行调整。
 
 ### Kubernetes Downward API
 
