@@ -9,7 +9,7 @@ ASP.NET Core 模块是一个 IIS 7.5+ 模块，它负责 ASP.NET Core HTTP 侦�
 
 * 其他配置
 
-1. 环境变量ASPNETCORE_ENVIRONMENT,设置为Production,表示该服务器读取的是生产环境 appsettings.Development.json的配置
+1. 环境变量ASPNETCORE_ENVIRONMENT，设置为Production，表示该服务器读取的是生产环境 appsettings.Development.json的配置
 2. 
 
 
@@ -29,7 +29,7 @@ dotnet publish E:\xxx\project.csproj
 ```
 
 ## IIS配置
-参考链接里面说的很清楚了,主要就是设置应用程序池为无托管代码即可,把编译出来的目录作为 web 目录就行了,出现问题的按Troubleshoot那个链接处理
+参考链接里面说的很清楚了，主要就是设置应用程序池为无托管代码即可，把编译出来的目录作为 web 目录就行了，出现问题的按Troubleshoot那个链接处理
 
 
 ## 参考链接:

@@ -92,7 +92,7 @@ TKE的节点资源规划其实是一个有点复杂的「费米估算」问题�
 针对单点节点故障而导致的问题，除了在云监控上面建立相应的告警策略外，
 我们在社区版本的基础上，对NPD做了增强。支持节点自愈（具体见《[使用 TKE NPDPlus 插件增强节点的故障自愈能力](https://cloud.tencent.com/document/product/457/49376)》），用户可以选择重启容器运行时甚至重启CVM。
 
-除此以外，我们TKE还支持[使用置放群组从物理层面实现容灾](https://cloud.tencent.com/document/product/457/40212#PlacementSet),从云服务器底层硬件层面，利用反亲和性将 Pod 打散到不同节点上。
+除此以外，我们TKE还支持[使用置放群组从物理层面实现容灾](https://cloud.tencent.com/document/product/457/40212#PlacementSet)，从云服务器底层硬件层面，利用反亲和性将 Pod 打散到不同节点上。
 
 ## 业务管理
 
@@ -121,9 +121,9 @@ TKE的节点资源规划其实是一个有点复杂的「费米估算」问题�
 2. Tracing
 3. Logging 
 
-这几部分。在这一方面，我们腾讯云基于 Prometheus 做了一套[云原生监控](https://cloud.tencent.com/document/product/457/49888)的方案，以及[日志采集](https://cloud.tencent.com/document/product/457/48836) , [事件存储](https://cloud.tencent.com/document/product/457/50988)。这几套方案涵盖了指标监控，日志采集,事件存储和监控告警等各个方面。
+这几部分。在这一方面，我们腾讯云基于 Prometheus 做了一套[云原生监控](https://cloud.tencent.com/document/product/457/49888)的方案，以及[日志采集](https://cloud.tencent.com/document/product/457/48836) , [事件存储](https://cloud.tencent.com/document/product/457/50988)。这几套方案涵盖了指标监控，日志采集，事件存储和监控告警等各个方面。
 
-而从 Tracing 角度方面考虑，分布式服务的跟踪监测我觉得还可以再细分为非侵入式和侵入式的方案。侵入式的方案指的是修改代码，比如在请求的链路里面加入特定请求头，request header；非侵入式方案则是现在很流行的 `Service Mesh`方案,让业务更加注重于业务，而让流量管控交给 sidecar 。由于篇幅限制，这里就不过多展开了。
+而从 Tracing 角度方面考虑，分布式服务的跟踪监测我觉得还可以再细分为非侵入式和侵入式的方案。侵入式的方案指的是修改代码，比如在请求的链路里面加入特定请求头，request header；非侵入式方案则是现在很流行的 `Service Mesh`方案，让业务更加注重于业务，而让流量管控交给 sidecar 。由于篇幅限制，这里就不过多展开了。
 
 ### 隔离性
 
@@ -139,7 +139,7 @@ TKE的节点资源规划其实是一个有点复杂的「费米估算」问题�
 
 #### 网络隔离性
 
-理解网络隔离性，要反过来先理解**网络连通性**。以 `Flannel` 的 `VXLAN` 模式为例，采用这个模式的 `kubernetes` 集群节点之间是互联的。而且实际上,跨 `namespace` 的 `service` 也是互联的。
+理解网络隔离性，要反过来先理解**网络连通性**。以 `Flannel` 的 `VXLAN` 模式为例，采用这个模式的 `kubernetes` 集群节点之间是互联的。而且实际上，跨 `namespace` 的 `service` 也是互联的。
 
 这里也许有人有个疑问：不是说 `kubernetes` 是基于 `namespace` 做的资源隔离吗？为什么说跨 `namespace` 的访问是互联的？
 
@@ -152,7 +152,7 @@ search default.svc.cluster.local svc.cluster.local cluster.local localdomain
 options ndots:5
 ```
 
-这个配置的意思是五级域名以下走 `coreDNS` ,优先按照 `search` 顺序补全。比如解析百度是这样：
+这个配置的意思是五级域名以下走 `coreDNS` ，优先按照 `search` 顺序补全。比如解析百度是这样：
 
 ```sh
 sh-4.2# host -v baidu.com
@@ -164,7 +164,7 @@ Trying "baidu.com"
 ......
 ```
 
-这里其实就可以看出端倪。比如我们在 `default` 和 `kube-system` 下面同时建立了一个名为 `tke-six-six-six` 的服务，在 `default` 下面之所以访问 `six` 不会跳到  `kube-system` 定义的服务，是因为一开始尝试解析的就是 `tke-six-six-six.default.svc.cluster.local` ,而如果直接访问 `tke-six-six-six.kube-system.svc.cluster.local` ,也是可以的。所谓的隔离只是在域名解析那里做了手脚。
+这里其实就可以看出端倪。比如我们在 `default` 和 `kube-system` 下面同时建立了一个名为 `tke-six-six-six` 的服务，在 `default` 下面之所以访问 `six` 不会跳到  `kube-system` 定义的服务，是因为一开始尝试解析的就是 `tke-six-six-six.default.svc.cluster.local` ，而如果直接访问 `tke-six-six-six.kube-system.svc.cluster.local` ，也是可以的。所谓的隔离只是在域名解析那里做了手脚。
 
 网络的隔离性，在多租户环境下显得尤为重要。我们不能保证来往的流量都是合法的，那就先假定所有的流量都是非法的，只让符合要求的流量接入应用。如果不用 `istio` 的话，其实官方也基于`ip`，`namespaceSelector`和`podSelector`做了 [Network Policy](https://kubernetes.io/docs/concepts/services-networking/network-policies/)。
 

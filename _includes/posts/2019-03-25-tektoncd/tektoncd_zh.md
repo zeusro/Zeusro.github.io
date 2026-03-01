@@ -1,10 +1,10 @@
-`tektoncd`是面向`kubernetes`的`pipeline`型CI/CD(kubectl apply)系统,自定义`kaniko`构建`docker`镜像
+`tektoncd`是面向`kubernetes`的`pipeline`型CI/CD(kubectl apply)系统，自定义`kaniko`构建`docker`镜像
 
 部署方式是创建一些RBAC相关的资源（ClusterRole，ClusterRoleBinding)以及CustomResourceDefinition。
 
 常驻的容器只有tekton-pipelines-controller，tekton-pipelines-webhook。
 
-首先声明,我没有实际安装使用过`tektoncd`,以下内容纯属扯淡.
+首先声明，我没有实际安装使用过`tektoncd`，以下内容纯属扯淡。
 ![image](/img/in-post/tektoncd/9150e4e5ly1fve14owghxj206o06omx8.jpg)
 
 
@@ -18,13 +18,13 @@
 1. Pipeline
 1. PipelineRun
 
-tektoncd目前(0.1.0)有5类对象,核心理念是通过定义yaml定义构建过程.构建任务的状态存放在status字段中
+tektoncd目前(0.1.0)有5类对象，核心理念是通过定义yaml定义构建过程。构建任务的状态存放在status字段中
 
-Task是单个任务的构建过程,定义TaskRun任务才会运行.
+Task是单个任务的构建过程，定义TaskRun任务才会运行。
 
-Pipeline包含多个Task,并在此基础上定义input和output,input和output以PipelineResource作为交付,PipelineResource的本质是PVC.
+Pipeline包含多个Task，并在此基础上定义input和output,input和output以PipelineResource作为交付，PipelineResource的本质是PVC.
 
-同样地,需要定义PipelineRun才会运行Pipeline
+同样地，需要定义PipelineRun才会运行Pipeline
 
 官方Github这个例子能够让大家理清这几类对象之间的关系
 
@@ -293,8 +293,8 @@ spec:
 
 ## 总结
 
-通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.
+通过CRD重新定义CI/CD是一大亮点，但目前构建任务只能通过手动创建YAML文件，构建任务一多的时候，集群内就会大量堆积该CI相关的CRD，感觉比较蠢。
 
 ![image](/img/in-post/tektoncd/1543218293905992.jpg)
 
-`serviceaccount`+`secret`配置SSH/auth实现对git仓库进行连接的,建议`Jenkins-X`好好学学.目前`Jenkins-X`还是无法在pipeline中定义`resource`,雪花配置荼毒不浅.
+`serviceaccount`+`secret`配置SSH/auth实现对git仓库进行连接的，建议`Jenkins-X`好好学学。目前`Jenkins-X`还是无法在pipeline中定义`resource`，雪花配置荼毒不浅。

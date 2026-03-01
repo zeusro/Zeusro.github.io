@@ -2,13 +2,13 @@
 
 `Kubernetes` 的 `apiVersion` 是会过期的
 
-以 1.16来说,`DaemonSet`, `Deployment`, `StatefulSet`, `ReplicaSet` 全部统一使用 `apps/v1`
+以 1.16来说，`DaemonSet`, `Deployment`, `StatefulSet`, `ReplicaSet` 全部统一使用 `apps/v1`
 
 `NetworkPolicy`  使用 `networking.k8s.io/v1`
 
 `PodSecurityPolicy` 使用 `networking.k8s.io/v1`
 
-所以,在 `1.16` 中使用 `apps/v1beta2`, `extensions/v1beta1` 等废弃API都会出错
+所以，在 `1.16` 中使用 `apps/v1beta2`, `extensions/v1beta1` 等废弃API都会出错
 
 ## 拥抱变化
 
@@ -34,11 +34,11 @@ kubectl get --raw="/metrics" | grep apiserver_request_count | grep 'group="apps"
 
 是的，你没有听错，只能删除后重建。
 
-我的建议是，在业务低峰期，建同label deploy 覆盖旧的`resource`，旧的`resource`缩容至0,并加上`deprecated:true`的`label`观察一段时间后,再彻底删除.
+我的建议是，在业务低峰期，建同label deploy 覆盖旧的`resource`，旧的`resource`缩容至0，并加上`deprecated:true`的`label`观察一段时间后，再彻底删除。
 
 ## 后记
 
-apiVersion 变动的频繁,在某种程度上也可以证明 `Kubernetes` 在容器调度方面的霸权——毕竟，如果你跟女朋友分手了，也不会想给她买新衣服，对吧？
+apiVersion 变动的频繁，在某种程度上也可以证明 `Kubernetes` 在容器调度方面的霸权——毕竟，如果你跟女朋友分手了，也不会想给她买新衣服，对吧？
 
 ![](/img/sticker/云原生开发.gif)
 

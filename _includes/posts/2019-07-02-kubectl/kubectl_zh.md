@@ -75,7 +75,7 @@ echo "if [ $commands[kubectl] ]; then source <(kubectl completion zsh); fi" >> ~
 
 ### 强制删除
 
-有时 删除pv/pvc时会有问题,这个使用得加2个命令参数`--grace-period=0 --force `
+有时 删除pv/pvc时会有问题，这个使用得加2个命令参数`--grace-period=0 --force `
 
 ### 删除所有失败的pod
 

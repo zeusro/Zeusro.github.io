@@ -6,7 +6,7 @@
     - [自己生成流](#自己生成流(引用自[IBM](https://www.ibm.com/developerworks/cn/java/j-lo-java8streamapi/)))
     - Stream.iterate
 1. [stream的注意事项](#stream的注意事项)
-    * 流只能用一次,重复使用会导致以下异常
+    * 流只能用一次，重复使用会导致以下异常
     * filter
 1. [完整代码](#完整代码)
 1. [参考链接](#参考链接)
@@ -274,7 +274,7 @@ Stream.iterate(0, n -> n + 3).limit(10). forEach(x -> System.out.print(x + " "))
 
 ## stream的注意事项
 
-* 流只能用一次,重复使用会导致以下异常
+* 流只能用一次，重复使用会导致以下异常
 
 ```java
 Stream<Person> list1Stream = list1.stream();
@@ -291,7 +291,7 @@ list1.stream().filter(o -> !o.getBirthday().equals(time1)).count();
 
 * filter
 
-一般有filter 操作时，不用并行流parallelStream ,如果用的话可能会导致线程安全问题
+一般有filter 操作时，不用并行流parallelStream ，如果用的话可能会导致线程安全问题
 
 
 ## 完整代码

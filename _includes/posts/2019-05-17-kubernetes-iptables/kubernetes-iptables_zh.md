@@ -143,7 +143,7 @@ g-->|loadbalancer的IP在节点上截获后转给service|h(KUBE-SVC-M42ZCW2EYUCR
 
 #### 最后一个chain KUBE-SEP-BVMKBOC4GGNJ3567为什么没有probability
 
-顺序匹配,他吃剩下的，所以不再需要计算权重了
+顺序匹配，他吃剩下的，所以不再需要计算权重了
 
 #### destination 0.0.0.0/0是什么意思
 

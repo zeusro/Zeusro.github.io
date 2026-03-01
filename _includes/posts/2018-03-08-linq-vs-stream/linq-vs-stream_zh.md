@@ -8,7 +8,7 @@
         * 匹配的第一项(findFirst/First,FirstOrDefault)
         * 遍历(ForEach)
         * 极值Max/Min        
-        * 跳过(skip/Skip),截取(limit/Take)
+        * 跳过(skip/Skip)，截取(limit/Take)
     1. [排序](#排序)
         * 去重复(Distinct)
         * 升序(sort/OrderBy)
@@ -19,7 +19,7 @@
     * 差集list1 - list2
 1. [数据结构转换](#数据结构转换)
 
-为方便初学 Java8/C# 集合操作的人,特意写下这篇文章.
+为方便初学 Java8/C# 集合操作的人，特意写下这篇文章。
 
 ## 前期准备
 
@@ -116,7 +116,7 @@ var group1 = list1.GroupBy(o => o.Sex);
              */
 ```
 
-与此对比,stream没有RemoveAll的操作
+与此对比，stream没有RemoveAll的操作
 
 * 匹配的第一项(findFirst/First,FirstOrDefault)
 
@@ -194,7 +194,7 @@ var group1 = list1.GroupBy(o => o.Sex);
             int minWeight = list1.Min(o => o.Weight);            
 ```
 
-* 跳过(skip/Skip),截取(limit/Take)
+* 跳过(skip/Skip)，截取(limit/Take)
 
 ```java
 

@@ -1,10 +1,10 @@
-`kubernetes`内部容器通讯都需要通过`api-server`进行通讯.外部通过`kubectl`访问管理集群,本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢.
+`kubernetes`内部容器通讯都需要通过`api-server`进行通讯。外部通过`kubectl`访问管理集群，本质上也是访问`api-server`,`api-server`就是整个集群的指挥中枢。
 
-但是人在江湖漂,哪能不挨刀呢?要怎么防止集群内外瞎搞事的破坏分子呢?`RBAC`(Role-based access control )顺势而生.
+但是人在江湖漂，哪能不挨刀呢？要怎么防止集群内外瞎搞事的破坏分子呢？`RBAC`(Role-based access control )顺势而生。
 
-一句话总结`ServiceAccount`,`Role`,`RoleBinding`,`ClusterRole`,`ClusterRoleBinding`的关系就是,
+一句话总结`ServiceAccount`,`Role`,`RoleBinding`,`ClusterRole`,`ClusterRoleBinding`的关系就是，
 
-**`ClusterRoleBinding`,`RoleBinding`是一种任命,认命被授权的对象(users, groups, or service accounts)能够有什么样的权限(Role,ClusterRole)**
+**`ClusterRoleBinding`,`RoleBinding`是一种任命，认命被授权的对象(users, groups, or service accounts)能够有什么样的权限(Role,ClusterRole)**
 
 ## ServiceAccount
 
@@ -25,16 +25,16 @@ secrets:
 - name: flannel-token-f7d4d
 ```
 
-上面说了,`ServiceAccount`只是一个虚名,本身没有任何的权限说明.
+上面说了，`ServiceAccount`只是一个虚名，本身没有任何的权限说明。
 
 ## service-account-token
 
 service-account-token的API type是`kubernetes.io/service-account-token`
 
-变动`ServiceAccount`时,Token Controller(controller-manager的一部分)
-会自动维护`service-account-token`,根据实际情况增加/修改/删除,`service-account-token`的本质类型是`secret`.所以`service-account-token`是1对1跟`ServiceAccount`随生随死的.
+变动`ServiceAccount`时，Token Controller(controller-manager的一部分)
+会自动维护`service-account-token`，根据实际情况增加/修改/删除，`service-account-token`的本质类型是`secret`.所以`service-account-token`是1对1跟`ServiceAccount`随生随死的。
 
-而定义的资源如果指定了`ServiceAccount`,`Admission Controllers`(api-server的一部分)就会把这个`ServiceAccount`相应的`service-account-token`以文件的形式挂载到容器内部的`/var/run/secrets/kubernetes.io/serviceaccount`目录下.
+而定义的资源如果指定了`ServiceAccount`,`Admission Controllers`(api-server的一部分)就会把这个`ServiceAccount`相应的`service-account-token`以文件的形式挂载到容器内部的`/var/run/secrets/kubernetes.io/serviceaccount`目录下。
 
 该目录一般会有3个文件
 
@@ -84,7 +84,7 @@ roleRef:
   apiGroup: rbac.authorization.k8s.io
 ```
 
-RoleBinding 适用于某个命名空间内授权,RoloBinding 可以将角色中定义的权限授予用户或用户组
+RoleBinding 适用于某个命名空间内授权，RoloBinding 可以将角色中定义的权限授予用户或用户组
 
 ## ClusterRole 
 
@@ -147,10 +147,10 @@ ClusterRoleBinding 适用于集群范围内的授权。
 |service-account-token|ServiceAccount的身份象征 | 
 |Role| 授予对单个命名空间中的资源访问权限| 
 |RoleBinding|将赋予被授权对象和Role| 
-|ClusterRole |可视为Role的超集,是从集群角度做的一种授权| 
+|ClusterRole |可视为Role的超集，是从集群角度做的一种授权| 
 |ClusterRoleBinding|将赋予被授权对象和ClusterRole| 
 
-理解`kubernetes`RBAC的最简单办法,就是进入kube-system内部,看看各类集群资源是怎么定义的.
+理解`kubernetes`RBAC的最简单办法，就是进入kube-system内部，看看各类集群资源是怎么定义的。
 
 参考链接:
 

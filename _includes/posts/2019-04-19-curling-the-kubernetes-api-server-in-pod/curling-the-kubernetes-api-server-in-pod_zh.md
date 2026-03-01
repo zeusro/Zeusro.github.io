@@ -1,8 +1,8 @@
 连接api-server一般分3种情况：
 
 1. Kubernetes Node通过kubectl proxy中转连接
-2. 通过授权验证,直接连接(kubectl和各种client就是这种情况)
-  - `kubectl`加载`~/.kube/config`作为授权信息,请求远端的`api-server`的resetful API.`api-server`根据你提交的授权信息判断有没有权限,有权限的话就将对应的结果返回给你。
+2. 通过授权验证，直接连接(kubectl和各种client就是这种情况)
+  - `kubectl`加载`~/.kube/config`作为授权信息，请求远端的`api-server`的resetful API.`api-server`根据你提交的授权信息判断有没有权限，有权限的话就将对应的结果返回给你。
 3. 容器内部通过`ServiceAccount`连接
 
 
@@ -10,9 +10,9 @@
 
 ![img](https://d33wubrfki0l68.cloudfront.net/673dbafd771491a080c02c6de3fdd41b09623c90/50100/images/docs/admin/access-control-overview.svg)
 
-`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)有提过.这里就不解释了
+`Kubernetes`这套RBAC的机制在[之前的文章](https://www.zeusro.com/2019/01/17/kubernetes-rbac/)有提过。这里就不解释了
 
-为了方便起见,我直接使用`kube-system`的`admin`作为例子.
+为了方便起见，我直接使用`kube-system`的`admin`作为例子。
 
 ```yaml
 # {% raw %}
@@ -71,9 +71,9 @@ subjects:
 # {% endraw %}
 ```
 
-简单地说,容器通过`ServiceAccount`配合RBAC这套机制,让容器拥有访问`api-server`的权限.
+简单地说，容器通过`ServiceAccount`配合RBAC这套机制，让容器拥有访问`api-server`的权限。
 
-原本我打算在`kube-system`下面创建一个nginx容器,去访问,但是curl失败了,后来我找了个centos的镜像去测试.大家记得配置好`serviceAccount`就行
+原本我打算在`kube-system`下面创建一个nginx容器，去访问，但是curl失败了，后来我找了个centos的镜像去测试。大家记得配置好`serviceAccount`就行
 
 
     metadata.spec.template.spec.serviceAccount: admin
@@ -82,9 +82,9 @@ subjects:
 
 ### deploy声明sa(`ServiceAccount`)的本质
 
-在deploy声明sa的本质是把sa的对应的secret挂载到`/var/run/secrets/kubernetes.io/serviceaccount`目录中.
+在deploy声明sa的本质是把sa的对应的secret挂载到`/var/run/secrets/kubernetes.io/serviceaccount`目录中。
 
-不声明sa,则把`default`作为sa挂载进去
+不声明sa，则把`default`作为sa挂载进去
 
 ```bash
 # k edit secret admin-token-wggwk
@@ -106,7 +106,7 @@ metadata:
 type: kubernetes.io/service-account-token
 ```
 
-所以deploy衍生的每一个pod里面的容器,
+所以deploy衍生的每一个pod里面的容器，
 `/var/run/secrets/kubernetes.io/serviceaccount`目录下面都会有这3个文件
 
 ```bash
@@ -117,7 +117,7 @@ lrwxrwxrwx    1 root     root            16 Apr 19 06:46 namespace -> ..data/nam
 lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 ```
 
-虽然这3个文件都是软链接而且最终指向了下面那个带日期的文件夹,但是我们不用管它.
+虽然这3个文件都是软链接而且最终指向了下面那个带日期的文件夹，但是我们不用管它。
 
 ```bash
 /run/secrets/kubernetes.io/serviceaccount # ls -a -l
@@ -133,7 +133,7 @@ lrwxrwxrwx    1 root     root            12 Apr 19 06:46 token -> ..data/token
 
 ## curl请求api-server
 
-集群就绪之后,在`default`这个命名空间下会有`kubernetes`这个svc,容器透过ca.crt作为证书去请求即可.跨ns的访问方式为`https://kubernetes.default.svc:443`
+集群就绪之后，在`default`这个命名空间下会有`kubernetes`这个svc，容器透过ca.crt作为证书去请求即可。跨ns的访问方式为`https://kubernetes.default.svc:443`
 
 ### 前期准备
 
@@ -166,7 +166,7 @@ sh-4.2# curl -voa  -s  $APISERVER/version
 * Closing connection 0
 ```
 
-可以看到,用默认的`/etc/pki/tls/certs/ca-bundle.crt`公钥去访问,直接就报证书对不上了(Peer's Certificate issuer is not recognized.)
+可以看到，用默认的`/etc/pki/tls/certs/ca-bundle.crt`公钥去访问，直接就报证书对不上了(Peer's Certificate issuer is not recognized.)
 
 ### 带证书去访问`api-server`
 
@@ -187,13 +187,13 @@ curl -s $APISERVER/version  \
 }
 ```
 
-那这样思路就很明确了,curl的时候带上正确的证书(ca.crt)和请求头就行了.
+那这样思路就很明确了，curl的时候带上正确的证书(ca.crt)和请求头就行了。
 
 ## 使用curl访问常见API
 
-这里先要介绍一个概念`selfLink`.在`kubernetes`里面,所有事物皆资源/对象.`selfLink`就是每一个资源对应的`api-server`地址.`selfLink`跟资源是一一对应的.
+这里先要介绍一个概念`selfLink`.在`kubernetes`里面，所有事物皆资源/对象。`selfLink`就是每一个资源对应的`api-server`地址。`selfLink`跟资源是一一对应的。
 
-`selfLink`是有规律的,由`namespace`,`type`,`apiVersion`,`name`等组成.
+`selfLink`是有规律的，由`namespace`,`type`,`apiVersion`,`name`等组成。
 
 
 ### [get node](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.14/#list-node-v1-core)
@@ -237,7 +237,7 @@ curl \
 
 ## 使用JavaScript客户端访问 api-server
 
-2019-08-23，我在部署 kubeflow 的时候,发现里面有个组件是用 nodejs 去请求 api service 的,观察了一下代码,加载配置的地方大致如此.
+2019-08-23，我在部署 kubeflow 的时候，发现里面有个组件是用 nodejs 去请求 api service 的，观察了一下代码，加载配置的地方大致如此。
 
 ```ts
 
@@ -328,13 +328,13 @@ public loadFromDefault() {
     }
 ```
 
-可以看到,加载配置是有先后顺序的. sa 排在比较靠后的优先级.
+可以看到，加载配置是有先后顺序的。 sa 排在比较靠后的优先级。
 
-host 和 port 通过读取相应 env 得出(实际上,就算在yaml没有配置ENV, kubernetes 本身也会注入大量ENV,这些ENV大多是svc的ip地址和端口等)
+host 和 port 通过读取相应 env 得出(实际上，就算在yaml没有配置ENV, kubernetes 本身也会注入大量ENV，这些ENV大多是svc的ip地址和端口等)
 
 而且默认的客户端 `skipTLSVerify: false,`
 
-那么使用默认的客户端,要取消SSL验证咋办呢?这里提供一个比较蠢但是万无一失的办法:
+那么使用默认的客户端，要取消SSL验证咋办呢？这里提供一个比较蠢但是万无一失的办法:
 
 ```ts
 import * as k8s from '@kubernetes/client-node';

@@ -255,5 +255,5 @@
 ## 参考链接:
 
 1. [语言集成查询 (LINQ)](https://docs.microsoft.com/zh-cn/dotnet/csharp/linq/)
-1. [LINQ操作数组（交集,并集,差集,最值,平均,去重复）](http://edi.wang/post/2012/2/20/linq-on-array-intersection-union-max-min-average-remove-duplication)
+1. [LINQ操作数组（交集，并集，差集，最值，平均，去重复）](http://edi.wang/post/2012/2/20/linq-on-array-intersection-union-max-min-average-remove-duplication)
 1. [C# 中奇妙的函数 -- 1. ToLookup](http://www.cnblogs.com/multiplesoftware/archive/2011/03/31/2000528.html)

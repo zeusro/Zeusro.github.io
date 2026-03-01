@@ -5,12 +5,12 @@
 
 type | 作用
 ---|---
-Cond|发令枪,一般预设一个条件让子任务等待,发出的信号可以是单个(Signal)也可集体广播(Broadcast)
+Cond|发令枪，一般预设一个条件让子任务等待，发出的信号可以是单个(Signal)也可集体广播(Broadcast)
 Locker|简单接口
 Mutex|互斥锁
-Once|并发运行,只允许一次
-RWMutex|读写锁,多读少写,同时读锁,读写互斥.
-WaitGroup|分发任务,主线程等待所有任务完成
+Once|并发运行，只允许一次
+RWMutex|读写锁，多读少写，同时读锁，读写互斥。
+WaitGroup|分发任务，主线程等待所有任务完成
 
 
 ### Cond 
@@ -25,9 +25,9 @@ type Cond
 
 加入到通知列表 -> 解锁 L -> 等待通知 -> 锁定 L
 
-虽然放在最前面,但我花了最长的时间去理解这玩意.
+虽然放在最前面，但我花了最长的时间去理解这玩意。
 
-按照我的理解,`Cond`就好比一个发令枪.比如我同时养了5条狗,并同时准备了5份食物,但是没有我的口令,我不准它们吃.示例代码如下:
+按照我的理解，`Cond`就好比一个发令枪。比如我同时养了5条狗，并同时准备了5份食物，但是没有我的口令，我不准它们吃。示例代码如下:
 
 
 ```go
@@ -129,27 +129,27 @@ Signal()方法:通知随机一条狗吃饭
 
 例子中的ch变量:狗拉的便便
 
-`useCondBroadcast()`和`useCondSignal`这2个例子,差别只在于最后管道的读取游标(i).
+`useCondBroadcast()`和`useCondSignal`这2个例子，差别只在于最后管道的读取游标(i).
 
-`Broadcast`方法通知的对象是所有的狗,所以最后所有的狗都顺利开吃(i=4).
+`Broadcast`方法通知的对象是所有的狗，所以最后所有的狗都顺利开吃(i=4).
 
-`Signal`只通知了一条狗,所以最后只有一条狗拉出了便便(i=0)
+`Signal`只通知了一条狗，所以最后只有一条狗拉出了便便(i=0)
 
-所以如果只有一条狗,那么使用`Signal`效果等同于`Broadcast`.
+所以如果只有一条狗，那么使用`Signal`效果等同于`Broadcast`.
 
-用`Signal`和`Broadcast`方法都好,如果设置了管道(ch := make(chan struct{}, 5))去接收最后的结果,要注意设置的临界值变化导致的最后出来的结果数量.
+用`Signal`和`Broadcast`方法都好，如果设置了管道(ch := make(chan struct{}, 5))去接收最后的结果，要注意设置的临界值变化导致的最后出来的结果数量。
 
-取少了没关系,取多了会出现`fatal error: all goroutines are asleep - deadlock!`这个`panic`(比如,在`useCondSignal`这个例子里面,把`i<1`改成`i<2`),后果不堪设想.
+取少了没关系，取多了会出现`fatal error: all goroutines are asleep - deadlock!`这个`panic`(比如，在`useCondSignal`这个例子里面，把`i<1`改成`i<2`)，后果不堪设想。
 
-关于`Cond`实际的使用场景,我觉得把`Cond`应用于最优解.比如说我要爬取同一个网页,可能有ABCD四种方案,我只需要其中一个方案最快完成即可.那么只要其中一个任务完成,在主线程发起`Broadcast`,这样其他方案就不用白忙活了,可以退出舞台.
+关于`Cond`实际的使用场景，我觉得把`Cond`应用于最优解。比如说我要爬取同一个网页，可能有ABCD四种方案，我只需要其中一个方案最快完成即可。那么只要其中一个任务完成，在主线程发起`Broadcast`，这样其他方案就不用白忙活了，可以退出舞台。
 
-暂时没想到`Signal`的实际用法,以后有机会再补充吧.
+暂时没想到`Signal`的实际用法，以后有机会再补充吧。
 
-真正理解了`Cond`锁的争抢方式之后,`Broadcast`和`Signal`交替使用也就不再有什么问题.
+真正理解了`Cond`锁的争抢方式之后，`Broadcast`和`Signal`交替使用也就不再有什么问题。
 
 ### [Locker](https://golang.org/pkg/sync/#Locker)
 
-只是一个简单的接口.
+只是一个简单的接口。
 
 ```go
 type Locker interface {
@@ -205,7 +205,7 @@ type Once
     func (o *Once) Do(f func())
 ```    
 
-如其名,Once里的Do函数只会运行一次
+如其名，Once里的Do函数只会运行一次
 
 ```go
 func useOnce() {
@@ -237,9 +237,9 @@ type RWMutex
     func (rw *RWMutex) Unlock()
 ```    
 
-RWMutex是基于Mutex实现的.
+RWMutex是基于Mutex实现的。
 
-读写锁,一般用在大量读操作、少量写操作的情况
+读写锁，一般用在大量读操作、少量写操作的情况
 
 1. 同时只能有一个 goroutine 能够获得写锁定。
 1. 同时可以有任意多个 gorouinte 获得读锁定。
@@ -337,9 +337,9 @@ type Map
 
 #### 适用场景
 
-线程安全集合,在2个场景做了优化
+线程安全集合，在2个场景做了优化
 
-1. 只写1次,多次读
+1. 只写1次，多次读
 2. 多个goroutines读写互不相同的键(比如goroutines1读写key1,goroutines2读写key2)
 
 #### 方法介绍
@@ -350,7 +350,7 @@ LoadOrStore 读取不到则写入
 
 Store 写入
 
-Range 无法直接遍历,得通过回调的方式遍历
+Range 无法直接遍历，得通过回调的方式遍历
 
 具体用法见
 

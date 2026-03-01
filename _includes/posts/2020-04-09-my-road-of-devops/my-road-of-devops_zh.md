@@ -51,7 +51,7 @@ Jenkins build 又可细分为
 ### 相关工作回顾
 
 1. [从零开始用Jenkins搭建.NET CI环境](http://www.zeusro.com/2016/02/26/net-ci/)
-2. [Gogs+Jenkins构建java项目,最后docker化](http://www.zeusro.com/2018/08/17/gogs-Jenkins-java-docker/)
+2. [Gogs+Jenkins构建java项目，最后docker化](http://www.zeusro.com/2018/08/17/gogs-Jenkins-java-docker/)
 3. [在kubernetes上面使用Jenkins](http://www.zeusro.com/2019/10/29/jenkins-on-kubernetes/)
 
 
@@ -86,7 +86,7 @@ BTW , Concourse 本身是一套分布式系统，未来计划在 `Kubernetes` �
 
 ![image](/img/road-of-devops/devops.png)
 
-其实，我还折腾过 `JenkinsX` ,但那时候，`JenkinsX` 的文档太少，导致工作一直不顺利。`JenkinsX` 有点像 `Jenkins Blue Ocean`，还加入点 `serverless` 。 但他并没有放弃 `static Jenkins` 那套玩意。最后变得有点不伦不类。
+其实，我还折腾过 `JenkinsX` ，但那时候，`JenkinsX` 的文档太少，导致工作一直不顺利。`JenkinsX` 有点像 `Jenkins Blue Ocean`，还加入点 `serverless` 。 但他并没有放弃 `static Jenkins` 那套玩意。最后变得有点不伦不类。
 
 2020/03/11，`JenkinsX` 宣布自(我)(倒)闭。
 
@@ -95,7 +95,7 @@ BTW , Concourse 本身是一套分布式系统，未来计划在 `Kubernetes` �
 在2019年3月的时候，我就已经作为云玩家参与体验了 `tektoncd` 。那时候，模型的定义还是非常简单。
 
 不过现在上看，当时觉得欠缺的构建缓存现在已经加上去了。不过，2019年我提出的
-> 通过CRD重新定义CI/CD是一大亮点,但目前构建任务只能通过手动创建YAML文件,构建任务一多的时候,集群内就会大量堆积该CI相关的CRD,感觉比较蠢.
+> 通过CRD重新定义CI/CD是一大亮点，但目前构建任务只能通过手动创建YAML文件，构建任务一多的时候，集群内就会大量堆积该CI相关的CRD，感觉比较蠢。
 
 这个问题没能很好解决。目前的思路是通过 `Cronjob` 实现定期清除。
 

@@ -1,18 +1,18 @@
-kubernetes + alpine+ php 特别容易出现访问外网/解析外网地址的时候出现超时的问题.
+kubernetes + alpine+ php 特别容易出现访问外网/解析外网地址的时候出现超时的问题。
 
 ## 原因
 
-docker容器访问外网的时候,整个完整路径是这样的.
+docker容器访问外网的时候，整个完整路径是这样的。
 
 容器-->主机-->外网-->主机-->容器
 
-容器到主机之间的流量要经过源地址转换(SNAT)才能顺利流通.
+容器到主机之间的流量要经过源地址转换(SNAT)才能顺利流通。
 
-SNAT就像是一个搬运工,把砖(流量)从容器搬到主机
+SNAT就像是一个搬运工，把砖(流量)从容器搬到主机
 
-如果一个主机上面运行多个容器,并发访问外网(特别是PHP这种没有连接池的)时向系统申请可用端口(nf_nat_l4proto_unique_tuple),不可用时+1,然后再申请,再校验.这个过程一多,最终就会导致寻址超时.
+如果一个主机上面运行多个容器，并发访问外网(特别是PHP这种没有连接池的)时向系统申请可用端口(nf_nat_l4proto_unique_tuple)，不可用时+1，然后再申请，再校验。这个过程一多，最终就会导致寻址超时。
 
-说白了是个系统内核问题.
+说白了是个系统内核问题。
 
 详细的解释见
 
@@ -22,17 +22,17 @@ SNAT就像是一个搬运工,把砖(流量)从容器搬到主机
 
 ### 最优解
 
-节点升级到 5.1的Linux内核.
+节点升级到 5.1的Linux内核。
 
 iptables升级到1.6.2以上
 
-用基于IPVS模式,尽量少做SNAT/DNAT,支持随机端口SNAT的网络插件启动kubernetes
+用基于IPVS模式，尽量少做SNAT/DNAT，支持随机端口SNAT的网络插件启动kubernetes
 
-或者用绕过SNAT的网络插件插件方案,比如阿里云的[terway](https://github.com/AliyunContainerService/terway).但这个插件跟阿里云绑定得比较深入,需要每台机器额外购买一个弹性网卡.
+或者用绕过SNAT的网络插件插件方案，比如阿里云的[terway](https://github.com/AliyunContainerService/terway).但这个插件跟阿里云绑定得比较深入，需要每台机器额外购买一个弹性网卡。
 
 ### 次优解
 
-[用ds部署name sever](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md),所有节点的DNS解析走节点上的name server,通过最小程度的SNAT+dns cache缓解此类问题.
+[用ds部署name sever](https://github.com/kubernetes/enhancements/blob/master/keps/sig-network/0030-nodelocal-dns-cache.md)，所有节点的DNS解析走节点上的name server，通过最小程度的SNAT+dns cache缓解此类问题。
 
 ### 伪解决方案(不能解决根本问题)
 
@@ -45,7 +45,7 @@ search <namespace>.svc.cluster.local svc.cluster.local cluster.local localdomain
 options ndots:5
 ```
 
-这个配置的意思是，默认nameserver指向kube-dns/core-dns,所有查询中，如果.的个数少于5个，则会根据search中配置的列表依次搜索,如果没有返回，则最后再直接查询域名本
+这个配置的意思是，默认nameserver指向kube-dns/core-dns，所有查询中，如果。的个数少于5个，则会根据search中配置的列表依次搜索，如果没有返回，则最后再直接查询域名本
 身。ndots就是n个.(dots)的意思
 
 举个例子
@@ -64,7 +64,7 @@ Trying "baidu.com"
 
 #### 使用 [FQDN](https://baike.baidu.com/item/FQDN)
 
-由于域名是从右到左逐级解析的，比如 `google.com` ,实际上是 `google.com.`，com后面的.称之为根域名。解析的时候，先解析.，然后解析.com,.com称之为顶级域名，最后解析google。
+由于域名是从右到左逐级解析的，比如 `google.com` ，实际上是 `google.com.`，com后面的。称之为根域名。解析的时候，先解析.，然后解析.com,.com称之为顶级域名，最后解析google。
 
 使用 FQDN：(Fully Qualified Domain Name)全限定域名，是为了尽可能减少内部DNS(比如coreDNS，节点DNS)的解析压力
 
@@ -105,7 +105,7 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
 
 综上所述，去掉ndots/ndots设为1 降低了频繁DNS查询的可能性。对于外网IP的解析有“奇效”。
 
-但如果该主机运行其他容器(这不废话吗,一个节点不跑多个容器那还用啥kubernetes),其他容器也会并发地请求,SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
+但如果该主机运行其他容器(这不废话吗，一个节点不跑多个容器那还用啥kubernetes)，其他容器也会并发地请求，SNAT的问题还是会出现，所以说修改`/etc/resolv.conf`文件并不能解决根本问题
 
 
 歪门邪道1
@@ -142,7 +142,7 @@ alpine的echo命令会吞换行符，而resolv.conf格式不对DNS解析会报�
 
 non-head service的 virtual domain 格式是`<svc>.<namespace>.svc.cluster.local`
 
-如果我们容器直接访问`<svc>.<namespace>.svc.cluster.local`,因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问`<svc>`
+如果我们容器直接访问`<svc>.<namespace>.svc.cluster.local`，因为默认DNS设置的问题，解析的次数反而更多。正确的方式是访问`<svc>`
 
 例子：假设test下面有个s的svc
 

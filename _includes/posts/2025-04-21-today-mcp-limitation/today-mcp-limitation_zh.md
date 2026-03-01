@@ -16,7 +16,7 @@ func sum(arr []int) int {
 
 如今，这种思想正在 [MCP](https://modelcontextprotocol.io/introduction) 这种协议沿用。
 
-在2025-04那段时间，我使用 `cline` 搭配 `Google gemini` 作为底层大模型“内核”,研究了一下大语言模型调用 MCP 这套完整协议。
+在2025-04那段时间，我使用 `cline` 搭配 `Google gemini` 作为底层大模型“内核”，研究了一下大语言模型调用 MCP 这套完整协议。
 
 但目前来看，MCP的实现方式还是有点丑陋的，并且有一些问题。
 而且由于大模型自身的问题，会导致多余的 token 消耗。
@@ -123,7 +123,7 @@ func 计算(){
 ![image](/img/in-post/mcp-limitation/远程本地函数分离.png)
 
 但在我看来， MCP 协议目前这种实现只能算是次选（过渡方案）。
-实际上，我觉得现阶段更需要做的事情是“分离函数”，把函数分为 `local function call` 和 `cloud function call` ,对于  `local function call` ，
+实际上，我觉得现阶段更需要做的事情是“分离函数”，把函数分为 `local function call` 和 `cloud function call` ，对于  `local function call` ，
 甚至不需要网络都能进行，像是“打开xx应用”，“给我grandma发短信”，像这类需求根本用不到云函数，“离线计算”就能进行。
 
 AI 应该有一个预备的知识库，面对不同的操作系统时内置一些能够支持的api，而不是像现在这样，连删除个文件都要建一个 [file-system](github.com/modelcontextprotocol/servers/tree/main/src/filesystem) 来实现。

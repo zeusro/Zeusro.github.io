@@ -22,7 +22,7 @@ remote_addr代表客户端的IP，但它的值不是由客户端提供的，而�
 podA-->podB
 ```
 
-这时只有`getRemoteAddr`能够获取IP,其余header全空.podB获得的clientIP为podA的podIP(虚拟IP)
+这时只有`getRemoteAddr`能够获取IP，其余header全空.podB获得的clientIP为podA的podIP(虚拟IP)
 
 The client_address is always the client pod’s IP address, whether the client pod and server pod are in the same node or in different nodes.
 
@@ -37,7 +37,7 @@ client-->svc-->pod
 
 #### externalTrafficPolicy: Cluster
 
-svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动`kube-proxy`,外部流量可能转发多1次.
+svc.spec设置`externalTrafficPolicy: Cluster`，意思是所有节点都会启动`kube-proxy`，外部流量可能转发多1次。
 
 ```
           client
@@ -51,11 +51,11 @@ svc.spec设置`externalTrafficPolicy: Cluster`,意思是所有节点都会启动
  endpoint
 ```
 
-这时流量通过node2的转发,app 获得的clientIP不定,有可能是`node 2` 的IP,也有可能是客户端的IP
+这时流量通过node2的转发，app 获得的clientIP不定，有可能是`node 2` 的IP，也有可能是客户端的IP
 
 #### externalTrafficPolicy: Local
 
-svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube-proxy`,外部流量直达节点.
+svc.spec设置`externalTrafficPolicy: Local`，在运行pod的节点上启动`kube-proxy`，外部流量直达节点。
 
 ```
         client
@@ -69,7 +69,7 @@ svc.spec设置`externalTrafficPolicy: Local`,在运行pod的节点上启动`kube
  endpoint
 ```
 
-这时,只有运行了pod的节点才会有对应的proxy,避免了中间商(node 2)挣差价
+这时，只有运行了pod的节点才会有对应的proxy，避免了中间商(node 2)挣差价
 
 `clientIP`为`remote_addr`
 
@@ -94,9 +94,9 @@ health check --->   node 1   node 2 <--- health check
 
 SLB监听HTTP:取`X-Forwarded-For`即可(从SLB获得客户端IP).
 
-SLB监听TCP,则取`remote_addr`
+SLB监听TCP，则取`remote_addr`
 
-`externalTrafficPolicy: Cluster`的情况就不用说了,没有意义.
+`externalTrafficPolicy: Cluster`的情况就不用说了，没有意义。
 
 ### ingress
 
@@ -104,11 +104,11 @@ SLB监听TCP,则取`remote_addr`
 client-->slb-->ingress svc-->ingress pod-->app svc-->pod
 ```
 
-首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`,并且`externalTrafficPolicy: Local`
+首先需要设置`ingress`的svc类型为`Nodeport`/`LoadBalancer`，并且`externalTrafficPolicy: Local`
 
-app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓.
+app svc type为`ClusterIP`/`NodePort`/`LoadBalancer`都无所谓。
 
-这个时候,`X-Forwarded-For`的值即为`clientIP`
+这个时候，`X-Forwarded-For`的值即为`clientIP`
 
 `remote_addr`为`ingress pod` Virtual IP
 

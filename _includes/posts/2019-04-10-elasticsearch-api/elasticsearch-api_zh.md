@@ -1,6 +1,6 @@
 ## 基本查询
 
-ES,默认并发限制1000,如果前面的查询卡住或者瞬时请求过多,就会出现异常.
+ES，默认并发限制1000，如果前面的查询卡住或者瞬时请求过多，就会出现异常。
 
 ### 创建
 
@@ -75,7 +75,7 @@ GET /_cluster/health
 
 ### [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik)
 
-使用该插件,要注意**mappings要在创建index时创建**,不能后期修改/添加
+使用该插件，要注意**mappings要在创建index时创建**，不能后期修改/添加
 
 ```
 PUT /a
@@ -94,9 +94,9 @@ PUT /a
 }
 ```
 
-使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词,这种需求是无法实现的.
+使用在线热更新接口有个问题:对于旧的的数据需要重新索引(reindex).所以妄想通过增加新词来对旧的数据进行分词，这种需求是无法实现的。
 
-热更新的词语存在内存中,不会更新dic文件
+热更新的词语存在内存中，不会更新dic文件
 
 ## 分片管理
 
@@ -197,7 +197,7 @@ PUT _ingest/pipeline/monthlyindex
 
 ## 付费功能(_xpack)
 
-es默认没有密码,需要用户授权功能的话买商业版的许可.
+es默认没有密码，需要用户授权功能的话买商业版的许可。
 
 - [security-api-users](https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-users.html)
 

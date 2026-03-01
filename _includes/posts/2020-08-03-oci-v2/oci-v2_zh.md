@@ -89,7 +89,7 @@ RUN rm /compressed.tar
 ADD compressed.tar /
 ```
 
-像这个 docker image ，实际在运行的时候, container 里面的根目录大小比镜像小得多。
+像这个 docker image ，实际在运行的时候， container 里面的根目录大小比镜像小得多。
 
 所以，**镜像大小和容器大小有着本质的区别**。
 

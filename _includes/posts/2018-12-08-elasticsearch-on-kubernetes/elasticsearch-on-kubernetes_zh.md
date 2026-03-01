@@ -57,7 +57,7 @@ roleRef:
 - 主体程序
 
 
-存储使用了hostpath,需要先在宿主机闯将目录,并赋予适当的权限,不然会出错
+存储使用了hostpath，需要先在宿主机闯将目录，并赋予适当的权限，不然会出错
 
 ```bash
 cd /root/kubernetes/$(namespace)/elasticsearch/data
@@ -227,9 +227,9 @@ spec:
   type: NodePort
 ```
 
-这个编排精髓的一点在于用了节点`affinity`使每一个节点最多会运行一个容器,确保了高可用.
+这个编排精髓的一点在于用了节点`affinity`使每一个节点最多会运行一个容器，确保了高可用。
 
-如果要把节点的角色再抽取出来,那么其实抽取一个service作为相互发现的,即可.
+如果要把节点的角色再抽取出来，那么其实抽取一个service作为相互发现的，即可。
 
 
 ```yaml
@@ -292,7 +292,7 @@ datastore.secure = False
 ## ElasticSearch集群的维护
 
 
-更新的时候务必使用灰度更新,从序号最大的镜像开始更新,不然分片丢失了,相信我,你会死的很惨
+更新的时候务必使用灰度更新，从序号最大的镜像开始更新，不然分片丢失了，相信我，你会死的很惨
 
 ```bash
 kubectl patch statefulset elasticsearch -p \

@@ -4,9 +4,9 @@
 [Concourse-CI从入门到放弃](https://www.zeusro.com/2018/09/02/give-up-concourse-ci/)
 今天来讲讲`Jenkins`的划时代版本--**JenkinsX**!
 
-`JenkinsX`是一个Jenkins的子项目,专门运行在K8S上面.
+`JenkinsX`是一个Jenkins的子项目，专门运行在K8S上面。
 
-文章分2部分,第一部分介绍安装,第二部分讲解应用实践.
+文章分2部分，第一部分介绍安装，第二部分讲解应用实践。
 
 
 ## 前期准备
@@ -21,7 +21,7 @@
 
 #### jx
 
-跟`Concourse-CI`差不多,一开始也要安装本地CLI
+跟`Concourse-CI`差不多，一开始也要安装本地CLI
 
 
 ```bash
@@ -42,21 +42,21 @@ git                git version 2.14.3 (Apple Git-98)
 Operating System   Mac OS X 10.13.6 build 17G65
 ```
 
-最佳实践是创建自己的`myvalue.yaml`,修改里面的镜像,一步到位,这样就不需要后期修改了
+最佳实践是创建自己的`myvalue.yaml`，修改里面的镜像，一步到位，这样就不需要后期修改了
 
 https://jenkins-x.io/getting-started/config/
 
 
 ### 服务器
 
-使用国内阿里云ECS作为服务器.
+使用国内阿里云ECS作为服务器。
 
 已经创建了ingress的服务和pod
 
 ### 验证安装
 
-`jx compliance run`会启动一个新的ns和一系列资源去检查整个集群.但由于镜像都是
-gcr.io的,所以我启动失败了.有信心的直接跳过这一步吧.
+`jx compliance run`会启动一个新的ns和一系列资源去检查整个集群。但由于镜像都是
+gcr.io的，所以我启动失败了。有信心的直接跳过这一步吧。
 
 ```
 jx compliance run
@@ -70,13 +70,13 @@ jx compliance delete
 
 ### jx install
 
-`jx install` 是对helm的再度封装.参数分为几部分
+`jx install` 是对helm的再度封装。参数分为几部分
 
-`default-admin-password` 是`Jenkins`,`grafana`,`nexus`,`chartmuseum`的默认密码,建议设复杂点,不然后期又要修改
+`default-admin-password` 是`Jenkins`,`grafana`,`nexus`,`chartmuseum`的默认密码，建议设复杂点，不然后期又要修改
 
 `--namespace`是安装的目标ns.默认是`kube-system`;
 
-`--ingress`指定当前的ingress实例,不指定的话会报错,提示找不到jx-ingress
+`--ingress`指定当前的ingress实例，不指定的话会报错，提示找不到jx-ingress
 
 `--domain`是最终Jenkins-X的对外域名
 
@@ -94,7 +94,7 @@ install \
 --domain=$(domain)
 ```
 
-里面有几个重要的选项,我先后选了
+里面有几个重要的选项，我先后选了
 
 > Static Master Jenkins
 
@@ -104,19 +104,19 @@ install \
 
 waiting for install to be ready, if this is the first time then it will take a while to download images
 
-部署docker镜像,相比一定会碰到不可描述类问题.这时
+部署docker镜像，相比一定会碰到不可描述类问题。这时
 
 ```bash
 kgpo -l release=jenkins-x
 ```
 
-果然发现部分pod启动失败,这时需要把镜像搬回国内,并修改对应的`deploy`/`ds`
+果然发现部分pod启动失败，这时需要把镜像搬回国内，并修改对应的`deploy`/`ds`
 
 ### 配置volume
 
 #### mongodb
 
-先把`jenkins-x-mongodb`关联的镜像转移到国内,再配置PVC
+先把`jenkins-x-mongodb`关联的镜像转移到国内，再配置PVC
 
 ```
 jenkins-x-mongodb
@@ -164,7 +164,7 @@ docker.io/bitnami/mongodb:3.6.6-debian-9
 
 ### 转移k8s.gcr.io镜像到国内
 
-Jenkins-X配置了deploy,CronJob,镜像很多都是`gcr.io`的,两部分都需要修改
+Jenkins-X配置了deploy,CronJob，镜像很多都是`gcr.io`的，两部分都需要修改
 
 #### deploy
 
@@ -187,12 +187,12 @@ docker pull k8s.gcr.io/addon-resizer:1.7
 
 - jenkins-x-gcpreviews
 
-转移完成后,pod基本上就全起来了
+转移完成后，pod基本上就全起来了
 
 
 ## 最后成果
 
-`jenkins`,`monocular`和`nexus`可以直接访问,其他的暂时不用管
+`jenkins`,`monocular`和`nexus`可以直接访问，其他的暂时不用管
 
 ```bash
 # $(app).$(namespace).$(domain)

@@ -242,7 +242,7 @@ Azure（https://azure.status.microsoft/en-us/status/history/）保留了5年，c
 
 同时不可用，概率极小。
 
-## 孤帆远影碧山尽,唯见长江天际流
+## 孤帆远影碧山尽，唯见长江天际流
 
 ## 参考链接
 
