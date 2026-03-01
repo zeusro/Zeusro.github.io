@@ -9,6 +9,8 @@ If you have ever decompiled the Android APK of a game, you will find a large num
 
 Due to Rule Zero, no programmer is willing to refactor or delete these art assets. This also explains why the installation package of *Honor of Kings* kept growing, until solutions like "clear historical props" and "modular on-demand resource downloads" were finally proposed — though some players complained that after the update, the "Zongzi" skin turned into a pile of bot-like icons.
 
+![](/img/in-post/entropy-reduction-law/a5ea41ff2d7691e097a223d17031c6a3_720.jpg)
+
 Why does this happen? It comes down to a basic principle of game theory: **a local optimum is not necessarily a global optimum**. For game developers, constructing new narratives is essential for generating new revenue. Clearing historical technical debt has no direct reflection on the game's financials.
 
 But for players and operators, bloated installation packages drive up CDN traffic costs, and the accumulation of garbage code prolongs the time users need to download and open the game — and may even cause lag.
