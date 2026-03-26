@@ -21,16 +21,16 @@ If there is only 1 person in the scenario, the strategy for choosing an elevator
 ```go
 
 type Work struct {
-	Floor       int16     //工作楼层
-	WorkHours   time.Time //上班时间
-	ClosingTime time.Time //下班时间
+	Floor       int16     // working floor
+	WorkHours   time.Time // work start time
+	ClosingTime time.Time // work end time
 }
 
-// Person 表示人
+// Person represents a person
 type Person struct {
-	Time        time.Time // 时间
-	Floor       int16     //当前楼层
-	TargetFloor int16     //目标楼层
+	Time        time.Time // time
+	Floor       int16     // current floor
+	TargetFloor int16     // target floor
 	work        Work
 }
 
@@ -38,19 +38,23 @@ func (p *Person) MVP(elevators []Elevator) (int, *Elevator) {
 	t := p.Time
 	if p.work.Floor < 10 && (t.Sub(p.work.ClosingTime).Abs() < 10*time.Minute || t.Sub(p.work.WorkHours).Abs() < 10*time.Minute) {
 		//walking
-		return 0, nil
+		return -1, nil
+	}
+	if len(elevators) == 0 {
+		return -1, nil
 	}
 	distance := time.Hour << 10
 	var bestElevator Elevator
 	var n int
 	for k, e := range elevators {
 		temp := *e.Status(t)
-		if temp.Distance(p) < distance {
+		if d := temp.Distance(p); d < distance {
+			distance = d
 			n = k
 			bestElevator = temp
 		}
 	}
-	//找到离自己最近的节点并选择
+	// find and choose the nearest elevator
 	return n, &bestElevator
 }
 ```

@@ -21,36 +21,40 @@
 ```go
 
 type Work struct {
-	Floor       int16     //工作楼层
-	WorkHours   time.Time //上班时间
-	ClosingTime time.Time //下班时间
+	Floor       int16     // рабочий этаж
+	WorkHours   time.Time // время начала работы
+	ClosingTime time.Time // время окончания работы
 }
 
-// Person 表示人
+// Person обозначает человека
 type Person struct {
-	Time        time.Time // 时间
-	Floor       int16     //当前楼层
-	TargetFloor int16     //目标楼层
+	Time        time.Time // время
+	Floor       int16     // текущий этаж
+	TargetFloor int16     // целевой этаж
 	work        Work
 }
 
 func (p *Person) MVP(elevators []Elevator) (int, *Elevator) {
 	t := p.Time
 	if p.work.Floor < 10 && (t.Sub(p.work.ClosingTime).Abs() < 10*time.Minute || t.Sub(p.work.WorkHours).Abs() < 10*time.Minute) {
-		//walking
-		return 0, nil
+		// пешком
+		return -1, nil
+	}
+	if len(elevators) == 0 {
+		return -1, nil
 	}
 	distance := time.Hour << 10
 	var bestElevator Elevator
 	var n int
 	for k, e := range elevators {
 		temp := *e.Status(t)
-		if temp.Distance(p) < distance {
+		if d := temp.Distance(p); d < distance {
+			distance = d
 			n = k
 			bestElevator = temp
 		}
 	}
-	//找到离自己最近的节点并选择
+	// найти и выбрать ближайший лифт
 	return n, &bestElevator
 }
 ```
