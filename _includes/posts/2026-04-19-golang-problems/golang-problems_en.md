@@ -165,6 +165,14 @@ By contrast, `Go` swaps implementations per build mostly via file-level conditio
 
 Without those tags, aside from **environment variables**, I do not have another clean pattern.
 
+## Only errors
+
+Go did not introduce errors.Is and errors.As until version 1.13 in 2019. Before that—and even today for many custom error types—developers often rely on interface implementations or type assertions to identify specific errors.
+
+Compared with Java-style exceptions (throw / catch), this approach feels vague. In golang, functions express failure through multiple return values, with error conventionally appearing as the final return value.
+
+The problem is that this abstraction hides information from the caller. The caller always receives an error, but cannot immediately know what concrete type of error it is without additional inspection, wrapping conventions, or type assertions.
+
 ## Postscript
 
 Writing this, I ask myself: does sharing tech still matter in the **AI era**?

@@ -105,7 +105,7 @@ service-worker: true
 page-mathjax: false
 
 languages: ["zh", "en", "jp", "ru"]
-default_lang: "zh"
+default_lang: "en"
 
 # Friends
 friends:
