@@ -10,7 +10,7 @@
 
 博客主题 fork 自 [Huxpro/huxpro.github.io](https://github.com/Huxpro/huxpro.github.io)（`package.json` 中仍保留 `hux-blog` 名称），并针对多语言（中/英/日/俄）内容做了大量定制：
 
-- 文章默认用中文撰写，可选择性地提供英文、日文、俄文翻译。
+- 文章默认用中文撰写，可选择性地提供英文、日文、俄文翻译；站点默认展示语言为英文。
 - 多语言内容通过 `_includes/posts/<post-name>/` 下的独立 Markdown 文件管理。
 - 前端使用 JavaScript 切换语言，URL 通过 `?lang=` 参数保留语言状态。
 - 注册了 Service Worker，提供离线缓存与缓存破坏策略。
@@ -217,7 +217,7 @@ python3 update_multilingual.py
 1. `_layouts/post.html` 的 `<select>` 语言选择器新增 `<option>`。
 2. `multilingual.md` 模板新增对应语言的 `<div class="xx post-container">` 块。
 3. `Makefile` 的 `mul` 目标新增对应语言片段文件。
-4. `_config.yml` 的 `languages` 字段。
+4. `_config.yml` 的 `languages` 字段；如需调整默认展示语言，同步修改 `default_lang` 字段。
 5. `_layouts/default.html`、`_includes/head.html` 中的 `hreflang`/`canonical`（如新增语言）。
 6. `_includes/footer.html` 与 `sw.js` 中硬编码的语言映射数组（搜索 `langMap`、`mapping`、`supportedLangs`）。
 

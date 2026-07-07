@@ -411,15 +411,15 @@
             "#ru": 3
         };
 
-        // default to zh
-        if (mapping[_hash] === undefined) _hash = "#zh";
+        // default to en
+        if (mapping[_hash] === undefined) _hash = "#en";
 
         var index = mapping[_hash];
         if ($select) $select.selectedIndex = index;
         
         // 更新html lang属性
         var langMap = ["zh", "en", "ja", "ru"]; // jp -> ja for HTML lang attribute
-        var htmlLang = langMap[index] || "zh";
+        var htmlLang = langMap[index] || "en";
         document.documentElement.lang = htmlLang;
 
         var langs = [$zh, $en, $jp, $ru];
@@ -462,7 +462,7 @@
     // handle select change
     function onLanChange(index) {
         const langMap = ["zh", "en", "jp", "ru"];
-        const lang = langMap[index] || "zh";
+        const lang = langMap[index] || "en";
         // 获取当前 hash（文章锚点）
         const anchor = window.location.hash || "";
         // 构建新的 query + 保留锚点
@@ -476,7 +476,7 @@
         }
 
         var hashMap = ["#zh", "#en", "#jp", "#ru"];
-        var newHash = hashMap[index] || "#zh";
+        var newHash = hashMap[index] || "#en";
         // in-memory basing
         _render(newHash);
     }
