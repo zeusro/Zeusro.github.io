@@ -64,7 +64,7 @@ Walkman был носителем музыки. Ранние носители �
 
 По сравнению с MD, Saturn был громоздче, а носителем данных стал CD-диск. Я играл на нём в The Legend of Sword and Fairy, а также как-то прошёл Langrisser, не понимая японский.
 
-## «Digivice» (японское название: デジヴァイス, Digivice)
+## «Digivice» 
 
 ![Digivice](/img/in-post/china-Millennials-CE/51+SanPlznL._AC_UF894,1000_QL80_.jpg)
 

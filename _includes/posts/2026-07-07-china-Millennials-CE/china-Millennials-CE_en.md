@@ -64,7 +64,7 @@ The Sega MD console left the deepest impression on me as a child. It had games l
 
 Compared to the MD, the Saturn was bulkier, and its storage medium shifted to CD-ROMs. I played The Legend of Sword and Fairy on it, and also somehow cleared Langrisser without understanding Japanese.
 
-## "Digivice" (Original Japanese Name: デジヴァイス, Digivice)
+## "Digivice" 
 
 ![Digivice](/img/in-post/china-Millennials-CE/51+SanPlznL._AC_UF894,1000_QL80_.jpg)
 
